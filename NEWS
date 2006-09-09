@@ -1,0 +1,519 @@
+0.97.1
+
+Various bug fixes from 0.97
+
+0.97
+
+USER VISIBLE CHANGES
+* When a model is dumped to jags.dump, all named nodes in the model are
+  written.
+
+
+INTERNAL CHANGES
+* Major code reorganization with the functions, distributions and samplers
+  now in loadable modules. This has implications for ownership of dynamically
+  allocated objects, as objects created in a loadable module must also 
+  delete them.  The FuncTab and DistTab classes no longer take ownership
+  of functions/distributions they contain.
+* The Compiler class uses static tables of distributions and functions (as
+  these must be accessible to loadable modules). The Model class uses
+  a static vector of sampler factories (for the same reason).
+* When reading values from NodeArray or SymTab, a boolean function is
+  used to select the required nodes. The functions to read all values are
+  redundant - since you can supply a trival function that always returns
+  true -  and have been removed.  The Console::dumpState function takes
+  three different flags: DUMP_PARAMETERS, DUMP_DATA, and DUMP_ALL. The
+  last flag is used after an error.
+* The function Node::isStochastic has been renamed Node::isVariable.
+
+CONFIGURATION CHANGES
+* The lex/flex library is no longer linked.  This was unnecessary, and
+  caused problems on IRIX building a shared library.
+
+0.90
+
+BUG FIXES
+* All aspects of the log normal distribution (density, distribution
+  function, quantile function, random samples) were incorrect due to a
+  mis-specification of the standard deviation, which was calculated as
+  the *square* of 1/tau (where tau is the scale parameter) instead of
+  the *square root* .
+* The Chi-squared distribution is referred to as "dchisqr" in the BUGS
+  language and not "dchisq" as I previously assumed.
+* The quantile function for the negative binomial function was incorrect.
+
+USER-VISIBLE CHANGES
+* The following distributions have new restrictions on valid parameters
+  dbin(p,n)     n must be discrete-valued.
+
+CONFIGURATION CHANGES
+* Removed redundant test for lm in configure.ac, which was causing 
+  warnings on IRIX and failures on Solaris.
+* Fixed test for sunperf in acx_blas.m4 to use -xlic_lib=sunperf.
+
+INTERNAL CHANGES
+* LeftRangeIterator and RightRangeIterator have been replaced
+  with a single class (RangeIterator) with member functions
+  nextLeft and nextRight. Counter is now a scalar RangeIterator.
+* SubSetIndex is now obsolete and has been removed.
+* Fixed bugs revealed by the SGI CC compiler. Unfortunately, the MipsPro
+  compiler refuses to do dynamic casting to an incomplete type, a 
+  technique which was used a lot in the JAGS source. In fact
+  this not covered by the C++ standard (although it is supported by the
+  GNU compiler) so I have been forced to rewrite some of the Distribution
+  and Sampler code.
+
+ 
+0.81
+
+BUG FIXES
+* Fixed out-of-range error when dumping CODA output from a subset
+  of a multivariate node.
+
+INTERNAL CHANGES
+* New member functions Range::(left/right)Index which invert
+  Range::(left/right)Offset.
+* Samplers are now created in the context of a given graph. So
+  many of the functions now take an extra Graph argument.
+* Model::initialize is now much more efficient. It calculates
+  a sampling graph that excludes all uninformative nodes (i.e. nodes
+  with no observed descendants), so the Sampler constructors do not
+  have to repeatedly do the same calculation.  (Thanks to Geoff Evans,
+  who supplied an example where JAGS was extremely inefficient)
+* Node::hasDescendant has been removed as it is no longer used and
+  there are no bounds on its complexity.
+* MixtureNode has been remodelled so that it no longer requires a
+  separate OffsetNode. Hence the OffsetNode and OffsetFactory classes
+  have been removed. SubSetIndex has been moved from the graph 
+  directory to the compiler directory.
+* SymTab now calculates the names of MixtureNodes dynamically instead
+  of storing them at compile time. This was very inefficient in models
+  with a large number of mixture nodes.
+* A new sampler - Censored - samples interval-censored observations.
+  It is created by the ConjugateFactory.
+
+0.80
+BUG FIXES
+* The log likelihood was not correctly calculated for unobserved stochastic 
+  nodes with a binomial distribution. This affected the PIGS example.
+* The default method for checking the parameter dimensions for real-valued
+  distributions (DistReal::checkParameterDim) only checked that the
+  _first_ parameter was scalar, e.g. in the expression "x ~ dnorm(mu, tau)",
+  tau could have been a vector.
+
+USER VISIBLE CHANGES
+* New distribution "dsum" - the sum of two discrete-valued stochastic nodes.
+  This is another observable function, like dinterval.
+* New function "rank" for calculating the ranks of the elements of a vector.
+  This behaves like the R function rank, rather than the BUGS version,
+  returning a vector of ranks.
+* A deviance node is now created automatically, unless the user has 
+  already defined a variable called "deviance".
+* Unbounded discrete-valued distributions (e.g. Poisson) can be sampled
+  with the new Discrete Slice Sampler.
+
+INTERNAL CHANGES
+* Nodes no longer store their name. Names are generated dynamically when
+  needed.
+* Identical Range objects now share their memory. Range is now a wrapper
+  class around a new class RangeImp which implements the member functions.
+* The NodeArray class is more memory efficient as it no longer uses an
+  internal map between Ranges and Nodes.
+* Changed names of NodeArray::get and NodeArray::set to "insert" and "find",
+  following STL conventions more closely.
+* Unused class SubSetNode removed.
+* UnaryMinus function renamed to NEG
+* The BUGSModel class is now used by the Compiler. It has overloaded methods
+  for setting and clearing monitors based on name and range.
+* The parameters of a LogicalNode are set in the constructor.
+* OffsetNodes are no longer constructed for 1-dimensional mixture models,
+  since they are redundant.
+* A new Sampler class Slicer implements both the the "doubling" method 
+  and "stepping" method for slice sampling. The previous class SliceSampler
+  is replaced with RealSliceSampler, which is a subclass of Slicer.  
+  DiscreteSliceSampler and DSumSampler are both subclasses.
+* Improved performance of BUGSModel::coda by avoiding unneccesary buffer
+  flushing from the std::endl manipulater: using '\n' instead.
+* Improved performance of ConjugateNormalSampler and ConjugateGammaSampler
+  by reducing the number of calls to Sampler::setValue from 3 to 2.
+
+0.75
+
+BUG FIXES
+* Constant nodes can no longer be initialized.  
+* The command PARAMETERS IN no longer ignores initial values for nodes
+  that have been declared but not defined. It will give an error message
+  instead.
+* MixtureNodes were sometimes being unnecessarily created when fixed subsets
+  were being taken. 
+
+USER VISIBLE CHANGES
+* Variable declaration is now optional. If you omit a variable declaration,
+  then JAGS will attempt to determine its dimension from the data table,
+  and failing this from the LHS of the relations.
+* Data transformations can now be defined inside a separate data block.
+  See the manual for details
+* In data and parameter files, attributes of R structures are now correctly
+  parsed.  You can now dump, for example, matrices with dimnames and use
+  them as data or initial values.
+* A new function "sort" for sorting the elements of a vector (untested).
+* C-style block quotes are now allowed in model files.
+* The progress bar printed during updating is longer (40 stars), and a 
+  guide bar shows you how long it will be.  The UPDATE command has a BY option
+  so that you can alter the refresh rate during updates.
+
+INTERNAL CHANGES
+* Compiler changes
+  - The compiler classes have been split off into a new directory.
+  - All deterministic node subclasses, along with Constant Nodes, have their
+    own factory object, which is used to maximize reuse of existing nodes
+    when compiling the model. 
+  These changes have led to modest speed increases, but there is a dramatic
+  improvement for the LEUK example which now runs 2.5 times faster.
+* More file input/output moved from the JAGS library into the terminal
+  program
+* Compiler::fillConstants is now gone.  This role is taken over by
+  Symtab::setValue. 
+* The above change means that there is no need for a default constructor
+  for ConstantNodes, so this is now gone.  All ConstantNodes have their
+  value set when they are constructed.
+* A new BUGSModel class, which is currently unused.
+* The Fortran linking fix for MacOs X has been improved. We no longer
+  redifine the official autoconf macros. Thanks to Bill Northcott.
+
+0.65
+* Modified parser and scanner in the terminal front-end to use C++
+  strings instead of C character arrays. This solves a problem on 
+  SuSE with variable and file names being mangled.
+* Attempting to initialize the model before compiling it no longer leads
+  to a crash.
+* Parse errors occuring in data and parameter files are now more clearly
+  indicated.
+* Sampling order has been changed so that a node is always sampled before
+  its parents. This appears to help in problems where there is a large
+  transient after initialization (birats, kidney).
+* Three configuration fixes for Mac Os X: We now have a modified version
+  of AC_F77_LIBRARY_LDFLAGS that strips lcrt1.o and lcrt2.o. We link to
+  -lcc_dynamic on Mac Os X. We check for BLAS and LAPACK in vecLib
+  using a modified version of acx_blas.m4 from Octave. Thanks to Chris
+  Jackson.
+* The class ScalarArgScalarFunc was not necessary and has been removed.
+* Samplers may now have a "burnin" mode to adapt their behaviour at the
+  beginning of the chain. Burnin mode is turned off when the first monitor
+  is set.
+* The distribution of a StochasticNode is now set in the constructor.
+  The setDistribution member function is removed.
+* The function of a LogicalNode is set in the constructor.
+  The setFunction member function is removed.
+* The compiler has been changed so that expressions "a <- b" are handled
+  more efficiently. The identity function is no longer required and has
+  been removed. The _fast flag is no longer required in conjugate samplers.
+* The algorithm in classifyNode (Sampler.cc) is more efficient as it
+  avoids repeat testing of the same node.
+* Rmath.h is now systematically included last. This prevents problems with
+  symbols being redefined using the C preprocessor.
+* R-style comments can now be embedded in data files.
+
+0.25 -> 0.50
+* Fixed a bug in DMNorm::randomsample that affected multivariate normal
+  variables of length 3 or more, and another bug that gave a length
+  mismatch error when forward sampling multivariate normal nodes.
+* Fixed a bug in ConjugateMNormal sampler that affected nodes with
+  multivariate normal children.
+* The SCHOOLS example now runs correctly.
+* Created a new class SamplerFactory for creating samplers. The process
+  of choosing samplers is now more general and this paves the way for
+  samplers that update several nodes at once.
+* Version number bumped up to 0.50 to celebrate beta status.
+
+0.24
+* Replaced the ARM sampler with a slice sampler.
+* Fixed a bug in the Conjugate Normal sampler which prevented it from
+  recognizing cases where it could sample. This bug had also been copied
+  to the multivariate normal sampler.
+* The two changes above give some important speed improvements.
+* LICENCE CHANGE. The license is now pure GPL, with no exception for linking
+  with the arms software by Wally Gilks.
+* ConstantNodes are now a distinct class from DeterministicNodes.
+* There are now restrictions on Data and Parameter (initial value) files.
+  It is illegal to set the value of a logical node, as doing so may leave
+  the graph in an inconsistent state (which, incidentally, may put the 
+  slice sampler in an infinite loop).  The values of deterministic nodes
+  are now calculated internally, but you may set the values of constant
+  nodes in the data file, and stochastic nodes in either file.
+* Distribution::checkParameterDim now checks the value as well as the
+  parameters, like Function::checkParameterDim.
+* The abstract class DistScalar has been removed. It was not necessary.
+* Fixed a bug in DMulti that only allowed the parameter p to be scalar.
+  DInterval should also now work with vector cutpoints.
+* Fixed the ConjugateMNormal sampler, which now runs the BIRATS example
+  correctly
+
+0.23
+* The matrix exponential is now calculated by the standard method of Pade
+  approximation with scaling and squaring.
+* The ConjugateGamma sampler now works with mixture models. Thanks to
+  Bettina Gruen <gruen@ci.tuwien.ac.at> for the patch.
+* The "Inits" statement is deprecated, and is replaced by the "parameters in"
+  statement, which can be used at any time to set the value of unobserved
+  nodes.  New statements "data to" and "parameters to" can be used to
+  write the data values, or current parameter values, to file.
+* Fixed a bug in Model::checkGraph which prevented forward sampling of
+  non-informative Poisson. Thanks to Greg Ridgeway <gregr@rand.org>.
+* The ParseTree class has been rewritten, with consequent changes to
+  the parser and compiler.
+* Some minor optimizations, e.g. SArray::value is inlined.
+* Functions with a variable number of arguments are now possible.
+  The functions min and max, and the inline functions '*' and '+' 
+  now have variable arguments. This leads to a reduction in the number
+  of nodes in the graph and a consequent increase in speed (along with
+  the optimizations).  The EPIL example now runs about 25% faster.
+* Min and Max now act like the equivalent functions in R: they
+  take a variable number of array arguments, and will return the
+  maximum of all the values present in those arguments. This means
+  that the incompatibility with BUGS introduced in version 0.21 is
+  gone.
+* Fixed a bug in forward sampling of truncated discrete distributions
+  and truncated binomial distributions, in which the lower limit
+  was never sampled. Thanks to Greg Ridgeway <gregr@rand.org>
+
+0.22
+* Fixed the ConjugateMNormal sampler so that it now handles more cases.
+
+0.21
+* max() and min() functions now take a single vector argument, like mean()
+* Seed setting fixed in the JAGS terminal. Previously the seed command
+  did nothing.  Thanks to Bettina Gruen <gruen@ci.tuwien.ac.at>
+* JAGS can now be built in a separate directory from the source directory.
+  In particular, "make distcheck" now works.
+* Fixed error introduced in 0.20 when calculating upper bounds.
+* Responsibility for updating noninformative nodes has
+  shifted from the Sampler to the Model. This means that these nodes are
+  updated only once per iteration, with consequent gains in efficiency.
+* The ForwardSampler class is no longer necessary.
+* Graph::getSortedNodes has more built-in checks, and will throw an
+  exception if they fail.
+* There was a serious bug in DistDiscrete::randomSample leading to 
+  incorrect samples being drawn. This has been fixed.
+* Conjugate samplers now work correctly with truncated variables.
+* The dump format has changed. It now uses the same R dump format as
+  initial value and data files.
+* MATHLIB_STANDALONE is now defined in the header file config.h
+* ARMSampler now sticks at the current value if the loglikelihood is 
+  infinite. This occurs in the LITTERS example.
+* Model::initialize no longer enters an infinite loop if an uninitialized
+  constant node is used in the model.
+* The inverse link functions ILogit and Phi could return a value
+  of exactly 1 due to rounding error, which would lead to some nodes being
+  apparently inconsistent with the data.  These functions now return 1 -
+  DBL_EPSILON instead. Similarly they return DBL_EPSILON instead of 0.
+
+0.20
+* Changes required to build JAGS with gcc 2.95-4 and 3.0.4
+  Thanks to Chris Jackson <chris.jackson@imperial.ac.uk>.
+* Installation of the shared library has been disabled by
+  default. You can re-enable it with ./configure --enable-shared.
+* Rearranged headers to minimize dependencies in the JAGS library.
+* DMulti is no longer (and should never have been) a subclass of DistScalar.
+* Try to speed up calculation of binomial likelihood when size parameter
+  is constant.
+* Corrected random samplers for Dirichlet and Discrete distributions.
+* ForwardSampler now updates all deterministic children of sampled node.
+* Fixed constructor for Model (_cansample is now initialized to false).
+
+0.19
+* Bugfix release.  Scalar nodes were causing a compiler error.
+
+0.18
+* Separate installation of terminal and library.
+
+0.17
+* Corrected CODA output with thinning interval != 1
+* Added Bernoulli distribution to DistTab (It had been forgotten)
+* Allow negative numbers as parameters to distributions and the
+  truncation construct T(,).
+* Added separate initialize command to scripting language (this is
+  required to handle multiple chains, which we can't do yet, but
+  it is better to put this in place now)
+* Fixed bug in CODA output which claimed that whole nodes were
+  not being monitored
+
+0.16
+* Allow C-style block comments in script files
+* Use config.h
+* Use T(,) syntax for truncation to avoid confusion with I(,)
+  in WinBUGS.
+
+0.15
+* Changes to the console, now renamed the terminal.  Now uses a Stata
+  style scripting language.
+* Distribution class names and file names have been changed to 
+  correspond with the names in the BUGS language
+* DistTab is a proper class. You can now add new distributions to
+  the DistTab.
+* FuncTab is a proper class, like DistTab
+* More extensive use of Standard Template Library
+* Lots of documentation
+* Lots of cruft removal
+
+0.14
+* SubSetNodes with variable indices have been removed completely
+  (were deprecated in release 0.12)
+* NodeArray has been taken out of the graph directory and put in
+  the compiler directory
+
+0.13
+No major changes in functionality. Some architecture changes instead
+* GraphNode is renamed to Node
+* Parameter is renamed to SArray (a more sensible name, given that it
+  is based on arrays in S)
+* Node is no longer a subclass of SArray. Instead, Node contains an
+  SArray as a public data member.
+* Major changes in the directory structure.  Source for the console is
+  now in a separate directory from the JAGS library, which is in turn
+  divided into several subdirectories. Currently, the JAGS library
+  is a "convenience library" created with libtool, so is not installed.
+  This will change when the class interfaces are nailed down.
+
+0.12
+
+* ConjugateGamma sampler now works with Weibull children
+  and Double exponential children.
+* GraphNode::hasDescendant fixed (would incorrectly return false
+  under certain circumstances).
+* FiniteSampler fixed (would always sample from the prior).
+* Conjugate Normal sampler now works correctly with bounded nodes.
+* New distribution "dinterval" (class DistInterval) for handling
+  interval censored observations.
+* Conjugate Normal sampler now works correctly with mixture models.
+* Added matrix functions inverse and logdet.
+* Added Wishart and Multivariate Normal distributions.
+* Added Conjugate samplers for Wishart and Multivariate Normal
+* SubSetNodes with variable indices are now deprecated: Mixture
+  models are now represented with a new class "MixtureNode",
+  and related class "OffsetNode".
+
+0.11
+
+* Added conjugate samplers for normal, gamma (including exponential and
+  chi square) and beta distributions.
+* Fixed important bug that led to likelihood being evaluated twice (!)
+* ATTENTION: The dump format has changed for Trace Monitors.
+
+0.10
+
+* New experimental distribution dmstate for transitions in multi-state
+  Markov models.
+* BLAS and LAPACK libraries now required (for the above, but they
+  will be needed for multivariate normal and Wishart distributions later)
+* Parameter class is no longer a virtual class. Takes some functionality
+  from GraphNode and avoids a lot of code repetition. However, there
+  may be a performance hit.
+* Parameter checking added for functions and distributions.
+* addParent and removeParent are no longer virtual functions (a preliminary
+  for removing graphical computations to a separate library)
+
+0.9
+
+* Further speed improvements. The parser tries to interpret index
+  expressions on the right hand side of a relation in order to avoid
+  creating unnecessary nodes and - in particular - SubSet nodes, which
+  are computationally very expensive.  There is a corresponding increase
+  in speed for the BONES example.
+
+0.8
+
+* The ArrayNode class is abolished and is replaced with two different
+  classes:
+  NodeArray: A container for nodes. Also a factory object that will
+             create aggregate nodes or subset nodes to represent
+             fixed/stochastic subsets respectively.
+  AggNode:   Aggregate nodes. Simply copies its values from other
+             nodes. Several different nodes can be aggregated together
+             to create an AggNode.
+
+  This leads to an enormous improvement in speed for the LSAT example.
+* Runs the KIDNEY example
+
+
+0.7
+
+* Updating of deterministic nodes no longer takes place automatically,
+  but is the responsibility of the sampler. This was done in response
+  to profiling of the LSAT example.
+
+0.6
+
+* Nested indexing now works
+
+0.5
+
+* Fixed segfault when quitting before defining a model.
+* User may now choose the thinning interval for monitors
+* Runs the LITTERS example
+* funclib remodelled to use the new Parameter base class.
+  FuncTrees are now obsolete. The compiler creates additional
+  logical nodes for complex expressions.
+  NOTE: This change creates an enormous performance hit in the
+  EPIL example, which has a rather complex linear expression. This
+  suggests that a special function for bi-linear expressions 
+  may be useful in a future version.
+* Added regression test suite based on the classic BUGS examples, vol1.
+  Since this is based on copyright material, it is not included in
+  the distribution.
+
+0.4
+
+* Major rewrite of libdist with corresponding changes to Stochastic nodes
+* Introduced a new base class Parameter
+* Some examples broken:
+  - epil2.bug crashes with a hard-to-trace bug that is overwriting memory
+  - blockert.bug crashes with error from arms sampler
+  Remember this is still alpha software
+
+0.3
+
+* License conditions on ARMS software clarified in file AUTHORS
+* Runs the PUMP example
+* Bug in logDensity for the Gamma distribution fixed
+* Monitoring of whole multivariate nodes now works correctly
+* Names of nodes in dumped output from TraceMonitor are now correct
+  (when  monitoring the whole node)
+* Runs the SEEDS example (seeds.bug, seedssig.bug seedsuni.bug, seedspar.bug)
+* Fixed updating of array nodes by adding the contents as parents
+* Runs the SURGICAL example (surgical.bug, surgfix.bug, surgrnk.bug)
+* Changed ARMSsampler so that it starts with extremely conservative
+  bounds around the current value.
+* Runs the SALM example (with gamma and pareto prior)
+* Runs the DYES example
+* Runs the STACKS example (with normal, logistic, double exponential, and
+  t_4 errors)
+* Runs the EPIL example (epil2.bug, epil3.bug)
+* Runs the BLOCKER example (blocker.bug, blockert.bug, but NOT blockht.bug)
+* Runs the OXFORD example (but with poor agreement for sigma due to
+  poor mixing of this parameter)
+* Runs the LITTERS example
+
+0.2
+
+* Fixed bugs in TraceMonitor
+  - Last monitored value correctly recorded
+  - mcpar attributes now correct
+* Added initialize method for Model
+* Nodes now sampled in forward-sampling order (but is this efficient?)
+* Initialize includes check that graph is complete
+* Can now monitor (some) multivariate nodes
+* Dump format changed. It is no longer compatible with the mcmc
+  class used in the coda library, so the class attribute is now
+  "mcarray".  This is a provisional name
+* Runs the first real example: RATS, including the version
+  with missing values (data in "ratsmiss.dat"), but
+  - very slow because there is no conjugate sampler, and
+  - higher autocorrelation than BUGS. This may be due to the 
+    choice of sampling order.
+
+0.1
+
+First public release (18/12/2002). Runs the "line" example, but does
+little else.
+
