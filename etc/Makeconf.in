@@ -1,0 +1,57 @@
+PACKAGE = @PACKAGE@
+VERSION = @VERSION@
+
+abs_top_srcdir = @abs_top_srcdir@
+abs_top_builddir = @abs_top_builddir@
+
+AR = @AR@
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+AWK = @AWK@
+CC = @CC@
+CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+CXX = @CXX@
+CXXFLAGS = @CXXFLAGS@
+CXXCPP = @CXXCPP@
+DEFS = @DEFS@
+ECHO_C = @ECHO_C@
+ECHO_N = @ECHO_N@
+ECHO_T = @ECHO_T@
+FFLAGS = @FFLAGS@
+F77 = @F77@
+GZIP = --best
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_DIR = ${INSTALL} -d
+LDFLAGS = @LDFLAGS@
+LIBM = @LIBM@
+LIBnn = @LIBnn@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
+MKINSTALLDIRS = $(SHELL) $(top_srcdir)/src/scripts/mkinstalldirs
+RANLIB = @RANLIB@
+SHELL = @SHELL@
+YACC = @YACC@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+## only used for installing 'R'.
+bindir = @bindir@
+## not used
+datadir = @datadir@
+## used for 'rhome' and installation of standalone Rmath
+libdir = @libdir@
+## used for man page
+mandir = @mandir@
+## used for installation of standalone Rmath headers
+includedir = @includedir@
+
+rhome = ${libdir}/R
+rsharedir = @rsharedir@
+rincludedir = @rincludedir@
+rdocdir = @rdocdir@
