@@ -1,0 +1,19 @@
+JAGS is now able to run most of the classic BUGS examples. It is now
+in beta.
+
+Goals for version 1.0 are:
+- Removing any bugs
+- Stabilizing the library API
+- Improving speed
+- Reducing memory footprint
+
+Currently working on:
+
+- introduce loadable modules
+- Gamerman's sampler for GLMs
+- Multivariate slice sampler
+- More efficient mixture model compilation
+- Efficient likelihood calculations for discrete data
+- Check parameter validity at initialization and update for stochastic nodes
+- Default initialization for top-level stochastic nodes
+- Use doubling method for Univariate slice sampler before burnin.
