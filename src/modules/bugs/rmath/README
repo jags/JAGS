@@ -1,0 +1,13 @@
+This is a partial copy of the Rmath library that is part of R.
+
+The API has been modified for the random number generators. These
+now take, as argument, a pointer to an opaque struct RNG which
+encapsulates the state of the random number generator.
+
+Apart from that, nothing is changed, so it should be fairly 
+straigthforward to resynchronise this library with R. The
+current version comes from R 2.3.0.
+
+The file callbacks.cc is a C++ source file that translates the
+functions unif_rand, norm_rand and exp_rand into member function
+calls for the class RNG.

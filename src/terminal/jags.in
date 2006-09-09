@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if test -z "${LD_LIBRARY_PATH}"; then
+  LD_LIBRARY_PATH="@libdir@"
+else
+  LD_LIBRARY_PATH="@libdir@:${LD_LIBRARY_PATH}"
+fi
+export LD_LIBRARY_PATH
+
+JAGS_HOME=@jagshomedir@
+export JAGS_HOME
+
+LTDL_LIBRARY_PATH="${JAGS_LIBS}:@jagsmoddir@"
+export LTDL_LIBRARY_PATH
+exec @jagsbindir@/jags.bin "$@"
