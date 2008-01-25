@@ -33,6 +33,7 @@
 #include <model/NodeArray.h>
 #include <graph/MixtureNode.h>
 #include <graph/GraphMarks.h>
+#include <graph/NodeError.h>
 #include <sampler/Sampler.h>
 #include <util/nainf.h>
 
@@ -416,8 +417,13 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
     default:
       throw logic_error("Invalid range expression");
     }
-    //Check validity of limits
-    if (ssi.node == 0) {
+    //Check validity of subset index
+    if (ssi.node) {
+      if (!ssi.node->isDiscreteValued()) {
+         throw NodeError(ssi.node, "Invalid index: not discrete-valued");
+      }
+    }
+    else {
       if (ssi.lower < array->range().lower()[i] ||
 	  ssi.upper > array->range().upper()[i] ||
 	  ssi.upper < ssi.lower)
