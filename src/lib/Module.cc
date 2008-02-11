@@ -15,10 +15,12 @@ Module::Module()
 Module::~Module()
 {
     unsigned int i;
-    for (i = 0; i < _functions.size(); ++i) {
-	Compiler::funcTab().erase(_functions[i]);
+    for (i = 0; i < _internal_functions.size(); ++i) {
+	Compiler::funcTab().erase(_internal_functions[i]);
     }
-
+    for (i = 0; i < _internal_link_functions.size(); ++i) {
+	Compiler::funcTab().erase(_internal_link_functions[i]);
+    }
     for (i = 0; i < _distributions.size(); ++i) {
 	Compiler::distTab().erase(_distributions[i]);
     }
@@ -53,12 +55,14 @@ Module::~Module()
 
 void Module::insert(InverseLinkFunc *lfunc)
 {
-    _link_functions.push_back(lfunc);
+    _internal_link_functions.push_back(lfunc);
+    _functions.push_back(lfunc);
     Compiler::funcTab().insert(lfunc);
 }
 
 void Module::insert(Function *func)
 {
+    _internal_functions.push_back(func);
     _functions.push_back(func);
     Compiler::funcTab().insert(func);
 }
@@ -71,6 +75,7 @@ void Module::insert(Distribution *dist)
 
 void Module::insert(SamplerFactory *fac)
 {
+    _sampler_factories.push_back(fac);
     Model::samplerFactories().push_front(fac);
 }
 

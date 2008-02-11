@@ -79,6 +79,7 @@
     static void setParameters(ParseTree *p, ParseTree *param1, ParseTree *param2);
     static void loadModule(std::string const &name);
     static void dumpSamplers(std::string const &file);
+    static void delete_pvec(std::vector<ParseTree*> *);
     %}
 
 %defines
@@ -209,7 +210,7 @@ data_in: data r_assignment_list ENDDATA {
     if (rngname.size() != 0) {
 	std::cerr << "WARNING: .RNG.name assignment ignored" << std::endl;
     }
-    delete $2;
+    delete_pvec($2);
  }
 | data {}    // Failed to open the data file 
 ;
@@ -242,7 +243,7 @@ parameters_in: parameters r_assignment_list ENDDATA
     std::map<std::string, SArray> parameter_table;
     std::string rngname;
     readRData($2, parameter_table, rngname);
-    delete $2;
+    delete_pvec($2);
     /* Set all chains to the same state. If the user sets the
        RNG state in addition to the parameter values then all
        chains will be identical!
@@ -1286,6 +1287,7 @@ int main (int argc, char **argv)
   console = new Console(std::cout, std::cerr);
 
   zzparse();
+
   if (argc==2) {
       std::fclose(cmdfile);
   }
@@ -1342,4 +1344,12 @@ static void dumpSamplers(std::string const &file)
     }
 
     out.close();
+}
+
+static void delete_pvec(std::vector<ParseTree*> *pv)
+{
+    for (unsigned int i = 0; i < pv->size(); ++i) {
+	delete (*pv)[i];
+    }
+    delete pv;
 }
