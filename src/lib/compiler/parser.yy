@@ -12,6 +12,7 @@
   
   void yyerror(const char *);
   int yylex();
+  int yylex_destroy();
   
 #define YYDEBUG 1
 #define YYERROR_VERBOSE 1
@@ -421,7 +422,11 @@ int parse_bugs (FILE *file, std::vector<ParseTree*> **dec_list,
   _pvariables = 0;
   _prelations = 0;
   _pdata = 0;
-  if (yyparse() == 0) {
+
+  bool ok = (yyparse() == 0);
+  yylex_destroy();
+
+  if (ok) {
       *dec_list = _pvariables;
       *data = _pdata;
       *relations = _prelations;

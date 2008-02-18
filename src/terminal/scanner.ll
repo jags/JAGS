@@ -5,11 +5,11 @@
 #include <compiler/ParseTree.h>
 #include "parser.h"
     
-    std::vector<YY_BUFFER_STATE> buffer_stack;
-    std::vector<bool> int_stack;
-    void push_buffer(YY_BUFFER_STATE);
-    void pop_buffer();
+    std::vector<FILE*> file_stack;
+    int command_buffer_count = 0;
+    int buffer_count = 0;
     void return_to_main_buffer();
+    void close_buffer();
 %}
 
 %option prefix="zz"
@@ -133,16 +133,17 @@ run                     zzlval.intval=RUN; return RUN;
 }
 
 <INITIAL><<EOF>> {
-    if (buffer_stack.empty()) {
-	yyterminate();
+    if (command_buffer_count) {
+	close_buffer();
+	--command_buffer_count;
     }
     else {
-	pop_buffer();
+	yyterminate();
     }
     return ENDSCRIPT;
 }
 <RDATA><<EOF>> {
-    pop_buffer();
+    close_buffer();
     BEGIN(INITIAL);
     return ENDDATA;
 }
@@ -153,11 +154,25 @@ int zzwrap()
   return 1;
 }
 
+void push_file(FILE *file) {
+    file_stack.push_back(file);
+}
+
+void pop_file() {
+    if (file_stack.empty())
+        return;
+
+    fclose(file_stack.back());
+    file_stack.pop_back();
+}
+
+
 bool open_data_buffer(std::string const *name) {
     FILE *file = fopen(name->c_str(),"r");
     if (file) {
-	push_buffer(YY_CURRENT_BUFFER);
-	yy_switch_to_buffer(yy_create_buffer(file, YY_BUF_SIZE ) );
+	zzpush_buffer_state(yy_create_buffer(file, YY_BUF_SIZE));
+	push_file(file);
+        ++buffer_count;
 	BEGIN(RDATA);
 	return true;
     }
@@ -166,11 +181,19 @@ bool open_data_buffer(std::string const *name) {
     }
 }
 
+void close_buffer() {
+    zzpop_buffer_state();
+    pop_file();
+    --buffer_count;
+}
+    
 bool open_command_buffer(std::string const *name) {
     FILE *file = fopen(name->c_str(),"r");
     if (file) {
-	push_buffer(YY_CURRENT_BUFFER);
-	yy_switch_to_buffer(yy_create_buffer(file, YY_BUF_SIZE ));
+	file_stack.push_back(file);
+	zzpush_buffer_state(yy_create_buffer(file, YY_BUF_SIZE ));
+	++command_buffer_count;
+        ++buffer_count;
 	return true;
     }
     else {
@@ -178,27 +201,13 @@ bool open_command_buffer(std::string const *name) {
     }
 }
 
-void push_buffer(YY_BUFFER_STATE new_buffer) {
-    buffer_stack.push_back(new_buffer);
-}
-
-void pop_buffer() {
-    if (!buffer_stack.empty()) {
-	yy_delete_buffer (YY_CURRENT_BUFFER);
-	yy_switch_to_buffer(buffer_stack.back());
-	buffer_stack.pop_back();
-    }
-}
-
 void return_to_main_buffer() {
     /* Clear all buffers in the stack and return to the first */
-    if (!buffer_stack.empty()) {
-	for (unsigned int i = 1; i < buffer_stack.size(); ++i) {
-	    yy_delete_buffer (buffer_stack[i]);
-	}
-	yy_switch_to_buffer(buffer_stack[0]);
-	buffer_stack.clear();
+    while(buffer_count) {
+	zzpop_buffer_state();
+	--buffer_count;
     }
+    command_buffer_count = 0;
     BEGIN(INITIAL);
 }
 

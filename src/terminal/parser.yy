@@ -52,15 +52,17 @@
 
     int zzerror(const char *);
     int zzlex();
+    int zzlex_destroy();
 #define YYERROR_VERBOSE 0
     static Console *console;
-    std::vector<bool> interactive;
+    bool interactive;
+    extern int command_buffer_count;
     void setName(ParseTree *p, std::string *name);
     std::map<std::string, SArray> _data_table;
     std::deque<lt_dlhandle> _modules;
     bool open_data_buffer(std::string const *name);
     bool open_command_buffer(std::string const *name);
-    void pop_buffer();
+    void close_buffer();
     void return_to_main_buffer();
     void setMonitor(ParseTree const *var, int thin, std::string const &type);
     void clearMonitor(ParseTree const *var, std::string const &type);
@@ -156,15 +158,21 @@
 
 %%
 
-input: {if (interactive.back()) std::cout << ". " << std::flush;}
-| input line {if (interactive.back()) std::cout << ". " << std::flush;}
+input: {
+    if (interactive && command_buffer_count == 0) 
+	std::cout << ". " << std::flush;
+}
+| input line {
+    if (interactive && command_buffer_count == 0) 
+	std::cout << ". " << std::flush;
+}
 ;
 
 line: ENDCMD {}
 | command ENDCMD {}
-| error ENDCMD {if(interactive.back()) yyerrok; else exit(1); }
-| run_script { interactive.push_back(false); }
-| ENDSCRIPT ENDCMD { interactive.pop_back(); }
+| error ENDCMD {if(interactive) yyerrok; else exit(1); }
+| run_script {}
+| ENDSCRIPT ENDCMD { close_buffer();}
 ;
 
 command: model 
@@ -1246,7 +1254,7 @@ int main (int argc, char **argv)
     std::cerr << "Too many arguments" << std::endl;
   }
   else if (argc == 2) {
-    interactive.push_back(false);
+    interactive = false;
     cmdfile = std::fopen(argv[1],"r");
     if (cmdfile) {
       zzin = cmdfile;
@@ -1257,7 +1265,7 @@ int main (int argc, char **argv)
     }
   }
   else {
-    interactive.push_back(true);
+    interactive = true;
   }
 
   if(lt_dlinit()) {
@@ -1287,6 +1295,7 @@ int main (int argc, char **argv)
   console = new Console(std::cout, std::cerr);
 
   zzparse();
+  zzlex_destroy();
 
   if (argc==2) {
       std::fclose(cmdfile);
