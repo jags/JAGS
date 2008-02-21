@@ -4,7 +4,14 @@ AM_YFLAGS = -d
 libexec_PROGRAMS = jags-terminal
 
 jags_terminal_SOURCES = parser.yy scanner.ll ReadData.cc 
-jags_terminal_LDADD = @LIBLTDL@ ${top_builddir}/src/lib/libjags.la
+## We list the modules here so that ltdl can emulate dynamic loading
+## on platforms that do not support it, or where the user has chosen
+## static linking
+jags_terminal_LDADD = @LIBLTDL@ ${top_builddir}/src/lib/libjags.la	\
+-dlopen ${top_builddir}/src/modules/base/basemod.la \
+-dlopen ${top_builddir}/src/modules/bugs/bugs.la \
+-dlopen ${top_builddir}/src/modules/dic/dic.la \
+-dlopen ${top_builddir}/src/modules/mix/mix.la
 jags_terminal_CPPFLAGS= -I$(top_srcdir)/src/include @INCLTDL@
 
 LEX_OUTPUT_ROOT=lex.zz

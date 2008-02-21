@@ -1268,6 +1268,10 @@ int main (int argc, char **argv)
     interactive = true;
   }
 
+  /* Allows emulation of dynamic loading on platforms that do not
+     support it by preloading modules */
+  LTDL_SET_PRELOADED_SYMBOLS();
+
   if(lt_dlinit()) {
       std::cerr << lt_dlerror() << std::endl;
       return 1;
