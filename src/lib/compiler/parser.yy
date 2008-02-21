@@ -413,10 +413,10 @@ void setParameters(ParseTree *p, ParseTree *param1, ParseTree *param2,
   p->setParameters(parameters);
 }
 
-int parse_bugs (FILE *file, std::vector<ParseTree*> **dec_list, 
+int parse_bugs (std::FILE *file, std::vector<ParseTree*> **dec_list, 
                 ParseTree **data, ParseTree **relations)
 {
-  extern FILE *yyin;
+  extern std::FILE *yyin;
   yyin = file;
 
   _pvariables = 0;
