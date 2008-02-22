@@ -11,7 +11,8 @@ jags_terminal_LDADD = @LIBLTDL@ ${top_builddir}/src/lib/libjags.la	\
 -dlopen ${top_builddir}/src/modules/base/basemod.la \
 -dlopen ${top_builddir}/src/modules/bugs/bugs.la \
 -dlopen ${top_builddir}/src/modules/dic/dic.la \
--dlopen ${top_builddir}/src/modules/mix/mix.la
+-dlopen ${top_builddir}/src/modules/mix/mix.la \
+-dlopen ${top_builddir}/src/modules/msm/msm.la 
 jags_terminal_CPPFLAGS= -I$(top_srcdir)/src/include @INCLTDL@
 
 LEX_OUTPUT_ROOT=lex.zz
