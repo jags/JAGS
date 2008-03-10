@@ -866,7 +866,7 @@ static void writeValue(double x, std::ostream &out, bool isdiscrete)
       out << "-Inf";
   }
   else if (isdiscrete) {
-      out << static_cast<int>(x);
+      out << static_cast<int>(x) << "L";
   }
   else {
     out << x;
@@ -875,77 +875,72 @@ static void writeValue(double x, std::ostream &out, bool isdiscrete)
 
 void doDump(std::string const &file, DumpType type, unsigned int chain)
 {
-  std::map<std::string,SArray> data_table;
-  std::string rng_name;
-  if (!console->dumpState(data_table, rng_name, type, chain)) {
-    return;
-  }
+    std::map<std::string,SArray> data_table;
+    std::string rng_name;
+    if (!console->dumpState(data_table, rng_name, type, chain)) {
+	return;
+    }
 
-  /* Open output file */
-  std::ofstream out(file.c_str());
-  if (!out) {
-    std::cerr << "Failed to open file " << file << std::endl;
-    return;
-  }
+    /* Open output file */
+    std::ofstream out(file.c_str());
+    if (!out) {
+	std::cerr << "Failed to open file " << file << std::endl;
+	return;
+    }
   
-  if (rng_name.size() != 0) {
-    out << "\".RNG.name\" <- \"" << rng_name << "\"\n";
-  }
+    if (rng_name.size() != 0) {
+	out << "`.RNG.name` <- \"" << rng_name << "\"\n";
+    }
 
-  for (std::map<std::string, SArray>::const_iterator p = data_table.begin();
-       p != data_table.end(); ++p) {
-    std::string const &name = p->first;
-    SArray const &sarray = p->second;
-    std::vector<double> const &value = sarray.value();
-    long length = sarray.length();
-    out << "\"" << name << "\" <- " << std::endl;
-    std::vector<unsigned int> const &dim = sarray.dim(false);
-    bool discrete = sarray.isDiscreteValued();
+    for (std::map<std::string, SArray>::const_iterator p = data_table.begin();
+	 p != data_table.end(); ++p) {
+	std::string const &name = p->first;
+	SArray const &sarray = p->second;
+	std::vector<double> const &value = sarray.value();
+	long length = sarray.length();
+	out << "`" << name << "` <- " << std::endl;
+	std::vector<unsigned int> const &dim = sarray.dim(false);
+	bool discrete = sarray.isDiscreteValued();
 
-    if (discrete) {
-       out << "as.integer(";
-    }
-    if (dim.size() == 1) {
-      // Vector 
-      if (dim[0] == 1) {
-	// Scalar
-	writeValue(value[0], out, sarray.isDiscreteValued());
-      }
-      else {
-	// Vector of length > 1
-	out << "c(";
-	for (int i = 0; i < length; ++i) {
-	  if (i > 0) {
-	    out << ",";
-	  }
-	  writeValue(value[i], out, sarray.isDiscreteValued());
+	if (dim.size() == 1) {
+	    // Vector 
+	    if (dim[0] == 1) {
+		// Scalar
+		writeValue(value[0], out, discrete);
+	    }
+	    else {
+		// Vector of length > 1
+		out << "c(";
+		for (int i = 0; i < length; ++i) {
+		    if (i > 0) {
+			out << ",";
+		    }
+		    writeValue(value[i], out, discrete);
+		}
+		out << ")";
+	    }
 	}
-	out << ")";
-      }
-    }
-    else {
-      // Array 
-      out << "structure(c(";
-      for (int i = 0; i < length; ++i) {
-	if (i > 0) {
-	  out << ",";
+	else {
+	    // Array 
+	    out << "structure(c(";
+	    for (int i = 0; i < length; ++i) {
+		if (i > 0) {
+		    out << ",";
+		}
+		writeValue(value[i], out, discrete);
+	    }
+	    out << "), .Dim = c(";
+	    for (unsigned int j = 0; j < dim.size(); ++j) {
+		if (j > 0) {
+		    out << ",";
+		}
+		out << dim[j] << "L";
+	    }
+	    out << "))";
 	}
-	writeValue(value[i], out, sarray.isDiscreteValued());
-      }
-      out << "), .Dim = as.integer(c(";
-      for (unsigned int j = 0; j < dim.size(); ++j) {
-	if (j > 0) {
-	  out << ",";
-	}
-	out << dim[j];
-      }
-      out << ")))";
+	out << "\n";
     }
-    if (discrete) 
-      out << ")";
-    out << "\n";
-  }
-  out.close();
+    out.close();
 }  
 
 void dumpMonitors(std::string const &file, std::string const &type)
@@ -979,15 +974,13 @@ void dumpMonitors(std::string const &file, std::string const &type)
 	out << "\"" << name << "\" = ";
 	std::vector<unsigned int> const &dim = sarray.dim(false);
 	bool discrete = sarray.isDiscreteValued();
+	bool named = !sarray.dimNames().empty();
 
-	if (discrete) {
-	    out << "as.integer(";
-	}
-	if (dim.size() == 1) {
+	if (dim.size() == 1 && !named) {
 	    // Vector 
 	    if (dim[0] == 1) {
 		// Scalar
-		writeValue(value[0], out, sarray.isDiscreteValued());
+		writeValue(value[0], out, discrete);
 	    }
 	    else {
 		// Vector of length > 1
@@ -996,7 +989,7 @@ void dumpMonitors(std::string const &file, std::string const &type)
 		    if (i > 0) {
 			out << ",";
 		    }
-		    writeValue(value[i], out, sarray.isDiscreteValued());
+		    writeValue(value[i], out, discrete);
 		}
 		out << ")";
 	    }
@@ -1008,19 +1001,33 @@ void dumpMonitors(std::string const &file, std::string const &type)
 		if (i > 0) {
 		    out << ",";
 		}
-		writeValue(value[i], out, sarray.isDiscreteValued());
+		writeValue(value[i], out, discrete);
 	    }
-	    out << "), .Dim = as.integer(c(";
+	    out << "), .Dim = ";
+	    if (named) {
+		out << "structure(";
+	    }
+	    out << "c(";
 	    for (unsigned int j = 0; j < dim.size(); ++j) {
 		if (j > 0) {
 		    out << ",";
 		}
-		out << dim[j];
+		out << dim[j] << "L";
 	    }
-	    out << ")))";
-	}
-	if (discrete) 
 	    out << ")";
+	    if (named) {
+		std::vector<std::string> const &dnames = sarray.dimNames();
+		out << ", .Names = c(";
+		for (unsigned int k = 0; k < dnames.size(); ++k) {
+		    if (k > 0) {
+			out << ",";
+		    }
+		    out << "\"" << dnames[k] << "\"";
+		}
+		out << "))";
+	    }
+	    out << ")";
+	}
     }
 
     out << "), \n.Names = c(";
