@@ -517,6 +517,7 @@ bool Console::dumpState(map<string,SArray> &data_table,
 
 
 bool Console::dumpMonitors(map<string,SArray> &data_table,
+			   map<string,unsigned int> &weight_table,
 			   string const &type) 
 {
     try {
