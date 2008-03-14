@@ -14,7 +14,7 @@ libjags_la_LIBADD = model/libmodel.la		\
 	compiler/libcompiler.la			\
         rng/librng.la
 
-libjags_la_LDFLAGS = -no-undefined -version-info 1:1:0
+libjags_la_LDFLAGS = -no-undefined -version-info 1:2:0
 
 SUBDIRS = util sarray distribution function sampler graph model	\
 	compiler rng 

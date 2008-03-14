@@ -946,8 +946,9 @@ void doDump(std::string const &file, DumpType type, unsigned int chain)
 void dumpMonitors(std::string const &file, std::string const &type)
 {
     std::map<std::string,SArray> data_table;
+    std::map<std::string,unsigned int> weight_table;
 
-    if (!console->dumpMonitors(data_table, type)) {
+    if (!console->dumpMonitors(data_table, weight_table, type)) {
 	return;
     }
 
