@@ -1,7 +1,6 @@
 #include "PDMonitor.h"
 
 #include <graph/StochasticNode.h>
-#include <distribution/Distribution.h>
 #include <rng/RNG.h>
 
 #include <stdexcept>
@@ -12,11 +11,13 @@ using std::string;
 
 namespace dic {
 
-    PDMonitor::PDMonitor(StochasticNode const *snode, unsigned int start,
-			 unsigned int thin, vector<RNG *> const &rngs,
-			 unsigned int nrep)
-	: Monitor("pD", snode, start, thin), _snode(snode), _rngs(rngs),
-	  _nrep(nrep)
+    PDMonitor::PDMonitor(StochasticNode const *snode,
+			 unsigned int start, unsigned int thin, 
+			 vector<RNG *> const &rngs, unsigned int nrep)
+	: Monitor("pD", snode, start, thin), 
+	  _repnode(snode->distribution(), snode->parents(), 
+                   snode->lowerBound(), snode->upperBound()),
+           _rngs(rngs), _nrep(nrep)
     
     {
 	if (snode->nchain() < 2) {
@@ -31,10 +32,7 @@ namespace dic {
 
     vector<unsigned int> PDMonitor::dim() const
     {
-	vector<unsigned int> d(2);
-	d[0] = 1;
-	d[1] = niter();
-	return d;
+	return vector<unsigned int> (1,niter());
     }
  
     vector<double> const &PDMonitor::value(unsigned int chain) const
@@ -44,43 +42,25 @@ namespace dic {
 
     void PDMonitor::doUpdate()
     {
-	unsigned int nchain = _snode->nchain();
+	unsigned int nchain = _repnode.nchain();
+	unsigned int len = _repnode.length();
 	
-	Distribution const *dist = _snode->distribution();
-	vector<vector<unsigned int> > const  &dims = _snode->parameterDims();
-	unsigned int length = _snode->length();
-	
-	double *rep_values = new double[length];
+	double pdsum = 0;
+	for (unsigned int r = 0; r < _nrep; ++r) {
+	    for (unsigned int i = 0; i < nchain; ++i) {
+		_repnode.randomSample(_rngs[i], i);
+		pdsum += _repnode.logDensity(i);
 
-	double pD = 0;
-	for (unsigned int ch = 0; ch < nchain; ++ch) {
-	    for (unsigned int i = 0; i < _nrep; ++i) {
-		dist->randomSample(rep_values, length, 
-				   _snode->parameters(ch), dims, 
-				   _snode->lowerLimit(ch),
-                                   _snode->upperLimit(ch), 
-				   _rngs[ch]);
-		
-		double lik0 = dist->logLikelihood(rep_values, length,
-						  _snode->parameters(ch), dims,
-						  _snode->lowerLimit(ch),
-						  _snode->upperLimit(ch));
-		double lik1 = 0;
-		for (unsigned int n = 0; n < nchain; ++n) {
-		    if (n != ch) {
-			lik1 += dist->logLikelihood(rep_values, length,
-						    _snode->parameters(n), 
-                                                    dims,
-						    _snode->lowerLimit(n),
-						    _snode->upperLimit(n));
+		double const *v = _repnode.value(i);
+		for (unsigned int j = 0; j < nchain; ++j) {
+		    if (j != i) {
+			_repnode.setValue(v, len, j);
+			pdsum -= _repnode.logDensity(j)/(nchain - 1);
 		    }
 		}
-		pD += lik0 - lik1/(nchain - 1);
 	    }
 	}
-	_values.push_back(pD/(_nrep * nchain));
-
-	delete [] rep_values;
+	_values.push_back(pdsum/(_nrep * nchain));
     }
 
     void PDMonitor::reserve(unsigned int niter)
@@ -91,12 +71,10 @@ namespace dic {
 
     SArray PDMonitor::dump() const
     {
-	vector<unsigned int> d = dim();
-	SArray ans(d);
+	SArray ans(dim());
 	ans.setValue(_values);
 
-        vector<string> names(2);
-	names[1] = "iteration";
+        vector<string> names(1,string("iteration"));
 	ans.setDimNames(names);
 	return ans;
     }

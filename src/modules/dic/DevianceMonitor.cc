@@ -26,10 +26,9 @@ namespace dic {
 
     vector<unsigned int> DevianceMonitor::dim() const
     {
-	vector<unsigned int> d(3);
-        d[0] = 1;
-	d[1] = niter();
-	d[2] = nchain();
+	vector<unsigned int> d(2);
+	d[0] = niter();
+	d[1] = nchain();
 	return d;
     }
  
@@ -68,9 +67,9 @@ namespace dic {
 	SArray ans(dim());
 	ans.setValue(v);    
 	
-	vector<string> names(3);
-	names[1] = "iteration";
-	names[2] = "chain";
+	vector<string> names(2);
+	names[0] = "iteration";
+	names[1] = "chain";
 	ans.setDimNames(names);
 	return(ans);
     }
