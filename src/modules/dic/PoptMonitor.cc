@@ -19,7 +19,7 @@ namespace dic {
 	: Monitor("popt", snode, start, thin), _snode(snode),
 	  _repnode(snode->distribution(), snode->parents(), 
                    snode->lowerBound(), snode->upperBound()),
-	  _rngs(rngs), _nrep(nrep)
+	  _rngs(rngs), _nrep(nrep), _weights(snode->nchain(), 0)
     
     {
 	if (snode->nchain() < 2) {
@@ -52,6 +52,7 @@ namespace dic {
 	for (unsigned int i = 0; i <  nchain; ++i) {
 	    w[i] = exp(-_snode->logDensity(i));
 	    wsum += w[i];
+	    _weights[i] += w[i];
 	}
 
 	double pdsum = 0;
@@ -69,16 +70,10 @@ namespace dic {
 			loglik -= w[j] * _repnode.logDensity(j);
 		    }
 		}
-		pdsum -= 2 * w[i] * loglik;
+		pdsum += 2 * w[i] * loglik;
 	    }
 	}
-	_values.push_back(pdsum/_nrep);
-
-	double w2 = 0;
-	for (unsigned int i = 0; i < nchain; ++i) {
-	    w2 += w[i] * w[i];
-	}
-	_weights += w2 - wsum * wsum;
+	_values.push_back(pdsum /  _nrep);
     }
 
     void PoptMonitor::reserve(unsigned int niter)
@@ -91,7 +86,18 @@ namespace dic {
     {
 	SArray ans(dim());
 	vector<double> scaled_values(_values);
-        double scale = niter() / _weights;
+
+	double wsum = 0;
+	for (unsigned int i = 0; i < _weights.size(); ++i) {
+	   for (unsigned int j = 0; j < _weights.size(); ++j) {
+              if (j != i) {
+                 wsum += _weights[i] * _weights[j];
+              }
+           }
+	}
+
+        //double scale = niter() / (wsum2 - wsum * wsum);
+        double scale = niter() * niter() / wsum;
 	for (unsigned int i = 0; i < _values.size(); ++i) {
 	    scaled_values[i] *= scale;
 	}

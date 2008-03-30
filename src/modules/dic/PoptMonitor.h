@@ -16,8 +16,8 @@ namespace dic {
 	StochasticNode _repnode;
 	const std::vector<RNG *> _rngs;
 	unsigned int _nrep;
+	std::vector<double> _weights; // weights for each chain
 	std::vector<double> _values; // sampled values
-	double _weights;
     public:
 	PoptMonitor(StochasticNode const *snode,
 		    unsigned int start,  unsigned int thin, 
