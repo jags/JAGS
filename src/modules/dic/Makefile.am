@@ -12,4 +12,4 @@ DefaultPDMonitor.cc KLPDMonitor.cc KLNorm.cc KLBin.cc KLPois.cc KLTab.cc
 
 noinst_HEADERS = DevianceMonitor.h DevianceMonitorFactory.h		\
 PDMonitor.h PDMonitorFactory.h PoptMonitor.h PoptMonitorFactory.h	\
-DefaultPDMonitor.h KLPDMonitor.h KLNorm.h KLBin.h KLPois.h KLTab.h
+DefaultPDMonitor.h KLPDMonitor.h KLNorm.h KLBin.h KLPois.h KLTab.h KL.h
