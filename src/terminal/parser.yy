@@ -16,6 +16,7 @@
 #include <sstream>
 #include <fstream>
 #include <list>
+#include <iterator>
 
 #include <Console.h>
 #include <compiler/ParseTree.h>
@@ -82,6 +83,7 @@
     static void loadModule(std::string const &name);
     static void dumpSamplers(std::string const &file);
     static void delete_pvec(std::vector<ParseTree*> *);
+    static void print_unused_variables();
     %}
 
 %defines
@@ -313,10 +315,12 @@ parameters: PARAMETERS IN file_name {
 ;
 
 compile: COMPILE {
-  console->compile(_data_table, 1, true);
+    console->compile(_data_table, 1, true);
+    print_unused_variables();
 }
 | COMPILE ',' NCHAINS '(' INT ')' {
     console->compile(_data_table, $5, true);
+    print_unused_variables();
 }
 ;
 
@@ -1365,3 +1369,29 @@ static void delete_pvec(std::vector<ParseTree*> *pv)
     }
     delete pv;
 }
+
+static void print_unused_variables()
+{
+    std::vector<std::string> data_vars;
+    for (std::map<std::string, SArray>::const_iterator p = _data_table.begin();
+	 p != _data_table.end(); ++p)
+    {
+	data_vars.push_back(p->first);
+    }
+    
+    std::vector<std::string> unused_vars;
+    std::vector<std::string> const &model_vars = console->variableNames();
+
+    std::set_difference(data_vars.begin(), data_vars.end(),
+			model_vars.begin(), model_vars.end(),
+			std::inserter(unused_vars, unused_vars.begin()));
+
+    if (!unused_vars.empty()) {
+	std::cerr << "\nWARNING: Unused variable(s) in data table:\n";
+	std::copy(unused_vars.begin(), unused_vars.end(),
+		  std::ostream_iterator<std::string>(std::cerr, "\n"));
+	std::cerr << "\n";
+    }
+
+}
+
