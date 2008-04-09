@@ -1,5 +1,5 @@
-#ifndef PD_MONITOR_H_
-#define PD_MONITOR_H_
+#ifndef POPT_MONITOR_H_
+#define POPT_MONITOR_H_
 
 #include <model/Monitor.h>
 #include <graph/StochasticNode.h>
@@ -32,4 +32,4 @@ namespace dic {
 
 }
 
-#endif /* PD_MONITOR_H_ */
+#endif /* POPT_MONITOR_H_ */
