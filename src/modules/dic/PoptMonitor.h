@@ -13,6 +13,7 @@ namespace dic {
 
     class PoptMonitor : public Monitor {
     protected:
+        StochasticNode const *_snode;
 	std::vector<double> _weights; // weights for each chain
 	std::vector<double> _values; // sampled values
     public:

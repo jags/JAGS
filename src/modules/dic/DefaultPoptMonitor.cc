@@ -18,15 +18,12 @@ namespace dic {
 					   unsigned int thin, 
 					   vector<RNG *> const &rngs, 
 					   unsigned int nrep)
-	: PoptMonitor("popt", snode, start, thin), _snode(snode),
+	: PoptMonitor(snode, start, thin), 
 	  _repnode(snode->distribution(), snode->parents(), 
                    snode->lowerBound(), snode->upperBound()),
-	  _rngs(rngs), _nrep(nrep), _weights(snode->nchain(), 0)
-    
+	  _rngs(rngs), _nrep(nrep)
+	  
     {
-	if (snode->nchain() < 2) {
-	    throw logic_error("DefaultPoptMonitor needs at least 2 chains");
-	}
     }
 
 

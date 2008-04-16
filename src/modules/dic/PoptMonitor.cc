@@ -14,8 +14,8 @@ namespace dic {
 
     PoptMonitor::PoptMonitor(StochasticNode const *snode,
 			     unsigned int start, unsigned int thin) 
-	: Monitor("popt", snode, start, thin), _snode(snode),
-	  _weights(snode->nchain(), 0)
+	: Monitor("popt", snode, start, thin), 
+          _snode(snode), _weights(snode->nchain(), 0)
     
     {
 	if (snode->nchain() < 2) {

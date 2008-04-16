@@ -10,7 +10,7 @@ namespace dic {
 
     PDMonitor::PDMonitor(StochasticNode const *snode,
 			 unsigned int start, unsigned int thin) 
-	: Monitor("pD", snode, start, thin)
+	: Monitor("pD", snode, start, thin), _snode(snode)
     {
 	if (snode->nchain() < 2) {
 	    throw logic_error("PDMonitor needs at least 2 chains");

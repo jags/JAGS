@@ -1,8 +1,12 @@
 #include "PoptMonitorFactory.h"
 #include "PoptMonitor.h"
+#include "KLPoptMonitor.h"
+#include "DefaultPoptMonitor.h"
+#include "KLTab.h"
 
 #include <model/Model.h>
 #include <graph/StochasticNode.h>
+#include <distribution/Distribution.h>
 
 #include <set>
 
@@ -10,7 +14,10 @@ using std::set;
 using std::string;
 using std::vector;
 
+
 namespace dic {
+
+    extern KLTab _kltab;
 
     Monitor *PoptMonitorFactory::getMonitor(Node const *node, 
 					  Model *model,
@@ -21,17 +28,25 @@ namespace dic {
 	if (type != "popt" || node->nchain() < 2)
 	    return 0;
 
+	StochasticNode const *snode = asStochastic(node);
+	if (!snode)
+	    return 0;
+	
+	if (isSupportFixed(snode)) {
+	    
+	    KL const *kl = _kltab.find(snode->distribution()->name());
+	    if (kl) {
+		return new KLPoptMonitor(snode, start, thin, kl);
+	    }
+	}
+
 	unsigned int nchain = model->nchain();
 	vector<RNG*> rngs;
 	for (unsigned int i = 0; i < nchain; ++i) {
 	    rngs.push_back(model->rng(i));
 	}
 
-	StochasticNode const *snode = asStochastic(node);
-	if (snode)
-	    return new PoptMonitor(snode, start, thin, rngs, 10);
-	else 
-	    return 0;
+	return new DefaultPoptMonitor(snode, start, thin, rngs, 10);
     }
 
     vector<Node const*> 

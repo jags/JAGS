@@ -1,4 +1,5 @@
 #include "KLPoptMonitor.h"
+#include "KL.h"
 
 #include <graph/StochasticNode.h>
 #include <rng/RNG.h>
@@ -14,26 +15,16 @@ using std::exp;
 namespace dic {
 
     KLPoptMonitor::KLPoptMonitor(StochasticNode const *snode,
-			     unsigned int start, unsigned int thin, 
-			     vector<RNG *> const &rngs, unsigned int nrep)
-	: PoptMonitor(snode, start, thin)
+				 unsigned int start, unsigned int thin, 
+				 KL const *kl)
+	: PoptMonitor(snode, start, thin), _kl(kl)
     
     {
-	unsigned int nchain = snode->nchain();
-	_par.reserve(nchain);
-	for (unsigned int i = 0; i < nchain; ++i) {
-	    _par.push_back(snode->parameters(i));
-	}
-    }
-
-    KLPoptMonitor::~KLPoptMonitor()
-    {
-	delete _kl;
     }
 
     void KLPoptMonitor::doUpdate()
     {
-	unsigned int nchain = _par.size();
+	unsigned int nchain = _snode->nchain();
 
 	vector<double> w(nchain); //weights
 	double wsum = 0;
@@ -48,7 +39,8 @@ namespace dic {
 	    double pdi = 0;
 	    for (unsigned int j = 0; j < nchain; ++j) {
 		if (j != i) {
-		    pdsum += w[j] * _kl->divergence(_par[i], _par[j]);
+		    pdsum += w[j] * _kl->divergence(_snode->parameters(i),
+						    _snode->parameters(j));
 		}
 	    }
 	    pdsum += 2 * w[i] * pdi;

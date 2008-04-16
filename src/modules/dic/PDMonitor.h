@@ -13,6 +13,7 @@ namespace dic {
 
     class PDMonitor : public Monitor {
     protected:
+        StochasticNode const *_snode;
 	std::vector<double> _values;
     public:
 	PDMonitor(StochasticNode const *node, unsigned int start,

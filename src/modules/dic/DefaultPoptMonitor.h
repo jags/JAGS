@@ -1,18 +1,14 @@
 #ifndef DEFAULT_POPT_MONITOR_H_
 #define DEFAULT_POPT_MONITOR_H_
 
-#include <model/Monitor.h>
-#include <graph/StochasticNode.h>
-
-#include <vector>
+#include "PoptMonitor.h"
 
 class StochasticNode;
 class RNG;
 
 namespace dic {
 
-    class PoptMonitor : public Monitor {
-	StochasticNode const *_snode;
+    class DefaultPoptMonitor : public PoptMonitor {
 	StochasticNode _repnode;
 	const std::vector<RNG *> _rngs;
 	unsigned int _nrep;

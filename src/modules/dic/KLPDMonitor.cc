@@ -12,27 +12,18 @@ namespace dic {
 			     KL const *kl)
 	: PDMonitor(snode, start, thin), _kl(kl)
     {
-	unsigned int nchain = snode->nchain();
-	_par.reserve(nchain);
-	for (unsigned int i = 0; i < nchain; ++i) {
-	    _par.push_back(snode->parameters(i));
-	}
-    }
-
-    KLPDMonitor::~KLPDMonitor()
-    {
-        delete _kl;
     }
 
     void KLPDMonitor::doUpdate()
     {
-	unsigned int nchain = _par.size();
+	unsigned int nchain = _snode->nchain();
 	
 	double pdsum = 0;
 	for (unsigned int i = 0; i < nchain; ++i) {
 	    for (unsigned int j = 0; j < nchain; ++j) {
 		if (j != i) {
-		    pdsum += _kl->divergence(_par[i], _par[j]);
+		    pdsum += _kl->divergence(_snode->parameters(i),
+                                             _snode->parameters(j));
 		}
 	    }
 	}

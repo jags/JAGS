@@ -3,6 +3,7 @@
 #include "DevianceMonitorFactory.h"
 #include "PDMonitorFactory.h"
 #include "PoptMonitorFactory.h"
+#include "KLTab.h"
 
 using std::vector;
 
@@ -28,6 +29,8 @@ namespace dic {
 	    delete mvec[i];
 	}
     }
+
+    KLTab _kltab;
 }
 
 dic::DICModule _dic_module;

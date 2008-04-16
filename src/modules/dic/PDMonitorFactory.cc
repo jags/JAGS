@@ -13,12 +13,10 @@ using std::set;
 using std::string;
 using std::vector;
 
+
 namespace dic {
 
-    static KL const *findKL(string const &name) {
-	static KLTab _kltab;
-	return _kltab.find(name);
-    }
+    extern KLTab _kltab;
 
     Monitor *PDMonitorFactory::getMonitor(Node const *node, 
 					  Model *model,
@@ -35,7 +33,7 @@ namespace dic {
 	
 	if (isSupportFixed(snode)) {
 	    
-	    KL const *kl = findKL(snode->distribution()->name());
+	    KL const *kl = _kltab.find(snode->distribution()->name());
 	    if (kl) {
 		return new KLPDMonitor(snode, start, thin, kl);
 	    }
