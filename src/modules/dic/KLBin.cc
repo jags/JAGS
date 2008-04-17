@@ -21,8 +21,8 @@ namespace dic {
 	    return JAGS_POSINF;
 	}
 	else {
-	    return (N0 * PROB0 * log (PROB0/PROB1) +
-		    N0 * (1 - PROB0) * log((1 - PROB0)/(1 - PROB1)));
+	    return N0 * ((PROB0 - PROB1) * 
+			 (log (PROB0/(1 - PROB0)) - log(PROB1/(1 - PROB1))));
 	}
     }
 

@@ -19,12 +19,10 @@ namespace dic {
 	unsigned int nchain = _snode->nchain();
 	
 	double pdsum = 0;
-	for (unsigned int i = 0; i < nchain; ++i) {
-	    for (unsigned int j = 0; j < nchain; ++j) {
-		if (j != i) {
-		    pdsum += _kl->divergence(_snode->parameters(i),
-                                             _snode->parameters(j));
-		}
+	for (unsigned int i = 1; i < nchain; ++i) {
+	    for (unsigned int j = 0; j < i; ++j) {
+		pdsum += _kl->divergence(_snode->parameters(i),
+					 _snode->parameters(j));
 	    }
 	}
 

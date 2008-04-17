@@ -1,6 +1,7 @@
 #ifndef DEFAULT_POPT_MONITOR_H_
 #define DEFAULT_POPT_MONITOR_H_
 
+#include <graph/StochasticNode.h>
 #include "PoptMonitor.h"
 
 class StochasticNode;

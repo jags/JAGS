@@ -2,7 +2,6 @@
 #define POPT_MONITOR_H_
 
 #include <model/Monitor.h>
-#include <graph/StochasticNode.h>
 
 #include <vector>
 

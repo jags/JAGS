@@ -16,7 +16,8 @@ namespace dic {
 			      vector<double const *> const &par1) const
     {
 	
-	return  ((mu0 - mu1) * (mu0 - mu1) * tau1 + tau1/tau0 - 1 + log(tau0/tau1)) /2;
+	return  (mu0 - mu1) * (mu0 - mu1) * (tau1 + tau0)/2 + 
+	    (tau1/tau0 - 1)/2 + (tau0/tau1 - 1)/2;
 	
     }
 

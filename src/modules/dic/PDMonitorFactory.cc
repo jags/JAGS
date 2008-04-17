@@ -31,6 +31,7 @@ namespace dic {
 	if (!snode)
 	    return 0;
 	
+/*
 	if (isSupportFixed(snode)) {
 	    
 	    KL const *kl = _kltab.find(snode->distribution()->name());
@@ -38,6 +39,7 @@ namespace dic {
 		return new KLPDMonitor(snode, start, thin, kl);
 	    }
 	}
+*/
 	
 	unsigned int nchain = model->nchain();
 	vector<RNG*> rngs;

@@ -15,8 +15,8 @@ namespace dic {
     double KLBern::divergence(vector<double const *> const &par0,
 			     vector<double const *> const &par1) const
     {
-	return (PROB0 * log (PROB0/PROB1) +
-		(1 - PROB0) * log((1 - PROB0)/(1 - PROB1)));
+	return (PROB0 - PROB1) * 
+	    (log (PROB0/(1 - PROB0)) - log(PROB1/(1 - PROB1)));
     }
 
 }
