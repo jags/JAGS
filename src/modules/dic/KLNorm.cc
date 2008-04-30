@@ -17,7 +17,7 @@ namespace dic {
     {
 	
 	return  (mu0 - mu1) * (mu0 - mu1) * (tau1 + tau0)/2 + 
-	    (tau1 - tao) * (tau1 - tau0) / (2 * tau1 * tau0);
+	    (tau1 - tau0) * (tau1 - tau0) / (2 * tau1 * tau0);
 	
     }
 

@@ -33,7 +33,7 @@ static void calBeta(double *betas, ConjugateSampler *sampler,
 {
     StochasticNode *snode = sampler->node();
     double const *xold = snode->value(chain);
-    int nrow = snode->length();
+    unsigned int nrow = snode->length();
     //unsigned int nrow = snode->length();
 
     double *xnew = new double[nrow];
@@ -58,9 +58,6 @@ static void calBeta(double *betas, ConjugateSampler *sampler,
 	}
 	beta_j += nrow_child * nrow;
     }
-
-    int i1 = 1;
-    double d1 = 1;
 
     for (unsigned int i = 0; i < nrow; ++i) {
 	xnew[i] += 1;
@@ -235,7 +232,7 @@ void ConjugateMNormal::update(ConjugateSampler *sampler, unsigned int chain,
         }
 
 	//Calculate largest possible size of working matrix C
-	int max_nrow_child = 0;
+	unsigned int max_nrow_child = 0;
 	for (unsigned int j = 0; j < nchildren; ++j) {
 	    if (snode->length() > max_nrow_child) {
 		max_nrow_child = snode->length();

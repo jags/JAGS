@@ -31,5 +31,5 @@ namespace dic {
 	else {
 	    return p->second;
 	}
-    };
+    }
 }

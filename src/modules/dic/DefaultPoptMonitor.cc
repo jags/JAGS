@@ -47,11 +47,9 @@ namespace dic {
 		_repnode.randomSample(_rngs[i], i);
 		double loglik = (wsum - w[i]) * _repnode.logDensity(i);
 		
-		double const *v = _repnode.value(i);
-		double lik1 = 0;
 		for (unsigned int j = 0; j < nchain; ++j) {
 		    if (j != i) {
-			_repnode.setValue(v, len, j);
+			_repnode.setValue(_repnode.value(i), len, j);
 			loglik -= w[j] * _repnode.logDensity(j);
 		    }
 		}
