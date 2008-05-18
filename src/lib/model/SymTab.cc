@@ -114,6 +114,8 @@ void SymTab::readValues(map<string, SArray> &data_table,
 	  data_table.erase(name);
 	}
 	data_table.insert(pair<string,SArray>(name, read_values));
+        /* FIXED! Insane failure to break out of this loop */
+        break;
       }
     }
   }
