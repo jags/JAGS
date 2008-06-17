@@ -19,6 +19,7 @@ BRACKET         [ \t]*\(
 
 %s RDATA
 %x COMMENT
+%x SYSTEM
 
 %%
 
@@ -75,9 +76,18 @@ run                     zzlval.intval=RUN; return RUN;
 <COMMENT>"*"+"/"        BEGIN(INITIAL);
 
 <RDATA,INITIAL>[ \t\r]+ /* Eat whitespace */
-<RDATA,INITIAL>"#".*\n          /* Eat comments */
+<RDATA,INITIAL>"#".*\n  /* Eat comments */
 <RDATA>[\n]+            /* Eat newlines */
 <INITIAL>[\n]           return ENDCMD;
+
+<INITIAL>"system"       BEGIN(SYSTEM);
+<SYSTEM>.*+ {
+  zzlval.stringptr = new std::string(zztext);
+  return SYSCMD;
+}
+<SYSTEM>[\n] {
+    BEGIN(INITIAL); return ENDCMD;
+ }
 
 <INITIAL,RDATA>"-"?([0-9]+){EXPONENT}  {
   zzlval.val = atof(zztext); return DOUBLE;

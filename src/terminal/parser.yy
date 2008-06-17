@@ -72,6 +72,7 @@
     void doAllCoda (std::string const &stem);
     void doDump (std::string const &file, DumpType type, unsigned int chain);
     void dumpMonitors(std::string const &file, std::string const &type);
+    void doSystem(std::string const *command);
 
     static bool getWorkingDirectory(std::string &name);
     static void errordump();
@@ -103,6 +104,7 @@
 %token <val>    DOUBLE
 %token <stringptr> NAME
 %token <stringptr> STRING
+%token <stringptr> SYSCMD
 %token <intval> ENDCMD
 
 %token <intval> MODEL
@@ -175,6 +177,7 @@ line: ENDCMD {}
 | error ENDCMD {if(interactive) yyerrok; else exit(1); }
 | run_script {}
 | ENDSCRIPT ENDCMD { close_buffer();}
+| SYSCMD ENDCMD { doSystem($1); delete $1;}
 ;
 
 command: model 
@@ -1395,3 +1398,7 @@ static void print_unused_variables()
 
 }
 
+void doSystem(std::string const *command)
+{
+    //std::cout << "**** SYSTEM COMMAND\n" << *command << "\n****\n";
+}
