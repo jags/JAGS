@@ -235,6 +235,20 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     for (unsigned int j = 0; j < stoch_parents.size(); ++j) {
 	vsave[j] = *stoch_parents[j]->value(0);
     }
+    /* Save deterministic node values also */
+    unsigned int dsize = 0;
+    for (unsigned int k = 0; k < dtrm_nodes.size(); ++k) {
+        dsize += dtrm_nodes[k]->length();
+    }
+    double *dsave = new double[dtrm_nodes.size()];
+    unsigned int offset = 0;
+    for (unsigned int k = 0; k < dtrm_nodes.size(); ++k) {
+       for (unsigned int l = 0; l < dtrm_nodes[k]->length(); ++l) {
+          dsave[offset] = dtrm_nodes[k]->value(0)[l];
+          offset++;
+       }
+    }
+    
 
     /* Create a set containing all possible values that the stochastic
        indices can take */
@@ -266,9 +280,16 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	double v = vsave[j];
 	stoch_parents[j]->setValue(&v, 1, 0);
     }
-    for (unsigned int k = 0; k < dtrm_nodes.size(); ++k) {
-	dtrm_nodes[k]->deterministicSample(0);
+    /* Bug fix in JAGS 1.0.2: We cannot restore previous values by 
+     * forward sampling if the index is not initialized
+     */
+    
+    for (unsigned int k = 0, offset=0; k < dtrm_nodes.size(); ++k) {
+         double const *v = dsave + offset;
+         dtrm_nodes[k]->setValue(v, dtrm_nodes[k]->length(), 0);
+         offset += dtrm_nodes[k]->length();
     }
+    delete [] dsave;
 
     /* Now set up the possible subsets defined by the stochastic indices */
 
