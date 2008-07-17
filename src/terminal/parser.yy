@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#include <cstdlib>
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -21,7 +22,6 @@
 #include <Console.h>
 #include <compiler/ParseTree.h>
 #include <util/nainf.h>
-#include <cstdlib>
 #include <cstring>
 #include <ltdl.h>
 
@@ -38,7 +38,6 @@
 #include <Console.h>
 #include <compiler/ParseTree.h>
 #include <util/nainf.h>
-#include <cstdlib>
 #include <cstring>
 #include <ltdl.h>
 
@@ -1400,5 +1399,5 @@ static void print_unused_variables()
 
 void doSystem(std::string const *command)
 {
-    //std::cout << "**** SYSTEM COMMAND\n" << *command << "\n****\n";
+    std::system(command->c_str());
 }

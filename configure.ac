@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([JAGS], [1.0.2], [martyn_plummer@users.sourceforge.net], [JAGS])
+AC_INIT([JAGS], [1.0.3], [martyn_plummer@users.sourceforge.net], [JAGS])
 AC_CANONICAL_HOST
 AC_CONFIG_SRCDIR(src/lib/Console.cc)
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
