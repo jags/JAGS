@@ -11,7 +11,7 @@ using std::string;
 
 Monitor::Monitor(string const &type, Node const *node, unsigned int start,
                  unsigned int thin)
-    : _type(type), _node(node), _start(0), _thin(thin), _niter(0)
+    : _type(type), _node(node), _start(start), _thin(thin), _niter(0)
 {
    if (thin == 0) {
 	throw invalid_argument("Illegal thinning interval");
