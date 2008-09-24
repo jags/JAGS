@@ -1,0 +1,42 @@
+#!/bin/sh
+
+if test -z "${LD_LIBRARY_PATH}"; then
+   LD_LIBRARY_PATH="@libdir@"
+else
+   LD_LIBRARY_PATH="@libdir@:${LD_LIBRARY_PATH}"
+fi
+export LD_LIBRARY_PATH
+
+JAGS_binary=@libexecdir@/@jterm@
+
+LTDL_LIBRARY_PATH="${JAGS_LIBS}:@jagsmoddir@"
+export LTDL_LIBRARY_PATH
+
+### Argument loop
+debugger=
+debugger_args=
+while test -n "${1}"; do
+  case ${1} in
+    -d|--debugger)
+      if test -n "`echo ${2} | sed 's/^-.*//'`"; then
+        debugger="${2}"; shift
+      else
+        error "option '${1}' requires an argument"
+      fi
+      ;;
+    --debugger=*)
+      debugger=`echo "${1}" | sed -e 's/[^=]*=//'` ;;
+    --debugger-args=*)
+      debugger_args=`echo "${1}" | sed -e 's/[^=]*=//'` ;;
+    *)
+      args="${args} ${1}" ;;
+  esac
+  shift
+done
+
+## Startup
+if test -z "${debugger}"; then
+    exec "${JAGS_binary}" ${args} "${@}"
+else
+    exec ${debugger} ${debugger_args} "${JAGS_binary}" ${args} "${@}"
+fi

@@ -30,18 +30,27 @@ else
 
 bin_SCRIPTS = jags
 
+# The edit command substitutes paths and filenames into the jags script.
+# Note that jterm (the name of the installed version of jags-terminal)
+# is the odd one out as it is a shell variable not
+# a Makefile variable. In particular, this means that the sed script
+# must be in double quotes so that it is expanded properly.
+
 edit = sed					\
         -e 's,@jagsmoddir\@,$(jagsmoddir),g'	\
         -e 's,@libexecdir\@,$(libexecdir),g'	\
-        -e 's,@libdir\@,$(libdir),g'
+        -e 's,@libdir\@,$(libdir),g'		\
+	-e "s,@jterm\@,$${jterm},g"
 
 jags: Makefile $(srcdir)/jags.in
 	rm -f jags jags.tmp
-	$(edit) $(srcdir)/jags.in >jags.tmp
+	jterm=`echo jags-terminal | sed -e '$(program_transform_name)'`; \
+	$(edit) $(srcdir)/jags.in > jags.tmp
 	chmod +x jags.tmp
 	mv jags.tmp jags
 
 endif
+
 
 ## We need to give Automake some additional hints for distribution
 ## and cleaning of the jags shell script and its source.
