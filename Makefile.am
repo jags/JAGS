@@ -12,10 +12,3 @@ win32-installer:
 	    ${INSTALL} $${f} inst/lib; \
 	  done;) 
 	makensis -DVERSION=${PACKAGE_VERSION} win32/jags.nsi
-# The edit command substitutes paths and filenames into the jags script.
-# Note that jterm (the name of the installed version of jags-terminal)
-# is the odd one out as it is a shell variable not
-# a Makefile variable. In particular, this means that the sed script
-# must be in double quotes so that it is expanded properly.
-
-
