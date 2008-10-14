@@ -806,6 +806,9 @@ void Compiler::setConstantMask(ParseTree const *rel)
     }
     Range range = VariableSubsetRange(var);
     Range const &var_range = q->second.range();
+    if (!var_range.contains(range)) {
+	throw logic_error("Invalid range in Compiler::setConstantMask.");
+    }
     vector<bool> &mask = p->second;
     for (RangeIterator i(range); !i.atEnd(); i.nextLeft()) {
 	mask[var_range.leftOffset(i)] = false;

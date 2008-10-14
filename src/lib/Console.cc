@@ -520,6 +520,10 @@ bool Console::dumpMonitors(map<string,SArray> &data_table,
 			   map<string,unsigned int> &weight_table,
 			   string const &type) 
 {
+    if (_model == 0) {
+	_err << "Cannot dump monitors.  No model!" << endl;
+	return true;
+    }
     try {
 	list<Monitor*> const &monitors = _model->monitors();
 	list<Monitor*>::const_iterator p;
