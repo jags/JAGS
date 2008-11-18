@@ -421,7 +421,7 @@ monitor_set: MONITOR SET var  {
 }
 | MONITOR ',' TYPE '(' NAME ')' {
     setDefaultMonitors(*$5, 1);
-    delete $5
+    delete $5;
 }
 | MONITOR ',' THIN '(' INT ')' {
     setDefaultMonitors("trace", $5);
