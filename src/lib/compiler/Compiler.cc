@@ -249,23 +249,20 @@ Range Compiler::VariableSubsetRange(ParseTree const *var)
     // It's a declared node
     vector<ParseTree*> const &range_list = var->parameters();
     
-    bool ok = true;
     if (range_list.empty()) {
-      ok = (array->range().ndim(false) == 1);
+	//Missing range implies the whole node
+	return array->range();
     }
-    else {
-      ok = (range_list.size() == array->range().ndim(false));
-    }
-    if (!ok) {
-      throw runtime_error(string("Dimension mismatch in subset expression ")
-			  + "of variable " + name);
+    if (range_list.size() != array->range().ndim(false)) {
+	throw runtime_error(string("Dimension mismatch in subset expression") +
+			    " of variable " + name);
     }
     Range range = getRange(var, array->range());
     if (isNULL(range)) {
-      throw runtime_error(string("Missing values in subset expression ") 
-			  + "of variable " + name);
+	throw runtime_error(string("Missing values in subset expression ") 
+			    + "of variable " + name);
     }
-    return range;
+	return range;
   }
   else {
       // Undeclared node
@@ -463,7 +460,7 @@ static Distribution const *getDistribution(ParseTree const *pstoch_rel,
 Node *Compiler::getLength(ParseTree const *p, SymTab const &symtab)
 {
     if (p->treeClass() != P_LENGTH) {
-	throw logic_error("Malformed parse tree. Expecting length expression");
+	throw logic_error("Malformed parse tree. Expecting dim expression");
     }
     ParseTree const *var = p->parameters()[0];
     if (var->treeClass() != P_VAR) {
