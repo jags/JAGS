@@ -299,7 +299,7 @@ void ConjugateMNormal::update(ConjugateSampler *sampler, unsigned int chain,
 	delete [] delta;
 
 	if (temp_beta) {
-	    delete betas;
+	    delete [] betas;
 	}
     }
 
