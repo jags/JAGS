@@ -162,7 +162,7 @@ void NodeArray::setValue(SArray const &value, unsigned int chain)
 	if (x[i] != JAGS_NA) {
 	    Node *node = _node_pointers[i];
 	    if (node == 0) {
-		string msg = "Attempt to set value of undefined node";
+		string msg = "Attempt to set value of undefined node ";
 		throw runtime_error(msg + name() + 
 				    print(value.range().leftIndex(i)));
 	    }
