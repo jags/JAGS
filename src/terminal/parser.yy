@@ -62,7 +62,6 @@
     std::deque<lt_dlhandle> _modules;
     bool open_data_buffer(std::string const *name);
     bool open_command_buffer(std::string const *name);
-    void close_buffer();
     void return_to_main_buffer();
     void setMonitor(ParseTree const *var, int thin, std::string const &type);
     void clearMonitor(ParseTree const *var, std::string const &type);
@@ -175,7 +174,7 @@ line: ENDCMD {}
 | command ENDCMD {}
 | error ENDCMD {if(interactive) yyerrok; else exit(1); }
 | run_script {}
-| ENDSCRIPT ENDCMD { close_buffer();}
+| ENDSCRIPT ENDCMD {}
 | SYSCMD ENDCMD { doSystem($1); delete $1;}
 ;
 

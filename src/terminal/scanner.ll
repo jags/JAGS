@@ -4,7 +4,7 @@
 #include <cstring>
 #include <compiler/ParseTree.h>
 #include "parser.h"
-    
+
     std::vector<FILE*> file_stack;
     int command_buffer_count = 0;
     int buffer_count = 0;
@@ -180,7 +180,7 @@ void pop_file() {
 bool open_data_buffer(std::string const *name) {
     FILE *file = fopen(name->c_str(),"r");
     if (file) {
-	zzpush_buffer_state(yy_create_buffer(file, YY_BUF_SIZE));
+	zzpush_buffer_state(zz_create_buffer(file, YY_BUF_SIZE));
 	push_file(file);
         ++buffer_count;
 	BEGIN(RDATA);
@@ -201,7 +201,7 @@ bool open_command_buffer(std::string const *name) {
     FILE *file = fopen(name->c_str(),"r");
     if (file) {
 	file_stack.push_back(file);
-	zzpush_buffer_state(yy_create_buffer(file, YY_BUF_SIZE ));
+	zzpush_buffer_state(zz_create_buffer(file, YY_BUF_SIZE ));
 	++command_buffer_count;
         ++buffer_count;
 	return true;
