@@ -186,10 +186,17 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     vector<Node*> dtrm_nodes;
     classifyParents(indices, compiler_graph, stoch_parents, dtrm_nodes);
 
+    /* If there are too many stochastic parents, the algorithm will
+       grind to a halt. Bail out after 10. */
+
+    unsigned int nparents = stoch_parents.size();  
+    if (nparents > 10) {
+	return 0;
+    }
+
     /* Test to see if all stochastic parents are discrete, scalar, with
        bounded support. If not we give up. */
 
-    unsigned int nparents = stoch_parents.size();  
     for (unsigned int i = 0; i < nparents; ++i) {
 	StochasticNode const *snode = stoch_parents[i];
 	if (snode->length() != 1 || !snode->isDiscreteValued() ||
@@ -240,7 +247,7 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     for (unsigned int k = 0; k < dtrm_nodes.size(); ++k) {
         dsize += dtrm_nodes[k]->length();
     }
-    double *dsave = new double[dtrm_nodes.size()];
+    double *dsave = new double[dsize];
     unsigned int offset = 0;
     for (unsigned int k = 0; k < dtrm_nodes.size(); ++k) {
        for (unsigned int l = 0; l < dtrm_nodes[k]->length(); ++l) {
@@ -412,10 +419,10 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
       }
       else {
 	  ssi.node = compiler->getParameter(p0);
-	if (ssi.node == 0)
-	  return 0;
-	else
-	  ++nvi;
+	  if (ssi.node == 0)
+	      return 0;
+	  else
+	      ++nvi;
       }
       break;
     case 2:
@@ -441,7 +448,10 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
     //Check validity of subset index
     if (ssi.node) {
       if (!ssi.node->isDiscreteValued()) {
-         throw NodeError(ssi.node, "Invalid index: not discrete-valued");
+         throw NodeError(ssi.node, "Continuous nodes cannot be used as indices");
+      }
+      if (ssi.node->length() != 1) {
+         throw NodeError(ssi.node, "Vector nodes cannot be used as indices");
       }
     }
     else {
