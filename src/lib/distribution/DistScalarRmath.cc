@@ -19,6 +19,7 @@ using std::max;
 double DistScalarRmath::calPlower(double lower, 
 				  vector<double const*> const &parameters) const
 {
+    //P(X < lower)
     if (isDiscreteValued()) {
 	return p(lower - 1, parameters, true, false);
     }
@@ -30,6 +31,7 @@ double DistScalarRmath::calPlower(double lower,
 double DistScalarRmath::calPupper(double upper,
 				  vector<double const*> const &parameters) const
 {
+    //P(X <= upper)
     return p(upper, parameters, true, false);
 }
 
@@ -90,25 +92,40 @@ DistScalarRmath::scalarLogLikelihood(double x,
 
     if (lower || upper) {
 
-	double plower = 0, pupper = 1;
+	if (lower && x < *lower)
+	    return JAGS_NEGINF;
+	if (upper && x > *upper)
+	    return JAGS_NEGINF;
+	if (upper && lower && *upper < *lower)
+	    return JAGS_NEGINF;
 
+	//Make adjustment for discrete-valued distributions
+	double ll = 0;
 	if (lower) {
-
-	    if (x < *lower)
-		return JAGS_NEGINF;
-
-	    plower = calPlower(*lower, parameters);
+	    ll = isDiscreteValued() ? *lower - 1 : *lower;
 	}
 
-	if (upper) {
-	    
-	    if (x > *upper)
-		return JAGS_NEGINF;
+	bool have_lower = lower && p(ll, parameters, true, false) > 0;
+	bool have_upper = upper && p(*upper, parameters, false, false) > 0;
 
-	    pupper = calPupper(*upper, parameters);
+	if (have_lower && have_upper) {
+	    if (p(ll, parameters, false, false) < 0.5) {
+		//Use upper tail
+		loglik -= log(p(ll, parameters, false, false) -
+			      p(*upper, parameters, false, false));
+	    }
+	    else {
+		//Use lower tail
+		loglik -= log(p(*upper, parameters, true, false) - 
+			      p(ll, parameters, true, false));
+	    }
 	}
-
-	loglik -= log(pupper - plower);
+	else if (have_lower) {
+	    loglik -= p(ll, parameters, false, true);
+	}
+	else if (have_upper) {
+	    loglik -= p(*upper, parameters, true, true);
+	}
     }
 
     return loglik;
