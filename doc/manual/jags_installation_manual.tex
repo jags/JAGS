@@ -120,10 +120,6 @@ to point to this directory at configure time:
 \begin{verbatim}
 LDFLAGS="-L/path/to/my/libs" ./configure ...
 \end{verbatim}
-If your BLAS and LAPACK libraries depend on other libraries that are
-not on the linker path, you must supply these dependency libraries as
-additional arguments to \texttt{--with-blas} and
-\texttt{--with-lapack} 
 
 At runtime, if you have linked \JAGS\ against BLAS or LAPACK in
 a non-standard location, you must supply this location with the
@@ -137,6 +133,17 @@ but is typically achieved with
 \begin{verbatim}
 LDFLAGS="-L/path/to/my/libs -R/path/to/my/libs
 \end{verbatim}
+
+\subsubsection{Multithreaded BLAS and LAPACK}
+\label{section:blas:multithreaded}
+
+Some high-performance computing libraries offer multi-threaded
+versions of the BLAS and LAPACK libraries. Although instructions for
+linking against some of these libraries are given below, this should
+not be taken as encouragement to use multithreaded BLAS.  Testing
+shows that using multiple threads in BLAS can lead to significantly
+{\em worse} performance while using up substantially more computing
+resources.
 
 \subsection{GNU/Linux}
 \label{section:gnulinux}
@@ -207,38 +214,31 @@ environment variable \verb+LD_LIBRARY_PATH+ at run time.
 \label{section:acml:linux}
 
 The AMD Core Math Library (acml) provides optimized BLAS and LAPACK
-routines for AMD processors. To link \JAGS\ with \texttt{acml}, you
-must supply the \texttt{acml} library, {\em and its dependencies}, as
-arguments to \texttt{--with-blas}.  It is not necessary to set the
-\texttt{--with-lapack} argument as \texttt{acml} provides both sets of
-functions. See also section~\ref{section:blas:lapack} for run-time
-instructions.
+routines for AMD processors. To link \JAGS\ with \texttt{acml}, you must
+supply the \texttt{acml} library as the argument to \texttt{--with-blas}.
+It is not necessary to set the \texttt{--with-lapack} argument
+as \texttt{acml} provides both sets of functions. See also
+section~\ref{section:blas:lapack} for run-time instructions.
 
 For example, to link to the 64-bit acml using gcc 4.0+:
 \begin{verbatim}
 LDFLAGS="-L/opt/acml4.3.0/gfortran64/lib" \
-./configure --with-blas="-lacml -lacml_mv -lgfortran" 
+./configure --with-blas="-lacml -lacml_mv" 
 \end{verbatim}
 The library \verb+acmv_mv+ library is a vectorized math library that
 exists only for the 64-bit version and is omitted when linking against
 32-bit acml.
 
-On multi-core systems, you may wish to use the threaded acml library.
+On multi-core systems, you may wish to use the threaded acml library
+(See the warning in section \ref{section:blas:multithreaded} however).
 To do this, link to \verb+acml_mp+ and add the compiler flag
 \verb+-fopenmp+:
 \begin{verbatim}
 LDFLAGS="-L/opt/acml4.3.0/gfortran64_mp/lib" \
-CXXFLAGS="-O2 -g -fopenmp" ./configure --with-blas="-lacml_mp -lacml_mv -lgfortran" 
+CXXFLAGS="-O2 -g -fopenmp" ./configure --with-blas="-lacml_mp -lacml_mv" 
 \end{verbatim}
 The number of threads used by multi-threaded acml may be controlled
 with the environment variable \verb+OMP_NUM_THREADS+.
-
-For older Linux systems, the last version that supports gcc 3.4 is
-\texttt{acml} 3.6.0. When using gcc 3.4, link against \texttt{libg2c}.
-\begin{verbatim}
-LDFLAGS="-L/opt/acml3.6.0/gnu64/lib" \
-./configure --with-blas="-lacml -lacml_mv -lg2c"
-\end{verbatim}
 
 \subsubsection{Intel Math Kernel Library}
 
@@ -255,26 +255,23 @@ differently from the GNU Fortran compiler. You must therefore use the
 interface layer that matches your compiler (\verb+mkl_intel*+ or
 \verb+mkl_gf*+).
 
-I have not been able to link \JAGS\ with MKL using GNU compilers, except
-which building a static version. To build a static version of \JAGS,
-use the configure option \verb+--disable-shared+. The \JAGS\ library and
-modules will be linked into the main executable.
-
 JAGS can be linked to a sequential version of MKL by
 \begin{verbatim}
 MKL_HOME=/opt/intel/mkl/10.0.3.020/
 MKL_LIB_PATH=${MKL_HOME}/lib/em64t/
-./configure --disable-shared \
-            --with-blas="-L${MKL_LIB_PATH} -lmkl_gf_lp64 -lmkl_sequential -lmkl_core"
+./configure --with-blas="-L${MKL_LIB_PATH} \
+            -lmkl_gf_lp64 -lmkl_sequential -lmkl_core"
 \end{verbatim}
 
 Threaded MKL may be used with:
 \begin{verbatim}
-./configure --disable-shared\
-   --with-blas="-L${MKL_LIB_PATH} -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -liomp5 -lpthread"
+./configure --with-blas="-L${MKL_LIB_PATH} \
+            -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -liomp5 -lpthread"
 \end{verbatim}
 The default number of threads will be chosen by the OpenMP software,
-but can be controlled by setting \verb+OMP_NUM_THREADS+ or \verb+MKL_NUM_THREADS+.
+but can be controlled by setting \verb+OMP_NUM_THREADS+ or
+\verb+MKL_NUM_THREADS+. (See the warning in section
+\ref{section:blas:multithreaded} however).
 
 \subsubsection{Using Intel Compilers}
 
@@ -290,7 +287,7 @@ CC=icc CXX=icpc F77=ifort ./configure
 \subsection{OpenSolaris}
 
 \JAGS\ has been successfully built and tested on the Intel x86
-platform under OpenSolaris 2008.05 using the Sun Studio Express 5/08
+platform under Solaris 11 Express using the Sun Studio Express 6/10
 compilers.
 \begin{verbatim}
 ./configure CC=cc CXX=CC F77=f95 \
@@ -300,7 +297,7 @@ CXXFLAGS="-xO3 -xarch=sse2"
 \end{verbatim}
 The Sun Studio compiler is not optimized by default. Use the option
 \verb+-xO3+ for optimization (NB This is the letter ``O'' not the
-number ``0'') In order to use the optimization flag \verb+-xO3+ you
+number 0) In order to use the optimization flag \verb+-xO3+ you
 must specify the architecture with the \verb+-xarch+ flag. The options
 above are for an Intel processor with SSE2 instructions. This must be
 adapted to your own platform.
@@ -312,8 +309,7 @@ Solaris provides two versions of the C++ standard library:
 \texttt{libCstd}, which is the default, and \texttt{libstlport4},
 which conforms more closely to the C++ standard. \JAGS\ may be linked
 to the stlport4 library by adding the options
-\verb+-library=stlport4+ to \verb+CXXFLAGS+. For older versions of the
-Sun Studio compiler you may need to also add the option \verb+-lCrun+.
+\verb+-library=stlport4+ to \verb+CXXFLAGS+.
 
 The configure script automatically detects the Sun Performance library,
 which implements the BLAS/LAPACK functions.  Automatic detection may
@@ -323,25 +319,6 @@ configure option
 \begin{verbatim}
 --with-blas="-xlic_lib=sunperf -lsunmath"
 \end{verbatim}
-
-\subsubsection{Using acml}
-
-AMD provides a version of their Core Math Library (acml) for
-Solaris. To use this library instead of the Sun Performance library
-add the following configure options (changing paths as appropriate):
-\begin{verbatim}
---with-blas="-lacml -lacml_mv -lfsu" \
-LDFLAGS="-L/opt/acml4.1.0/sun64/lib \
--R/opt/acml4.1.0/sun64/lib:/opt/SunStudioExpress/lib"
-\end{verbatim}
-The acml library is only available in 64-bit mode, so the option
-\verb+-m64+ must also be added to all the compiler flags.
-
-As with using acml on Linux (section \ref{section:acml:linux}), the
-configure option \verb+--with-blas+ must include not only the acml
-library, but also its dependencies. The \verb+LDFLAGS+ option \verb+-R+
-hard-codes the paths to these libraries into the JAGS modules that
-require them.
 
 \subsection{IRIX}
 
