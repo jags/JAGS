@@ -254,24 +254,29 @@ layered model are given below. These examples are for GCC compilers on
 differently from the GNU Fortran compiler. You must therefore use the
 interface layer that matches your compiler (\verb+mkl_intel*+ or
 \verb+mkl_gf*+).
+For further guidance, consult the MKL Link Line advisor at
+\url{http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor}.
+
+I have not been able to link \JAGS\ with MKL using GNU compilers, except
+which building a static version. To build a static version of \JAGS,
+use the configure option \verb+--disable-shared+. The \JAGS\ library and
+modules will be linked into the main executable.
 
 JAGS can be linked to a sequential version of MKL by
 \begin{verbatim}
 MKL_HOME=/opt/intel/mkl/10.0.3.020/
 MKL_LIB_PATH=${MKL_HOME}/lib/em64t/
-./configure --with-blas="-L${MKL_LIB_PATH} \
-            -lmkl_gf_lp64 -lmkl_sequential -lmkl_core"
+./configure --disable-shared \
+            --with-blas="-L${MKL_LIB_PATH} -lmkl_gf_lp64 -lmkl_sequential -lmkl_core"
 \end{verbatim}
 
 Threaded MKL may be used with:
 \begin{verbatim}
-./configure --with-blas="-L${MKL_LIB_PATH} \
-            -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -liomp5 -lpthread"
+./configure --disable-shared\
+   --with-blas="-L${MKL_LIB_PATH} -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -liomp5 -lpthread"
 \end{verbatim}
 The default number of threads will be chosen by the OpenMP software,
-but can be controlled by setting \verb+OMP_NUM_THREADS+ or
-\verb+MKL_NUM_THREADS+. (See the warning in section
-\ref{section:blas:multithreaded} however).
+but can be controlled by setting \verb+OMP_NUM_THREADS+ or \verb+MKL_NUM_THREADS+.  (See the warning in section \ref{section:blas:multithreaded} however).
 
 \subsubsection{Using Intel Compilers}
 
