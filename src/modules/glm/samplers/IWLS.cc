@@ -43,6 +43,7 @@ static double logDet(cholmod_factor *F)
 }
 
 #define MAX_ITER 100
+#define ANNEALING_TEMPERATURE 20
 
 namespace glm {
 
@@ -168,7 +169,7 @@ namespace glm {
 	    _w = 0;
 	    for (unsigned int i = 0; i < MAX_ITER; ++i) {
 		_w += 1.0/MAX_ITER;
-		updateLM(rng, false);
+		updateLM(rng, ANNEALING_TEMPERATURE);
             }
 	    _init = false;
 	}

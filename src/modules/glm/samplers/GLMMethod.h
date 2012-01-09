@@ -55,13 +55,13 @@ namespace glm {
 	std::vector<GraphView const *> _sub_views;
 	cholmod_sparse *_x;
 	cholmod_factor *_factor;
+	void symbolic();
+	void calDesign() const;
     private:
 	std::vector<bool> _fixed;
 	unsigned int _length_max;
 	unsigned _nz_prior;
 	bool _init;
-	void symbolic();
-	void calDesign() const;
     public:
 	/**
 	 * Constructor.
@@ -103,12 +103,10 @@ namespace glm {
 	 *
 	 * @param rng Random number generator used for sampling
 	 *
-	 * @param stochastic Logical flag. If true then updateLM draws
-	 * a sample from the posterior distribution of the regression
-	 * parameters. If false then it sets the regression parameters
-	 * to their posterior mean.
+	 * @param T Temperature parameter that allows a tempered (T < 1)
+	 * or annealed (T > 1) update. See calCoef.
 	 */
-	void updateLM(RNG *rng, bool stochastic = true);
+	void updateLM(RNG *rng, double T = 1);
 	/**
 	 * Updates the regression parameters element-wise (i.e. with
 	 * Gibbs sampling).  Although Gibbs sampling less efficient
@@ -123,14 +121,20 @@ namespace glm {
 	 * of the regression parameters. GLMMethod uses a canonical
 	 * parametrization (b, A) such that "A" is the posterior
 	 * precision of the parameters and the posterior mean "mu"
-	 * solves (A %*% mu = b).
+	 * solves (A %*% mu = b). Both b and A are derived from the
+	 * sum of prior and likelihood contributions. The calCoef
+	 * function optionally allows these contributions to be
+	 * weighted.
 	 *
 	 * @param b Dense vector such that (b = A %*% mu), where "mu"
 	 * is the posterior mean and "A" is the posterior precision.
 	 *
 	 * @param A Posterior precision represented as a sparse matrix.
+	 *
+	 * @param Temp Temperature parameter that is used to weight
+	 * the contribution from the likelihood.
 	 */
-	void calCoef(double *&b, cholmod_sparse *&A);
+	void calCoef(double *&b, cholmod_sparse *&A, double Temp=1.0);
 	/**
 	 * Returns the linear predictor for the outcome variable with index i.
 	 */

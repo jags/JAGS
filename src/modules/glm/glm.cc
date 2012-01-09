@@ -4,6 +4,7 @@
 #include "samplers/LinearGibbsFactory.h"
 #include "samplers/IWLSFactory.h"
 #include "samplers/HolmesHeldFactory.h"
+#include "samplers/HolmesHeldBlockFactory.h"
 #include "samplers/AlbertChibFactory.h"
 #include "samplers/AlbertChibGibbsFactory.h"
 #include "samplers/AMFactory.h"
@@ -28,9 +29,9 @@ namespace glm {
     {
 	glm_wk = new cholmod_common;
 	cholmod_start(glm_wk);
-
-	//glm_wk->final_ll = true; //Use LL' factorisation instead of LDL
 /*
+	glm_wk->final_ll = true; //Use LL' factorisation instead of LDL
+
 	//For debuggin purposes we may choose not to reorder matrices
 	//Use only on small problems
 
@@ -46,6 +47,7 @@ namespace glm {
 	insert(new AlbertChibGibbsFactory);
 	insert(new AlbertChibFactory);
 	insert(new HolmesHeldFactory);
+	insert(new HolmesHeldBlockFactory);
 	insert(new ConjugateFFactory);
     }
     

@@ -243,7 +243,7 @@ namespace glm {
 	cholmod_free_sparse(&A, glm_wk);
     }
 
-    void GLMMethod::calCoef(double *&b, cholmod_sparse *&A) 
+    void GLMMethod::calCoef(double *&b, cholmod_sparse *&A, double Temp)
     {
 	//   The log of the full conditional density takes the form
 	//   -(t(x) %*% A %*% x - 2 * b %*% x)/2
@@ -311,7 +311,7 @@ namespace glm {
 	double *Tx = static_cast<double*>(t_x->x);
 
 	for (unsigned int c = 0; c < t_x->ncol; ++c) {
-	    double tau = getPrecision(c);
+	    double tau = Temp * getPrecision(c);
 	    double delta = tau * (getValue(c) - getMean(c));
 	    double sigma = sqrt(tau);
 	    for (int r = Tp[c]; r < Tp[c+1]; ++r) {
@@ -322,13 +322,15 @@ namespace glm {
 
 	cholmod_sparse *Alik = cholmod_aat(t_x, 0, 0, 1, glm_wk);
 	cholmod_free_sparse(&t_x, glm_wk);
-	double one[2] = {1, 0};
+	double alpha[2] = {1, 0};
+	double beta[2] = {1, 0};
+	
 	A = cholmod_add(Aprior, Alik, one, one, 1, 0, glm_wk);
 	cholmod_free_sparse(&Aprior, glm_wk);
 	cholmod_free_sparse(&Alik, glm_wk);
     }
 
-    void GLMMethod::updateLM(RNG *rng, bool stochastic) 
+    void GLMMethod::updateLM(RNG *rng, double Temp) 
     {
 	//   The log of the full conditional density takes the form
 	//   -(t(x) %*% A %*% x - 2 * b %*% x)/2
@@ -346,7 +348,7 @@ namespace glm {
 
 	double *b = 0;
 	cholmod_sparse *A = 0;
-	calCoef(b, A);
+	calCoef(b, A, Temp);
 	
 	// Get LDL' decomposition of posterior precision
 	A->stype = -1;
@@ -373,22 +375,20 @@ namespace glm {
 	cholmod_dense *u1 = cholmod_solve(CHOLMOD_L, _factor, w, glm_wk);
 	updateAuxiliary(u1, _factor, rng);
 
-	if (stochastic) {
-	    double *u1x = static_cast<double*>(u1->x);
-	    if (_factor->is_ll) {
-		// LL' decomposition
-		for (unsigned int r = 0; r < nrow; ++r) {
-		    u1x[r] += rng->normal();
-		}
+	double *u1x = static_cast<double*>(u1->x);
+	if (_factor->is_ll) {
+	    // LL' decomposition
+	    for (unsigned int r = 0; r < nrow; ++r) {
+		u1x[r] += rng->normal();
 	    }
-	    else {
-		// LDL' decomposition. The diagonal D matrix is stored
-		// as the diagonal of _factor
-		int *fp = static_cast<int*>(_factor->p);
-		double *fx = static_cast<double*>(_factor->x);
-		for (unsigned int r = 0; r < nrow; ++r) {
-		    u1x[r] += rng->normal() * sqrt(fx[fp[r]]);
-		}
+	}
+	else {
+	    // LDL' decomposition. The diagonal D matrix is stored
+	    // as the diagonal of _factor
+	    int *fp = static_cast<int*>(_factor->p);
+	    double *fx = static_cast<double*>(_factor->x);
+	    for (unsigned int r = 0; r < nrow; ++r) {
+		u1x[r] += rng->normal() * sqrt(fx[fp[r]]);
 	    }
 	}
 
