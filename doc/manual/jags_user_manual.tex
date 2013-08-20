@@ -1389,11 +1389,13 @@ Function & Description & Restrictions \\
 Table \ref{table:bugs:vector} lists vector- or matrix-valued functions
 in the \texttt{bugs} module.
 
-The \texttt{sort} and \texttt{rank} functions behaves like their R
-namesakes: \texttt{sort} accepts a vector and returns the same values
-sorted in ascending order; \texttt{rank} returns a vector of ranks.
-This is distinct from \OpenBUGS, which has two scalar-valued functions
-\verb+rank+ and \verb+ranked+.
+The functions \texttt{sort}, \texttt{rank}, and \texttt{order} behave
+like their R namesakes: \texttt{sort} accepts a vector and returns the
+same values sorted in ascending order; \texttt{rank} returns a vector
+of ranks of the elements; \texttt{order} returns a permutation that
+sorts the elements of the vector in ascending order. The \texttt{rank}
+function is distinct from \OpenBUGS, which has two scalar-valued
+functions \verb+rank+ and \verb+ranked+.
 
 \begin{table}
 \begin{center}
@@ -1404,6 +1406,7 @@ Usage & Description & Restrictions \\
 \verb+inverse(a)+ & Matrix inverse & $a$ is a symmetric positive definite matrix  \\
 %\verb+mexp(a)+ & Matrix exponential & $a$ is a square matrix \\
 \verb+rank(v)+ & Ranks of elements of $v$ & $v$ is a vector   \\
+\verb+order(v)+ & Ordering permutation of $v$ & $v$ is a vector \\
 \verb+sort(v)+ & Elements of $v$ in order & $v$ is a vector  \\
 \verb+t(a)+    & Transpose                & $a$ is a matrix \\
 \verb+a %*% b+  & Matrix multiplication & $a,b$ conforming vector or matrices\\
@@ -1580,7 +1583,7 @@ their distribution.
       hypergeometric & $0 \leq n_i$, $0 < m_1 \leq n_+$  \\
       Negative & \verb+dnegbin(p, r)+ &
       \multirow{2}{*}{${x + r -1 \choose x} p^r (1-p)^x$} & 0 & \\
-      binomial & $0 < p < 1$, $r > 0$ \\
+      binomial & $0 < p \leq 1$, $r \geq 0$ \\
       Poisson & \verb+dpois(lambda)+ & 
       \multirow{2}{*}{$\frac{\textstyle \exp(-\lambda) \lambda^x}{\textstyle x!}$} & 0 & \\
       ~ & $\lambda > 0$ \\
