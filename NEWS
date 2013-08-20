@@ -7,6 +7,10 @@ New features
 * The order function in the bugs module returns a permutation that sorts
   its argument in ascending order (the inverse of the permutation 
   provided by the rank function).
+* The Windows installer now offers a choice of personal or global
+  installation for users with Admin access.
+* The negative binomial distribution is extended to allow parameters
+  size=0 and probability=1.
 
 Bug fixes
 =========
@@ -22,16 +26,21 @@ Bug fixes
   (round to n significant figures) when it should have been calling
   fround (round to n decimal places).
 * The sd() function divided by n (sample size) instead of (n-1).
+* The Windows uninstaller did not correctly uninstall personal
+  installations for users with administrative access.
 
 Internal changes in modules
 ===========================
 
 * base module
-  The Pow function has alias "pow" so it can be invoked either as "a^b"
+  - The Pow function has alias "pow" so it can be invoked either as "a^b"
   or as "pow(a,b)"
 
-  bugs module
-* The Pow function has been removed: it was a duplicate of base::pow
+* bugs module
+  - The Pow function has been removed: it was a duplicate of base::pow
+  - The DSum distribution no longer throws an exception if the parameters
+  are inconsistent with the value. This gives a more informative error
+  message.
 
 
 Changes in JAGS 3.3.0
