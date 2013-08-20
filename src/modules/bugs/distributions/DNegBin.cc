@@ -29,7 +29,7 @@ bool
 DNegBin::checkParameterValue (vector<double const *> const &par) const
 {
     double p = PROB(par);
-    return (SIZE(par) > 0 && p > 0 && p < 1);
+    return (SIZE(par) >= 0 && p > 0 && p <= 1);
 }
 
 double
@@ -37,26 +37,51 @@ DNegBin::d(double x, PDFType type,
 	   vector<double const *> const &par, bool give_log) 
     const
 {
-    return dnbinom(x, SIZE(par), PROB(par), give_log);
+    if (SIZE(par) == 0) {
+	if (give_log) {
+	    return (x == 0) ? 0 : JAGS_NEGINF;
+	}
+	else {
+	    return (x == 0) ? 1 : 0;
+	}
+    }
+    else {
+	return dnbinom(x, SIZE(par), PROB(par), give_log);
+    }
 }
 
 double
 DNegBin::p(double q, vector<double const *> const &par, bool lower, 
 	   bool give_log) const
 {
-    return pnbinom(q, SIZE(par), PROB(par), lower, give_log);
+    if (SIZE(par) == 0) {
+	return give_log ? 0 : 1;
+    }
+    else {
+	return pnbinom(q, SIZE(par), PROB(par), lower, give_log);
+    }
 }
 
 double 
 DNegBin::q(double p, vector<double const *> const &par, bool lower, 
 	   bool log_p) const
 {
-    return qnbinom(p, SIZE(par), PROB(par), lower, log_p);
+    if (SIZE(par) == 0) {
+	return 0;
+    }
+    else {
+	return qnbinom(p, SIZE(par), PROB(par), lower, log_p);
+    }
 }
 
 double DNegBin::r(vector<double const *> const &par, RNG *rng) const
 {
-    return rnbinom(SIZE(par), PROB(par), rng);
+    if (SIZE(par) == 0) {
+	return 0;
+    }
+    else {
+	return rnbinom(SIZE(par), PROB(par), rng);
+    }
 }
 
 double DNegBin::KL(vector<double const *> const &par1,
