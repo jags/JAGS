@@ -173,7 +173,8 @@ void Model::initialize(bool datagen)
 		    else {
 			msg.append("unobserved parents");
 		    }
-		    msg.append(" at initialization");
+		    msg.append(" at initialization.\n");
+		    msg.append("Try setting appropriate initial values.");
 		    throw NodeError(snode, msg);
 		}
 	    }
