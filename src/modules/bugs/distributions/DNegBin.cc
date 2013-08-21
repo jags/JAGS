@@ -1,5 +1,6 @@
 #include <config.h>
 #include "DNegBin.h"
+#include <util/nainf.h>
 
 #include <cmath>
 #include <vector>
