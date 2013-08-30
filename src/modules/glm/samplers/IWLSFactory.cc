@@ -36,6 +36,7 @@ namespace glm {
 		return false;
 	    }
 	}
+	return false; //icpc -Wall
     }
     
     GLMMethod *
