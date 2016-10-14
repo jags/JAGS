@@ -26,7 +26,7 @@ namespace jags {
 
 bool lt(LogicalPair const &arg1, LogicalPair const &arg2)
 {
-    if (arg1.first == arg2.first) {
+    if (FUNC(arg1.first) == FUNC(arg2.first)) {
 	//Same function: check parameters
 	return lt(arg1.second, arg2.second);
     }
