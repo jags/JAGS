@@ -47,6 +47,11 @@ namespace bugs {
     
     bool Sum::isScale(vector<bool> const &mask, vector<bool> const &fix) const
     {
+	return allTrue(mask);
+    }
+
+    bool Sum::isLinear(vector<bool> const &mask, vector<bool> const &fix) const
+    {
 	return true;
     }
 

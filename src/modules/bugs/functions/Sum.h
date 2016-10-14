@@ -25,6 +25,8 @@ namespace bugs {
 			std::vector<bool> const &isfixed) const;
 	bool isScale(std::vector<bool> const &mask,
 		     std::vector<bool> const &isfixed) const;
+	bool isLinear(std::vector<bool> const &mask,
+		      std::vector<bool> const &isfixed) const;
     };
     
 }}

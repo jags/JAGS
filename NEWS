@@ -14,6 +14,8 @@ Bug fixes
   dependent on the order in which the nodes are defined.
 * Parameter consistency checks are improved for bounded scalar stochastic
   nodes.
+* The sum function was incorrectly reporting itself as a scale-preserving
+  function when used with multiple arguments.
   
 Changes in JAGS 4.2.0
 
