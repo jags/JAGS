@@ -140,6 +140,7 @@ AC_CONFIG_FILES([
   src/modules/glm/SSparse/CHOLMOD/Modify/Makefile
   src/modules/glm/SSparse/CHOLMOD/Supernodal/Makefile
   src/modules/glm/samplers/Makefile
+  src/modules/glm/distributions/Makefile
   src/terminal/Makefile
   win/Makefile
   win/runtime32/Makefile

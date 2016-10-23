@@ -5,6 +5,9 @@
 //#include "samplers/ConjugateFFactory.h"
 #include "samplers/GLMGenericFactory.h"
 
+#include "distributions/DScaledGamma.h"
+#include "distributions/DScaledWishart.h"
+
 #include <cholmod.h>
 
 using std::vector;
@@ -47,6 +50,9 @@ namespace glm {
 	insert(new GLMGenericFactory);
 	insert(new HolmesHeldFactory);
 	//insert(new ConjugateFFactory);
+
+	insert(new DScaledGamma);
+	insert(new DScaledWishart);
     }
     
     GLMModule::~GLMModule() {
