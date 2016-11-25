@@ -16,6 +16,11 @@ Bug fixes
   nodes.
 * The sum function was incorrectly reporting itself as a scale-preserving
   function when used with multiple arguments.
+
+New features
+============
+* New distribution dmnorm.vcov for the multivariate normal distribution
+  parameterized by the mean and the variance-covariance matrix.
   
 Changes in JAGS 4.2.0
 

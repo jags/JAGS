@@ -16,6 +16,7 @@
 #include <distributions/DLnorm.h>
 #include <distributions/DLogis.h>
 #include <distributions/DMNorm.h>
+#include <distributions/DMNormVC.h>
 #include <distributions/DMT.h>
 #include <distributions/DMulti.h>
 #include <distributions/DNegBin.h>
@@ -127,6 +128,7 @@ namespace bugs {
 	insert(new DLnorm);
 	insert(new DLogis);
 	insert(new DMNorm);
+	insert(new DMNormVC);
 	insert(new DMT);
 	insert(new DMulti);
 	insert(new DNChisqr);

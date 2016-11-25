@@ -16,6 +16,7 @@
 #include "DLnorm.h"
 #include "DLogis.h"
 #include "DMNorm.h"
+#include "DMNormVC.h"
 #include "DMT.h"
 #include "DMulti.h"
 #include "DNChisqr.h"
@@ -75,6 +76,7 @@ void BugsDistTest::setUp() {
     _dlnorm = new jags::bugs::DLnorm();
     _dlogis = new jags::bugs::DLogis();
     _dmnorm = new jags::bugs::DMNorm();
+    _dmnormvc = new jags::bugs::DMNormVC();
     _dmt = new jags::bugs::DMT();
     _dmulti = new jags::bugs::DMulti();
     _dnchisqr = new jags::bugs::DNChisqr();
@@ -113,6 +115,7 @@ void BugsDistTest::tearDown() {
     delete _dlnorm;
     delete _dlogis;
     delete _dmnorm;
+    delete _dmnormvc;
     delete _dmt;
     delete _dmulti;
     delete _dnchisqr;
@@ -150,6 +153,7 @@ void BugsDistTest::npar()
     CPPUNIT_ASSERT_EQUAL(_dlnorm->npar(), 2U);
     CPPUNIT_ASSERT_EQUAL(_dlogis->npar(), 2U);
     CPPUNIT_ASSERT_EQUAL(_dmnorm->npar(), 2U);
+    CPPUNIT_ASSERT_EQUAL(_dmnormvc->npar(), 2U);
     CPPUNIT_ASSERT_EQUAL(_dmt->npar(), 3U);
     CPPUNIT_ASSERT_EQUAL(_dmulti->npar(), 2U);
     CPPUNIT_ASSERT_EQUAL(_dchisqr->npar(), 1U);
@@ -186,6 +190,7 @@ void BugsDistTest::name()
     CPPUNIT_ASSERT_EQUAL(string("dlnorm"), _dlnorm->name());
     CPPUNIT_ASSERT_EQUAL(string("dlogis"), _dlogis->name());
     CPPUNIT_ASSERT_EQUAL(string("dmnorm"), _dmnorm->name());
+    CPPUNIT_ASSERT_EQUAL(string("dmnorm.vcov"), _dmnormvc->name());
     CPPUNIT_ASSERT_EQUAL(string("dmt"), _dmt->name());
     CPPUNIT_ASSERT_EQUAL(string("dmulti"), _dmulti->name());
     CPPUNIT_ASSERT_EQUAL(string("dnchisqr"), _dnchisqr->name());
@@ -222,6 +227,7 @@ void BugsDistTest::alias()
     CPPUNIT_ASSERT_EQUAL(string(""), _dlnorm->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _dlogis->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _dmnorm->alias());
+    CPPUNIT_ASSERT_EQUAL(string(""), _dmnormvc->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _dmt->alias());
     CPPUNIT_ASSERT_EQUAL(string("dmultinom"), _dmulti->alias());
     CPPUNIT_ASSERT_EQUAL(string("dnchisq"), _dnchisqr->alias());
