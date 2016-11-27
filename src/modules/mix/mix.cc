@@ -2,6 +2,7 @@
 
 #include <distributions/DNormMix.h>
 #include <distributions/DBetaBin.h>
+#include <distributions/DPick.h>
 #include <samplers/MixSamplerFactory.h>
 #include <samplers/DirichletCatFactory.h>
 #include <samplers/LDAFactory.h>
@@ -22,6 +23,8 @@ namespace mix {
 
 	insert(new DBetaBin);
 	insert(new DNormMix);
+        insert(new DPick);
+	
 	insert(new MixSamplerFactory);
 	insert(new DirichletCatFactory);
 	insert(new LDAFactory);
