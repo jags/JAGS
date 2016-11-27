@@ -185,13 +185,18 @@ bool
 DScaledWishart::checkParameterDim (vector<vector<unsigned int> > const &dims)
     const
 {
-  return isVector(dims[0]) && isScalar(dims[1]);
+    return (isVector(dims[0]) || isScalar(dims[0])) && isScalar(dims[1]);
 }
 
 vector<unsigned int> 
 DScaledWishart::dim(vector<vector<unsigned int> > const &dims) const
 {
-    return vector<unsigned int> (2, dims[0][0]);
+    if (isScalar(dims[0])) {
+	return vector<unsigned int>(1,1);
+    }
+    else {
+	return vector<unsigned int> (2, dims[0][0]);
+    }
 }
 
 bool 
