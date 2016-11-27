@@ -4,9 +4,12 @@
 #include "samplers/HolmesHeldFactory.h"
 //#include "samplers/ConjugateFFactory.h"
 #include "samplers/GLMGenericFactory.h"
+#include "samplers/ScaledGammaFactory.h"
+#include "samplers/ScaledWishartFactory.h"
 
 #include "distributions/DScaledGamma.h"
 #include "distributions/DScaledWishart.h"
+
 
 #include <cholmod.h>
 
@@ -50,7 +53,9 @@ namespace glm {
 	insert(new GLMGenericFactory);
 	insert(new HolmesHeldFactory);
 	//insert(new ConjugateFFactory);
-
+	insert(new ScaledGammaFactory);
+	insert(new ScaledWishartFactory);
+	
 	insert(new DScaledGamma);
 	insert(new DScaledWishart);
     }
