@@ -7,6 +7,7 @@
 #include "AuxMixPoisson.h"
 #include "AuxMixBinomial.h"
 #include "NormalLinear.h"
+#include "LogisticLinear.h"
 //#include "BinaryLogit.h"
 #include "BinaryProbit.h"
 #include "PolyaGamma.h"
@@ -32,6 +33,7 @@ namespace glm {
     bool GLMGenericFactory::checkOutcome(StochasticNode const *snode) const
     {
 	return NormalLinear::canRepresent(snode) ||
+	    LogisticLinear::canRepresent(snode) || 
 	    //BinaryLogit::canRepresent(snode) ||
 	    PolyaGamma::canRepresent(snode) ||
 	    BinaryProbit::canRepresent(snode) ||
@@ -53,6 +55,9 @@ namespace glm {
 	    Outcome *outcome = 0;
 	    if (NormalLinear::canRepresent(*p)) {
 		outcome = new NormalLinear(*p, chain);
+	    }
+	    else if (LogisticLinear::canRepresent(*p)) {
+		outcome = new LogisticLinear(*p, chain);
 	    }
 	    else if (PolyaGamma::canRepresent(*p)) {
 		outcome = new PolyaGamma(*p, chain);

@@ -13,7 +13,8 @@ libglmsampler_la_SOURCES = GLMFactory.cc GLMSampler.cc GLMMethod.cc	\
  IWLSOutcome.cc HolmesHeld.cc HolmesHeldFactory.cc GLMBlock.cc		\
  GLMGibbs.cc GLMGenericFactory.cc HolmesHeldGibbs.cc PolyaGamma.cc PGcommon.cc \
  ScaledWishart.cc ScaledWishartFactory.cc \
- ScaledGamma.cc ScaledGammaFactory.cc
+ ScaledGamma.cc ScaledGammaFactory.cc \
+ LogisticLinear.cc
 
 noinst_HEADERS = GLMFactory.h GLMSampler.h GLMMethod.h			\
   KS.h 	\
@@ -23,7 +24,8 @@ noinst_HEADERS = GLMFactory.h GLMSampler.h GLMMethod.h			\
   IWLSOutcome.h HolmesHeld.h HolmesHeldFactory.h GLMBlock.h		\
   GLMGibbs.h GLMGenericFactory.h HolmesHeldGibbs.h PolyaGamma.h PG.h    \
   ScaledWishart.h ScaledWishartFactory.h \
-  ScaledGamma.cc ScaledGammaFactory.cc
+  ScaledGamma.h ScaledGammaFactory.h \
+  LogisticLinear.h
 
 check_LTLIBRARIES = libglmsamptest.la
 libglmsamptest_la_SOURCES = testglmsamp.cc testglmsamp.h
