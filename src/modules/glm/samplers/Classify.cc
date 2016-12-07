@@ -26,6 +26,12 @@ namespace glm {
 	else if (name == "dnorm") {
 	    return GLM_NORMAL;
 	}
+	else if (name == "dlogis") {
+	    return GLM_LOGISTIC;
+	}
+	else if (name == "dt") {
+	    return GLM_T;
+	}
 	else {
 	    return GLM_UNKNOWN;
 	}

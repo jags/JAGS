@@ -21,7 +21,7 @@ namespace jags {
 				       unsigned int chain)
 	    : Outcome(snode, chain),
 	      _value(snode->value(chain)[0]),
-	      _mean(snode->parents()[1]->value(chain)[0]),
+	      _mean(snode->parents()[0]->value(chain)[0]),
 	      _precision(snode->parents()[1]->value(chain)[0]),
 	      _lambda(1)
 	{
