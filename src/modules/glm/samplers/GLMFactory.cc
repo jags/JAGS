@@ -386,8 +386,19 @@ namespace glm {
 	    }
 	    view = new GraphView(sample_nodes, graph);
 	}
-
-	if (sub_views.size() == 1 && view->length() == 1 && !gibbs) {
+	
+	/* FIXME
+	 * 
+	 * The overhead of a GLM sampling method for a univariate
+	 * sampler is too large So we skip univariate nodes. However,
+	 * by returning a null pointer at this point we terminate the
+	 * factory and so will miss a block of nodes that could be
+	 * sampled together later.
+	 *
+	 * What we need to do here is to mark this node to be skipped in any
+	 * later call.
+	 */
+	if (sub_views.size() == 1 && view->length() == 1) {
 	    delete view;
 	    delete sub_views.back();
 	    return 0;
@@ -402,7 +413,6 @@ namespace glm {
 	    methods[ch] = newMethod(view, const_sub_views, ch, gibbs);
 	}
 
-	//FIXME: Append "gibbs" to name if true
 	string nm = _name;
 	if (gibbs) nm.append("-Gibbs");
 	return new GLMSampler(view, sub_views, methods, nm);
