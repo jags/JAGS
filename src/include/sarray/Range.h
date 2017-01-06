@@ -30,7 +30,7 @@ class Range {
     std::vector<std::vector<int> > _scope;
   protected:
     std::vector<unsigned int> _dim, _dim_dropped;
-    std::vector<int>_first, _last;
+    std::vector<int> _first, _last;
     unsigned int _length;
   public:
     /**

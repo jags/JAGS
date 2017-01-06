@@ -129,7 +129,7 @@ Subsets of node arrays may be obtained with expressions of the form
 integer vector. Typically expressions of the form \verb+L:U+ are used,
 where $L$ and $U$ are integer arguments to the operator $:$. This
 creates an integer vector of length $U - L + 1$ with elements $L, L+1,
-\ldots R-1, R$.\footnote{If $L > U$ then the operator $:$ returns a
+\ldots U-1, U$.\footnote{If $L > U$ then the operator $:$ returns a
 vector of length zero, which may not be used to take array subsets}
 
 Multi-dimensional node arrays are also possible. For a two-dimensional
@@ -182,7 +182,8 @@ A general expression for a for loop takes the form
 for (ind in exp) {
 }
 \end{verbatim}
-where 
+where \verb+exp+ is any expression that evaluates to an integer
+vector.
 
 \subsection{Data}
 \label{section:data}
@@ -346,7 +347,7 @@ The user may supply initial value files -- one for each chain --
 containing initial values for the model parameters. The files may not
 contain values for logical or constant nodes. The format is the same
 as the data file (see (See appendix \cite{appendix:data}).
-Section \label{parameters:in} describes how to read the initial value
+Section \cite{parameters:in} describes how to read the initial value
 files into the model.
 
 As with the data file, you may supply missing values in the initial
