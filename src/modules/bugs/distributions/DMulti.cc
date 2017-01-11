@@ -225,11 +225,13 @@ double DMulti::KL(vector<double const *> const &par1,
 	    S1 += p1;
 	    S2 += p2;
 	}
-	y /= S1;
-	y += log(S2) - log(S1);
-	y *= SIZE(par1);
     }
+    y /= S1;
+    y += log(S2) - log(S1);
+    y *= SIZE(par1);
+
     return y;
 }
+
 
 }}

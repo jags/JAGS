@@ -16,6 +16,8 @@ Bug fixes
   nodes.
 * The sum function was incorrectly reporting itself as a scale-preserving
   function when used with multiple arguments.
+* Estimation of the deviance optimism pD was incorrect for the multinomail
+  distribution.
 
 New features
 ============
