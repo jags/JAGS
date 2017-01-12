@@ -31,7 +31,14 @@ AC_CONFIG_SRCDIR([src/lib/Console.cc])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])
-PKG_CHECK_MODULES([CPPUNIT], [cppunit >= 1.12.1])
+
+dnl pkg-config and cppunit are required only for checks, so make them optional
+PKG_PROG_PKG_CONFIG()
+AS_IF([test -n "$PKG_CONFIG"],[
+   PKG_CHECK_MODULES([CPPUNIT], [cppunit >= 10.12.1],
+   [cancheck=yes], [cancheck=no])
+])   
+AM_CONDITIONAL([CANCHECK], [test x$cancheck = xyes])
 
 dnl libtool and ltdl configuration
 LT_PREREQ(2.2.6)

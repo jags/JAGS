@@ -18,8 +18,10 @@ DNT.h SumDist.h DSample.h DRW1.h DMNormVC.h
 
 ### Test library 
 
+if CANCHECK
 check_LTLIBRARIES = libbugsdisttest.la
 libbugsdisttest_la_SOURCES = testbugsdist.cc testbugsdist.h
 libbugsdisttest_la_CPPFLAGS = -I$(top_srcdir)/src/include \
 	-I$(top_srcdir)/src/modules/base/rngs
 libbugsdisttest_la_CXXFLAGS = $(CPPUNIT_CFLAGS)
+endif

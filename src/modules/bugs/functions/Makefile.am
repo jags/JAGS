@@ -25,7 +25,9 @@ IfElse.h Order.h Combine.h Rep.h
 
 ### Test library 
 
+if CANCHECK
 check_LTLIBRARIES = libbugsfuntest.la
 libbugsfuntest_la_SOURCES = testbugsfun.cc testbugsfun.h
 libbugsfuntest_la_CPPFLAGS = -I$(top_srcdir)/src/include
 libbugsfuntest_la_CXXFLAGS = $(CPPUNIT_CFLAGS)
+endif

@@ -8,8 +8,10 @@ DPQFunction.cc DFunction.cc PFunction.cc QFunction.cc \
 ScalarLogDensity.cc VectorLogDensity.cc ArrayLogDensity.cc \
 ScalarVectorFunction.cc
 
+if CANCHECK
 check_LTLIBRARIES = libfuntest.la
 libfuntest_la_SOURCES = testfun.cc
 libfuntest_la_CPPFLAGS = -I$(top_srcdir)/src/include
 libfuntest_la_CXXFLAGS = $(CPPUNIT_CFLAGS)
 libfuntest_la_LDFLAGS = $(CPPUNIT_LIBS) 
+endif

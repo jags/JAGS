@@ -1,6 +1,9 @@
+if CANCHECK
+
 # Rules for the test code (use `make check` to execute)
 TESTS = base bugs glm
 check_PROGRAMS = $(TESTS)
+
 
 ## Base module
 
@@ -35,3 +38,4 @@ glm_LDADD = $(top_builddir)/src/modules/glm/libglmtest.la
 glm_CPPFLAGS = -I$(top_srcdir)/src/include	\
 	-I$(top_srcdir)/src/modules
 
+endif

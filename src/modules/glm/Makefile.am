@@ -21,6 +21,7 @@ endif
 
 ### Test library 
 
+if CANCHECK
 check_LTLIBRARIES = libglmtest.la
 libglmtest_la_SOURCES = testglm.cc testglm.h
 libglmtest_la_CPPFLAGS = -I$(top_srcdir)/src/include
@@ -40,3 +41,4 @@ if WINDOWS
 libglmtest_la_LDFLAGS += -no-undefined
 endif
 
+endif

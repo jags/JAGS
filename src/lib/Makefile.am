@@ -28,6 +28,7 @@ endif
 
 ### Test library 
 
+if CANCHECK
 check_LTLIBRARIES = libtest.la
 libtest_la_SOURCES = testlib.cc
 libtest_la_CPPFLAGS = -I$(top_srcdir)/src/include
@@ -37,3 +38,4 @@ if WINDOWS
 libtest_la_LDFLAGS = -no-undefined
 endif
 
+endif
