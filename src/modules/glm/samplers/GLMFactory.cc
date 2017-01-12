@@ -213,7 +213,7 @@ namespace glm {
 	: _name(name)
     {}
 
-    bool GLMFactory::checkDescendants(SingletonGraphView const *view) const
+    bool GLMFactory::checkDescendants(GraphView const *view) const
     {
 	// Check stochastic children
 	vector<StochasticNode *> const &stoch_nodes = 

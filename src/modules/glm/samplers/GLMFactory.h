@@ -25,7 +25,7 @@ namespace glm {
 	std::string _name;
 	SingletonGraphView * makeView(StochasticNode *snode, 
 				      Graph const &graph, bool gibbs) const;
-	bool checkDescendants(SingletonGraphView const *view) const;
+	bool checkDescendants(GraphView const *view) const;
     public:
 	GLMFactory(std::string const &name);
 	virtual ~GLMFactory();
@@ -105,6 +105,9 @@ namespace glm {
 	 * function apply for auxiliary variables.
 	 */
 	virtual bool fixedDesign() const;
+
+
+	
     };
 
 }}
