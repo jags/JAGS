@@ -141,7 +141,7 @@ static bool hasDescendant(DeterministicNode *node,
 //  Find stochastic parents of given set of nodes within the model,
 //  and their intermediate deterministic nodes in forward-sampling order
 //  We are looking for discrete, univariate parents.
-static bool findStochasticIndices(vector<Node const *> const &tgt_nodes, 
+static void findStochasticParents(vector<Node const *> const &tgt_nodes, 
 				  Model const &model,
 				  vector<StochasticNode *> &stoch_parents,
 				  vector<DeterministicNode *> &dtrm_parents)
@@ -159,16 +159,8 @@ static bool findStochasticIndices(vector<Node const *> const &tgt_nodes,
 	    stoch_parents.push_back(snodes[i]);
 	}
 	else {
-	    if (snodes[i]->length() != 1 || !snodes[i]->isDiscreteValued() ||
-		!isSupportFixed(snodes[i]))
-	    {
-		//We are only interested if all the stochastic parents
-		//are discrete, univariate, unbounded.
-		return false;
-	    }
-
 	    bool ans = false;
-	    list<DeterministicNode*> const *dc = 
+	    list<DeterministicNode*> const *dc =
 		snodes[i]->deterministicChildren();
 	    for(list<DeterministicNode*>::const_iterator p = dc->begin();
 		p != dc->end(); ++p)
@@ -179,11 +171,6 @@ static bool findStochasticIndices(vector<Node const *> const &tgt_nodes,
 	    }
 	    if (ans) {
 		stoch_parents.push_back(snodes[i]);
-		if (stoch_parents.size() > 10) {
-		    //This algorithm grinds to a halt with too many
-		    //stochastic parents. So bail out after 10
-		    return 0;
-		}
 	    }
 	}
     }
@@ -193,7 +180,6 @@ static bool findStochasticIndices(vector<Node const *> const &tgt_nodes,
        dtrm_parents in reverse sampling order.
     */
     reverse(dtrm_parents.begin(), dtrm_parents.end());
-    return true;
 }
 
     /*
@@ -247,13 +233,24 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 
     vector<StochasticNode *> sparents;
     vector<DeterministicNode *> dparents;
-    if (!findStochasticIndices(indices, compiler->model(), sparents, dparents))
-	return 0;
+    findStochasticParents(indices, compiler->model(), sparents, dparents);
 
-    unsigned int nparents = sparents.size();  
+    unsigned int nparents = sparents.size();
+    if (nparents > 10) {
+	//This algorithm grinds to a halt with too many stochastic
+	//parents. So bail out after 10
+	return 0;
+    }
     vector<int> lower(nparents), upper(nparents);
     for (unsigned int i = 0; i < nparents; ++i) {
 	StochasticNode const *snode = sparents[i];
+
+	if (snode->length() != 1 || !snode->isDiscreteValued() ||
+	    !isSupportFixed(snode))
+	{
+	    //Must have discrete, scalar parents with fixed support
+	    return 0;
+	}
 	
 	// Get lower and upper limits of support
 	double l = JAGS_NEGINF, u = JAGS_POSINF;
@@ -364,21 +361,18 @@ getMixtureNode2(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     vector<pair<vector<int>, Range> > ranges;  
     getSubsetRanges(ranges, limits, array->range());
 
-    map<vector<int>, Node const *> subsets;
-    bool resolved = true;
+    map<vector<int>, Node const *> mixmap;
     for (unsigned int i = 0; i < ranges.size(); ++i) {
 	Node *subset_node =
 	    array->getSubset(ranges[i].second, compiler->model());
 	if (subset_node) {
-	    subsets[ranges[i].first] = subset_node;
+	    mixmap[ranges[i].first] = subset_node;
 	}
 	else {
-	    resolved = false;
+	    return 0;
 	}
 
     }
-    
-    if (!resolved) return 0;
 
     vector<Node const *> indices;
     for (unsigned int i = 0; i < limits.size(); ++i) {
@@ -386,8 +380,8 @@ getMixtureNode2(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	    indices.push_back(limits[i].node);
 	}
     }
-
-    return compiler->mixtureFactory2().getMixtureNode(indices, subsets, 
+    
+    return compiler->mixtureFactory2().getMixtureNode(indices, mixmap, 
 						      compiler->model());
 }
 
