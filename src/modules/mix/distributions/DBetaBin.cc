@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include <JRmath.h>
+#include <cfloat>
 
 using std::vector;
 using std::max;
@@ -14,16 +15,17 @@ using std::string;
 #define B(par) (*par[1])
 #define SIZE(par) (*par[2])
 
-static double dbb(double x, double a, double b, double n)
+static inline double dbb(double x, double a, double b, double n)
 {
     //Probability density function
-    return choose(a+x-1, x) * choose(b+n-x-1, n-x) / choose(a+b+n-1, n);
+    //return choose(a+x-1, x) * choose(b+n-x-1, n-x) / choose(a+b+n-1, n);
+    return choose(n, x) * beta(x + a, n - x + b) / beta(a, b);
 }
 
-static double ldbb(double x, double a, double b, double n)
+static inline double ldbb(double x, double a, double b, double n)
 {
     //Log probability density function
-    return lchoose(a+x-1, x) + lchoose(b+n-x-1, n-x) - lchoose(a+b+n-1, n);
+    return lchoose(n, x) + lbeta(x + a, n - x + b) - lbeta(a, b);
 }
 
 namespace jags {
@@ -57,7 +59,7 @@ double DBetaBin::d(double x, PDFType type, vector<double const *> const &par,
     else
 	return dbb(x, A(par), B(par), SIZE(par));
 }
-
+    
 static double pbb(double x, double a, double b, double n)
 {
     //Distribution function
@@ -87,10 +89,13 @@ static double qbb(double p, double a, double b, double n)
     if (p < 0) return 0;
     if (p >= 1) return n;
 
-    double pi = 0;
+    /* fuzz to ensure left continuity: */
+    p *= 1 - 64*DBL_EPSILON;
+	    
+    double psum = 0;
     for (int i = 0; i < n; ++i) {
-	pi += dbb(i, a, b, n);
-	if (pi > p) return i;
+	psum += dbb(i, a, b, n);
+	if (psum > p) return i;
     }
     return n;
 }
