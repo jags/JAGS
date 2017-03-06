@@ -1,6 +1,7 @@
 #include "testmixdist.h"
 
 #include "DBetaBin.h"
+#include "DNormMix.h"
 
 #include <MersenneTwisterRNG.h>
 #include <util/nainf.h>
@@ -23,24 +24,23 @@ using std::sort;
 
 using jags::ScalarDist;
 using jags::RScalarDist;
+using jags::PDF_FULL;
 
 void MixDistTest::setUp() {
 
     _rng = new jags::base::MersenneTwisterRNG(1234567, 
 					      jags::KINDERMAN_RAMAGE);
 
-    //_dbeta = new jags::bugs::DBeta();
-    //_dbin = new jags::bugs::DBin();
     _dbetabin = new jags::mix::DBetaBin();
+    _dnormmix = new jags::mix::DNormMix();
 }
 
 void MixDistTest::tearDown() {
 
     delete _rng;
 
-    //delete _dbern;
-    //delete _dbeta;
     delete _dbetabin;
+    delete _dnormmix;
 }
 
 void MixDistTest::npar()
@@ -48,16 +48,19 @@ void MixDistTest::npar()
     //CPPUNIT_ASSERT_MESSAGE("npar check", false);
 
     CPPUNIT_ASSERT_EQUAL(_dbetabin->npar(), 3U);
+    CPPUNIT_ASSERT_EQUAL(_dnormmix->npar(), 3U);
 }
 
 void MixDistTest::name()
 {
     CPPUNIT_ASSERT_EQUAL(string("dbetabin"), _dbetabin->name());
+    CPPUNIT_ASSERT_EQUAL(string("dnormmix"), _dnormmix->name());
 }
 
 void MixDistTest::alias()
 {
     CPPUNIT_ASSERT_EQUAL(string("dbetabinom"), _dbetabin->alias());
+    CPPUNIT_ASSERT_EQUAL(string(""), _dnormmix->alias());
 }
 
 void MixDistTest::rscalar_rpq(RScalarDist const *dist, 
@@ -219,8 +222,8 @@ static double qdkwbound(double n, double p) {
 }
 
 void MixDistTest::dkwtest(RScalarDist const *dist,
-			   vector<double const *> const &par,
-			   unsigned int N, double pthresh)
+			  vector<double const *> const &par,
+			  unsigned int N, double pthresh)
 {
     /*
       Test using the Dvoretzky-Kiefer-Wolfowitz (1956) bound on the
@@ -262,4 +265,120 @@ void MixDistTest::dkw()
 
     dkwtest(_dbetabin, mkPar(1,1, 4));
 }
+
+static double normmix_mean(vector<double const *> const &par,
+			   vector<unsigned int> const &lengths)
+{
+    double const *mu = par[0];
+    double const *pi = par[2];
     
+    double sumpi = 0, mean = 0;
+    for (unsigned int i = 0; i < lengths[0]; ++i) {
+	sumpi += pi[i];
+	mean += pi[i] * mu[i];
+    }
+    return mean/sumpi;
+}
+
+
+static double normmix_var(vector<double const *> const &par,
+			  vector<unsigned int> const &len)
+{
+    double const *mu = par[0];
+    double const *tau = par[1];
+    double const *pi = par[2];
+    
+    double sumpi = 0, mean = 0;
+    for (unsigned int i = 0; i < len[0]; ++i) {
+	sumpi += pi[i];
+	mean += pi[i] * mu[i];
+    }
+    mean /= sumpi;
+    
+    double var = 0;
+    for (unsigned int i = 0; i < len[0]; ++i) {
+	var += pi[i] * ((mu[i] - mean)*(mu[i] - mean) + 1/tau[i]);
+    }
+    var /= sumpi;
+    
+    return var;
+}
+
+void MixDistTest::test_mean_normmix(vector<double const *> const &par,
+				    vector<unsigned int> const &len,
+				    unsigned int N)
+{
+    CPPUNIT_ASSERT_MESSAGE(_dnormmix->name(),
+			   _dnormmix->checkParameterLength(len));
+    CPPUNIT_ASSERT_MESSAGE(_dnormmix->name(),
+			   _dnormmix->checkParameterValue(par, len));
+    
+    double x;
+    double xmean = 0;
+    for (unsigned int i = 0; i < N; ++i) {
+	_dnormmix->randomSample(&x, 1, par, len, 0, 0, _rng);
+	xmean += x;
+    }
+    xmean /= N;
+
+    double zmean = normmix_mean(par, len);
+    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(_dnormmix->name(), zmean, xmean,
+					 0.01);
+}
+
+void MixDistTest::test_var_normmix(vector<double const *> const &par,
+				   vector<unsigned int> const &len,
+				   unsigned int N)
+{
+    CPPUNIT_ASSERT_MESSAGE(_dnormmix->name(),
+			   _dnormmix->checkParameterLength(len));
+    CPPUNIT_ASSERT_MESSAGE(_dnormmix->name(),
+			   _dnormmix->checkParameterValue(par, len));
+    
+    double x;
+    double xmean = 0;
+    for (unsigned int i = 0; i < N; ++i) {
+	_dnormmix->randomSample(&x, 1, par, len, 0, 0, _rng);
+	xmean += x;
+    }
+    xmean /= N;
+
+    double xvar = 0;
+    for (unsigned int i = 0; i < N; ++i) {
+	_dnormmix->randomSample(&x, 1, par, len, 0, 0, _rng);
+	xvar += (x - xmean) * (x - xmean);
+    }
+    xvar /= N;
+
+    double zvar = normmix_var(par, len);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(_dnormmix->name(),
+					 zvar, xvar, 0.1);
+}
+
+void MixDistTest::normmix()
+{
+    unsigned int N = 100000;
+    
+    //Construct parameter vector of length 2
+    vector<double> mu(2), tau(2), pi(2);
+    vector<double const *> par2;
+    par2.push_back(&mu[0]);
+    par2.push_back(&tau[0]);
+    par2.push_back(&pi[0]);
+    
+    //Construct length vector corresponding to par2
+    vector<unsigned int> len2(3, 2);
+
+    //Set up example
+    mu[0] = -1; mu[1] = 3;
+    tau[0] = 0.1; tau[1] = 0.2;
+    pi[0] = 8; pi[1] = 2;
+    test_mean_normmix(par2, len2, N);
+    test_var_normmix(par2, len2, N);
+    
+    mu[0] = 1; mu[1] = 1;
+    tau[0] = 1; tau[1] = 1;
+    test_mean_normmix(par2, len2, N);
+    test_var_normmix(par2, len2, N);
+}
