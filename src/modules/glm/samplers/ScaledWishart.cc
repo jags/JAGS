@@ -149,6 +149,7 @@ static void sampleWishart(double *x, int length,
 namespace jags {
     namespace glm {
 
+	/*
 	static inline double getPrecision0(StochasticNode const *snode, 
 					   unsigned int chain)
 	{
@@ -157,6 +158,7 @@ namespace jags {
 	    
 	    return snode->parents()[1]->value(chain)[0];
 	}
+	*/
 
 	bool
 	ScaledWishart::canSample(StochasticNode *snode, Graph const &graph)

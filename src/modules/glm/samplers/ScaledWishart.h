@@ -10,7 +10,7 @@ namespace jags {
     class Graph;
     class SingletonGraphView;
     class StochasticNode;
-    class RNG;
+    struct RNG;
     
     namespace glm {
 

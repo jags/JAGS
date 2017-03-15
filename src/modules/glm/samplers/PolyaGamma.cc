@@ -39,43 +39,6 @@ namespace jags {
 	    return phi(b) + exp(2 * z) * phi(a);
 	}
 
-	static double rigauss(double mu, RNG *rng)
-	{
-	    // Samples from the inverse Gaussian distribution
-	    // IG(mu, 1) truncated to the interval (0, TRUNC)
-	    
-	    double X;
-	    if (mu > TRUNC) {
-		double alpha;
-		double z = 1/mu;
-		do {
-		    double E1, E2;
-		    do {
-			E1 = rng->exponential();
-			E2 = rng->exponential();
-		    } while (E1 * E1 > 2 * E2 / TRUNC);
-		    X = 1 + E1 * TRUNC;
-		    X = TRUNC / (X * X);
-		    alpha = exp(-z * z * X / 2);
-		}
-		while (rng->uniform() > alpha);
-	    }
-	    else {
-		do {
-		    double Y = rng->normal();
-		    Y *= Y;
-		    double muY = mu * Y;
-		    X = mu +
-			mu * mu * Y / 2 -
-			mu * sqrt(4 * muY + muY * muY) / 2;
-		    if (rng->uniform() > mu / (mu + X)) {
-			X = mu * mu / X;
-		    }
-		} while (X > TRUNC);
-	    }
-	    return X;
-	}
-
 	static double a(double n, double x)
 	{
 	    // Alternating series expansion of the Jacobi density
@@ -143,6 +106,7 @@ namespace jags {
 		}
 	    }
 	    throwLogicError("Failed to sample Polya-Gamma");
+	    return 0; //-Wall
 	} 
 
 	static double const & getSize(StochasticNode const *snode,

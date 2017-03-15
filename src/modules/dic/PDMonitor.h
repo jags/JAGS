@@ -20,7 +20,6 @@ namespace dic {
 	std::vector<double> _weights;
 	double _scale;
 	unsigned int _nchain;
-	unsigned int _n;
     public:
 	PDMonitor(std::vector<StochasticNode const *> const &snodes,
 		  std::vector<RNG *> const &rngs,

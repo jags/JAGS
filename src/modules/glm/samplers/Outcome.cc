@@ -14,6 +14,7 @@ namespace glm {
 	
 	switch(getFamily(snode)) {
 	case GLM_NORMAL: case GLM_BERNOULLI: case GLM_BINOMIAL: case GLM_POISSON:
+	case GLM_LOGISTIC: case GLM_T:
 	    lp = snode->parents()[0];
 	    break;
 	case GLM_UNKNOWN:

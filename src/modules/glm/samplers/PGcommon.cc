@@ -7,24 +7,6 @@
 
 using jags::RNG;
 
-static inline double phi(double x) {
-    //Cumulative distribution function of a standard normal
-    return pnorm(x, 0.0, 1.0, true, false);
-}
-
-/*
-static double pigauss(double z, double lambda, double t)
-{
-    // P(X <= t) if X has an inverse Gaussian distribution with
-    // mean mu = 1/z and shape lambda
-    
-    const double K = sqrt(lambda/t);
-    double b = (t * z - 1) * K;
-    double a = -(t * z + 1) * K;
-    return phi(b) + exp(2 * lambda * z) * phi(a);
-}
-*/
-
 static double rigauss_body(double mu, double lambda, double t, RNG *rng)
 {
     // Sample truncated IG(mu, lambda) I(0,t) using accept-reject sampling
@@ -49,7 +31,7 @@ static double rigauss_body(double mu, double lambda, double t, RNG *rng)
 static double rigauss_tail(double mu, double lambda, double t, RNG *rng)
 {
     // Generate truncated IG(mu, lambda) I(0, t) by rejection sampling
-    // This is efficient withn the truncation point t is in the tail of
+    // This is efficient when the truncation point t is in the tail of
     // the distribution.
     
     double X;
