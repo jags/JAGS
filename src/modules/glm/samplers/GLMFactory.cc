@@ -353,6 +353,7 @@ namespace glm {
 	    }
 	    else {
 		delete candidates[j];
+		candidates[j] = 0;
 	    }
 	}
 
@@ -364,7 +365,8 @@ namespace glm {
 	if (!checkLinear(view, fixedDesign(), true)) {
 
 	    // Candidates are not jointly linear
-	    
+
+	    candidates = sub_views;
 	    sample_nodes.clear();
 	    sub_views.clear();
 	    delete view; 
