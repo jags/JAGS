@@ -15,7 +15,8 @@ libglmsampler_la_SOURCES = GLMFactory.cc GLMSampler.cc GLMMethod.cc	\
  ScaledWishart.cc ScaledWishartFactory.cc \
  ScaledGamma.cc ScaledGammaFactory.cc \
  LogisticLinear.cc TLinear.cc \
- REScaledGamma.cc RESampler.cc REMethod.cc REFactory.cc REScaledGammaFactory.cc
+ RESampler.cc REMethod.cc REFactory.cc \
+ REGamma.cc REGammaFactory.cc REScaledGamma.cc REScaledGammaFactory.cc
 
 noinst_HEADERS = GLMFactory.h GLMSampler.h GLMMethod.h			\
   KS.h 	\
@@ -27,7 +28,8 @@ noinst_HEADERS = GLMFactory.h GLMSampler.h GLMMethod.h			\
   ScaledWishart.h ScaledWishartFactory.h \
   ScaledGamma.h ScaledGammaFactory.h \
   LogisticLinear.h TLinear.h \
-  REScaledGamma.h RESampler.h REMethod.h REFactory.h REScaledGammaFactory.h
+  RESampler.h REMethod.h REFactory.h \
+  REGamma.h REGammaFactory.h REScaledGamma.h REScaledGammaFactory.h
 
 if CANCHECK
 check_LTLIBRARIES = libglmsamptest.la

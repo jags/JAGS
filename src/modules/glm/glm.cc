@@ -7,6 +7,7 @@
 #include "samplers/ScaledGammaFactory.h"
 #include "samplers/ScaledWishartFactory.h"
 #include "samplers/REScaledGammaFactory.h"
+#include "samplers/REGammaFactory.h"
 
 #include "distributions/DScaledGamma.h"
 #include "distributions/DScaledWishart.h"
@@ -57,6 +58,7 @@ namespace glm {
 	insert(new ScaledGammaFactory);
 	insert(new ScaledWishartFactory);
 	insert(new REScaledGammaFactory);
+	insert(new REGammaFactory);
 	
 	insert(new DScaledGamma);
 	insert(new DScaledWishart);
