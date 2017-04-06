@@ -273,6 +273,14 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	copy(pv, pv + sparents[j]->length(), value.begin());
 	stored_parent_values.push_back(value);
     }
+    //Store current value of all deterministic nodes
+    vector<vector<double> > stored_dtrm_values;
+    for (unsigned int j = 0; j < dparents.size(); ++j) {
+	double const *pv = dparents[j]->value(0);
+	vector<double> value(dparents[j]->length());
+	copy(pv, pv + dparents[j]->length(), value.begin());
+	stored_dtrm_values.push_back(value);
+    }
     
     // Create a set containing all possible values that the stochastic
     // indices can take
@@ -300,14 +308,17 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     }
 
     //Restore value of all stochastic parents
-    vector<vector<double> > parent_values;
     for (unsigned int j = 0; j < sparents.size(); ++j) {
 	vector<double> const &pv = stored_parent_values[j];
 	sparents[j]->setValue(&pv[0], pv.size(), 0);
     }
-
+    //Restore value of all deterministic nodes
+    for (unsigned int j = 0; j < dparents.size(); ++j) {
+	vector<double> const &pv = stored_dtrm_values[j];
+	dparents[j]->setValue(&pv[0], pv.size(), 0);
+    }
+    
     // Now set up the possible subsets defined by the stochastic indices
-
     vector<int> variable_offset;
     vector<vector<int> > scope(ndim);
     for (unsigned int j = 0; j < ndim; ++j) {
