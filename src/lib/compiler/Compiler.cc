@@ -348,23 +348,28 @@ bool Compiler::indexExpression(ParseTree const *p, vector<int> &value)
        evaluation of the index expression.
     */
 
+    bool isfixed = true;
+
     _index_expression++;
     Node *node = getParameter(p);
     _index_expression--;
 
     if (!node || !node->isFixed()) {
-	return false;
+	isfixed = false;
+    }
+    else {
+	for (unsigned int i = 0; i < node->length(); ++i) {
+	    double v = node->value(0)[i];
+	    if (!checkInteger(v)) {
+		throw NodeError(node, 
+				"Index expression evaluates to non-integer value");
+	    }
+	    value.push_back(asInteger(v));
+	}
     }
 
-    for (unsigned int i = 0; i < node->length(); ++i) {
-	double v = node->value(0)[i];
-	if (!checkInteger(v)) {
-	    throw NodeError(node, 
-			    "Index expression evaluates to non-integer value");
-	}
-	value.push_back(asInteger(v));
-    }
-	
+    /* Make sure we always clean up at the top-level call to IndexExpression */
+
     if (_index_expression == 0) {
 	while(!_index_nodes.empty()) {
 	    Node *inode = _index_nodes.back();
@@ -373,7 +378,8 @@ bool Compiler::indexExpression(ParseTree const *p, vector<int> &value)
 	    delete inode;
 	}
     }
-    return true;
+
+    return isfixed;
 }
 
 Range Compiler::getRange(ParseTree const *p, 

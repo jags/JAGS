@@ -33,7 +33,7 @@ namespace jags {
 	    double const * mu = parameters[0];
 	    double const * V  = parameters[1];
 
-	    vector<double> T(m);
+	    vector<double> T(m * m);
 	    inverse_spd (&T[0], V, m);
 
 	    double loglik = 0;

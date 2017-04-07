@@ -10,6 +10,7 @@
 
 using std::vector;
 using std::string;
+using std::abs;
 
 #define TAU(par) (*par[0])
 #define XCOORDS(par) (par[1])
