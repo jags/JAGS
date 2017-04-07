@@ -45,6 +45,7 @@
 #include <climits>
 #include <algorithm>
 #include <list>
+#include <map>
 
 using std::vector;
 using std::pair;
@@ -131,80 +132,92 @@ static void getSubsetRanges(vector<pair<vector<int>, Range> > &subsets,
     }
 }
 
-//  Returns true if node, or one of its deterministic descendants, is
-//  in the set target_nodes
+/*  Recursive function that returns true if node, or one of its
+    deterministic descendants, is in target_set */
 static bool hasDescendant(DeterministicNode *node, 
-			  set<Node const*> const &target_nodes,
+			  set<Node const*> const &target_set,
 			  vector<DeterministicNode*> &dnodes,
-			  set<DeterministicNode*> &known_dnodes)
+			  map<DeterministicNode*, bool> &known_dnodes)
 {
-    if (known_dnodes.count(node))
-	return true;
-
-    if (target_nodes.count(node)) {
-	known_dnodes.insert(node);
-	dnodes.push_back(node);
-	return true;
+    //Skip previously visited nodes
+    map<DeterministicNode*,bool>::iterator i = known_dnodes.find(node);
+    if (i != known_dnodes.end()) {
+	return i->second;
     }
-    
-    bool ans = false;
+
+    //The current node might be in the target set.
+    bool ans = target_set.count(node);
+
+    //Search all deterministic descendants. Even if node is in
+    //target_set we still need to visit the descendants to ensure that
+    //nodes are pushed onto the vector dnodes *after* their deterministic
+    //descendants (i.e. in reverse topological order).
     list<DeterministicNode*> const *dc = node->deterministicChildren();
     for(list<DeterministicNode*>::const_iterator p = dc->begin();
 	p != dc->end(); ++p)
     {
-	if (hasDescendant(*p, target_nodes, dnodes, known_dnodes)) {
+	if (hasDescendant(*p, target_set, dnodes, known_dnodes)) {
 	    ans = true;
 	}
     }
 
+    //At this point we have visited all deterministic descendants and can
+    //classify the current node.
+    known_dnodes[node] = ans;
     if (ans) {
-	known_dnodes.insert(node);
 	dnodes.push_back(node);
     }
     return ans;
 }
 
-//  Find stochastic parents of given set of nodes within the model,
-//  and their intermediate deterministic nodes in forward-sampling order
-//  We are looking for discrete, univariate parents.
+
+/* hasDescendant for stochastic nodes */
+static bool hasDescendant(StochasticNode *node, 
+			  set<Node const*> const &target_set,
+			  vector<DeterministicNode*> &dnodes,
+			  map<DeterministicNode*, bool> &known_dnodes)
+{
+    //This is a stripped-down version of hasDescendant for deterministic
+    //nodes. We do not keep track of known stochastic nodes
+    bool ans = target_set.count(node);
+
+    list<DeterministicNode*> const *dc = node->deterministicChildren();
+    for(list<DeterministicNode*>::const_iterator p = dc->begin();
+	p != dc->end(); ++p)
+    {
+	if (hasDescendant(*p, target_set, dnodes, known_dnodes)) {
+	    ans = true;
+	}
+    }
+
+    return ans;
+}
+
+/*  Find stochastic parents of given set of nodes within the model,
+    and their intermediate deterministic descendants in topological
+    order */
 static void findStochasticParents(vector<Node const *> const &tgt_nodes, 
 				  Model const &model,
 				  vector<StochasticNode *> &stoch_parents,
 				  vector<DeterministicNode *> &dtrm_parents)
 {
+    //Copy input vector tgt_nodes to a set
     set<Node const *> tgt_set;
     for (unsigned int i = 0; i < tgt_nodes.size(); ++i) {
 	tgt_set.insert(tgt_nodes[i]);
     }
-    
-    set<DeterministicNode*> known_dnodes;
+
+    //Set up auxliary variables required for hasDescendant and call
+    map<DeterministicNode*, bool> known_dnodes;
     vector<StochasticNode*> const &snodes = model.stochasticNodes();
     for (unsigned int i = 0; i < snodes.size(); ++i) {
-
-	if (tgt_set.count(snodes[i])) {
+	if (hasDescendant(snodes[i], tgt_set, dtrm_parents, known_dnodes)) {
 	    stoch_parents.push_back(snodes[i]);
-	}
-	else {
-	    bool ans = false;
-	    list<DeterministicNode*> const *dc =
-		snodes[i]->deterministicChildren();
-	    for(list<DeterministicNode*>::const_iterator p = dc->begin();
-		p != dc->end(); ++p)
-	    {
-		if (hasDescendant(*p, tgt_set, dtrm_parents, known_dnodes)) {
-		    ans = true;
-		}
-	    }
-	    if (ans) {
-		stoch_parents.push_back(snodes[i]);
-	    }
 	}
     }
     
-    /* 
-       Deterministic nodes have been pushed back onto the vector 
-       dtrm_parents in reverse sampling order.
-    */
+    // Nodes are pushed onto dtrm_parents in reverse topological order.
+    // Reverse the vector to get them in topological (forward sampling) order
     reverse(dtrm_parents.begin(), dtrm_parents.end());
 }
 
@@ -298,7 +311,6 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 
     // Create a set containing all possible values that the stochastic
     // indices can take
-
     set<vector<int> > index_values;
     vector<int>  this_index(indices.size(),1);
     SimpleRange stoch_node_range(lower, upper);
