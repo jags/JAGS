@@ -16,8 +16,6 @@ using std::string;
 
 #define MIN_ADAPT 50
 
-#include <iostream>
-
 namespace jags {
     namespace base {
 
@@ -235,12 +233,14 @@ namespace jags {
 
 	void MSlicer::adaptOff() {
 	    _adapt = false;
+/*
 	    std::cout << "chain " << _chain << " node " << _gv->node() <<
 		std::endl;
 	    for (unsigned int i = 0; i < _length; ++i) {
 		std::cout << _width[i] << " ";
 	    }
 	    std::cout << std::endl;
+*/
 	}
 
 	bool MSlicer::checkAdaptation() const
