@@ -20,7 +20,7 @@
 
    There are limited circumstances under which we can calculate the
    possible values of the index node. Currently, this is restricted to
-   the case where all the direct Stochastic ancestors of Y are discrete
+   the case where all the Stochastic parents of Y are discrete
    and univariate. In this case, the function getMixtureNode1 is used
    to create an efficient Mixture Node. If this fails, we fall back on
    the default getMixtureNode2 function.
@@ -58,6 +58,32 @@ using std::reverse;
 using std::list;
 
 namespace jags {
+
+    //Saves the values of the nodes in chain 0 to the values vector
+    //(presumed empty when the function is called)
+    template<class T>
+    void save(vector<T*> const &nodes, vector<vector<double> > &values)
+    {
+	for (typename vector<T*>::const_iterator p = nodes.begin();
+	     p != nodes.end(); ++p)
+	{
+	    double const *pv = (*p)->value(0);
+	    unsigned int n = (*p)->length();
+	    vector<double> v(n);
+	    copy(pv, pv + n, v.begin());
+	    values.push_back(v);
+	}
+    }
+
+    //Restores saved values to the nodes in chain 0
+    template<class T>
+    void restore(vector<T*> const &nodes, vector<vector<double> > const &values)
+    {
+	for (unsigned int j = 0; j < nodes.size(); ++j) {
+	    vector<double> const &pv = values[j];
+	    nodes[j]->setValue(&pv[0], pv.size(), 0);
+	}
+    }
 
 //Structure to hold subset indices
 struct SSI {
@@ -265,23 +291,11 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	upper[i] = static_cast<int>(u);
     }
 
-    //Store current value of all stochastic parents
-    vector<vector<double> > stored_parent_values;
-    for (unsigned int j = 0; j < sparents.size(); ++j) {
-	double const *pv = sparents[j]->value(0);
-	vector<double> value(sparents[j]->length());
-	copy(pv, pv + sparents[j]->length(), value.begin());
-	stored_parent_values.push_back(value);
-    }
-    //Store current value of all deterministic nodes
-    vector<vector<double> > stored_dtrm_values;
-    for (unsigned int j = 0; j < dparents.size(); ++j) {
-	double const *pv = dparents[j]->value(0);
-	vector<double> value(dparents[j]->length());
-	copy(pv, pv + dparents[j]->length(), value.begin());
-	stored_dtrm_values.push_back(value);
-    }
-    
+    //Store current value of all stochastic parents and deterministic nodes
+    vector<vector<double> > stored_parent_values, stored_dtrm_values;
+    save(sparents, stored_parent_values);
+    save(dparents, stored_dtrm_values);
+
     // Create a set containing all possible values that the stochastic
     // indices can take
 
@@ -307,16 +321,9 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	index_values.insert(this_index);
     }
 
-    //Restore value of all stochastic parents
-    for (unsigned int j = 0; j < sparents.size(); ++j) {
-	vector<double> const &pv = stored_parent_values[j];
-	sparents[j]->setValue(&pv[0], pv.size(), 0);
-    }
-    //Restore value of all deterministic nodes
-    for (unsigned int j = 0; j < dparents.size(); ++j) {
-	vector<double> const &pv = stored_dtrm_values[j];
-	dparents[j]->setValue(&pv[0], pv.size(), 0);
-    }
+    //Restore value of all stochastic parents and deterministic nodes
+    restore(sparents, stored_parent_values);
+    restore(dparents, stored_dtrm_values);
     
     // Now set up the possible subsets defined by the stochastic indices
     vector<int> variable_offset;
@@ -349,11 +356,13 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     for (unsigned int i = 0; i < ranges.size(); ++i) {
 	Node *subset_node = array->getSubset(ranges[i].second, 
 					     compiler->model());
-	if (!subset_node)
+	if (!subset_node) {
 	    return 0;
+	}
 	subsets[ranges[i].first] = subset_node;
-	if (subset_node != subset_node0)
+	if (subset_node != subset_node0) {
 	    trivial = false;
+	}
     }
 
     if (trivial) {
