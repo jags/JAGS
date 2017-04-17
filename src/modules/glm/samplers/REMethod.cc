@@ -10,9 +10,11 @@
 #include <JRmath.h>
 
 #include <cmath>
+#include <algorithm>
 
 using std::vector;
 using std::sqrt;
+using std::fill;
 
 extern cholmod_common *glm_wk;
 
@@ -28,8 +30,18 @@ namespace jags {
 	{
 	    calDesign();
 	    symbolic();
+
+	    unsigned int nrow = _outcomes.size();
+	    unsigned int ncol = eps->nodes()[0]->length();
+	    _z = cholmod_allocate_dense(nrow, ncol, nrow, CHOLMOD_REAL,
+					glm_wk);
 	}
 
+	REMethod::~REMethod()
+	{
+	    cholmod_free_dense(&_z, glm_wk);
+	}
+	
 	//FIXME: This is largely copy-pasted from GLMBlock. Surely no need
 	//to reproduce it here?
 	void REMethod::updateEps(RNG *rng) 
@@ -127,6 +139,49 @@ namespace jags {
 	    updateEps(rng);
 	    updateTau(rng);
 	
+	}
+
+	void REMethod::calDesignSigma()
+	{
+	    //Sanity checks
+	    unsigned int Neps = _eps->nodes().size();
+	    if (_x->nrow != _outcomes.size() || _z->nrow != _x->nrow) {
+		throwLogicError("Row mismatch in REGamma");
+	    }
+	    if (_x->ncol != _z->ncol * Neps || _x->ncol != _eps->length()) {
+		throwLogicError("Column mismatch in REGamma");
+	    }
+	    
+	    //Get current values of random effects
+	    vector<double> eps(_eps->length());
+	    _eps->getValue(eps, _chain);
+	    
+	    //Set up access to sparse design matrix for eps
+	    int *Xp = static_cast<int*>(_x->p);
+	    int *Xi = static_cast<int*>(_x->i);
+	    double *Xx = static_cast<double*>(_x->x);
+	    
+	    //Set up access to dense design matrix for sigma
+	    double *Zx = static_cast<double*>(_z->x);
+
+	    //Set all elements of _z to zero.
+	    fill(Zx, Zx + _z->nzmax, 0);
+
+	    //If there are m columns of _z then _z[,i] is the sum of
+	    //every mth column of _x (starting with _x[,i]),
+	    //multiplied by the corresponding random effect
+	    for (unsigned int zcol = 0; zcol < _z->ncol; ++zcol) {
+		for (unsigned int i = 0; i < Neps; ++i) {
+		    int xcol = i * _z->ncol + zcol;
+		    for (int xi = Xp[xcol]; xi < Xp[xcol+1]; ++xi) {
+			int row = Xi[xi];
+			int zi = _z->nrow * zcol + row;
+			//_z[row,zcol] += _x[row,xcol] * exp[xcol]
+			Zx[zi] += Xx[xi] * eps[xcol];
+		    }
+		}
+	    }
+
 	}
 
     }

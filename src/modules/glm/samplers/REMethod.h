@@ -22,6 +22,7 @@ namespace glm {
       protected:
 	SingletonGraphView const *_tau;
 	GraphView const *_eps;
+	cholmod_dense *_z;
       public:
 	/**
 	 * Constructor.
@@ -51,6 +52,7 @@ namespace glm {
 		 std::vector<SingletonGraphView const *> const &sub_eps,
 		 std::vector<Outcome *> const &outcomes,
 		 unsigned int chain);
+	~REMethod();
 	/**
 	 * Updates the random effects
 	 *
@@ -59,6 +61,7 @@ namespace glm {
 	void updateEps(RNG *rng);
 	virtual void updateTau(RNG *rng) = 0;
 	void update(RNG *rng);
+	void calDesignSigma();
     };
 
 }}
