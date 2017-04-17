@@ -19,7 +19,7 @@ namespace jags {
 
 	bool REGammaFactory::canSample(StochasticNode *snode) const
 	{
-	    return snode->distribution()->name() == "gamma";
+	    return snode->distribution()->name() == "dgamma";
 	}
 
 	REMethod *

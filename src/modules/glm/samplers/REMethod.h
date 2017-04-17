@@ -21,6 +21,7 @@ namespace glm {
     class REMethod : public GLMMethod {
       protected:
 	SingletonGraphView const *_tau;
+	GraphView const *_eps;
       public:
 	/**
 	 * Constructor.

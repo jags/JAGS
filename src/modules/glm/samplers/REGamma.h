@@ -2,21 +2,33 @@
 #define RE_GAMMA_H_
 
 #include "REMethod.h"
+#include "REGammaSlicer.h"
 
 namespace jags {
     namespace glm {
 
+	class REGammaSlicer;
+	
 	/**
 	 * @short Random effects sampler for gamma precision
 	 */
 	class REGamma : public REMethod {
+	    cholmod_dense *_z;
+	    REGammaSlicer *_slicer;
 	  public:
 	    REGamma(SingletonGraphView const *tau,
 		    GraphView const *eps, 
 		    std::vector<SingletonGraphView const *> const &veps,
 		    std::vector<Outcome *> const &outcomes,
 		    unsigned int chain);
+	    ~REGamma();
 	    void updateTau(RNG *rng);
+	    void updateSigma(RNG *rng);
+	    void update(RNG *rng);
+	    bool isAdaptive() const;
+	    void adaptOff();
+	    bool checkAdaptation() const;
+	    void calDesignSigma();
 	};
 
     }

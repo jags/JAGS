@@ -19,7 +19,7 @@ namespace jags {
 
 	bool REScaledGammaFactory::canSample(StochasticNode *snode) const
 	{
-	    return snode->distribution()->name() == "scaled.gamma";
+	    return snode->distribution()->name() == "dscaled.gamma";
 	}
 
 	REMethod *
