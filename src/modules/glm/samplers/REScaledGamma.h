@@ -10,7 +10,7 @@ namespace jags {
 	 * @short Random effects sampler for scaled gamma precision
 	 */
 	class REScaledGamma : public REMethod {
-	    double _a;
+	    double _sigma;
 	  public:
 	    REScaledGamma(SingletonGraphView const *tau,
 			  GraphView const *eps, 
@@ -18,6 +18,8 @@ namespace jags {
 			  std::vector<Outcome *> const &outcomes,
 			  unsigned int chain);
 	    void updateTau(RNG *rng);
+	    void updateSigma(RNG *rng);
+	    void update(RNG *rng);
 	};
 
     }
