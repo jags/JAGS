@@ -18,7 +18,10 @@
 #define F77_DSYMM  F77_FUNC(dsymm, DSYMM)
 #define F77_DPOTRI F77_FUNC(dpotri, DPOTRI)
 #define F77_DDOT   F77_FUNC(ddot, DDOT)
-
+#define F77_DTRTRI F77_FUNC(dtrtri, DTRTRI)
+#define F77_DTRMM  F77_FUNC(dtrmm, DTRMM)
+#define F77_DSYRK  F77_FUNC(dsyrk, DSYRK)
+    
 extern "C" {
 /*
   void F77_DGEEV (const char* jobvl, const char* jobvr,
@@ -90,6 +93,19 @@ extern "C" {
 
     double F77_DDOT (const int* n, double const *X, const int *incx, 
 		     double const *Y, const int *incy);
+
+    void F77_DTRTRI (const char *uplo, const char *diag,
+		     const int *n, double *a, const int *lda, const int *info);
+
+    void F77_DTRMM(const char *side, const char *uplo, const char *transa,
+		   const char *diag, const int *m, const int *n,
+		   const double *alpha, const double *a, const int *lda,
+		   double *b, const int *ldb);
+
+    void F77_DSYRK(const char *uplo, const char *trans, const int *n,
+		   const int *k,
+		   const double *alpha, const double *a, const int *lda,
+		   const double *beta, double *c, const int *ldc);
 }
 
 #endif
