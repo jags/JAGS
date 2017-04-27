@@ -12,11 +12,13 @@
 #include <cfloat>
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 #include <JRmath.h>
 
 using std::vector;
 using std::log;
+using std::reverse;
 
 #define SCALE(par) (par[0])
 #define DF(par)    (*par[1])
@@ -60,7 +62,7 @@ double DWish::logDensity(double const *x, unsigned int length, PDFType type,
     return loglik/2;
 }
 
-void DWish::randomSample(double *x, int length,
+void DWish::randomSample(double *X, int length,
 			 double const *R, double k, int nrow,
 			 RNG *rng)
 {
@@ -115,15 +117,14 @@ void DWish::randomSample(double *x, int length,
     F77_DTRMM("R", "U", "N", "N", &nrow, &nrow, &one, &C[0], &nrow, &Z[0],
 	      &nrow);
 
-    // C = t(Z) %*% Z
+    // X = t(Z) %*% Z
     double zero = 0;
-    F77_DSYRK("U", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, &C[0], &nrow);
+    F77_DSYRK("U", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, X, &nrow);
 
-    // Copy result back to argument x.
-    // Note that C contains only the upper triangle
+    // Copy lower triangle of X from upper triangle
     for (int i = 0; i < nrow; ++i) {
-	for (int j = 0; j <= i; ++j) {
-	    x[i * nrow + j] = x[j * nrow + i] = C[i * nrow + j];
+	for (int j = 0; j < i; ++j) {
+	    X[j * nrow + i] = X[i * nrow + j];
 	}
     }
 }

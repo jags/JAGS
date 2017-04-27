@@ -17,9 +17,6 @@
 using std::vector;
 using std::fill;
 
-//debuggin
-#include <iostream>
-
 namespace jags {
     namespace glm {
 

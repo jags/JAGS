@@ -22,6 +22,7 @@ using std::set;
 using std::sqrt;
 using std::string;
 using std::copy;
+using std::reverse;
 
 #include <iostream>
 
@@ -46,12 +47,10 @@ extern "C" {
 }
 
 
-//FIXME: This is a more efficient version of the Wishart sampling
-//function from the BUGS module (using BLAS calls and avoiding double
-//Cholesky decomposition). It should be copy-pasted back.
-static void sampleWishart(double *x, int length,
-			   double const *R, double k, int nrow,
-			   jags::RNG *rng)
+//FIXME We would not need this if we could call bugs::DWish::sampleWishart
+static void sampleWishart(double *X, int length,
+			  double const *R, double k, int nrow,
+			  jags::RNG *rng)
 {
     int info = 0;
     /* 
@@ -104,15 +103,14 @@ static void sampleWishart(double *x, int length,
     F77_DTRMM("R", "U", "N", "N", &nrow, &nrow, &one, &C[0], &nrow, &Z[0],
 	      &nrow);
 
-    // C = t(Z) %*% Z
+    // X = t(Z) %*% Z
     double zero = 0;
-    F77_DSYRK("U", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, &C[0], &nrow);
+    F77_DSYRK("U", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, X, &nrow);
 
-    // Copy result back to argument x.
-    // Note that C contains only the upper triangle
+    // Copy upper triangle of X to lower triangle
     for (int i = 0; i < nrow; ++i) {
-	for (int j = 0; j <= i; ++j) {
-	    x[i * nrow + j] = x[j * nrow + i] = C[i * nrow + j];
+	for (int j = 0; j < i; ++j) {
+	    X[j * nrow + i] = X[i * nrow + j];
 	}
     }
 }
