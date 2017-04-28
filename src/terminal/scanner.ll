@@ -126,6 +126,7 @@ run                     zzlval.intval=RUN; return RUN;
 }
 
 <RDATA>".Dim"                   return DIM;
+<RDATA>".Data"                  return DOTDATA;
 <RDATA>"NA"		        return NA;
 <RDATA>"NULL"		        return R_NULL;
 <RDATA>"structure"/{BRACKET}	return STRUCTURE;

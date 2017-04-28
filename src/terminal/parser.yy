@@ -153,6 +153,7 @@
 %token <intval> ARROW
 %token <intval> ENDDATA
 %token <intval> ASINTEGER
+%token <intval> DOTDATA
 
 %token <intval> DIRECTORY
 %token <intval> CD
@@ -162,11 +163,11 @@
 
 %type <ptree> var index 
 %type <ptree> r_assignment r_structure
-%type <ptree> range_element r_dim 
+%type <ptree> range_element r_dim
 %type <ptree> r_attribute_list
 %type <ptree> r_value 
 %type <pvec>  r_value_list r_assignment_list range_list
-%type <ptree> r_value_collection r_integer_collection r_collection
+%type <ptree> r_value_collection r_integer_collection r_collection r_data
 %type <stringptr> file_name;
 %type <stringptr> r_name;
 
@@ -348,7 +349,7 @@ parameters: PARAMETERS IN file_name {
 compile: COMPILE {
     Jtry(console->compile(_data_table, 1, true));
     print_unused_variables(_data_table, true);
-}
+ }
 | COMPILE ',' NCHAINS '(' INT ')' {
     Jtry(console->compile(_data_table, $5, true));
     print_unused_variables(_data_table, true);
@@ -585,14 +586,19 @@ r_name: STRING
     $$ = $2;
 }
 
-r_structure: STRUCTURE '(' r_collection ',' r_attribute_list ')' {
+r_data: r_collection
+| DOTDATA '=' r_collection {
+    $$ = $3;
+}
+
+r_structure: STRUCTURE '(' r_data ',' r_attribute_list ')' {
   $$ = new jags::ParseTree(jags::P_ARRAY); 
   if ($5) 
     setParameters($$, $3, $5);
   else
     setParameters($$, $3);
 }
-| STRUCTURE '(' r_collection ')' {
+| STRUCTURE '(' r_data ')' {
     $$ = new jags::ParseTree(jags::P_ARRAY);
     setParameters($$, $3);
 }
