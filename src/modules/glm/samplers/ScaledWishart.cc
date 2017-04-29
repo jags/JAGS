@@ -180,7 +180,7 @@ namespace jags {
 
 	    _a = vector<double>(nrow);	    
 	    for (unsigned int k = 0; k < nrow; ++k) {
-		double shape = (1 + df)/2; // shape
+		double shape = (nrow + df)/2; // shape
 		double rate = df * x[k*nrow+k] + 1/(S[k]*S[k]); // 1/scale
 		_a[k] = shape/rate;
 	    }
