@@ -36,7 +36,7 @@ namespace jags {
 		methods[ch] = new ScaledGamma(gv, ch);
 	    }
     
-	    return new MutableSampler(gv, methods, "glm::ScaledPrecision");
+	    return new MutableSampler(gv, methods, "glm::ScaledGamma");
 	}
 
 	string ScaledGammaFactory::name() const

@@ -11,7 +11,7 @@ namespace jags {
     namespace glm {
     
 	REScaledWishartFactory::REScaledWishartFactory()
-	    : REFactory("REScaledWishart")
+	    : REFactory("glm::REScaledWishart")
 	{}
 
 	REScaledWishartFactory::~REScaledWishartFactory()

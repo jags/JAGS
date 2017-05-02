@@ -36,7 +36,7 @@ namespace jags {
 		methods[ch] = new ScaledWishart(gv, ch);
 	    }
     
-	    return new MutableSampler(gv, methods, "glm::ScaledPrecision");
+	    return new MutableSampler(gv, methods, "glm::ScaledWishart");
 	}
 
 	string ScaledWishartFactory::name() const

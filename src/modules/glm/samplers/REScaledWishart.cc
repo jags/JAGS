@@ -103,7 +103,6 @@ namespace jags {
 		double Y = _outcomes[i]->value();
 		double mu = _outcomes[i]->mean();
 		double lambda = _outcomes[i]->precision();
-
 		vector<double> X(m);
 		for (unsigned int j = 0; j < m; ++j) {
 		    X[j] =  Zx[j*N+i]/sigma0[j];
@@ -112,20 +111,21 @@ namespace jags {
 		    for (unsigned int k = 0; k < m; ++k) {
 			A[j*m + k] += X[j] * X[k] * lambda;
 		    }
-		    b[j] += (Y - mu + Zx[j*N + i]) * X[j] * lambda;
+		    b[j] += (Y - mu) * X[j] * lambda;
 		}
 	    }
-
+	    
 	    //Sample each sigma from its full conditional
 	    //Fixme: wouldn't it be better to do block sampling here?
 	    //Fixme: not reversible
 	    for (unsigned int j = 0; j < m; ++j) {
-		double bcon = b[j];
-		double Acon = A[j*m + j];
-		for (unsigned int k = 0; k < m; ++k) {
-		    if (k != j) bcon -= A[j*m + k] * _sigma[k];
+		double mu  = _sigma[j] + b[j]/A[j*m+j];
+		double sigma = sqrt(1.0/A[j*m+j]);
+		_sigma[j] = lnormal(0, rng, mu, sigma);
+		double delta = _sigma[j] - sigma0[j];
+		for (int k = 0; k < m; ++k) {
+		    b[k] -= delta * A[m*j + k];
 		}
-		_sigma[j] = lnormal(0, rng, bcon/Acon, 1/sqrt(Acon));
 	    }
 
 	    vector<double> sigma_ratio(m);
@@ -136,7 +136,8 @@ namespace jags {
 	    //Rescale random effects
 	    vector<double> eps(_eps->length());
 	    _eps->getValue(eps, _chain);
-	    for (unsigned int i = 0; i < eps.size(); ++i) {
+	    unsigned int Neff = _eps->nodes().size();
+	    for (unsigned int i = 0; i < Neff; ++i) {
 		for (unsigned int j = 0; j < m; ++j) {
 		    eps[m*i + j] *= sigma_ratio[j];
 		}

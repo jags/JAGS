@@ -11,7 +11,7 @@ namespace jags {
     namespace glm {
     
 	REGammaFactory::REGammaFactory()
-	    : REFactory("REGamma")
+	    : REFactory("glm::REGamma")
 	{}
 
 	REGammaFactory::~REGammaFactory()

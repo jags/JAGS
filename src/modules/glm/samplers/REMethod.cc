@@ -146,10 +146,10 @@ namespace jags {
 	    //Sanity checks
 	    unsigned int Neps = _eps->nodes().size();
 	    if (_x->nrow != _outcomes.size() || _z->nrow != _x->nrow) {
-		throwLogicError("Row mismatch in REGamma");
+		throwLogicError("Row mismatch in REMethod");
 	    }
 	    if (_x->ncol != _z->ncol * Neps || _x->ncol != _eps->length()) {
-		throwLogicError("Column mismatch in REGamma");
+		throwLogicError("Column mismatch in REMethod");
 	    }
 	    
 	    //Get current values of random effects
@@ -170,15 +170,28 @@ namespace jags {
 	    //If there are m columns of _z then _z[,i] is the sum of
 	    //every mth column of _x (starting with _x[,i]),
 	    //multiplied by the corresponding random effect
+
+	    /*
 	    for (unsigned int zcol = 0; zcol < _z->ncol; ++zcol) {
 		for (unsigned int i = 0; i < Neps; ++i) {
 		    int xcol = i * _z->ncol + zcol;
 		    for (int xi = Xp[xcol]; xi < Xp[xcol+1]; ++xi) {
 			int row = Xi[xi];
 			int zi = _z->nrow * zcol + row;
-			//_z[row,zcol] += _x[row,xcol] * exp[xcol]
+			//i.e. _z[row,zcol] += _x[row,xcol] * eps[xcol]
 			Zx[zi] += Xx[xi] * eps[xcol];
 		    }
+		}
+	    }
+	    */
+
+	    for (unsigned int xcol = 0; xcol < _x->ncol; ++xcol) {
+		int zcol = xcol % _z->ncol;
+		for (int xi = Xp[xcol]; xi < Xp[xcol+1]; ++xi) {
+		    int row = Xi[xi];
+		    int zi = _z->nrow * zcol + row;
+		    //i.e. _z[row,zcol] += _x[row,xcol] * eps[xcol]
+		    Zx[zi] += Xx[xi] * eps[xcol];
 		}
 	    }
 

@@ -11,7 +11,7 @@ namespace jags {
     namespace glm {
     
 	REScaledGammaFactory::REScaledGammaFactory()
-	    : REFactory("REScaledGamma")
+	    : REFactory("glm::REScaledGamma")
 	{}
 
 	REScaledGammaFactory::~REScaledGammaFactory()

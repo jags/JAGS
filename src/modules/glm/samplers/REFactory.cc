@@ -58,7 +58,8 @@ namespace jags {
 		else if (isBounded(eps[i])) {
 		    return false; 
 		}
-		else if (eps[i]->distribution()->name() != "dnorm") {
+		else if (eps[i]->distribution()->name() != "dnorm" &&
+			 eps[i]->distribution()->name() != "dmnorm") {
 		    return false;
 		}
 		else {
