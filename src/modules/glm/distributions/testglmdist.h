@@ -12,6 +12,8 @@ namespace jags {
 #include <cppunit/extensions/HelperMacros.h>
 #include <testlib.h>
 
+#include "DOrdered.h"
+
 class GLMDistTest : public CppUnit::TestFixture, public JAGSFixture
 {
 
@@ -28,7 +30,8 @@ class GLMDistTest : public CppUnit::TestFixture, public JAGSFixture
 
     jags::RScalarDist *_dscaled_gamma;
     jags::ArrayDist *_dscaled_wishart;
-
+    jags::glm::DOrdered *_dordered_logit;
+    
     void rscalar_rpq(jags::RScalarDist const *dist, 
 		     std::vector<double const *> const &par);
 

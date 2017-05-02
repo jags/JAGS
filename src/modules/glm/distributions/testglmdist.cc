@@ -4,6 +4,7 @@
 
 #include "DScaledGamma.h"
 #include "DScaledWishart.h"
+#include "DOrderedLogit.h"
 
 #include <MersenneTwisterRNG.h>
 #include <util/nainf.h>
@@ -44,6 +45,7 @@ void GLMDistTest::setUp() {
 
     _dscaled_gamma = new jags::glm::DScaledGamma();
     _dscaled_wishart = new jags::glm::DScaledWishart();
+    _dordered_logit = new jags::glm::DOrderedLogit();
 }
 
 void GLMDistTest::tearDown() {
@@ -52,6 +54,7 @@ void GLMDistTest::tearDown() {
 
     delete _dscaled_gamma;
     delete _dscaled_wishart;
+    delete _dordered_logit;
 }
 
 void GLMDistTest::npar()
@@ -60,18 +63,21 @@ void GLMDistTest::npar()
 
     CPPUNIT_ASSERT_EQUAL(_dscaled_gamma->npar(), 2U);
     CPPUNIT_ASSERT_EQUAL(_dscaled_wishart->npar(), 2U);
+    CPPUNIT_ASSERT_EQUAL(_dordered_logit->npar(), 2U);
 }
 
 void GLMDistTest::name()
 {
     CPPUNIT_ASSERT_EQUAL(string("dscaled.gamma"), _dscaled_gamma->name());
     CPPUNIT_ASSERT_EQUAL(string("dscaled.wishart"), _dscaled_wishart->name());
+    CPPUNIT_ASSERT_EQUAL(string("dordered.logit"), _dordered_logit->name());
 }
 
 void GLMDistTest::alias()
 {
     CPPUNIT_ASSERT_EQUAL(string(""), _dscaled_gamma->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _dscaled_wishart->alias());
+    CPPUNIT_ASSERT_EQUAL(string(""), _dordered_logit->alias());
 }
 
 void GLMDistTest::rscalar_rpq(RScalarDist const *dist, 
@@ -302,8 +308,8 @@ static double qdkwbound(double n, double p) {
 }
 
 void GLMDistTest::dkwtest(RScalarDist const *dist,
-			   vector<double const *> const &par,
-			   unsigned int N, double pthresh)
+			  vector<double const *> const &par,
+			  unsigned int N, double pthresh)
 {
     /*
       Test using the Dvoretzky-Kiefer-Wolfowitz (1956) bound on the
