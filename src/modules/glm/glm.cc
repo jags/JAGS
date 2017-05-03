@@ -12,7 +12,7 @@
 
 #include "distributions/DScaledGamma.h"
 #include "distributions/DScaledWishart.h"
-
+#include "distributions/DOrderedLogit.h"
 
 #include <cholmod.h>
 
@@ -64,6 +64,7 @@ namespace glm {
 	
 	insert(new DScaledGamma);
 	insert(new DScaledWishart);
+	insert(new DOrderedLogit);
     }
     
     GLMModule::~GLMModule() {

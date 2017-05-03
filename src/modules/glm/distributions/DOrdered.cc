@@ -32,9 +32,9 @@ namespace jags {
 				      vector<unsigned int> const &lengths) const
 	{
 	    double const * cut = CUT(par);
-	    unsigned int N = NCUT(lengths);
+	    unsigned int ncut = NCUT(lengths);
 	    
-	    for (unsigned int i = 1; i < N; ++i) {
+	    for (unsigned int i = 1; i < ncut; ++i) {
 		if (cut[i] <= cut[i-1]) return false;
 	    }
 	    return true;
@@ -43,16 +43,16 @@ namespace jags {
 	double DOrdered::density(double x, double mu, double const *cut,
 				 unsigned int ncut, bool give_log) const
 	{
-	    int y = static_cast<int>(x);
+	    int y = static_cast<int>(x) - 1;
 
-	    if (y <= 0 || y > ncut) {
+	    if (y < 0 || y > ncut) {
 		return JAGS_NEGINF;
 	    }
 	    else if (y == 0) {
-		return p(cut[y], mu, true, give_log);
+		return p(cut[0], mu, true, give_log);
 	    }
 	    else if (y == ncut) {
-		return p(cut[y], mu, false, give_log);
+		return p(cut[ncut - 1], mu, false, give_log);
 	    }
 	    else {
 		double delta = p(cut[y], mu, true, false) -

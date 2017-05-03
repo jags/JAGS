@@ -32,6 +32,9 @@ namespace glm {
 	else if (name == "dt") {
 	    return GLM_T;
 	}
+	else if (name == "dordered.logit") {
+	    return GLM_ORDLOGIT;
+	}
 	else {
 	    return GLM_UNKNOWN;
 	}

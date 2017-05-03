@@ -3,6 +3,7 @@
 #include "NormalLinear.h"
 #include "BinaryProbit.h"
 #include "BinaryLogit.h"
+#include "OrderedLogit.h"
 
 #include "HolmesHeldFactory.h"
 #include "HolmesHeld.h"
@@ -26,6 +27,7 @@ namespace glm {
     {
 	return (BinaryProbit::canRepresent(snode) ||
 		BinaryLogit::canRepresent(snode) ||
+		OrderedLogit::canRepresent(snode) ||
 		NormalLinear::canRepresent(snode));
     }
 
@@ -52,6 +54,10 @@ namespace glm {
 	    }
 	    else if (BinaryLogit::canRepresent(*p)) {
 		outcome = new BinaryLogit(*p, chain);
+		linear = false;
+	    }
+	    else if (OrderedLogit::canRepresent(*p)) {
+		outcome = new OrderedLogit(*p, chain);
 		linear = false;
 	    }
 	    else {

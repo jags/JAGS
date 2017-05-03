@@ -11,6 +11,7 @@
 //#include "BinaryLogit.h"
 #include "BinaryProbit.h"
 #include "PolyaGamma.h"
+#include "OrderedLogit.h"
 
 #include "GLMBlock.h"
 #include "GLMGibbs.h"
@@ -38,7 +39,8 @@ namespace glm {
 	    PolyaGamma::canRepresent(snode) ||
 	    BinaryProbit::canRepresent(snode) ||
 	    AuxMixPoisson::canRepresent(snode) ||
-	    AuxMixBinomial::canRepresent(snode);
+	    AuxMixBinomial::canRepresent(snode) ||
+	    OrderedLogit::canRepresent(snode);
     }
     
     GLMMethod *
@@ -70,6 +72,9 @@ namespace glm {
 	    }
 	    else if (AuxMixPoisson::canRepresent(*p)) {
 		outcome = new AuxMixPoisson(*p, chain);
+	    }
+	    else if (OrderedLogit::canRepresent(*p)) {
+		outcome = new OrderedLogit(*p, chain);
 	    }
 	    else {
 		throwLogicError("Invalid outcome in GLMGenericFactory");
