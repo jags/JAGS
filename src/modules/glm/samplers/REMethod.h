@@ -59,6 +59,7 @@ namespace glm {
 	 * @param rng Random number generator used for sampling
 	 */
 	void updateEps(RNG *rng);
+	virtual void updateSigma(RNG *rng) = 0;
 	virtual void updateTau(RNG *rng) = 0;
 	void update(RNG *rng);
 	void calDesignSigma();

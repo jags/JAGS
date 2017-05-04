@@ -21,10 +21,11 @@ namespace jags {
 	class REFactory : public SamplerFactory
 	{
 	    std::string _name;
+	  public:
 	    bool checkOutcome(StochasticNode const *snode) const;
 	    bool checkTau(SingletonGraphView const *tau) const;
 	    bool checkEps(GraphView const *eps) const;
-	  public:
+	    //public:
 	    REFactory(std::string const &name);
 	    ~REFactory();
 	    std::vector<Sampler*> 

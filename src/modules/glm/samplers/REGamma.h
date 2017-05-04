@@ -22,7 +22,6 @@ namespace jags {
 		    unsigned int chain);
 	    void updateTau(RNG *rng);
 	    void updateSigma(RNG *rng);
-	    void update(RNG *rng);
 	    bool isAdaptive() const;
 	    void adaptOff();
 	    bool checkAdaptation() const;

@@ -127,20 +127,6 @@ namespace jags {
 	    delete [] b;
 	}
 
-	void REMethod::update(RNG *rng) {
-
-	    // Update outcomes
-	    for (vector<Outcome*>::const_iterator p = _outcomes.begin();
-		 p != _outcomes.end(); ++p)
-	    {
-		(*p)->update(rng);
-	    }
-
-	    updateEps(rng);
-	    updateTau(rng);
-	
-	}
-
 	void REMethod::calDesignSigma()
 	{
 	    //Sanity checks
@@ -195,6 +181,21 @@ namespace jags {
 		}
 	    }
 
+	}
+
+	void REMethod::update(RNG *rng) {
+	    
+	    // Update outcomes
+	    for (vector<Outcome*>::const_iterator p = _outcomes.begin();
+		 p != _outcomes.end(); ++p)
+	    {
+		(*p)->update(rng);
+	    }
+	    
+	    updateEps(rng); //Update random effects
+	    updateTau(rng); //Sufficient parameterization
+	    updateSigma(rng); //Ancillary parameterization
+	    updateTau(rng); //Sufficient parameterization
 	}
 
     }

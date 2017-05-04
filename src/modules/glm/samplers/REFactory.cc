@@ -57,31 +57,33 @@ namespace jags {
 		if (isObserved(eps[i])) {
 		    return false;
 		}
-		else if (isBounded(eps[i])) {
+		if (isBounded(eps[i])) {
 		    return false; 
 		}
-		else if (eps[i]->distribution()->name() != "dnorm" &&
-			 eps[i]->distribution()->name() != "dmnorm") {
+		if (eps[i]->distribution()->name() != "dnorm" &&
+		    eps[i]->distribution()->name() != "dmnorm") {
 		    return false;
 		}
-		else {
-		    /* 
-		       Check that the random effects have zero mean and
-		       their precision parameters are all equal to tau.
-		       
-		       FIXME: In principle we could allow random effects
-		       to have non-zero means (that do not depend on tau)
-		       and for the precision parameters to be scale
-		       functions of tau. Keep this for a later revision.
-		    */
-		    Node const *mu_eps = eps[i]->parents()[0];
-		    if (!mu_eps->isFixed() || mu_eps->value(0)[0] != 0) {
+		/* 
+		   Check that the random effects have zero mean and
+		   their precision parameters are all equal to tau.
+		   
+		Node const *mu_eps = eps[i]->parents()[0];
+		if (!mu_eps->isFixed()) {
+		    return false;
+		}
+		for (unsigned int j = 0; j < mu_eps->length(); ++j) {
+		    if (mu_eps->value(0)[j] != 0) {
 			return false;
 		    }
-		    Node const *mu_tau = eps[i]->parents()[1];
-		    if (mu_tau != tau->node()) {
-			return false;
-		    }
+		}
+		*/
+		Node const *mu_tau = eps[i]->parents()[1];
+		if (mu_tau != tau->node()) {
+		    return false;
+		}
+		if (tau->isDependent(eps[i]->parents()[0])) {
+		    return false; //mean parameter depends on snode
 		}
 	    }
 	    
@@ -185,6 +187,7 @@ namespace jags {
 			outcome = new OrderedLogit(*p, ch);
 		    }
 		    else {
+			//FIXME: Add OrderedLogit, OrderedProbit
 			throwLogicError("Invalid outcome in REFactory");
 		    }
 		    outcomes.push_back(outcome);

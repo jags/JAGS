@@ -51,8 +51,9 @@ namespace jags {
 	    vector<StochasticNode *> const &eps = _eps->nodes();
 	    for (unsigned int i = 0; i < eps.size(); ++i) {
 		double Y = *eps[i]->value(_chain);
+		double mu = *eps[i]->parents()[0]->value(_chain);
 		shape += 0.5;
-		rate += Y * Y / 2.0;
+		rate += (Y - mu) * (Y - mu) / 2.0;
 	    }
 	    
 	    double x = rgamma(shape, 1.0/rate, rng);
@@ -84,23 +85,23 @@ namespace jags {
 		double X =  Zx[i]/sigma0;
 
 		A += X * X * lambda;
-		b += (Y - mu + Zx[i]) * X * lambda;
+		b += (Y - mu) * X * lambda;
 	    }
 
 	    //Set new value of sigma
-	    //FIXME: Truncate or not?
-	    //_sigma = rnorm(b/A, 1/sqrt(A), rng);
-	    _sigma = lnormal(0, rng, b/A, 1/sqrt(A));
+	    _sigma = lnormal(0, rng, _sigma + b/A, 1/sqrt(A));
 	    double sigma_ratio = _sigma/sigma0;
 	    
 	    //Rescale random effects
-	    vector<double> eps(_eps->length());
-	    _eps->getValue(eps, _chain);
+	    vector<StochasticNode *> const &eps = _eps->nodes();
+	    vector<double> eval(_eps->length());
 	    for (unsigned int i = 0; i < eps.size(); ++i) {
-		eps[i] *= sigma_ratio;
+		double Y = *eps[i]->value(_chain);
+		double mu = *eps[i]->parents()[0]->value(_chain);
+		eval[i] = mu + (Y - mu) * sigma_ratio;
 	    }
-	    _eps->setValue(eps, _chain);
-
+	    _eps->setValue(eval, _chain);
+	    
 	    /*
 	    //Rescale tau
 	    double tau = *_tau->node()->value(_chain);
@@ -108,21 +109,5 @@ namespace jags {
 	    _tau->setValue(&tau, 1, _chain);
 	    */
 	}
-
-	void REScaledGamma::update(RNG *rng) {
-	    
-	    // Update outcomes
-	    for (vector<Outcome*>::const_iterator p = _outcomes.begin();
-		 p != _outcomes.end(); ++p)
-	    {
-		(*p)->update(rng);
-	    }
-	    
-	    updateEps(rng);
-	    updateTau(rng); //Sufficient parameterization
-	    updateSigma(rng); //Ancillary parameterization
-	    updateTau(rng); //Sufficient parameterization
-	}
-
     }
 }

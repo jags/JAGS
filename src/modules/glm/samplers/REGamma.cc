@@ -85,28 +85,15 @@ namespace jags {
 	    _tau->setValue(&x, 1, _chain);
 
 	    //Rescale random effects
-	    vector<double> eps(_eps->length());
-	    _eps->getValue(eps, _chain);
 	    double sigma_ratio = sigma1/sigma0;
+	    vector<StochasticNode *> const &eps = _eps->nodes();
+	    vector<double> eval(_eps->length());
 	    for (unsigned int i = 0; i < eps.size(); ++i) {
-		eps[i] *= sigma_ratio;
+		double Y = *eps[i]->value(_chain);
+		double m = *eps[i]->parents()[0]->value(_chain);
+		eval[i] = m + (Y - m) * sigma_ratio;
 	    }
-	    _eps->setValue(eps, _chain);
-	}
-
-	void REGamma::update(RNG *rng) {
-	    
-	    // Update outcomes
-	    for (vector<Outcome*>::const_iterator p = _outcomes.begin();
-		 p != _outcomes.end(); ++p)
-	    {
-		(*p)->update(rng);
-	    }
-	    
-	    updateEps(rng);
-	    updateTau(rng); //Sufficient parameterization
-	    updateSigma(rng); //Ancillary parameterization
-	    updateTau(rng); //Sufficient parameterization
+	    _eps->setValue(eval, _chain);
 	}
 
 	bool REGamma::isAdaptive() const

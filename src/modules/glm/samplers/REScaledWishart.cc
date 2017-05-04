@@ -132,18 +132,19 @@ namespace jags {
 	    for (unsigned int j = 0; j < m; ++j) {
 		sigma_ratio[j] = _sigma[j]/sigma0[j];
 	    }
-	    
+
 	    //Rescale random effects
-	    vector<double> eps(_eps->length());
-	    _eps->getValue(eps, _chain);
-	    unsigned int Neff = _eps->nodes().size();
-	    for (unsigned int i = 0; i < Neff; ++i) {
+	    vector<StochasticNode *> const &eps = _eps->nodes();
+	    vector<double> eval(_eps->length());
+	    for (unsigned int i = 0; i < eps.size(); ++i) {
+		double const *Y = eps[i]->value(_chain);
+		double const *mu = eps[i]->parents()[0]->value(_chain);
 		for (unsigned int j = 0; j < m; ++j) {
-		    eps[m*i + j] *= sigma_ratio[j];
+		    eval[m*i + j] = mu[j] + (Y[j] - mu[j]) * sigma_ratio[j];
 		}
 	    }
-	    _eps->setValue(eps, _chain);
-
+	    _eps->setValue(eval, _chain);
+	    
 	    /*
 	    //Rescale tau
 	    double tau = *_tau->node()->value(_chain);
@@ -151,21 +152,5 @@ namespace jags {
 	    _tau->setValue(&tau, 1, _chain);
 	    */
 	}
-
-	void REScaledWishart::update(RNG *rng) {
-	    
-	    // Update outcomes
-	    for (vector<Outcome*>::const_iterator p = _outcomes.begin();
-		 p != _outcomes.end(); ++p)
-	    {
-		(*p)->update(rng);
-	    }
-	    
-	    updateEps(rng);
-	    updateTau(rng); //Sufficient parameterization
-	    updateSigma(rng); //Ancillary parameterization
-	    updateTau(rng); //Sufficient parameterization
-	}
-
     }
 }
