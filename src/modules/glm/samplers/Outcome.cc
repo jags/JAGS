@@ -10,19 +10,10 @@ namespace glm {
 
     static Node const *getLinearPredictor(StochasticNode const *snode)
     {
-	Node const *lp = 0;
-
-	//FIXME: Apart from checking that getFamily(snode) != GLM_UNKNOWN
-	//this switch statement seems pointless.
-	switch(getFamily(snode)) {
-	case GLM_NORMAL: case GLM_BERNOULLI: case GLM_BINOMIAL: case GLM_POISSON:
-	case GLM_LOGISTIC: case GLM_T: case GLM_ORDLOGIT:
-	    lp = snode->parents()[0];
-	    break;
-	case GLM_UNKNOWN:
-	    throwLogicError("Invalid distribution in GLMOutcome");
-	    break;
+	if (getFamily(snode) == GLM_UNKNOWN) {
+	    throwLogicError("Invalid distribution in glm::Outcome");
 	}
+	Node const *lp = snode->parents()[0];
 	
 	LinkNode const *ln = dynamic_cast<LinkNode const*>(lp);
 	if (ln) {

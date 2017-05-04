@@ -3,10 +3,10 @@ noinst_LTLIBRARIES = libglmdist.la
 libglmdist_la_CPPFLAGS = -I$(top_srcdir)/src/include
 
 libglmdist_la_SOURCES = DScaledGamma.cc DScaledWishart.cc \
-DOrdered.cc DOrderedLogit.cc
+DOrdered.cc DOrderedLogit.cc DOrderedProbit.cc
 
 noinst_HEADERS = DScaledGamma.h DScaledWishart.h \
-DOrdered.h DOrderedLogit.h
+DOrdered.h DOrderedLogit.h DOrderedProbit.h
 
 ## Test library 
 

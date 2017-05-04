@@ -35,6 +35,9 @@ namespace glm {
 	else if (name == "dordered.logit") {
 	    return GLM_ORDLOGIT;
 	}
+	else if (name == "dordered.probit") {
+	    return GLM_ORDPROBIT;
+	}
 	else {
 	    return GLM_UNKNOWN;
 	}

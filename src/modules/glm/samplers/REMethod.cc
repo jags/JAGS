@@ -138,10 +138,6 @@ namespace jags {
 		throwLogicError("Column mismatch in REMethod");
 	    }
 	    
-	    //Get current values of random effects
-	    vector<double> eps(_eps->length());
-	    _eps->getValue(eps, _chain);
-	    
 	    //Set up access to sparse design matrix for eps
 	    int *Xp = static_cast<int*>(_x->p);
 	    int *Xi = static_cast<int*>(_x->i);
@@ -157,30 +153,19 @@ namespace jags {
 	    //every mth column of _x (starting with _x[,i]),
 	    //multiplied by the corresponding random effect
 
-	    /*
-	    for (unsigned int zcol = 0; zcol < _z->ncol; ++zcol) {
-		for (unsigned int i = 0; i < Neps; ++i) {
+	    vector<StochasticNode*> const &eps=_eps->nodes();
+	    for (unsigned int i = 0; i < Neps; ++i) {
+		double const *eval = eps[i]->value(_chain);
+		double const *emean = eps[i]->parents()[0]->value(_chain);
+		for (unsigned int zcol = 0; zcol < _z->ncol; ++zcol) {
 		    int xcol = i * _z->ncol + zcol;
 		    for (int xi = Xp[xcol]; xi < Xp[xcol+1]; ++xi) {
 			int row = Xi[xi];
 			int zi = _z->nrow * zcol + row;
-			//i.e. _z[row,zcol] += _x[row,xcol] * eps[xcol]
-			Zx[zi] += Xx[xi] * eps[xcol];
+			Zx[zi] += Xx[xi] * (eval[zcol] - emean[zcol]);
 		    }
 		}
 	    }
-	    */
-
-	    for (unsigned int xcol = 0; xcol < _x->ncol; ++xcol) {
-		int zcol = xcol % _z->ncol;
-		for (int xi = Xp[xcol]; xi < Xp[xcol+1]; ++xi) {
-		    int row = Xi[xi];
-		    int zi = _z->nrow * zcol + row;
-		    //i.e. _z[row,zcol] += _x[row,xcol] * eps[xcol]
-		    Zx[zi] += Xx[xi] * eps[xcol];
-		}
-	    }
-
 	}
 
 	void REMethod::update(RNG *rng) {

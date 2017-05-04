@@ -63,10 +63,11 @@ namespace jags {
 		 p != eps.end(); ++p)
 	    {
 		double const *Y = (*p)->value(_chain);
+		double const *mu = (*p)->parents()[0]->value(_chain);
 		//FIXME: We could use blas call dsyr here
 		for (int j = 0; j < m; j++) {
 		    for (int k = 0; k < m; k++) {
-			R[j*m + k] += Y[j] * Y[k];
+			R[j*m + k] += (Y[j] - mu[j]) * (Y[k] - mu[k]);
 		    }
 		}
 		wdf += 1;
@@ -92,12 +93,15 @@ namespace jags {
 	    
 	    //Get parameters of posterior distribution for _sigma
 	    //Precision is A and mean is inverse(A) %*% b
+	    //We work on a scale where the current value sigma0 is the origin
 	    vector<double> A(m2, 0);
+	    vector<double> b(m, 0);
 	    for (unsigned int j = 0; j < m; ++j) {
-		A[j * m + j] = 1/(S[j] * S[j]);
+		double priorprec = 1.0/(S[j] * S[j]);
+		A[j * m + j] = priorprec;
+		b[j] = - sigma0[j] * priorprec;
 	    }
 
-	    vector<double> b(m, 0);
 	    unsigned int N = _outcomes.size();
 	    for (unsigned int i = 0; i < N; ++i) {
 		double Y = _outcomes[i]->value();
@@ -119,9 +123,9 @@ namespace jags {
 	    //Fixme: wouldn't it be better to do block sampling here?
 	    //Fixme: not reversible
 	    for (unsigned int j = 0; j < m; ++j) {
-		double mu  = _sigma[j] + b[j]/A[j*m+j];
-		double sigma = sqrt(1.0/A[j*m+j]);
-		_sigma[j] = lnormal(0, rng, mu, sigma);
+		double sigma_mean  = _sigma[j] + b[j]/A[j*m+j];
+		double sigma_sd = sqrt(1.0/A[j*m+j]);
+		_sigma[j] = lnormal(0, rng, sigma_mean, sigma_sd);
 		double delta = _sigma[j] - sigma0[j];
 		for (int k = 0; k < m; ++k) {
 		    b[k] -= delta * A[m*j + k];
