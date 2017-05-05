@@ -75,7 +75,7 @@ namespace jags {
 	    //Get parameters of posterior distribution for _sigma
 	    //Precision is A and mean is b/A
 	    double priorprec = 1.0/(S*S);
-	    double A = priorprec
+	    double A = priorprec;
 	    double b = - _sigma * priorprec;
 	    unsigned int N = _outcomes.size();
 	    for (unsigned int i = 0; i < N; ++i) {

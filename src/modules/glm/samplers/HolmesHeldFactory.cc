@@ -1,6 +1,5 @@
 #include <config.h>
 
-#include "NormalLinear.h"
 #include "BinaryProbit.h"
 #include "BinaryLogit.h"
 #include "OrderedLogit.h"
@@ -36,7 +35,6 @@ namespace glm {
 			     vector<SingletonGraphView const *> const &subviews,
 			     unsigned int chain, bool gibbs) const
     {
-	bool linear = true;
 	vector<Outcome*> outcomes;
 
 	vector<StochasticNode *>::const_iterator p;
