@@ -61,8 +61,9 @@ namespace jags {
 	    vector<StochasticNode *> const &eps = _eps->nodes();
 	    for (unsigned int i = 0; i < eps.size(); ++i) {
 		double Y = *eps[i]->value(_chain);
+		double mu = *eps[i]->parents()[0]->value(_chain);
 		shape += 0.5;
-		rate += Y * Y / 2.0;
+		rate += (Y - mu) * (Y - mu) / 2.0;
 	    }
 
 	    double x = rgamma(shape, 1.0/rate, rng);
@@ -90,8 +91,8 @@ namespace jags {
 	    vector<double> eval(_eps->length());
 	    for (unsigned int i = 0; i < eps.size(); ++i) {
 		double Y = *eps[i]->value(_chain);
-		double m = *eps[i]->parents()[0]->value(_chain);
-		eval[i] = m + (Y - m) * sigma_ratio;
+		double mu = *eps[i]->parents()[0]->value(_chain);
+		eval[i] = mu + (Y - mu) * sigma_ratio;
 	    }
 	    _eps->setValue(eval, _chain);
 	}
