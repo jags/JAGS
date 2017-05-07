@@ -38,9 +38,13 @@ namespace glm {
 	else if (name == "dordered.probit") {
 	    return GLM_ORDPROBIT;
 	}
+	else if (name == "dmnorm") {
+	    return GLM_MNORMAL;
+	}
 	else {
 	    return GLM_UNKNOWN;
 	}
+
     }
 
     GLMLink getLink(StochasticNode const *snode)

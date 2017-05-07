@@ -13,6 +13,7 @@
 #include "PolyaGamma.h"
 #include "OrderedLogit.h"
 #include "OrderedProbit.h"
+#include "MNormalLinear.h"
 
 #include "GLMBlock.h"
 #include "GLMGibbs.h"
@@ -42,7 +43,8 @@ namespace glm {
 	    AuxMixPoisson::canRepresent(snode) ||
 	    AuxMixBinomial::canRepresent(snode) ||
 	    OrderedLogit::canRepresent(snode) ||
-	    OrderedProbit::canRepresent(snode);
+	    OrderedProbit::canRepresent(snode) ||
+	    MNormalLinear::canRepresent(snode);
     }
     
     GLMMethod *
@@ -80,6 +82,9 @@ namespace glm {
 	    }
 	    else if (OrderedProbit::canRepresent(*p)) {
 		outcome = new OrderedProbit(*p, chain);
+	    }
+	    else if (MNormalLinear::canRepresent(*p)) {
+		outcome = new MNormalLinear(*p, chain);
 	    }
 	    else {
 		throwLogicError("Invalid outcome in GLMGenericFactory");

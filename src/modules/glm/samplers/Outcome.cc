@@ -24,7 +24,9 @@ namespace glm {
     }
 
     Outcome::Outcome(StochasticNode const *snode, unsigned int chain)
-	: _lp(getLinearPredictor(snode)->value(chain)[0])
+	: _lp(getLinearPredictor(snode)->value(chain)[0]),
+	  _length(snode->length()),
+	  _vmean(getLinearPredictor(snode)->value(chain))
     {
     }
 
@@ -59,6 +61,30 @@ namespace glm {
     {
 	return false;
     }
+
+    unsigned int Outcome::length() const
+    {
+	return _length;
+    }
+
+    
+    double const *Outcome::vmean() const
+    {
+	return _vmean;
+    }
+    
+    double const *Outcome::vprecision() const
+    {
+	//FIXME: Bit of a hack 
+	return 0;
+    }
+
+    double const *Outcome::vvalue() const
+    {
+	//FIXME: Bit of a hack 
+	return 0;
+    }
+
 }}
     
 
