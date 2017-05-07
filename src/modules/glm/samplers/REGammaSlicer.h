@@ -3,31 +3,19 @@
 
 #include <sampler/Slicer.h>
 
-#include <vector>
-
-extern "C" {
-#include <cholmod.h>
-}
-
-using std::vector;
-
 namespace jags {
     namespace glm {
 
-	class Outcome;
+	class REGamma;
 
 	class REGammaSlicer : public Slicer
 	{
-	    std::vector<Outcome const *> _outcomes;
-	    cholmod_sparse const *_x;
-	    cholmod_dense const *_z;
+	    REGamma const *_regamma;
 	    double const *_shape;
 	    double const *_rate;
 	    double _sigma, _sigma0;
-	    REGammaSlicer *_slicer;
 	  public:
-	    REGammaSlicer(std::vector<Outcome*> const &outcomes,
-			  cholmod_sparse const *x, cholmod_dense const *z,
+	    REGammaSlicer(REGamma const *regamma,
 			  double const *shape, double const *rate,
 			  double sigma);
 	    double value() const;

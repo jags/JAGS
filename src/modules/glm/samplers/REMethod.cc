@@ -183,5 +183,51 @@ namespace jags {
 	    updateTau(rng); //Sufficient parameterization
 	}
 
+	void REMethod::calCoefSigma(double *A, double *b, double const *sigma0,
+				    unsigned int m) const
+	{
+	    double const *Zx = static_cast<double const *>(_z->x);
+	    unsigned int N = _outcomes.size();
+
+	    for (unsigned int i = 0; i < N; ++i) {
+		double Y = _outcomes[i]->value();
+		double mu = _outcomes[i]->mean();
+		double lambda = _outcomes[i]->precision();
+		vector<double> X(m);
+		for (unsigned int j = 0; j < m; ++j) {
+		    X[j] =  Zx[j*N+i]/sigma0[j];
+		}
+		for (unsigned int j = 0; j < m; ++j) {
+		    for (unsigned int k = 0; k < m; ++k) {
+			A[j*m + k] += X[j] * X[k] * lambda;
+		    }
+		    b[j] += (Y - mu) * X[j] * lambda;
+		}
+	    }
+	}
+
+	double REMethod::logLikelihoodSigma(double const *sigma,
+					    double const *sigma0,
+					    unsigned int m) const
+	{
+	    vector<double> A(m*m);
+	    vector<double> b(m);
+	    calCoefSigma(&A[0], &b[0], sigma0, m);
+
+	    vector<double> delta(m);
+	    for (unsigned int i = 0; i < m; ++i) {
+		delta[i] = sigma[i] - sigma0[i];
+	    }
+	    
+	    double loglik = 0;
+	    for (unsigned int i = 0; i < m; ++i) {
+		loglik += b[i] * delta[i];
+		for (unsigned int j = 0; j < m; ++j) {
+		    loglik -= delta[i] * A[i*m + j] * delta[j] /2.0;
+		}
+	    }
+	    return loglik;
+	}
+	
     }
 }

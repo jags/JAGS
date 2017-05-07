@@ -1,7 +1,6 @@
 #include <config.h>
 
 #include "REGamma.h"
-#include "Outcome.h"
 
 #include <JRmath.h>
 #include <sampler/SingletonGraphView.h>
@@ -38,31 +37,33 @@ namespace jags {
 
     namespace glm {
 
+	class Outcome;
+	
 	REGamma::REGamma(SingletonGraphView const *tau,
 			 GraphView const *eps,
 			 vector<SingletonGraphView const *> const &sub_eps,
 			 vector<Outcome *> const &outcomes,
 			 unsigned int chain)
 	    : REMethod(tau, eps, sub_eps, outcomes, chain),
-	      _slicer(outcomes, _x, _z, SHAPE(tau, chain), RATE(tau, chain),
+	      _slicer(this, SHAPE(tau, chain), RATE(tau, chain),
 		      SIGMA(tau, chain))
 	{
 	}
-	
 
 	void REGamma::updateTau(RNG *rng)
 	{
 	    vector<Node const*> const &par = _tau->node()->parents();
 	    double shape = *par[0]->value(_chain); 
 	    double rate = *par[1]->value(_chain); //(1/scale)
-    
+
 	    // Likelihood
 	    //vector<StochasticNode *> const &sch = _tau->stochasticChildren();
 	    vector<StochasticNode *> const &eps = _eps->nodes();
 	    for (unsigned int i = 0; i < eps.size(); ++i) {
 		double Y = *eps[i]->value(_chain);
+		double mu = *eps[i]->parents()[0]->value(_chain);
 		shape += 0.5;
-		rate += Y * Y / 2.0;
+		rate += (Y - mu) * (Y - mu) / 2.0;
 	    }
 
 	    double x = rgamma(shape, 1.0/rate, rng);
@@ -110,7 +111,6 @@ namespace jags {
 	{
 	    return _slicer.checkAdaptation();
 	}
-
 
     }
 }

@@ -102,22 +102,7 @@ namespace jags {
 		b[j] = - sigma0[j] * priorprec;
 	    }
 
-	    unsigned int N = _outcomes.size();
-	    for (unsigned int i = 0; i < N; ++i) {
-		double Y = _outcomes[i]->value();
-		double mu = _outcomes[i]->mean();
-		double lambda = _outcomes[i]->precision();
-		vector<double> X(m);
-		for (unsigned int j = 0; j < m; ++j) {
-		    X[j] =  Zx[j*N+i]/sigma0[j];
-		}
-		for (unsigned int j = 0; j < m; ++j) {
-		    for (unsigned int k = 0; k < m; ++k) {
-			A[j*m + k] += X[j] * X[k] * lambda;
-		    }
-		    b[j] += (Y - mu) * X[j] * lambda;
-		}
-	    }
+	    calCoefSigma(&A[0], &b[0], &sigma0[0], m);
 	    
 	    //Sample each sigma from its full conditional
 	    //Fixme: wouldn't it be better to do block sampling here?
