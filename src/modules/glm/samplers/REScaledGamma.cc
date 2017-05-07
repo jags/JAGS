@@ -82,17 +82,8 @@ namespace jags {
 
 	    //Set new value of sigma
 	    _sigma = lnormal(0, rng, _sigma + b/A, 1/sqrt(A));
-	    double sigma_ratio = _sigma/sigma0;
-	    
-	    //Rescale random effects
-	    vector<StochasticNode *> const &eps = _eps->nodes();
-	    vector<double> eval(_eps->length());
-	    for (unsigned int i = 0; i < eps.size(); ++i) {
-		double Y = *eps[i]->value(_chain);
-		double mu = *eps[i]->parents()[0]->value(_chain);
-		eval[i] = mu + (Y - mu) * sigma_ratio;
-	    }
-	    _eps->setValue(eval, _chain);
+
+	    rescaleSigma(&_sigma, &sigma0, 1);
 	    
 	    /*
 	    //Rescale tau

@@ -117,22 +117,8 @@ namespace jags {
 		}
 	    }
 
-	    vector<double> sigma_ratio(m);
-	    for (unsigned int j = 0; j < m; ++j) {
-		sigma_ratio[j] = _sigma[j]/sigma0[j];
-	    }
-
 	    //Rescale random effects
-	    vector<StochasticNode *> const &eps = _eps->nodes();
-	    vector<double> eval(_eps->length());
-	    for (unsigned int i = 0; i < eps.size(); ++i) {
-		double const *Y = eps[i]->value(_chain);
-		double const *mu = eps[i]->parents()[0]->value(_chain);
-		for (unsigned int j = 0; j < m; ++j) {
-		    eval[m*i + j] = mu[j] + (Y[j] - mu[j]) * sigma_ratio[j];
-		}
-	    }
-	    _eps->setValue(eval, _chain);
+	    rescaleSigma(&_sigma[0], &sigma0[0], m);
 	    
 	    /*
 	    //Rescale tau

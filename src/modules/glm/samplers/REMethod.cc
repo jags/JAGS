@@ -205,7 +205,7 @@ namespace jags {
 		}
 	    }
 	}
-
+	
 	double REMethod::logLikelihoodSigma(double const *sigma,
 					    double const *sigma0,
 					    unsigned int m) const
@@ -227,6 +227,27 @@ namespace jags {
 		}
 	    }
 	    return loglik;
+	}
+
+	void REMethod::rescaleSigma(double const *sigma,
+				    double const *sigma0,
+				    unsigned int m)
+	{
+	    vector<double> sigma_ratio(m);
+	    for (unsigned int i = 0; i < m; ++i) {
+		sigma_ratio[i] = sigma[i]/sigma0[i];
+	    }
+	    
+	    vector<StochasticNode *> const &eps = _eps->nodes();
+	    vector<double> eval(_eps->length());
+	    for (unsigned int i = 0; i < eps.size(); ++i) {
+		double const *Y = eps[i]->value(_chain);
+		double const *mu = eps[i]->parents()[0]->value(_chain);
+		for (unsigned int j = 0; j < m; ++j) {
+		    eval[m*i + j] = mu[j] + (Y[j] - mu[j]) * sigma_ratio[j];
+		}
+	    }
+	    _eps->setValue(eval, _chain);
 	}
 	
     }
