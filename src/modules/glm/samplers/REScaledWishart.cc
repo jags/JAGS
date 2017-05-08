@@ -102,22 +102,7 @@ namespace jags {
 		b[j] = - sigma0[j] * priorprec;
 	    }
 
-	    unsigned int N = _outcomes.size();
-	    for (unsigned int i = 0; i < N; ++i) {
-		double Y = _outcomes[i]->value();
-		double mu = _outcomes[i]->mean();
-		double lambda = _outcomes[i]->precision();
-		vector<double> X(m);
-		for (unsigned int j = 0; j < m; ++j) {
-		    X[j] =  Zx[j*N+i]/sigma0[j];
-		}
-		for (unsigned int j = 0; j < m; ++j) {
-		    for (unsigned int k = 0; k < m; ++k) {
-			A[j*m + k] += X[j] * X[k] * lambda;
-		    }
-		    b[j] += (Y - mu) * X[j] * lambda;
-		}
-	    }
+	    calCoefSigma(&A[0], &b[0], &sigma0[0], m);
 	    
 	    //Sample each sigma from its full conditional
 	    //Fixme: wouldn't it be better to do block sampling here?
@@ -132,22 +117,8 @@ namespace jags {
 		}
 	    }
 
-	    vector<double> sigma_ratio(m);
-	    for (unsigned int j = 0; j < m; ++j) {
-		sigma_ratio[j] = _sigma[j]/sigma0[j];
-	    }
-
 	    //Rescale random effects
-	    vector<StochasticNode *> const &eps = _eps->nodes();
-	    vector<double> eval(_eps->length());
-	    for (unsigned int i = 0; i < eps.size(); ++i) {
-		double const *Y = eps[i]->value(_chain);
-		double const *mu = eps[i]->parents()[0]->value(_chain);
-		for (unsigned int j = 0; j < m; ++j) {
-		    eval[m*i + j] = mu[j] + (Y[j] - mu[j]) * sigma_ratio[j];
-		}
-	    }
-	    _eps->setValue(eval, _chain);
+	    rescaleSigma(&_sigma[0], &sigma0[0], m);
 	    
 	    /*
 	    //Rescale tau

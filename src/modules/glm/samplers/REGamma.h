@@ -7,8 +7,6 @@
 namespace jags {
     namespace glm {
 
-	class REGammaSlicer;
-	
 	/**
 	 * @short Random effects sampler for gamma precision
 	 */

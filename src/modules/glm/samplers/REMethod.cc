@@ -21,6 +21,15 @@ extern cholmod_common *glm_wk;
 namespace jags {
     namespace glm {
 
+	static unsigned int sumLengths(vector<Outcome*> const &outcomes)
+	{
+	    unsigned int s = 0;
+	    for (unsigned int i = 0; i < outcomes.size(); ++i) {
+		s += outcomes[i]->length();
+	    }
+	    return s;
+	}
+	
 	REMethod::REMethod(SingletonGraphView const *tau,
 			   GraphView const *eps,
 			   vector<SingletonGraphView const *> const &sub_eps,
@@ -31,7 +40,7 @@ namespace jags {
 	    calDesign();
 	    symbolic();
 
-	    unsigned int nrow = _outcomes.size();
+	    unsigned int nrow = sumLengths(_outcomes);
 	    unsigned int ncol = eps->nodes()[0]->length();
 	    _z = cholmod_allocate_dense(nrow, ncol, nrow, CHOLMOD_REAL,
 					glm_wk);
@@ -131,7 +140,7 @@ namespace jags {
 	{
 	    //Sanity checks
 	    unsigned int Neps = _eps->nodes().size();
-	    if (_x->nrow != _outcomes.size() || _z->nrow != _x->nrow) {
+	    if (_z->nrow != _x->nrow) {
 		throwLogicError("Row mismatch in REMethod");
 	    }
 	    if (_x->ncol != _z->ncol * Neps || _x->ncol != _eps->length()) {
@@ -183,5 +192,119 @@ namespace jags {
 	    updateTau(rng); //Sufficient parameterization
 	}
 
+	void REMethod::calCoefSigma(double *A, double *b, double const *sigma0,
+				    unsigned int m) const
+	{
+	    double const *Zx = static_cast<double const *>(_z->x);
+	    unsigned int N = _outcomes.size();
+
+	    int xrow = 0;
+	    for (unsigned int i = 0; i < N; ++i) {
+		unsigned int n = _outcomes[i]->length();
+		if (n == 1) {
+		    //Scalar outcome
+		    double Y = _outcomes[i]->value();
+		    double mu = _outcomes[i]->mean();
+		    double lambda = _outcomes[i]->precision();
+		    vector<double> X(m);
+		    for (unsigned int j = 0; j < m; ++j) {
+			X[j] =  Zx[j * _z->nrow + xrow]/sigma0[j];
+		    }
+		    for (unsigned int j = 0; j < m; ++j) {
+			for (unsigned int k = 0; k < m; ++k) {
+			    A[j*m + k] += X[j] * X[k] * lambda;
+			}
+			b[j] += (Y - mu) * X[j] * lambda;
+		    }
+		}
+		else {
+		    //Multivariate outcome
+		    double const *Y = _outcomes[i]->vvalue();
+		    double const *mu = _outcomes[i]->vmean();
+		    double const *lambda = _outcomes[i]->vprecision();
+
+		    // delta = Y - mu
+		    vector<double> delta(n);
+		    for (unsigned int p = 0; p < n; ++p) {
+			delta[p] = Y[p] - mu[p];
+		    }
+		    
+		    //X = Scaled design matrix for outcome i
+		    vector<double> X(m*n); //n x m matrix
+		    for (unsigned int j = 0; j < m; ++j) {
+			double const *Zj = &Zx[j * _z->nrow + xrow];
+			for (unsigned int p = 0; p < n; ++p) {
+			    X[j*n + p] = Zj[p]/sigma0[j];
+			}
+		    }
+
+		    // Tx = lambda %*% X (n x m matrix)
+		    vector<double> TX(n*m, 0); 
+		    for (int j = 0; j < m; ++j) {
+			for (unsigned int p = 0; p < n; ++p) {
+			    b[j] += delta[p] * X[j*n + p];
+			    for (unsigned int q = 0; q < n; ++q) {
+				TX[j*n + p] += lambda[n*p + q] * X[j*n + q];
+			    }
+			}
+		    }
+
+		    for (unsigned int j = 0; j < m; ++j) {
+			for (unsigned int p = 0; p < n; ++p) {
+			    b[j] += delta[p] * TX[j*n + p];
+			    for (unsigned int k = 0; k < m; ++k) {
+				A[j*m + k] += X[j*n + p] * TX[k*n + p];
+			    }
+			}
+		    }
+		}
+		xrow += n;
+	    }
+	}
+	
+	double REMethod::logLikelihoodSigma(double const *sigma,
+					    double const *sigma0,
+					    unsigned int m) const
+	{
+	    vector<double> A(m*m);
+	    vector<double> b(m);
+	    calCoefSigma(&A[0], &b[0], sigma0, m);
+
+	    vector<double> delta(m);
+	    for (unsigned int i = 0; i < m; ++i) {
+		delta[i] = sigma[i] - sigma0[i];
+	    }
+	    
+	    double loglik = 0;
+	    for (unsigned int i = 0; i < m; ++i) {
+		loglik += b[i] * delta[i];
+		for (unsigned int j = 0; j < m; ++j) {
+		    loglik -= delta[i] * A[i*m + j] * delta[j] /2.0;
+		}
+	    }
+	    return loglik;
+	}
+
+	void REMethod::rescaleSigma(double const *sigma,
+				    double const *sigma0,
+				    unsigned int m)
+	{
+	    vector<double> sigma_ratio(m);
+	    for (unsigned int i = 0; i < m; ++i) {
+		sigma_ratio[i] = sigma[i]/sigma0[i];
+	    }
+	    
+	    vector<StochasticNode *> const &eps = _eps->nodes();
+	    vector<double> eval(_eps->length());
+	    for (unsigned int i = 0; i < eps.size(); ++i) {
+		double const *Y = eps[i]->value(_chain);
+		double const *mu = eps[i]->parents()[0]->value(_chain);
+		for (unsigned int j = 0; j < m; ++j) {
+		    eval[m*i + j] = mu[j] + (Y[j] - mu[j]) * sigma_ratio[j];
+		}
+	    }
+	    _eps->setValue(eval, _chain);
+	}
+	
     }
 }

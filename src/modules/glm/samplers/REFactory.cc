@@ -12,6 +12,7 @@
 #include "PolyaGamma.h"
 #include "OrderedLogit.h"
 #include "OrderedProbit.h"
+#include "MNormalLinear.h"
 
 #include <graph/Graph.h>
 #include <graph/StochasticNode.h>
@@ -45,7 +46,8 @@ namespace jags {
 		AuxMixPoisson::canRepresent(snode) ||
 		AuxMixBinomial::canRepresent(snode) ||
 		OrderedLogit::canRepresent(snode) ||
-		OrderedProbit::canRepresent(snode);
+		OrderedProbit::canRepresent(snode) ||
+		MNormalLinear::canRepresent(snode);
 	}
 
 	bool REFactory::checkTau(SingletonGraphView const *tau) const
@@ -66,20 +68,7 @@ namespace jags {
 		    eps[i]->distribution()->name() != "dmnorm") {
 		    return false;
 		}
-		/* 
-		   Check that the random effects have zero mean and
-		   their precision parameters are all equal to tau.
-		   
-		Node const *mu_eps = eps[i]->parents()[0];
-		if (!mu_eps->isFixed()) {
-		    return false;
-		}
-		for (unsigned int j = 0; j < mu_eps->length(); ++j) {
-		    if (mu_eps->value(0)[j] != 0) {
-			return false;
-		    }
-		}
-		*/
+
 		Node const *mu_tau = eps[i]->parents()[1];
 		if (mu_tau != tau->node()) {
 		    return false;
@@ -190,6 +179,9 @@ namespace jags {
 		    }
 		    else if (OrderedProbit::canRepresent(*p)) {
 			outcome = new OrderedProbit(*p, ch);
+		    }
+		    else if (MNormalLinear::canRepresent(*p)) {
+			outcome = new MNormalLinear(*p, ch);
 		    }
 		    else {
 			throwLogicError("Invalid outcome in REFactory");

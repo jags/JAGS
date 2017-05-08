@@ -77,29 +77,13 @@ namespace jags {
 	    double priorprec = 1.0/(S*S);
 	    double A = priorprec;
 	    double b = - _sigma * priorprec;
-	    unsigned int N = _outcomes.size();
-	    for (unsigned int i = 0; i < N; ++i) {
-		double Y = _outcomes[i]->value();
-		double mu = _outcomes[i]->mean();
-		double lambda = _outcomes[i]->precision();
-		double X =  Zx[i]/sigma0;
-		A += X * X * lambda;
-		b += (Y - mu) * X * lambda;
-	    }
+
+	    calCoefSigma(&A, &b, &_sigma, 1);
 
 	    //Set new value of sigma
 	    _sigma = lnormal(0, rng, _sigma + b/A, 1/sqrt(A));
-	    double sigma_ratio = _sigma/sigma0;
-	    
-	    //Rescale random effects
-	    vector<StochasticNode *> const &eps = _eps->nodes();
-	    vector<double> eval(_eps->length());
-	    for (unsigned int i = 0; i < eps.size(); ++i) {
-		double Y = *eps[i]->value(_chain);
-		double mu = *eps[i]->parents()[0]->value(_chain);
-		eval[i] = mu + (Y - mu) * sigma_ratio;
-	    }
-	    _eps->setValue(eval, _chain);
+
+	    rescaleSigma(&_sigma, &sigma0, 1);
 	    
 	    /*
 	    //Rescale tau

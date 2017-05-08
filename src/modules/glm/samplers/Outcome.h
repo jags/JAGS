@@ -24,6 +24,8 @@ namespace glm {
     class Outcome  {
       protected:
 	double const &_lp;
+	unsigned int _length;
+	double const *_vmean;
       public:
 	/**
 	 * Constructor
@@ -84,6 +86,14 @@ namespace glm {
 	 * "A" is fixed at any given iteration. The default returns false.
 	 */
 	virtual bool fixedA() const;
+	/**
+	 * Returns the length of the node represented by the Outcome
+	 */
+	unsigned int length() const;
+	virtual double const *vmean() const;
+	virtual double const *vprecision() const;
+	virtual double const *vvalue() const;
+
     };
 
 }}
