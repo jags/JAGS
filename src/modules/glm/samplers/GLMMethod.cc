@@ -350,8 +350,8 @@ namespace glm {
 	    if (m == 1) {
 		//Scalar outcome
 		double tau = _outcomes[i]->precision();
-		double delta = tau * (_outcomes[c]->value() -
-				      _outcomes[c]->mean());
+		double delta = tau * (_outcomes[i]->value() -
+				      _outcomes[i]->mean());
 		for (r = Tp[c]; r < Tp[c+1]; ++r) {
 		    b[Ti[r]] += Tx[r] * delta;
 		    Tx[r] *= tau;
