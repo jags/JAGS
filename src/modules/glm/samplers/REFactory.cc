@@ -12,6 +12,7 @@
 #include "PolyaGamma.h"
 #include "OrderedLogit.h"
 #include "OrderedProbit.h"
+#include "MNormalLinear.h"
 
 #include <graph/Graph.h>
 #include <graph/StochasticNode.h>
@@ -45,7 +46,8 @@ namespace jags {
 		AuxMixPoisson::canRepresent(snode) ||
 		AuxMixBinomial::canRepresent(snode) ||
 		OrderedLogit::canRepresent(snode) ||
-		OrderedProbit::canRepresent(snode);
+		OrderedProbit::canRepresent(snode) ||
+		MNormalLinear::canRepresent(snode);
 	}
 
 	bool REFactory::checkTau(SingletonGraphView const *tau) const
@@ -177,6 +179,9 @@ namespace jags {
 		    }
 		    else if (OrderedProbit::canRepresent(*p)) {
 			outcome = new OrderedProbit(*p, ch);
+		    }
+		    else if (MNormalLinear::canRepresent(*p)) {
+			outcome = new MNormalLinear(*p, ch);
 		    }
 		    else {
 			throwLogicError("Invalid outcome in REFactory");
