@@ -5,7 +5,7 @@
 \usepackage{url}
 \usepackage{multirow}
 \usepackage{amsfonts}
-\newcommand{\release}{4.0.0}
+\newcommand{\release}{4.3.0}
 \newcommand{\JAGS}{\textsf{JAGS}}
 \newcommand{\rjags}{\textsf{rjags}}
 \newcommand{\BUGS}{\textsf{BUGS}}
@@ -16,7 +16,7 @@
 
 \title{JAGS Version \release\ user manual}
 \author{Martyn Plummer}
-\date{1 October 2015}
+\date{15 May 2017}
 \maketitle
 
 \tableofcontents
@@ -173,17 +173,50 @@ as it implies writing two different values to the same element \verb+x[1]+.
 
 \subsubsection{For loops}
 
-Node arrays can be traversed with for loops. In the linear regression
-example above, a for loop is used to define nodes \verb+Y[i]+ and
-\verb+mu[i]+ for values of $i$ ranging from $1$ to $M$.
-
+Node arrays can be traversed with for loops. 
 A general expression for a for loop takes the form
 \begin{verbatim}
-for (ind in exp) {
+for (i in exp) {
 }
 \end{verbatim}
-where \verb+exp+ is any expression that evaluates to an integer
-vector.
+where \texttt{exp} is any expression that evaluates to an integer
+vector. The contents of the for loop inside the curly braces will then
+be expanded with the index \texttt{i} taking each value in the vector
+\texttt{exp}. For example
+\begin{verbatim}
+for (i in 1:3) {
+   Y[i] ~ dnorm(mu, tau)
+}
+\end{verbatim}
+is equivalent to
+\begin{verbatim}
+Y[1] ~ dnorm(mu, tau)
+Y[2] ~ dnorm(mu, tau)
+Y[3] ~ dnorm(mu, tau)
+\end{verbatim}
+As in the above exmaple, for loops generally use the sequence operator
+\verb+:+ to generate an increasing sequence of integers. This operator
+has high precedence, so is important to use brackets to ensure that
+the expression is interpreted correctly. For example, to get a for
+loop from $1$ to $m+1$ the correct expression is
+\begin{verbatim}
+for (i in 1:(m+1)) {
+}
+\end{verbatim}
+Omitting the brackets as in the following expression:
+\begin{verbatim}
+for (i in 1:m+1) {
+}
+\end{verbatim}
+gives a for loop from $2$ to $m+1$.
+
+The sequence operator \verb+:+ can only produce increasing sequences
+(See section \label{base:functions}). If $n < m$ then \verb+m:n+
+produces a vector of length zero and when this is used in a for loop
+index expression the contents of loop inside the curly brackets are
+skipped. Note that this behaviour is different from the sequence
+operator in R, where \verb+m:n+ will produce a {\em decreasing}
+sequence if $n < m$.
 
 \subsection{Data}
 \label{section:data}
@@ -952,237 +985,6 @@ to a file named \verb+jags.dumpN.R+ where $N$ is the chain number.
 You should then load the dumped data into R to inspect the state of
 each chain when the error occurred.
 
-\chapter{Modules}
-\label{section:modules}
-
-The \JAGS\  library is distributed along with certain dynamically
-loadable modules that extend its functionality. A module can define
-new objects of the following classes:
-\begin{enumerate}
-\item {\bf functions} and {\bf distributions}, the basic building
-blocks of the BUGS language.
-\item {\bf samplers}, the objects which update the parameters of the
-model at each iteration, and {\bf sampler factories}, the objects that 
-create new samplers for specific model structures.  If the module
-defines a new distribution, then it will typically also define a new
-sampler for that distribution.
-\item {\bf monitors}, the objects that record sampled values for
-later analysis, and {\bf monitor factories} that create them. 
-\item {\bf random number generators}, the objects that drive the
-MCMC algorithm and {\bf RNG factories} that create them.
-\end{enumerate}
-
-The \verb+base+ module and the \verb+bugs+ module are loaded automatically
-at start time.  Others may be loaded by the user.
-
-\section{The base module}
-
-The base module supply the base functionality for the \JAGS\ library
-to function correctly. It is loaded first by default.  
-
-\subsection{Base Samplers}
-
-The \verb+base+ module defines samplers that use highly generic update
-methods.  These sampling methods only require basic information about
-the stochastic nodes they sample.  Conversely, they may not be fully
-efficient.
-
-Three samplers are currently defined:
-\begin{enumerate}
-\item The Finite sampler can sample a discrete-valued node with
-fixed support of less than 20 possible values. The node must not
-be bounded using the \verb+T(,)+ construct
-\item The Real Slice Sampler can sample any scalar real-valued 
-stochastic node.
-\item The Discrete Slice Sampler can sample any scalar
-discrete-valued stochastic node.
-\end{enumerate}
-
-\subsection{Base RNGs}
-
-The \verb+base+ module defines four RNGs, taken directly from \R,
-with the following names:
-\begin{enumerate}
-\item \verb+"base::Wichmann-Hill"+
-\item \verb+"base::Marsaglia-Multicarry"+
-\item \verb+"base::Super-Duper"+
-\item \verb+"base::Mersenne-Twister"+
-\end{enumerate}
-
-A single RNG factory object is also defined by the \verb+base+
-module which will supply these RNGs for chains 1 to 4 respectively, if
-``RNG.name'' is not specified in the initial values file.  All chains
-generated by the base RNG factory are initialized using the current
-time stamp.
-
-If you have more than four parallel chains, then the base module will
-recycle the same for RNGs, but using different seeds. If you want many
-parallel chains then you may wish to load the \verb+lecuyer+ module.
-
-\subsection{Base Monitors}
-
-The \verb+base+ module defines the TraceMonitor class (type
-``trace''). This is the monitor class that simply records the current
-value of the node at each iteration.
-
-\section{The bugs module}
-
-The \verb+bugs+ module defines some of the functions and distributions
-from \OpenBUGS. These are described in more detail in sections
-\ref{section:functions} and \ref{section:distributions}.  The
-\verb+bugs+ module also defines conjugate samplers for efficient Gibbs
-sampling.
-
-\section{The mix module}
-
-The \verb+mix+ module defines a novel distribution
-\verb+dnormmix(mu,tau,pi)+ representing a finite mixture of normal
-distributions. In the parameterization of the \verb+dnormmix+
-distribution, $\mu$, $\tau$, and $\pi$ are vectors of the same length,
-and the density of \verb+y ~ dnormmix(mu, tau, pi)+ is
-\[
-f(y | \mu, \tau, \pi) = \sum_i \pi_i \tau_i^{\frac{1}{2}} \phi( \tau^{\frac{1}{2}}_i (y - \mu_i))
-\]
-where $\phi()$ is the probability density function of a standard
-normal distribution.
-
-The \verb+mix+ module also defines a sampler that is designed to act
-on finite normal mixtures. It uses tempered transitions to jump
-between distant modes of the multi-modal posterior distribution
-generated by such models \cite{Neal94,Celeux99}. The tempered
-transition method is computationally very expensive. If you want to
-use the \verb+dnormmix+ distribution but do not care about label
-switching, then you can disable the tempered transition sampler with
-\begin{verbatim}
-set factory "mix::TemperedMix" off, type(sampler)
-\end{verbatim}
-
-\section{The dic module}
-
-The \verb+dic+ module defines new monitor classes for Bayesian model
-criticism using deviance-based measures. 
-
-\subsection{The deviance monitor}
-
-The deviance monitor records the deviance of the model ({\em i.e.} the
-sum of the deviances of all the observed stochastic nodes) at each
-iteration. The command
-\begin{verbatim}
-monitor deviance
-\end{verbatim}
-will create a deviance monitor {\em unless} you have defined a node
-called ``deviance'' in your model. In this case, you will get a trace
-monitor for your deviance node.
-
-\subsection{The \texttt{pD} monitor}
-
-The \verb+pD+ monitor is used to estimate the effective number of
-parameters ($p_D$) of the model \cite{spiegelhalter:etal:2002}. It
-requires at least two parallel chains in the model, but calculates
-a single estimate of $p_D$ across all chains \cite{plummer:2002}.
-A pD monitor can be created using the command:
-\begin{verbatim}
-monitor pD
-\end{verbatim}
-Like the deviance monitor, however, if you have defined a node called
-``pD'' in your model then this will take precedence, and you will get
-a trace monitor for your \verb+pD+ node.
-
-Since the $p_D$ monitor pools its value across all chains, its values
-will be written out to the index file ``CODAindex0.txt'' and
-output file ``CODAoutput0.txt'' when you use the CODA command.
-
-The effective number of parameters is the sum of separate contributions
-from all observed stochastic nodes: $p_D = \sum_i p_{D_i}$. There is
-also a monitor that stores the sample mean of $p_{D_i}$. These statistics
-may be used as influence diagnostics \cite{spiegelhalter:etal:2002}.
-The mean monitor for $p_{D_i}$ is created with:
-\begin{verbatim}
-monitor pD, type(mean)
-\end{verbatim}
-Its values can be written out to a file ``PDtable0.txt'' with
-\begin{verbatim}
-coda pD, type(mean) stem(PD)
-\end{verbatim}
-
-\subsection{The \texttt{popt} monitor}
-
-The \verb+popt+ monitor works exactly like the mean monitor for $p_D$,
-but records contributions to the optimism of the expected deviance
-($p_{opt_i}$). The total optimism $p_{opt} = \sum_i p_{opt_i}$  can be
-added to the mean deviance to give the penalized expected deviance
-\cite{plummer:2008}.
-
-The mean monitor for $p_{opt_i}$ is created with
-\begin{verbatim}
-monitor popt, type(mean)
-\end{verbatim}
-Its values can be written out to a file ``POPTtable0.txt'' with
-\begin{verbatim}
-coda popt, type(mean) step(POPT)
-\end{verbatim}
-Under asymptotically favourable conditions in which $p_{D_i} \ll 1
-\forall i$,
-\[
-p_{opt} \approx 2 p_D
-\]
-For generalized linear models, a better approximation is
-\[
-p_{opt} \approx \sum_{i=1}^n \frac {p_{D_i}}{1 - p_{D_i}}
-\]
-
-The \verb+popt+ monitor uses importance weights to estimate
-$p_{opt}$. The resulting estimates may be numerically unstable when
-$p_{D_i}$ is not small.  This typically occurs in random-effects
-models, so it is recommended to use caution with the \verb+popt+
-until I can find a better way of estimating $p_{opt_i}$.
-
-\section{The msm module}
-
-The \verb+msm+ module defines the matrix exponential function
-\verb+mexp+ and the multi-state distribution \verb+dmstate+ which
-describes the transitions between observed states in continuous-time
-multi-state Markov transition models. 
-
-\section{The glm module}
-
-The \verb+glm+ module implements samplers for efficient updating of
-generalized linear mixed models.  The fundamental idea is to do block
-updating of the parameters in the linear predictor.  The \verb+glm+
-module is built on top of the \textsf{Csparse} and \textsf{CHOLMOD}
-sparse matrix libraries
-\cite{Davis2006, Davis1999} which allows updating of both fixed and random
-effects in the same block. Currently, the methods only work on
-parameters that have a normal prior distribution.
-
-Some of the samplers are based in the idea of introducing latent
-normal variables that reduce the GLM to a linear model. This idea was
-introduced by Albert and Chib \cite{AlbertChib93} for probit
-regression with a binary outcome, and was later refined and extended
-to logistic regression with binary outcomes by Holmes and Held
-\cite{HolmesHeld06}. Another approach, auxiliary mixture sampling,
-was developed by Fr{\"u}hwirth-Schnatter {\em et al}
-\cite{Fruhwirth-Schnatter09} and is used for more general Poisson
-regression and logistic regression models with binomial outcomes.
-Gamerman \cite{Gamerman97} proposed a stochastic version of the iteratively
-weighted least squares algorithm for GLMs, which is also implemented
-in the \verb+glm+ module. However the IWLS sampler tends to break down
-when there are many random effects in the model. It uses
-Metropolis-Hastings updates, and the acceptance probability may be
-very small under these circumstances.
-
-Block updating in GLMMs frees the user from the need to center
-predictor variables, like this:
-\begin{verbatim}
-y[i] ~ dnorm(mu[i], tau)
-mu[i] <- alpha + beta * (x[i] - mean(x))
-\end{verbatim}
-The second line can simply be written
-\begin{verbatim}
-mu[i] <- alpha + beta * x[i]
-\end{verbatim}
-without affecting the mixing of the Markov chain.  
-
 \chapter{Functions}
 \label{section:functions}
 
@@ -1215,486 +1017,23 @@ for (i in 1:D[1])
 Inverse link functions are an exception to this rule ({\em i.e.} exp,
 icloglog, ilogit, phi) and cannot be vectorized. 
 
-\section{Base functions}
-\label{section:functions:base}
-
-The functions defined by the \verb+base+ module all appear as infix or
-prefix operators. The syntax of these operators is built into the
-\JAGS\ parser. They are therefore considered part of the modelling
-language.  Table \ref{table:base:functions} lists them in reverse
-order of precedence.
-
-\begin{table}[h]
-\begin{center}
-\begin{tabular}{lll}
-\hline
-Type & Usage & Description\\ 
-\hline
-Logical           & \verb+x || y+ & Or \\
-operators         & \verb+x && y+ & And \\
-                  & \verb+!x+     & Not \\
-\hline
-Comparison  & \verb+x > y+ & Greater than\\
-operators   & \verb+x >= y+ & Greater than or equal to  \\
-            & \verb+x < y+ & Less than \\
-            & \verb+x <= y+ & Less than or equal to \\
-            & \verb+x == y+ & Equal \\
-            & \verb+x != y+ & Not equal \\
-\hline
-Arithmetic  & \verb-x + y- & Addition \\
-operators   & \verb+x - y+ & Subtraction\\
-            & \verb+x * y+ & Multiplication \\
-            & \verb+x / y+ & Division \\
-            & \verb+x %special% y+ &User-defined operators\\
-            & \verb+-x+ & Unary minus\\
-\hline
-Power function & \verb+x^y+ & \\
-\hline
-\end{tabular}
-\caption{Base functions listed in reverse order of precedence 
-  \label{table:base:functions}}
-\end{center}
-\end{table}
-
-Logical operators convert numerical arguments to logical values: zero
-arguments are converted to FALSE and non-zero arguments to
-TRUE. Logical and comparison operators return the value 1 if the
-result is TRUE and 0 if the result is FALSE.  Comparison operators are
-non-associative: the expression \verb+x < y < z+, for example, is
-syntactically incorrect.
-
-The \verb+%special%+ function is an exception in table
-\ref{table:base:functions}. It is not a function defined by the
-\verb+base+ module, but is a place-holder for any function
-with a name starting and ending with the character ``\verb+%+'' Such
-functions are automatically recognized as infix operators by the
-\JAGS\ model parser, with precedence defined by table
-\ref{table:base:functions}.
-
-\section{Functions in the bugs module}
-\label{section:functions:bugs}
-
-\subsection{Scalar functions}
-
-Table \ref{table:bugs:scalar} lists the scalar-valued functions in the
-\texttt{bugs} module that also have scalar arguments.  These functions
-are automatically vectorized when they are given vector, matrix, or
-array arguments with conforming dimensions.
-
-Table \ref{table:bugs:link} lists the link functions in the
-\texttt{bugs} module.  These are smooth scalar-valued functions that
-may be specified using an S-style replacement function notation. So,
-for example, the log link
-\begin{verbatim}
-log(y) <- x
-\end{verbatim}
-is equivalent to the more direct use of its inverse, the exponential
-function:
-\begin{verbatim}
-y <- exp(x)
-\end{verbatim}
-This usage comes from the use of link functions in generalized linear
-models.
-
-Table \ref{table:bugs:dpq} shows functions to calculate the
-probability density, probability function, and quantiles of some of
-the distributions provided by the \texttt{bugs} module. These
-functions are parameterized in the same way as the corresponding
-distribution.  For example, if $x$ has a normal distribution with mean
-$\mu$ and precision $\tau$
-\begin{verbatim}
-x ~ dnorm(mu, tau)
-\end{verbatim}
-Then the usage of the corresponding density, probability, and quantile
-functions is: 
-\begin{verbatim}
-density.x  <- dnorm(x, mu, tau)     # Density of normal distribution at x
-prob.x     <- pnorm(x, mu, tau)     # P(X <= x)
-quantile90.x <- qnorm(0.9, mu, tau) # 90th percentile
-\end{verbatim}
-For details of the parameterization of the other distributions, see
-tables \ref{table:bugs:distributions:real} and
-\ref{table:bugs:distributions:discrete}.
-
-\begin{table}
-\begin{center}
-\begin{tabular}{llll}
-\hline
-Usage  & Description & Value & Restrictions on arguments \\ 
-\hline
-\verb+abs(x)+       & Absolute value        & Real & \\
-\verb+arccos(x)+    & Arc-cosine            & Real & $-1 < x < 1$\\
-\verb+arccosh(x)+   & Hyperbolic arc-cosine & Real & $1 < x$ \\
-\verb+arcsin(x)+    & Arc-sine              & Real & $-1 < x < 1$\\
-\verb+arcsinh(x)+   & Hyperbolic arc-sine   & Real &\\
-\verb+arctan(x)+    & Arc-tangent           & Real &\\
-\verb+arctanh(x)+   & Hyperbolic arc-tangent & Real & $-1 < x < 1$\\
-\verb+cos(x)+       & Cosine              & Real & \\
-\verb+cosh(x)+      & Hyperbolic Cosine   & Real & \\
-\verb+cloglog(x)+    & Complementary log log & Real & $0 < x < 1$ \\
-\verb+equals(x,y)+   & Test for equality   & Logical & \\
-\verb+exp(x)+       & Exponential         & Real & \\
-\verb+icloglog(x)+  & Inverse complementary & Real & \\
-                    & log log function    & \\
-\verb+ifelse(x,a,b)+ & If $x$ then $a$ else $b$ & Real & \\
-\verb+ilogit(x)+    & Inverse logit       & Real & \\
-\verb+log(x)+       & Log function        & Real & $x > 0$ \\
-\verb+logfact(x)+   & Log factorial       & Real & $x > -1$ \\
-\verb+loggam(x)+    & Log gamma           & Real & $x > 0$ \\
-\verb+logit(x)+     & Logit               & Real & $0 < x < 1$ \\
-\verb+phi(x)+       & Standard normal cdf & Real & \\
-\verb+pow(x,z)+     & Power function      & Real & If $x < 0$ then $z$ is integer \\ 
-\verb+probit(x)+    & Probit              & Real & $0 < x < 1$ \\
-\verb+round(x)+     & Round to integer    & Integer & \\
-                    & away from zero      &      & \\
-\verb+sin(x)+       & Sine                & Real & \\
-\verb+sinh(x)+      & Hyperbolic Sine     & Real & \\
-\verb+sqrt(x)+      & Square-root         & Real & $x >= 0$ \\
-\verb+step(x)+      & Test for $x \geq 0$ & Logical & \\
-\verb+tan(x)+       & Tangent             & Real & \\
-\verb+tanh(x)+      & Hyperbolic Tangent  & Real & \\
-\verb+trunc(x)+     & Round to integer    & Integer & \\
-                    & towards zero        & \\
-\hline
-\end{tabular}
-\caption{Scalar functions in the \texttt{bugs} module \label{table:bugs:scalar}}
-\end{center}
-\end{table}
-
-\begin{table}
-\begin{center}
-\begin{tabular}{llll}
-\hline
-Distribution & Density & Distribution & Quantile \\
-\hline
-Bernoulli          & dbern     & pbern     & qbern \\
-Beta               & dbeta     & pbeta     & qbeta \\
-Binomial           & dbin      & pbin      & qbin \\
-Chi-square         & dchisqr   & pchisqr   & qchisqr \\
-Double exponential & ddexp     & pdexp     & qdexp \\
-Exponential        & dexp      & pexp      & qexp \\
-F                  & df        & pf        & qf \\
-Gamma              & dgamma    & pgamma    & qgamma \\
-Generalized gamma  & dgen.gamma & pgen.gamma & qgen.gamma \\
-Noncentral hypergeometric     & dhyper    & phyper    & qhyper \\
-Logistic           & dlogis    & plogis    & qlogis \\
-Log-normal         & dlnorm    & plnorm    & qlnorm \\
-Negative binomial  & dnegbin   & pnegbin   & qnegbin \\
-Noncentral Chi-square & dnchisqr   & pnchisqr   & qnchisqr \\
-Normal             & dnorm     & pnorm     & qnorm \\
-Pareto             & dpar      & ppar      & qpar \\
-Poisson            & dpois     & ppois     & qpois \\
-Student t          & dt        & pt        & qt \\
-Weibull            & dweib     & pweib     & qweib \\
-\hline
-\end{tabular}
-\caption{Functions to calculate the probability density, probability
-  function, and quantiles of some of the distributions provided by the
-  \texttt{bugs} module. \label{table:bugs:dpq}}
-\end{center}
-\end{table}
-
-\begin{table}
-\begin{center}
-\begin{tabular}{llll}
-\hline
-Link function         & Description & Range & Inverse \\
-\hline
-\verb+cloglog(y) <- x+ & Complementary log log & $0 < y < 1$ & \verb+y <- icloglog(x)+ \\
-\verb+log(y) <- x+    & Log           & $0 < y$ &  \verb+y <- exp(x)+ \\
-\verb+logit(y) <- x+  & Logit         & $0 < y < 1$ &  \verb+y <- ilogit(x)+ \\
-\verb+probit(y) <- x+ & Probit        & $0 < y < 1$ &  \verb+y <- phi(x)+\\
-\hline
-\end{tabular}
-\caption{Link functions in the \texttt{bugs} module \label{table:bugs:link}}
-\end{center}
-\end{table}
-
-\subsection{Scalar-valued functions with vector arguments}
-
-Table \ref{table:bugs:scalar2} lists the scalar-valued functions in the
-\texttt{bugs} module that take general arguments. Unless otherwise
-stated in table \ref{table:bugs:scalar2}, the arguments to these functions
-may be scalar, vector, or higher-dimensional arrays.
-
-The \verb+max()+ and \verb+min()+ functions work like the
-corresponding \R\ functions. They take a variable number of arguments
-and return the maximum/minimum element over all supplied
-arguments. This usage is  compatible with \OpenBUGS, although more general.
-
-\begin{table}
-\begin{tabular}{lll}
-\hline
-Function & Description & Restrictions \\
-\hline
-\verb+inprod(x1,x2)+ & Inner product & Dimensions of $x1$, $x2$ conform \\
-\verb+interp.lin(e,v1,v2)+ & Linear Interpolation & $e$ scalar, \\
-                          &                     & $v1,v2$ conforming vectors \\
-\verb+logdet(m)+ & Log determinant & $m$ is a symmetric positive definite matrix \\
-\verb+max(x1,x2,...)+ & Maximum element among all arguments & \\
-\verb+mean(x)+  & Mean of elements of $x$ & \\
-\verb+min(x1,x2,...)+ & Minimum element among all arguments & \\
-\verb+prod(x)+  & Product of elements of $x$ & \\
-\verb+sum(x)+   & Sum of elements of $x$& \\
-\verb+sd(x)+    & Standard deviation of elements of $x$ & \\
-\hline
-\end{tabular}
-\caption{Scalar-valued functions with general
-  arguments in the \texttt{bugs} module \label{table:bugs:scalar2}}
-\end{table}
-
-\subsection{Vector- and array-valued functions}
-
-Table \ref{table:bugs:vector} lists vector- or matrix-valued functions
-in the \texttt{bugs} module.
-
-The functions \texttt{sort}, \texttt{rank}, and \texttt{order} behave
-like their R namesakes: \texttt{sort} accepts a vector and returns the
-same values sorted in ascending order; \texttt{rank} returns a vector
-of ranks of the elements; \texttt{order} returns a permutation that
-sorts the elements of the vector in ascending order. The \texttt{rank}
-function is distinct from \OpenBUGS, which has two scalar-valued
-functions \verb+rank+ and \verb+ranked+.
-
-\begin{table}
-\begin{center}
-\begin{tabular}{lll}
-\hline
-Usage & Description & Restrictions \\
-\hline
-\verb+inverse(a)+ & Matrix inverse & $a$ is a symmetric positive definite matrix  \\
-%\verb+mexp(a)+ & Matrix exponential & $a$ is a square matrix \\
-\verb+rank(v)+ & Ranks of elements of $v$ & $v$ is a vector   \\
-\verb+order(v)+ & Ordering permutation of $v$ & $v$ is a vector \\
-\verb+sort(v)+ & Elements of $v$ in order & $v$ is a vector  \\
-\verb+t(a)+    & Transpose                & $a$ is a matrix \\
-\verb+a %*% b+  & Matrix multiplication & $a,b$ conforming vector or matrices\\
-
-\hline
-\end{tabular}
-\caption{Vector- or matrix-valued functions in the \texttt{bugs}
-  module \label{table:bugs:vector}}
-\end{center}
-\end{table}
-
-\section{Function aliases}
-
 A function may optionally have an alias, which can be used in the
 model definition in place of the canonical name. Aliases are used to
 to avoid confusion with other software in which functions may have
-different names. Table \ref{table:bugs:functions:alias} shows the
-functions in the \texttt{bugs} module with an alias.
-
-\begin{table}
-\begin{center}
-\begin{tabular}{llll}
-\hline
-Function               & Canonical & Alias & Compatible  \\
-                       & name      &       & with         \\
-\hline
-Arc-cosine             & arccos    & acos  & R \\
-Hyperbolic arc-cosine  & arccosh   & acosh & R \\
-Arc-sine               & arcsin    & asin  & R \\
-Hyperbolic arc-sine    & arcsinh   & asinh & R \\
-Arc-tangent            & arctan    & atan  & R \\
-\hline
-\end{tabular}
-\caption{Functions with aliases in \texttt{bugs} module
-  \label{table:bugs:functions:alias}}
-\end{center}
-\end{table}
+different names.
 
 \chapter{Distributions}
-\label{section:distributions}
+\label{chapter:distributions}
 
 Distributions are used to define stochastic nodes using the \verb+~+
-operator. The distributions defined in the bugs module are listed in
-table \ref{table:bugs:distributions:real} (real-valued distributions),
-\ref{table:bugs:distributions:discrete} (discrete-valued
-distributions), and \ref{table:bugs:distributions:multi}
-(multivariate distributions).
+operator.
 
 Some distributions have restrictions on the valid parameter values,
-and these are indicated in the tables. If a Distribution is
+and these are indicated in the tables. If a distribution is
 given invalid parameter values when evaluating the log-likelihood, it
 returns $-\infty$. When a model is initialized, all stochastic nodes
 are checked to ensure that the initial parameter values are valid for
 their distribution.
-
-\begin{table}
-  \begin{center}
-    \begin{tabular}{llcll}
-      \hline
-      Name & Usage & Density & Lower & Upper \\
-      \hline
-      Beta & \verb+dbeta(a,b)+ & 
-      \multirow{2}{*}{
-        $\frac{\textstyle x^{a-1}(1-x)^{b-1}}{\textstyle \beta(a,b)}$
-      } & $0$ & $1$ \\
-      & $a > 0$, $b > 0$ \\
-      Chi-square & \verb+dchisqr(k)+ & 
-      \multirow{2}{*}{
-        $\frac{\textstyle x^{\frac{k}{2} - 1} \exp(-x/2)}
-        {\textstyle 2^{\frac{k}{2}} \Gamma({\scriptstyle \frac{k}{2}})}$
-      } & 0 & \\
-      & $k > 0$ \\
-      Double  & \verb+ddexp(mu,tau)+ & 
-      \multirow{2}{*}{$\tau \exp(-\tau | x-\mu |)/2$} & & \\
-      exponential & $\tau > 0$ \\
-      Exponential & \verb+dexp(lambda)+ & 
-      \multirow{2}{*}{$\lambda \exp(-\lambda x)$} & 0 & \\ 
-      & $\lambda > 0$ \\
-      F   & \verb+df(n,m)+ & 
-      \multirow{2}{*}{
-        $\textstyle \frac{\Gamma(\frac{n + m}{2})}
-                         {\Gamma(\frac{n}{2}) \Gamma(\frac{m}{2})}
-        \left(\frac{n}{m} \right)^{\frac{n}{2}} x^{\frac{n}{2} - 1} 
-        \left\{1 + \frac{nx}{m} \right\}^{-\frac{(n + m)}{2}}$} & 0 & \\
-      & $n > 0$, $m > 0$ \\
-      Gamma       & \verb+dgamma(r, lambda)+ & 
-      \multirow{2}{*}{
-        $\frac{\textstyle \lambda^r x^{r - 1} \exp(-\lambda x)}
-        {\textstyle \Gamma(r)}$} & 0 & \\
-      & $\lambda > 0$, $r > 0$ \\
-      Generalized & \verb+dgen.gamma(r,lambda,b)+ &  
-      \multirow{2}{*}{
-        $\frac
-        {\textstyle b \lambda^{b r} x^{b r - 1}  \exp\{-(\lambda x)^{b}\}}
-        {\textstyle \Gamma(r)}$
-      } & $0$ & \\
-      gamma       & $\lambda >0$, $b > 0$, $r > 0$ \\
-      Logistic    & \verb+dlogis(mu, tau)+ &
-      \multirow{2}{*}{
-        $\frac{\textstyle \tau \exp\{(x - \mu) \tau\}}
-        {\textstyle  \left[1 + \exp\{(x - \mu) \tau\}\right]^2}$
-      } &  & \\
-      ~ & $\tau > 0$ \\
-      Log-normal  & \verb+dlnorm(mu,tau)+ & 
-      \multirow{2}{*}{
-        $\left(\frac{\tau}{2\pi}\right)^{\frac{1}{2}} x^{-1} \exp \left\{-\tau (\log(x) - \mu)^2 / 2 \right\}$} & 0 \\
-      ~ & $\tau > 0$ \\
-      Noncentral & \verb+dnchisqr(k, delta)+ & 
-      \multirow{2}{*}{
-        $\sum_{r=0}^{\infty} 
-        \frac{ \exp(-\frac{\delta}{2}) (\frac{\delta}{2})^r}{\textstyle r!} \,
-        \frac{ x^{(k/2 + r - 1)} \exp(-\frac{x}{2})}
-             { 2^{(k/2 + r)} \Gamma({ \frac{k}{2} + r})}
-        $
-      } & 0 & \\
-      Chi-squre & $k > 0, \delta \geq 0$ \\
-      Normal   & \verb+dnorm(mu,tau)+ & 
-      \multirow{2}{*}{
-        $\left(\frac{\tau}{2\pi}\right)^{\frac{1}{2}} \exp\{- \tau (x - \mu)^2 / 2\}$} & & \\
-      ~ & $\tau > 0$ \\
-      Pareto      & \verb+dpar(alpha, c)+ & 
-      \multirow{2}{*}{
-        $\alpha c^{\alpha} x^{-(\alpha + 1)}$
-      } & $c$ & \\
-      ~ & $\alpha > 0$, $c > 0$ \\
-      Student t   & \verb+dt(mu,tau,k)+ & 
-      \multirow{2}{*}{
-        $\textstyle \frac{\Gamma(\frac{k+1}{2})}{\Gamma(\frac{k}{2})} 
-        \left(\frac{\tau}{k\pi} \right)^{\frac{1}{2}} 
-        \left\{1 + \frac{\tau (x - \mu)^2}{k} \right\}^{-\frac{(k+1)}{2}}$} & & \\
-      ~ & $\tau > 0$, $k > 0$ \\
-      Uniform     & \verb+dunif(a,b)+ & 
-      \multirow{2}{*}{$\frac{\textstyle 1}{\textstyle b - a}$} & $a$ & $b$ \\
-      ~ & $a < b$ \\ 
-      Weibull     & \verb+dweib(v, lambda)+ & 
-      \multirow{2}{*}{$v  \lambda  x^{v - 1} \exp (- \lambda x^v)$} & 0 & \\
-      ~ & $v > 0$, $\lambda > 0$ \\
-      \hline
-    \end{tabular}
-    \caption{Univariate real-valued distributions in the \texttt{bugs} module
-      \label{table:bugs:distributions:real}}
-  \end{center}
-\end{table}
-
-\begin{table}
-  \begin{center}
-    \begin{tabular}{llccc}
-      \hline
-      Name & Usage & Density & Lower & Upper \\
-      \hline
-      Beta & \verb+dbetabin(a, b, n)+ &
-     \multirow{2}{*}{
-        $\textstyle {a+x-1 \choose x} {b+n-x-1 \choose n - x} 
-                    {a+b+n-1 \choose n}^{-1}$
-      } & $0$ & $n$ \\
-      binomial & $a > 0, b > 0, n \in \mathbb{N}^*$ \\
-      Bernoulli & \verb+dbern(p)+ & 
-      \multirow{2}{*}{$p^x (1 - p)^{1 -x}$} & 
-      $0$ & $1$ \\
-      ~ & $0 < p < 1$ \\
-      Binomial  & \verb+dbin(p,n)+ & 
-      \multirow{2}{*}{${n \choose x}  p^x (1-p)^{n-x}$}
-      ~  & $0$ & $n$ \\
-      ~ & $0 < p < 1$, $n \in \mathbb{N}^*$ \\
-      Categorical & \verb+dcat(pi)+ & \multirow{2}{*}{$\frac{\textstyle \pi_x}{\textstyle \sum_i \pi_i}$} & $1$ & $N$ \\
-      ~ & $\pi \in (\mathbb{R}^+)^N$  \\
-      Noncentral & \verb+dhyper(n1,n2,m1,psi)+ &
-      \multirow{2}{*}{
-        $\frac{ {n_1 \choose x} {n_2 \choose m_1 - x} \psi^x}
-              { \sum_i {n_1 \choose i} {n_2 \choose m_1 - i} \psi^i}$
-      } &
-      $\scriptstyle \text{max}(0,n_+ - m_1)$ & 
-      $\scriptstyle \text{min}(n_1,m_1)$ \\
-      hypergeometric & $0 \leq n_i$, $0 < m_1 \leq n_+$  \\
-      Negative & \verb+dnegbin(p, r)+ &
-      \multirow{2}{*}{${x + r -1 \choose x} p^r (1-p)^x$} & 0 & \\
-      binomial & $0 < p \leq 1$, $r \geq 0$ \\
-      Poisson & \verb+dpois(lambda)+ & 
-      \multirow{2}{*}{$\frac{\textstyle \exp(-\lambda) \lambda^x}{\textstyle x!}$} & 0 & \\
-      ~ & $\lambda > 0$ \\
-      \hline
-    \end{tabular}
-  \caption{Discrete univariate distributions in the \texttt{bugs} module
-    \label{table:bugs:distributions:discrete}}
-  \end{center}
-\end{table}
-
-
-\begin{table}
-  \begin{center}
-    \begin{tabular}{lll}
-      \hline
-      Name & Usage & Density \\
-      \hline
-      Dirichlet & \verb+p ~ ddirch(alpha)+ & 
-      \multirow{2}{*}{$\Gamma(\sum_i \alpha_i) \prod_j 
-        \frac{\textstyle p_j^{\alpha_j - 1}}{\textstyle \Gamma(\alpha_j)}$} \\
-      ~ & $\alpha_j \geq 0$ \\
-      & \\
-      Multivariate & \verb+x ~ dmnorm(mu,Omega)+ &
-      \multirow{2}{*}{
-        $|\Omega|^{\frac{1}{2}} \left(2\pi\right)^{-\frac{p}{2}} \exp\{-(x-\mu)^T \Omega (x-\mu) / 2\}$} \\
-      normal & $\Omega \; p \times p$ positive definite \\
-      Wishart & \verb+Omega ~ dwish(R,k)+ &
-      \multirow{2}{*}{
-        $\frac{\textstyle |\Omega|^{(k-p-1)/2} |R|^{k/2} \exp\{-\text{Tr}(R\Omega/2)\}}
-               {\textstyle 2^{pk/2} \Gamma_p (k/2)}$
-      } \\
-      & $R \; p \times p$ pos. def., $k \geq p$ \\
-      Multivariate & \verb+x ~ dmt(mu,Omega,k)+ &
-      \multirow{2}{*}{
-        $\frac{\textstyle \Gamma \{(k+p)/2\}}{\textstyle \Gamma(k/2) (n\pi)^{p/2}}
-        |\Omega|^{1/2}
-        \left\{1 + \frac{1}{k} (x - \mu)^T \Omega (x - \mu) \right\}^{-\frac{(k+p)}{2}}$   } \\
-      Student t &  $\Omega$ pos. def. & \\
-      Multinomial  & \verb+x ~ dmulti(pi, n)+ & 
-      \multirow{2}{*}{$n! \prod_j 
-        \frac{\textstyle \pi_j^{x_j}}{\textstyle x_j!}$} \\
-      ~ & $\sum_j x_j = n$ \\
-      & \\
-    \hline
-    \end{tabular}
-    \caption{Multivariate distributions in the \texttt{bugs} module
-      \label{table:bugs:distributions:multi}}
-  \end{center}
-\end{table}
-
-\section{Distribution aliases}
-\label{subsection:distributions:aliases}
 
 A distribution may optionally have an alias, which can be used in the
 model definition in place of the canonical name. Aliases are used to
@@ -1703,96 +1042,6 @@ may have slightly different names. Note however that the alias does
 not change the parameterization. For example, the Weibull distribution
 is parameterized differently in BUGS and R, and using the alias
 ``dweibull'' does not change this.
-
-Table \ref{table:bugs:distributions:alias} shows the distributions in
-the \texttt{bugs} module with an alias.
-
-\begin{table}
-\begin{center}
-\begin{tabular}{llll}
-\hline
-Distribution & Canonical & Alias & Same \\
-             & name      &       & name as \\
-\hline
-Binomial           & dbin       & dbinom   & R   \\
-Chi-square         & dchisqr    & dchisq   & R   \\ 
-Generalized gamma  & dgen.gamma & dggamma  & OpenBUGS \\
-Negative binomial  & dnegbin    & dnbinom  & R   \\
-Weibull            & dweib      & dweibull & R   \\ 
-Dirichlet          & ddirch     & ddirich  & OpenBUGS \\
-\hline
-\end{tabular}
-\caption{Distributions with aliases in \texttt{bugs} module
-  \label{table:bugs:distributions:alias}}
-\end{center}
-\end{table}
-
-\chapter{Differences between \JAGS\ and \OpenBUGS}
-
-Although \JAGS\ aims for the same functionality as \OpenBUGS, there are
-a number of important differences.
-
-\subsection{Data format}
-
-There is no need to transpose matrices and arrays when transferring
-data between \R\ and \JAGS, since \JAGS\ stores the values of an array
-in ``column major'' order, like \R\ and FORTRAN ({\em i.e.} filling
-the left-hand index first).
-
-If you have an \textsf{S}-style data file for \OpenBUGS\ and you wish
-to convert it for \JAGS, then use the command \texttt{bugs2jags},
-which is supplied with the \CODA\ package.
-
-\subsection{Distributions}
-
-Structural zeros are allowed in the Dirichlet distribution. If
-\begin{verbatim}
-p ~ ddirch(alpha)
-\end{verbatim}
-and some of the elements of alpha are zero, then the corresponding
-elements of p will be fixed to zero.
-
-The Multinomial (\verb+dmulti+) and Categorical (\verb+dcat+)
-distributions, which take a vector of probabilities as a parameter,
-may use unnormalized probabilities. The probability vector is
-normalized internally so that
-\[
-p_i \rightarrow \frac{p_i}{\sum_j p_j}
-\]
-
-The non-central hypergeometric distribution (\verb+dhyper+) uses the
-same parameterization as R, which is different from the
-parameterization used in OpenBUGS 3.2.2. OpenBUGS is parameterized as
-\begin{verbatim}
-X ~ dhyper(n, m, N, psi)     #OpenBUGS
-\end{verbatim}
-where $n, m, N$ are the following table margins:
-\begin{center}
-\begin{tabular}{|cc|c|}
-\hline
-x & - & n \\
--  & - & -  \\
-\hline
-m & - & N \\
-\hline
-\end{tabular}
-\end{center}
-This parameterization is symmetric in $n$, $m$. In JAGS, \verb+dhyper+
-is parameterized as
-\begin{verbatim}
-X ~ dhyper(n1, n2, m1, psi) #JAGS 
-\end{verbatim}
-where $n1, n2, m1$ are
-\begin{center}
-\begin{tabular}{|cc|c|}
-\hline
-x & - & m1 \\
--  & - & -   \\
-\hline
-n1 & n2 & - \\
-\hline
-\end{tabular}
-\end{center}
 
 \subsection{Observable Functions}
 \label{section:obfun}
@@ -2087,6 +1336,852 @@ If you want to send a bug report, it must be reproducible. Send the
 model file, the data file, the initial value file and a script file
 that will reproduce the problem. Describe what you think should
 happen, and what did happen.
+
+\chapter{Modules}
+\label{chapter:modules}
+
+The \JAGS\  library is distributed along with certain dynamically
+loadable modules that extend its functionality. A module can define
+new objects of the following classes:
+\begin{enumerate}
+\item {\bf functions} and {\bf distributions}, the basic building
+blocks of the BUGS language.
+\item {\bf samplers}, the objects which update the parameters of the
+model at each iteration, and {\bf sampler factories}, the objects that 
+create new samplers for specific model structures.  If the module
+defines a new distribution, then it will typically also define a new
+sampler for that distribution.
+\item {\bf monitors}, the objects that record sampled values for
+later analysis, and {\bf monitor factories} that create them. 
+\item {\bf random number generators}, the objects that drive the
+MCMC algorithm and {\bf RNG factories} that create them.
+\end{enumerate}
+
+The \verb+base+ module and the \verb+bugs+ module are loaded automatically
+at start time.  Others may be loaded by the user.
+
+\chapter{The base module}
+
+The base module supplies the base functionality for the \JAGS\ library
+to function correctly. It is loaded first and should never be
+unloaded.
+
+In order to avoid a name clash with the \texttt{base} package of R,
+the file name of the base module is \texttt{basemod.so} on Unix/Linux
+or \texttt{basemod.dll} on Windows.
+
+\section{Functions in the base module}
+\label{section:base:functions}
+
+The functions defined by the \texttt{base} module are all infix or
+prefix operators. The syntax of these operators is built into the
+\JAGS\ parser and they are considered part of the modelling language.
+Table \ref{table:base:functions} lists them in reverse order of
+precedence.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Type & Usage & Description\\ 
+\hline
+Logical           & \verb+x || y+ & Or \\
+operators         & \verb+x && y+ & And \\
+                  & \verb+!x+     & Not \\
+\hline
+Comparison  & \verb+x > y+ & Greater than\\
+operators   & \verb+x >= y+ & Greater than or equal to  \\
+            & \verb+x < y+ & Less than \\
+            & \verb+x <= y+ & Less than or equal to \\
+            & \verb+x == y+ & Equal \\
+            & \verb+x != y+ & Not equal \\
+\hline
+Arithmetic  & \verb-x + y- & Addition \\
+operators   & \verb+x - y+ & Subtraction\\
+            & \verb+x * y+ & Multiplication \\
+            & \verb+x / y+ & Division \\
+            & \verb+x %special% y+ &User-defined operators\\
+            & \verb+x : y+ & Sequence \\
+            & \verb+-x+ & Unary minus\\
+\hline
+Power function & \verb+x^y+ & \\
+\hline
+\end{tabular}
+\caption{Base functions listed in reverse order of precedence 
+  \label{table:base:functions}}
+\end{center}
+\end{table}
+
+There is no logical data type in the BUGS language.  Logical
+operators, like all other functions in JAGS, take numeric arguments
+and return numerical values Zero values are considered to be FALSE and
+non-zero arguments to be TRUE. If the result of a logical operator is
+TRUE then the value 1 is returned, or if it is FALSE the value 0 is
+returned.
+
+Comparison operators use the same convention as logical operators and
+return 1 or 0 for TRUE and FALSE respectively.  Comparison operators
+are non-associative: the expression \verb+x < y < z+, for example, is
+syntactically incorrect. Likewise \verb+x != y == z+ is an invalid
+expression.
+
+The \verb+%special%+ function is an exception in table
+\ref{table:base:functions}. It is not a function defined by the
+\verb+base+ module, but is a place-holder for any function with a name
+starting and ending with the character ``\verb+%+'' For example, the
+\texttt{bugs} module defines a matrix multiplication operator
+\verb+%*%+. Such functions are automatically recognized as infix
+operators by the \JAGS\ model parser, with precedence defined by table
+\ref{table:base:functions}.
+
+The sequence operator in the expression \verb+m:n+ takes two integer
+arguments $m$ and $n$ (which may themselves be arithmetic expressions)
+and returns a vector of length $n - m + 1$ containing the increasing
+integer sequence $m, m+1, \ldots, n-1, n$. Since the length of the
+resulting vector may not change from one iteration to another, the
+arguments $m$ and $n$ must be fixed.  If $n < m$ then \verb+m:n+
+returns a vector of length zero. See section \label{section:forloops}
+for the consequences of this in for loops.
+
+For compatibility with OpenBUGS, the expression \verb+x^y+ can also be
+represented as \texttt{pow(x,y)}.
+
+\section{Samplers in the base module}
+
+The \texttt{base} module defines samplers that use highly generic update
+methods.  These sampling methods only require basic information about
+the stochastic nodes they sample.  
+
+\subsection{Inversion}
+
+The \texttt{bugs::Finite} factory produces the \texttt{bugs::Finite}
+sampler for discrete-valued, bounded stochastic nodes ({\em i.e.}
+those that can take only a finite number of values). The
+\texttt{bugs::Finite} sampler draws samples by inverting the
+cumulative distribution function. When the number of possible values
+is large, inversion can be slow and the discrete slice sampler (see
+below) is typically more efficient. For this reason, the
+\texttt{bugs::Finite} factory will not produce a sampler when there
+are more than 100 possible values. An exception to this 100-value
+limit is made for nodes with a \texttt{dcat} prior, which may be
+arbitrarily large.
+
+\subsection{Slice sampling}
+  
+\subsection
+Three samplers are currently defined:
+\begin{enumerate}
+\item The Finite sampler can sample a discrete-valued node with fixed
+  support of less than 20 possible values. The node must not be
+  bounded using the \verb+T(,)+ construct
+\item The Real Slice Sampler can sample any scalar real-valued
+  stochastic node.
+\item The Discrete Slice Sampler can sample any scalar discrete-valued
+  stochastic node.
+\end{enumerate}
+
+\subsection{Base RNGs}
+
+The \verb+base+ module defines four RNGs, taken directly from \R,
+with the following names:
+\begin{enumerate}
+\item \verb+"base::Wichmann-Hill"+
+\item \verb+"base::Marsaglia-Multicarry"+
+\item \verb+"base::Super-Duper"+
+\item \verb+"base::Mersenne-Twister"+
+\end{enumerate}
+
+A single RNG factory object is also defined by the \texttt{base}
+module which will supply these RNGs for chains 1 to 4 respectively, if
+``RNG.name'' is not specified in the initial values file.  All chains
+generated by the base RNG factory are initialized using the current
+time stamp.
+
+If you have more than four parallel chains, then the base module will
+recycle the same four RNGs, but using different seeds. If you want
+many parallel chains then you may wish to load the \verb+lecuyer+
+module.
+
+\subsection{Base Monitors}
+
+The \verb+base+ module defines the TraceMonitor class (type
+``trace''). This is the monitor class that simply records the current
+value of the node at each iteration.
+
+\chapter{The bugs module}
+\label{section:bugs}
+
+The \verb+bugs+ module defines some of the functions and distributions
+from \OpenBUGS.
+
+
+hese are described in more detail in sections
+\ref{section:functions} and \ref{section:distributions}.  The
+\verb+bugs+ module also defines conjugate samplers for efficient Gibbs
+sampling.
+
+\section{Functions in the bugs module}
+\label{section:bugs:functions}
+
+\subsection{Scalar functions}
+
+Table \ref{table:bugs:scalar} lists the scalar-valued functions in the
+\texttt{bugs} module that also have scalar arguments.  These functions
+are automatically vectorized when they are given vector, matrix, or
+array arguments with conforming dimensions.
+%Cross-reference to language chapter on functions
+
+Table \ref{table:bugs:link} lists the link functions in the
+\texttt{bugs} module.  These are smooth scalar-valued functions that
+may be specified using an S-style replacement function notation. So,
+for example, the log link
+\begin{verbatim}
+log(y) <- x
+\end{verbatim}
+is equivalent to the more direct use of its inverse, the exponential
+function:
+\begin{verbatim}
+y <- exp(x)
+\end{verbatim}
+This usage comes from the use of link functions in generalized linear
+models.
+
+Table \ref{table:bugs:dpq} shows functions to calculate the
+probability density, probability function, and quantiles of some of
+the distributions provided by the \texttt{bugs} module. These
+functions are parameterized in the same way as the corresponding
+distribution.  For example, if $x$ has a normal distribution with mean
+$\mu$ and precision $\tau$
+\begin{verbatim}
+x ~ dnorm(mu, tau)
+\end{verbatim}
+Then the usage of the corresponding density, probability, and quantile
+functions is: 
+\begin{verbatim}
+density.x  <- dnorm(x, mu, tau)     # Density of normal distribution at x
+prob.x     <- pnorm(x, mu, tau)     # P(X <= x)
+quantile90.x <- qnorm(0.9, mu, tau) # 90th percentile
+\end{verbatim}
+For details of the parameterization of the other distributions, see
+tables \ref{table:bugs:distributions:real} and
+\ref{table:bugs:distributions:discrete}.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Usage  & Description & Value & Restrictions on arguments \\ 
+\hline
+\verb+abs(x)+       & Absolute value        & Real & \\
+\verb+arccos(x)+    & Arc-cosine            & Real & $-1 < x < 1$\\
+\verb+arccosh(x)+   & Hyperbolic arc-cosine & Real & $1 < x$ \\
+\verb+arcsin(x)+    & Arc-sine              & Real & $-1 < x < 1$\\
+\verb+arcsinh(x)+   & Hyperbolic arc-sine   & Real &\\
+\verb+arctan(x)+    & Arc-tangent           & Real &\\
+\verb+arctanh(x)+   & Hyperbolic arc-tangent & Real & $-1 < x < 1$\\
+\verb+cos(x)+       & Cosine              & Real & \\
+\verb+cosh(x)+      & Hyperbolic Cosine   & Real & \\
+\verb+cloglog(x)+    & Complementary log log & Real & $0 < x < 1$ \\
+\verb+equals(x,y)+   & Test for equality   & Logical & \\
+\verb+exp(x)+       & Exponential         & Real & \\
+\verb+icloglog(x)+  & Inverse complementary & Real & \\
+                    & log log function    & \\
+\verb+ifelse(x,a,b)+ & If $x$ then $a$ else $b$ & Real & \\
+\verb+ilogit(x)+    & Inverse logit       & Real & \\
+\verb+log(x)+       & Log function        & Real & $x > 0$ \\
+\verb+logfact(x)+   & Log factorial       & Real & $x > -1$ \\
+\verb+loggam(x)+    & Log gamma           & Real & $x > 0$ \\
+\verb+logit(x)+     & Logit               & Real & $0 < x < 1$ \\
+\verb+phi(x)+       & Standard normal cdf & Real & \\
+\verb+pow(x,z)+     & Power function      & Real & If $x < 0$ then $z$ is integer \\ 
+\verb+probit(x)+    & Probit              & Real & $0 < x < 1$ \\
+\verb+round(x)+     & Round to integer    & Integer & \\
+                    & away from zero      &      & \\
+\verb+sin(x)+       & Sine                & Real & \\
+\verb+sinh(x)+      & Hyperbolic Sine     & Real & \\
+\verb+sqrt(x)+      & Square-root         & Real & $x >= 0$ \\
+\verb+step(x)+      & Test for $x \geq 0$ & Logical & \\
+\verb+tan(x)+       & Tangent             & Real & \\
+\verb+tanh(x)+      & Hyperbolic Tangent  & Real & \\
+\verb+trunc(x)+     & Round to integer    & Integer & \\
+                    & towards zero        & \\
+\hline
+\end{tabular}
+\caption{Scalar functions in the \texttt{bugs} module \label{table:bugs:scalar}}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Distribution & Density & Distribution & Quantile \\
+\hline
+Bernoulli          & dbern     & pbern     & qbern \\
+Beta               & dbeta     & pbeta     & qbeta \\
+Binomial           & dbin      & pbin      & qbin \\
+Chi-square         & dchisqr   & pchisqr   & qchisqr \\
+Double exponential & ddexp     & pdexp     & qdexp \\
+Exponential        & dexp      & pexp      & qexp \\
+F                  & df        & pf        & qf \\
+Gamma              & dgamma    & pgamma    & qgamma \\
+Generalized gamma  & dgen.gamma & pgen.gamma & qgen.gamma \\
+Noncentral hypergeometric     & dhyper    & phyper    & qhyper \\
+Logistic           & dlogis    & plogis    & qlogis \\
+Log-normal         & dlnorm    & plnorm    & qlnorm \\
+Negative binomial  & dnegbin   & pnegbin   & qnegbin \\
+Noncentral Chi-square & dnchisqr   & pnchisqr   & qnchisqr \\
+Normal             & dnorm     & pnorm     & qnorm \\
+Pareto             & dpar      & ppar      & qpar \\
+Poisson            & dpois     & ppois     & qpois \\
+Student t          & dt        & pt        & qt \\
+Weibull            & dweib     & pweib     & qweib \\
+\hline
+\end{tabular}
+\caption{Functions to calculate the probability density, probability
+  function, and quantiles of some of the distributions provided by the
+  \texttt{bugs} module. \label{table:bugs:dpq}}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Link function         & Description & Range & Inverse \\
+\hline
+\verb+cloglog(y) <- x+ & Complementary log log & $0 < y < 1$ & \verb+y <- icloglog(x)+ \\
+\verb+log(y) <- x+    & Log           & $0 < y$ &  \verb+y <- exp(x)+ \\
+\verb+logit(y) <- x+  & Logit         & $0 < y < 1$ &  \verb+y <- ilogit(x)+ \\
+\verb+probit(y) <- x+ & Probit        & $0 < y < 1$ &  \verb+y <- phi(x)+\\
+\hline
+\end{tabular}
+\caption{Link functions in the \texttt{bugs} module \label{table:bugs:link}}
+\end{center}
+\end{table}
+
+\subsection{Scalar-valued functions with vector arguments}
+
+Table \ref{table:bugs:scalar2} lists the scalar-valued functions in the
+\texttt{bugs} module that take general arguments. Unless otherwise
+stated in table \ref{table:bugs:scalar2}, the arguments to these functions
+may be scalar, vector, or higher-dimensional arrays.
+
+The \verb+max()+ and \verb+min()+ functions work like the
+corresponding \R\ functions. They take a variable number of arguments
+and return the maximum/minimum element over all supplied
+arguments. This usage is  compatible with \OpenBUGS, although more general.
+
+\begin{table}
+\begin{tabular}{lll}
+\hline
+Function & Description & Restrictions \\
+\hline
+\verb+inprod(x1,x2)+ & Inner product & Dimensions of $x1$, $x2$ conform \\
+\verb+interp.lin(e,v1,v2)+ & Linear Interpolation & $e$ scalar, \\
+                          &                     & $v1,v2$ conforming vectors \\
+\verb+logdet(m)+ & Log determinant & $m$ is a symmetric positive definite matrix \\
+\verb+max(x1,x2,...)+ & Maximum element among all arguments & \\
+\verb+mean(x)+  & Mean of elements of $x$ & \\
+\verb+min(x1,x2,...)+ & Minimum element among all arguments & \\
+\verb+prod(x)+  & Product of elements of $x$ & \\
+\verb+sum(x)+   & Sum of elements of $x$& \\
+\verb+sd(x)+    & Standard deviation of elements of $x$ & \\
+\hline
+\end{tabular}
+\caption{Scalar-valued functions with general
+  arguments in the \texttt{bugs} module \label{table:bugs:scalar2}}
+\end{table}
+
+\subsection{Vector- and array-valued functions}
+
+Table \ref{table:bugs:vector} lists vector- or matrix-valued functions
+in the \texttt{bugs} module.
+
+The functions \texttt{sort}, \texttt{rank}, and \texttt{order} behave
+like their R namesakes: \texttt{sort} accepts a vector and returns the
+same values sorted in ascending order; \texttt{rank} returns a vector
+of ranks of the elements; \texttt{order} returns a permutation that
+sorts the elements of the vector in ascending order. The \texttt{rank}
+function is distinct from \OpenBUGS, which has two scalar-valued
+functions \verb+rank+ and \verb+ranked+.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Usage & Description & Restrictions \\
+\hline
+\verb+inverse(a)+ & Matrix inverse & $a$ is a symmetric positive definite matrix  \\
+%\verb+mexp(a)+ & Matrix exponential & $a$ is a square matrix \\
+\verb+rank(v)+ & Ranks of elements of $v$ & $v$ is a vector   \\
+\verb+order(v)+ & Ordering permutation of $v$ & $v$ is a vector \\
+\verb+sort(v)+ & Elements of $v$ in order & $v$ is a vector  \\
+\verb+t(a)+    & Transpose                & $a$ is a matrix \\
+\verb+a %*% b+  & Matrix multiplication & $a,b$ conforming vector or matrices\\
+
+\hline
+\end{tabular}
+\caption{Vector- or matrix-valued functions in the \texttt{bugs}
+  module \label{table:bugs:vector}}
+\end{center}
+\end{table}
+
+\section{Function aliases}
+
+Table \ref{table:bugs:functions:alias} shows the
+functions in the \texttt{bugs} module with an alias.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Function               & Canonical & Alias & Compatible  \\
+                       & name      &       & with         \\
+\hline
+Arc-cosine             & arccos    & acos  & R \\
+Hyperbolic arc-cosine  & arccosh   & acosh & R \\
+Arc-sine               & arcsin    & asin  & R \\
+Hyperbolic arc-sine    & arcsinh   & asinh & R \\
+Arc-tangent            & arctan    & atan  & R \\
+\hline
+\end{tabular}
+\caption{Functions with aliases in \texttt{bugs} module
+  \label{table:bugs:functions:alias}}
+\end{center}
+\end{table}
+
+\section{Distributions in the bugs module}
+\label{section:bugs:distributions}
+
+\subsection{Bernoulli distribution}
+
+
+The distributions defined in the bugs module are listed in table
+\ref{table:bugs:distributions:real} (real-valued distributions),
+\ref{table:bugs:distributions:discrete} (discrete-valued
+distributions), and \ref{table:bugs:distributions:multi} (multivariate
+distributions).
+
+\begin{table}
+  \begin{center}
+    \begin{tabular}{llcll}
+      \hline
+      Name & Usage & Density & Lower & Upper \\
+      \hline
+      Beta & \verb+dbeta(a,b)+ & 
+      \multirow{2}{*}{
+        $\frac{\textstyle x^{a-1}(1-x)^{b-1}}{\textstyle \beta(a,b)}$
+      } & $0$ & $1$ \\
+      & $a > 0$, $b > 0$ \\
+      Chi-square & \verb+dchisqr(k)+ & 
+      \multirow{2}{*}{
+        $\frac{\textstyle x^{\frac{k}{2} - 1} \exp(-x/2)}
+        {\textstyle 2^{\frac{k}{2}} \Gamma({\scriptstyle \frac{k}{2}})}$
+      } & 0 & \\
+      & $k > 0$ \\
+      Double  & \verb+ddexp(mu,tau)+ & 
+      \multirow{2}{*}{$\tau \exp(-\tau | x-\mu |)/2$} & & \\
+      exponential & $\tau > 0$ \\
+      Exponential & \verb+dexp(lambda)+ & 
+      \multirow{2}{*}{$\lambda \exp(-\lambda x)$} & 0 & \\ 
+      & $\lambda > 0$ \\
+      F   & \verb+df(n,m)+ & 
+      \multirow{2}{*}{
+        $\textstyle \frac{\Gamma(\frac{n + m}{2})}
+                         {\Gamma(\frac{n}{2}) \Gamma(\frac{m}{2})}
+        \left(\frac{n}{m} \right)^{\frac{n}{2}} x^{\frac{n}{2} - 1} 
+        \left\{1 + \frac{nx}{m} \right\}^{-\frac{(n + m)}{2}}$} & 0 & \\
+      & $n > 0$, $m > 0$ \\
+      Gamma       & \verb+dgamma(r, lambda)+ & 
+      \multirow{2}{*}{
+        $\frac{\textstyle \lambda^r x^{r - 1} \exp(-\lambda x)}
+        {\textstyle \Gamma(r)}$} & 0 & \\
+      & $\lambda > 0$, $r > 0$ \\
+      Generalized & \verb+dgen.gamma(r,lambda,b)+ &  
+      \multirow{2}{*}{
+        $\frac
+        {\textstyle b \lambda^{b r} x^{b r - 1}  \exp\{-(\lambda x)^{b}\}}
+        {\textstyle \Gamma(r)}$
+      } & $0$ & \\
+      gamma       & $\lambda >0$, $b > 0$, $r > 0$ \\
+      Logistic    & \verb+dlogis(mu, tau)+ &
+      \multirow{2}{*}{
+        $\frac{\textstyle \tau \exp\{(x - \mu) \tau\}}
+        {\textstyle  \left[1 + \exp\{(x - \mu) \tau\}\right]^2}$
+      } &  & \\
+      ~ & $\tau > 0$ \\
+      Log-normal  & \verb+dlnorm(mu,tau)+ & 
+      \multirow{2}{*}{
+        $\left(\frac{\tau}{2\pi}\right)^{\frac{1}{2}} x^{-1} \exp \left\{-\tau (\log(x) - \mu)^2 / 2 \right\}$} & 0 \\
+      ~ & $\tau > 0$ \\
+      Noncentral & \verb+dnchisqr(k, delta)+ & 
+      \multirow{2}{*}{
+        $\sum_{r=0}^{\infty} 
+        \frac{ \exp(-\frac{\delta}{2}) (\frac{\delta}{2})^r}{\textstyle r!} \,
+        \frac{ x^{(k/2 + r - 1)} \exp(-\frac{x}{2})}
+             { 2^{(k/2 + r)} \Gamma({ \frac{k}{2} + r})}
+        $
+      } & 0 & \\
+      Chi-squre & $k > 0, \delta \geq 0$ \\
+      Normal   & \verb+dnorm(mu,tau)+ & 
+      \multirow{2}{*}{
+        $\left(\frac{\tau}{2\pi}\right)^{\frac{1}{2}} \exp\{- \tau (x - \mu)^2 / 2\}$} & & \\
+      ~ & $\tau > 0$ \\
+      Pareto      & \verb+dpar(alpha, c)+ & 
+      \multirow{2}{*}{
+        $\alpha c^{\alpha} x^{-(\alpha + 1)}$
+      } & $c$ & \\
+      ~ & $\alpha > 0$, $c > 0$ \\
+      Student t   & \verb+dt(mu,tau,k)+ & 
+      \multirow{2}{*}{
+        $\textstyle \frac{\Gamma(\frac{k+1}{2})}{\Gamma(\frac{k}{2})} 
+        \left(\frac{\tau}{k\pi} \right)^{\frac{1}{2}} 
+        \left\{1 + \frac{\tau (x - \mu)^2}{k} \right\}^{-\frac{(k+1)}{2}}$} & & \\
+      ~ & $\tau > 0$, $k > 0$ \\
+      Uniform     & \verb+dunif(a,b)+ & 
+      \multirow{2}{*}{$\frac{\textstyle 1}{\textstyle b - a}$} & $a$ & $b$ \\
+      ~ & $a < b$ \\ 
+      Weibull     & \verb+dweib(v, lambda)+ & 
+      \multirow{2}{*}{$v  \lambda  x^{v - 1} \exp (- \lambda x^v)$} & 0 & \\
+      ~ & $v > 0$, $\lambda > 0$ \\
+      \hline
+    \end{tabular}
+    \caption{Univariate real-valued distributions in the \texttt{bugs} module
+      \label{table:bugs:distributions:real}}
+  \end{center}
+\end{table}
+
+\begin{table}
+  \begin{center}
+    \begin{tabular}{llccc}
+      \hline
+      Name & Usage & Density & Lower & Upper \\
+      \hline
+      Beta & \verb+dbetabin(a, b, n)+ &
+     \multirow{2}{*}{
+        $\textstyle {a+x-1 \choose x} {b+n-x-1 \choose n - x} 
+                    {a+b+n-1 \choose n}^{-1}$
+      } & $0$ & $n$ \\
+      binomial & $a > 0, b > 0, n \in \mathbb{N}^*$ \\
+      Bernoulli & \verb+dbern(p)+ & 
+      \multirow{2}{*}{$p^x (1 - p)^{1 -x}$} & 
+      $0$ & $1$ \\
+      ~ & $0 < p < 1$ \\
+      Binomial  & \verb+dbin(p,n)+ & 
+      \multirow{2}{*}{${n \choose x}  p^x (1-p)^{n-x}$}
+      ~  & $0$ & $n$ \\
+      ~ & $0 < p < 1$, $n \in \mathbb{N}^*$ \\
+      Categorical & \verb+dcat(pi)+ & \multirow{2}{*}{$\frac{\textstyle \pi_x}{\textstyle \sum_i \pi_i}$} & $1$ & $N$ \\
+      ~ & $\pi \in (\mathbb{R}^+)^N$  \\
+      Noncentral & \verb+dhyper(n1,n2,m1,psi)+ &
+      \multirow{2}{*}{
+        $\frac{ {n_1 \choose x} {n_2 \choose m_1 - x} \psi^x}
+              { \sum_i {n_1 \choose i} {n_2 \choose m_1 - i} \psi^i}$
+      } &
+      $\scriptstyle \text{max}(0,n_+ - m_1)$ & 
+      $\scriptstyle \text{min}(n_1,m_1)$ \\
+      hypergeometric & $0 \leq n_i$, $0 < m_1 \leq n_+$  \\
+      Negative & \verb+dnegbin(p, r)+ &
+      \multirow{2}{*}{${x + r -1 \choose x} p^r (1-p)^x$} & 0 & \\
+      binomial & $0 < p \leq 1$, $r \geq 0$ \\
+      Poisson & \verb+dpois(lambda)+ & 
+      \multirow{2}{*}{$\frac{\textstyle \exp(-\lambda) \lambda^x}{\textstyle x!}$} & 0 & \\
+      ~ & $\lambda > 0$ \\
+      \hline
+    \end{tabular}
+  \caption{Discrete univariate distributions in the \texttt{bugs} module
+    \label{table:bugs:distributions:discrete}}
+  \end{center}
+\end{table}
+
+
+\begin{table}
+  \begin{center}
+    \begin{tabular}{lll}
+      \hline
+      Name & Usage & Density \\
+      \hline
+      Dirichlet & \verb+p ~ ddirch(alpha)+ & 
+      \multirow{2}{*}{$\Gamma(\sum_i \alpha_i) \prod_j 
+        \frac{\textstyle p_j^{\alpha_j - 1}}{\textstyle \Gamma(\alpha_j)}$} \\
+      ~ & $\alpha_j \geq 0$ \\
+      & \\
+      Multivariate & \verb+x ~ dmnorm(mu,Omega)+ &
+      \multirow{2}{*}{
+        $|\Omega|^{\frac{1}{2}} \left(2\pi\right)^{-\frac{p}{2}} \exp\{-(x-\mu)^T \Omega (x-\mu) / 2\}$} \\
+      normal & $\Omega \; p \times p$ positive definite \\
+      Wishart & \verb+Omega ~ dwish(R,k)+ &
+      \multirow{2}{*}{
+        $\frac{\textstyle |\Omega|^{(k-p-1)/2} |R|^{k/2} \exp\{-\text{Tr}(R\Omega/2)\}}
+               {\textstyle 2^{pk/2} \Gamma_p (k/2)}$
+      } \\
+      & $R \; p \times p$ pos. def., $k \geq p$ \\
+      Multivariate & \verb+x ~ dmt(mu,Omega,k)+ &
+      \multirow{2}{*}{
+        $\frac{\textstyle \Gamma \{(k+p)/2\}}{\textstyle \Gamma(k/2) (n\pi)^{p/2}}
+        |\Omega|^{1/2}
+        \left\{1 + \frac{1}{k} (x - \mu)^T \Omega (x - \mu) \right\}^{-\frac{(k+p)}{2}}$   } \\
+      Student t &  $\Omega$ pos. def. & \\
+      Multinomial  & \verb+x ~ dmulti(pi, n)+ & 
+      \multirow{2}{*}{$n! \prod_j 
+        \frac{\textstyle \pi_j^{x_j}}{\textstyle x_j!}$} \\
+      ~ & $\sum_j x_j = n$ \\
+      & \\
+    \hline
+    \end{tabular}
+    \caption{Multivariate distributions in the \texttt{bugs} module
+      \label{table:bugs:distributions:multi}}
+  \end{center}
+\end{table}
+
+\section{Distribution aliases}
+\label{subsection:distributions:aliases}
+
+
+Table \ref{table:bugs:distributions:alias} shows the distributions in
+the \texttt{bugs} module with an alias.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Distribution & Canonical & Alias & Same \\
+             & name      &       & name as \\
+\hline
+Binomial           & dbin       & dbinom   & R   \\
+Chi-square         & dchisqr    & dchisq   & R   \\ 
+Generalized gamma  & dgen.gamma & dggamma  & OpenBUGS \\
+Negative binomial  & dnegbin    & dnbinom  & R   \\
+Weibull            & dweib      & dweibull & R   \\ 
+Dirichlet          & ddirch     & ddirich  & OpenBUGS \\
+\hline
+\end{tabular}
+\caption{Distributions with aliases in \texttt{bugs} module
+  \label{table:bugs:distributions:alias}}
+\end{center}
+\end{table}
+
+\subsection{Samplers in the bugs module}
+
+
+\chapter{The mix module}
+
+The \verb+mix+ module defines a novel distribution
+\verb+dnormmix(mu,tau,pi)+ representing a finite mixture of normal
+distributions. In the parameterization of the \verb+dnormmix+
+distribution, $\mu$, $\tau$, and $\pi$ are vectors of the same length,
+and the density of \verb+y ~ dnormmix(mu, tau, pi)+ is
+\[
+f(y | \mu, \tau, \pi) = \sum_i \pi_i \tau_i^{\frac{1}{2}} \phi( \tau^{\frac{1}{2}}_i (y - \mu_i))
+\]
+where $\phi()$ is the probability density function of a standard
+normal distribution.
+
+The \verb+mix+ module also defines a sampler that is designed to act
+on finite normal mixtures. It uses tempered transitions to jump
+between distant modes of the multi-modal posterior distribution
+generated by such models \cite{Neal94,Celeux99}. The tempered
+transition method is computationally very expensive. If you want to
+use the \verb+dnormmix+ distribution but do not care about label
+switching, then you can disable the tempered transition sampler with
+\begin{verbatim}
+set factory "mix::TemperedMix" off, type(sampler)
+\end{verbatim}
+
+\chapter{The dic module}
+
+The \verb+dic+ module defines new monitor classes for Bayesian model
+criticism using deviance-based measures. 
+
+\subsection{The deviance monitor}
+
+The deviance monitor records the deviance of the model ({\em i.e.} the
+sum of the deviances of all the observed stochastic nodes) at each
+iteration. The command
+\begin{verbatim}
+monitor deviance
+\end{verbatim}
+will create a deviance monitor {\em unless} you have defined a node
+called ``deviance'' in your model. In this case, you will get a trace
+monitor for your deviance node.
+
+\subsection{The \texttt{pD} monitor}
+
+The \verb+pD+ monitor is used to estimate the effective number of
+parameters ($p_D$) of the model \cite{spiegelhalter:etal:2002}. It
+requires at least two parallel chains in the model, but calculates
+a single estimate of $p_D$ across all chains \cite{plummer:2002}.
+A pD monitor can be created using the command:
+\begin{verbatim}
+monitor pD
+\end{verbatim}
+Like the deviance monitor, however, if you have defined a node called
+``pD'' in your model then this will take precedence, and you will get
+a trace monitor for your \verb+pD+ node.
+
+Since the $p_D$ monitor pools its value across all chains, its values
+will be written out to the index file ``CODAindex0.txt'' and
+output file ``CODAoutput0.txt'' when you use the CODA command.
+
+The effective number of parameters is the sum of separate contributions
+from all observed stochastic nodes: $p_D = \sum_i p_{D_i}$. There is
+also a monitor that stores the sample mean of $p_{D_i}$. These statistics
+may be used as influence diagnostics \cite{spiegelhalter:etal:2002}.
+The mean monitor for $p_{D_i}$ is created with:
+\begin{verbatim}
+monitor pD, type(mean)
+\end{verbatim}
+Its values can be written out to a file ``PDtable0.txt'' with
+\begin{verbatim}
+coda pD, type(mean) stem(PD)
+\end{verbatim}
+
+\subsection{The \texttt{popt} monitor}
+
+The \verb+popt+ monitor works exactly like the mean monitor for $p_D$,
+but records contributions to the optimism of the expected deviance
+($p_{opt_i}$). The total optimism $p_{opt} = \sum_i p_{opt_i}$  can be
+added to the mean deviance to give the penalized expected deviance
+\cite{plummer:2008}.
+
+The mean monitor for $p_{opt_i}$ is created with
+\begin{verbatim}
+monitor popt, type(mean)
+\end{verbatim}
+Its values can be written out to a file ``POPTtable0.txt'' with
+\begin{verbatim}
+coda popt, type(mean) step(POPT)
+\end{verbatim}
+Under asymptotically favourable conditions in which $p_{D_i} \ll 1
+\forall i$,
+\[
+p_{opt} \approx 2 p_D
+\]
+For generalized linear models, a better approximation is
+\[
+p_{opt} \approx \sum_{i=1}^n \frac {p_{D_i}}{1 - p_{D_i}}
+\]
+
+The \verb+popt+ monitor uses importance weights to estimate
+$p_{opt}$. The resulting estimates may be numerically unstable when
+$p_{D_i}$ is not small.  This typically occurs in random-effects
+models, so it is recommended to use caution with the \verb+popt+
+until I can find a better way of estimating $p_{opt_i}$.
+
+\chapter{The msm module}
+
+The \verb+msm+ module defines the matrix exponential function
+\verb+mexp+ and the multi-state distribution \verb+dmstate+ which
+describes the transitions between observed states in continuous-time
+multi-state Markov transition models. 
+
+\chapter{The glm module}
+
+The \verb+glm+ module implements samplers for efficient updating of
+generalized linear mixed models.  The fundamental idea is to do block
+updating of the parameters in the linear predictor.  The \verb+glm+
+module is built on top of the \textsf{Csparse} and \textsf{CHOLMOD}
+sparse matrix libraries
+\cite{Davis2006, Davis1999} which allows updating of both fixed and random
+effects in the same block. Currently, the methods only work on
+parameters that have a normal prior distribution.
+
+Some of the samplers are based in the idea of introducing latent
+normal variables that reduce the GLM to a linear model. This idea was
+introduced by Albert and Chib \cite{AlbertChib93} for probit
+regression with a binary outcome, and was later refined and extended
+to logistic regression with binary outcomes by Holmes and Held
+\cite{HolmesHeld06}. Another approach, auxiliary mixture sampling,
+was developed by Fr{\"u}hwirth-Schnatter {\em et al}
+\cite{Fruhwirth-Schnatter09} and is used for more general Poisson
+regression and logistic regression models with binomial outcomes.
+Gamerman \cite{Gamerman97} proposed a stochastic version of the iteratively
+weighted least squares algorithm for GLMs, which is also implemented
+in the \verb+glm+ module. However the IWLS sampler tends to break down
+when there are many random effects in the model. It uses
+Metropolis-Hastings updates, and the acceptance probability may be
+very small under these circumstances.
+
+Block updating in GLMMs frees the user from the need to center
+predictor variables, like this:
+\begin{verbatim}
+y[i] ~ dnorm(mu[i], tau)
+mu[i] <- alpha + beta * (x[i] - mean(x))
+\end{verbatim}
+The second line can simply be written
+\begin{verbatim}
+mu[i] <- alpha + beta * x[i]
+\end{verbatim}
+without affecting the mixing of the Markov chain.  
+
+\chapter{Differences between \JAGS\ and \OpenBUGS}
+
+Although \JAGS\ aims for the same functionality as \OpenBUGS, there are
+a number of important differences.
+
+\subsection{Data format}
+
+There is no need to transpose matrices and arrays when transferring
+data between \R\ and \JAGS, since \JAGS\ stores the values of an array
+in ``column major'' order, like \R\ and FORTRAN ({\em i.e.} filling
+the left-hand index first).
+
+If you have an \textsf{S}-style data file for \OpenBUGS\ and you wish
+to convert it for \JAGS, then use the command \texttt{bugs2jags},
+which is supplied with the \CODA\ package.
+
+\subsection{Distributions}
+
+Structural zeros are allowed in the Dirichlet distribution. If
+\begin{verbatim}
+p ~ ddirch(alpha)
+\end{verbatim}
+and some of the elements of alpha are zero, then the corresponding
+elements of p will be fixed to zero.
+
+The Multinomial (\verb+dmulti+) and Categorical (\verb+dcat+)
+distributions, which take a vector of probabilities as a parameter,
+may use unnormalized probabilities. The probability vector is
+normalized internally so that
+\[
+p_i \rightarrow \frac{p_i}{\sum_j p_j}
+\]
+
+The non-central hypergeometric distribution (\verb+dhyper+) uses the
+same parameterization as R, which is different from the
+parameterization used in OpenBUGS 3.2.2. OpenBUGS is parameterized as
+\begin{verbatim}
+X ~ dhyper(n, m, N, psi)     #OpenBUGS
+\end{verbatim}
+where $n, m, N$ are the following table margins:
+\begin{center}
+\begin{tabular}{|cc|c|}
+\hline
+x & - & n \\
+-  & - & -  \\
+\hline
+m & - & N \\
+\hline
+\end{tabular}
+\end{center}
+This parameterization is symmetric in $n$, $m$. In JAGS, \verb+dhyper+
+is parameterized as
+\begin{verbatim}
+X ~ dhyper(n1, n2, m1, psi) #JAGS 
+\end{verbatim}
+where $n1, n2, m1$ are
+\begin{center}
+\begin{tabular}{|cc|c|}
+\hline
+x & - & m1 \\
+-  & - & -   \\
+\hline
+n1 & n2 & - \\
+\hline
+\end{tabular}
+\end{center}
+
 
 \chapter{Acknowledgments}
 
