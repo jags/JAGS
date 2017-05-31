@@ -1065,6 +1065,9 @@ unobserved variables.
 \end{enumerate}
 \JAGS\ contains novel distributions to handle these situations.  
 
+%Add warning that observable functions do not give correct deviance
+%statistics
+
 \subsubsection{Interval censored data: \texttt{dinterval}}
 
 \begin{verbatim}
@@ -1509,16 +1512,12 @@ The \verb+base+ module defines the TraceMonitor class (type
 value of the node at each iteration.
 
 \chapter{The bugs module}
-\label{section:bugs}
+\label{chapter:bugs}
 
-The \verb+bugs+ module defines some of the functions and distributions
-from \OpenBUGS.
-
-
-hese are described in more detail in sections
-\ref{section:functions} and \ref{section:distributions}.  The
-\verb+bugs+ module also defines conjugate samplers for efficient Gibbs
-sampling.
+The \texttt{bugs} module was originally intended to include the
+functions and distributions from \OpenBUGS. It has expanded somewhat
+beyond its original purpose and now contains a number of novel
+functions and distributions.
 
 \section{Functions in the bugs module}
 \label{section:bugs:functions}
@@ -1754,186 +1753,745 @@ Arc-tangent            & arctan    & atan  & R \\
 \section{Distributions in the bugs module}
 \label{section:bugs:distributions}
 
-\subsection{Bernoulli distribution}
+\subsection{Continuous univariate distributions}
 
+\subsubsection{Beta}
+\label{bugs:dbeta}
 
-The distributions defined in the bugs module are listed in table
-\ref{table:bugs:distributions:real} (real-valued distributions),
-\ref{table:bugs:distributions:discrete} (discrete-valued
-distributions), and \ref{table:bugs:distributions:multi} (multivariate
-distributions).
+The beta distribution with shape parameters $a > 0, b > 0$ is defined by
+\begin{verbatim}
+y ~ dbeta(a,b)
+\end{verbatim}
+The density of the beta distribution is
+\[
+\frac{\textstyle y^{a-1}(1-y)^{b-1}}{\textstyle \beta(a,b)}
+\]
+for $0 \leq y \leq 1$.
 
-\begin{table}
-  \begin{center}
-    \begin{tabular}{llcll}
-      \hline
-      Name & Usage & Density & Lower & Upper \\
-      \hline
-      Beta & \verb+dbeta(a,b)+ & 
-      \multirow{2}{*}{
-        $\frac{\textstyle x^{a-1}(1-x)^{b-1}}{\textstyle \beta(a,b)}$
-      } & $0$ & $1$ \\
-      & $a > 0$, $b > 0$ \\
-      Chi-square & \verb+dchisqr(k)+ & 
-      \multirow{2}{*}{
-        $\frac{\textstyle x^{\frac{k}{2} - 1} \exp(-x/2)}
-        {\textstyle 2^{\frac{k}{2}} \Gamma({\scriptstyle \frac{k}{2}})}$
-      } & 0 & \\
-      & $k > 0$ \\
-      Double  & \verb+ddexp(mu,tau)+ & 
-      \multirow{2}{*}{$\tau \exp(-\tau | x-\mu |)/2$} & & \\
-      exponential & $\tau > 0$ \\
-      Exponential & \verb+dexp(lambda)+ & 
-      \multirow{2}{*}{$\lambda \exp(-\lambda x)$} & 0 & \\ 
-      & $\lambda > 0$ \\
-      F   & \verb+df(n,m)+ & 
-      \multirow{2}{*}{
-        $\textstyle \frac{\Gamma(\frac{n + m}{2})}
-                         {\Gamma(\frac{n}{2}) \Gamma(\frac{m}{2})}
-        \left(\frac{n}{m} \right)^{\frac{n}{2}} x^{\frac{n}{2} - 1} 
-        \left\{1 + \frac{nx}{m} \right\}^{-\frac{(n + m)}{2}}$} & 0 & \\
-      & $n > 0$, $m > 0$ \\
-      Gamma       & \verb+dgamma(r, lambda)+ & 
-      \multirow{2}{*}{
-        $\frac{\textstyle \lambda^r x^{r - 1} \exp(-\lambda x)}
-        {\textstyle \Gamma(r)}$} & 0 & \\
-      & $\lambda > 0$, $r > 0$ \\
-      Generalized & \verb+dgen.gamma(r,lambda,b)+ &  
-      \multirow{2}{*}{
-        $\frac
-        {\textstyle b \lambda^{b r} x^{b r - 1}  \exp\{-(\lambda x)^{b}\}}
-        {\textstyle \Gamma(r)}$
-      } & $0$ & \\
-      gamma       & $\lambda >0$, $b > 0$, $r > 0$ \\
-      Logistic    & \verb+dlogis(mu, tau)+ &
-      \multirow{2}{*}{
-        $\frac{\textstyle \tau \exp\{(x - \mu) \tau\}}
-        {\textstyle  \left[1 + \exp\{(x - \mu) \tau\}\right]^2}$
-      } &  & \\
-      ~ & $\tau > 0$ \\
-      Log-normal  & \verb+dlnorm(mu,tau)+ & 
-      \multirow{2}{*}{
-        $\left(\frac{\tau}{2\pi}\right)^{\frac{1}{2}} x^{-1} \exp \left\{-\tau (\log(x) - \mu)^2 / 2 \right\}$} & 0 \\
-      ~ & $\tau > 0$ \\
-      Noncentral & \verb+dnchisqr(k, delta)+ & 
-      \multirow{2}{*}{
-        $\sum_{r=0}^{\infty} 
-        \frac{ \exp(-\frac{\delta}{2}) (\frac{\delta}{2})^r}{\textstyle r!} \,
-        \frac{ x^{(k/2 + r - 1)} \exp(-\frac{x}{2})}
-             { 2^{(k/2 + r)} \Gamma({ \frac{k}{2} + r})}
-        $
-      } & 0 & \\
-      Chi-squre & $k > 0, \delta \geq 0$ \\
-      Normal   & \verb+dnorm(mu,tau)+ & 
-      \multirow{2}{*}{
-        $\left(\frac{\tau}{2\pi}\right)^{\frac{1}{2}} \exp\{- \tau (x - \mu)^2 / 2\}$} & & \\
-      ~ & $\tau > 0$ \\
-      Pareto      & \verb+dpar(alpha, c)+ & 
-      \multirow{2}{*}{
-        $\alpha c^{\alpha} x^{-(\alpha + 1)}$
-      } & $c$ & \\
-      ~ & $\alpha > 0$, $c > 0$ \\
-      Student t   & \verb+dt(mu,tau,k)+ & 
-      \multirow{2}{*}{
-        $\textstyle \frac{\Gamma(\frac{k+1}{2})}{\Gamma(\frac{k}{2})} 
-        \left(\frac{\tau}{k\pi} \right)^{\frac{1}{2}} 
-        \left\{1 + \frac{\tau (x - \mu)^2}{k} \right\}^{-\frac{(k+1)}{2}}$} & & \\
-      ~ & $\tau > 0$, $k > 0$ \\
-      Uniform     & \verb+dunif(a,b)+ & 
-      \multirow{2}{*}{$\frac{\textstyle 1}{\textstyle b - a}$} & $a$ & $b$ \\
-      ~ & $a < b$ \\ 
-      Weibull     & \verb+dweib(v, lambda)+ & 
-      \multirow{2}{*}{$v  \lambda  x^{v - 1} \exp (- \lambda x^v)$} & 0 & \\
-      ~ & $v > 0$, $\lambda > 0$ \\
-      \hline
-    \end{tabular}
-    \caption{Univariate real-valued distributions in the \texttt{bugs} module
-      \label{table:bugs:distributions:real}}
-  \end{center}
-\end{table}
+The Dirichlet distribution (section \ref{bugs:ddirch}) is a
+multivariate generalization of the beta distribution.
 
-\begin{table}
-  \begin{center}
-    \begin{tabular}{llccc}
-      \hline
-      Name & Usage & Density & Lower & Upper \\
-      \hline
-      Beta & \verb+dbetabin(a, b, n)+ &
-     \multirow{2}{*}{
-        $\textstyle {a+x-1 \choose x} {b+n-x-1 \choose n - x} 
-                    {a+b+n-1 \choose n}^{-1}$
-      } & $0$ & $n$ \\
-      binomial & $a > 0, b > 0, n \in \mathbb{N}^*$ \\
-      Bernoulli & \verb+dbern(p)+ & 
-      \multirow{2}{*}{$p^x (1 - p)^{1 -x}$} & 
-      $0$ & $1$ \\
-      ~ & $0 < p < 1$ \\
-      Binomial  & \verb+dbin(p,n)+ & 
-      \multirow{2}{*}{${n \choose x}  p^x (1-p)^{n-x}$}
-      ~  & $0$ & $n$ \\
-      ~ & $0 < p < 1$, $n \in \mathbb{N}^*$ \\
-      Categorical & \verb+dcat(pi)+ & \multirow{2}{*}{$\frac{\textstyle \pi_x}{\textstyle \sum_i \pi_i}$} & $1$ & $N$ \\
-      ~ & $\pi \in (\mathbb{R}^+)^N$  \\
-      Noncentral & \verb+dhyper(n1,n2,m1,psi)+ &
-      \multirow{2}{*}{
-        $\frac{ {n_1 \choose x} {n_2 \choose m_1 - x} \psi^x}
-              { \sum_i {n_1 \choose i} {n_2 \choose m_1 - i} \psi^i}$
-      } &
-      $\scriptstyle \text{max}(0,n_+ - m_1)$ & 
-      $\scriptstyle \text{min}(n_1,m_1)$ \\
-      hypergeometric & $0 \leq n_i$, $0 < m_1 \leq n_+$  \\
-      Negative & \verb+dnegbin(p, r)+ &
-      \multirow{2}{*}{${x + r -1 \choose x} p^r (1-p)^x$} & 0 & \\
-      binomial & $0 < p \leq 1$, $r \geq 0$ \\
-      Poisson & \verb+dpois(lambda)+ & 
-      \multirow{2}{*}{$\frac{\textstyle \exp(-\lambda) \lambda^x}{\textstyle x!}$} & 0 & \\
-      ~ & $\lambda > 0$ \\
-      \hline
-    \end{tabular}
-  \caption{Discrete univariate distributions in the \texttt{bugs} module
-    \label{table:bugs:distributions:discrete}}
-  \end{center}
-\end{table}
+\subsubsection{Chi-square}
+\label{bugs:dchisqr}
 
+The chi-square distribution on $k > 0$ degrees of freedom is defined by
+\begin{verbatim}
+y ~ dchisqr(k)
+\end{verbatim}
+The alias \texttt{dchisq} may also be used for compatibility with R.
 
-\begin{table}
-  \begin{center}
-    \begin{tabular}{lll}
-      \hline
-      Name & Usage & Density \\
-      \hline
-      Dirichlet & \verb+p ~ ddirch(alpha)+ & 
-      \multirow{2}{*}{$\Gamma(\sum_i \alpha_i) \prod_j 
-        \frac{\textstyle p_j^{\alpha_j - 1}}{\textstyle \Gamma(\alpha_j)}$} \\
-      ~ & $\alpha_j \geq 0$ \\
-      & \\
-      Multivariate & \verb+x ~ dmnorm(mu,Omega)+ &
-      \multirow{2}{*}{
-        $|\Omega|^{\frac{1}{2}} \left(2\pi\right)^{-\frac{p}{2}} \exp\{-(x-\mu)^T \Omega (x-\mu) / 2\}$} \\
-      normal & $\Omega \; p \times p$ positive definite \\
-      Wishart & \verb+Omega ~ dwish(R,k)+ &
-      \multirow{2}{*}{
-        $\frac{\textstyle |\Omega|^{(k-p-1)/2} |R|^{k/2} \exp\{-\text{Tr}(R\Omega/2)\}}
-               {\textstyle 2^{pk/2} \Gamma_p (k/2)}$
-      } \\
-      & $R \; p \times p$ pos. def., $k \geq p$ \\
-      Multivariate & \verb+x ~ dmt(mu,Omega,k)+ &
-      \multirow{2}{*}{
-        $\frac{\textstyle \Gamma \{(k+p)/2\}}{\textstyle \Gamma(k/2) (n\pi)^{p/2}}
-        |\Omega|^{1/2}
-        \left\{1 + \frac{1}{k} (x - \mu)^T \Omega (x - \mu) \right\}^{-\frac{(k+p)}{2}}$   } \\
-      Student t &  $\Omega$ pos. def. & \\
-      Multinomial  & \verb+x ~ dmulti(pi, n)+ & 
-      \multirow{2}{*}{$n! \prod_j 
-        \frac{\textstyle \pi_j^{x_j}}{\textstyle x_j!}$} \\
-      ~ & $\sum_j x_j = n$ \\
-      & \\
-    \hline
-    \end{tabular}
-    \caption{Multivariate distributions in the \texttt{bugs} module
-      \label{table:bugs:distributions:multi}}
-  \end{center}
-\end{table}
+The density of the chi-square distribution is
+\[
+\frac{\textstyle y^{\frac{k}{2} - 1} \exp(-y/2)}
+     {\textstyle 2^{\frac{k}{2}} \Gamma({\scriptstyle \frac{k}{2}})}
+\]
+for $y \geq 0$.
+
+The chi-square distribution is a special case of the gamma
+distribution and is equivalent to
+\begin{verbatim}
+y ~ dgamma(1/2, k/2)
+\end{verbatim}
+
+\subsubsection{Double exponential}
+\label{bugs:ddexp}
+
+The double exponential (or Laplace) distribution with mean $\mu$ (mu) and
+precision $\tau$ (tau) is defined by
+\begin{verbatim}
+y ~ ddexp(mu, tau)
+\end{verbatim}
+for $\tau > 0$. It has probability density function
+\[
+\tau \exp(-\tau | y - \mu |)/2
+\]
+The variance of the double exponential distribution is $1/\tau$.
+
+\subsubsection{Exponential}
+\label{bugs:dexp}
+
+The exponential distribution with rate lambda ($\lambda$) is defined by
+\begin{verbatim}
+y ~ dexp(lambda)
+\end{verbatim}
+for $\lambda > 0$. It has probability density function
+\[
+\lambda \exp(-\lambda y)
+\]
+for $y \geq 0$.
+
+The exponential distribution has mean $1/\lambda$ and variance $1/\lambda$.
+
+In survival analysis, $T ~ dexp(lambda)$ is the survival distribution
+for an event $T$ that has constant hazard $\lambda$.
+
+\subsection{F}
+\label{bugs:df}
+
+The F distribution on $n >0$ and $m > 0$ degrees of freedom is defined by
+\begin{verbatim}
+y ~ df(n, m)
+\end{verbatim}
+It has probability density function
+\[
+\frac{\Gamma(\frac{n + m}{2})}
+     {\Gamma(\frac{n}{2}) \Gamma(\frac{m}{2})}
+     \left(\frac{n}{m} \right)^{\frac{n}{2}} y^{\frac{n}{2} - 1} 
+     \left\{1 + \frac{ny}{m} \right\}^{-\frac{(n + m)}{2}}
+\]
+for $y \geq 0$.       
+
+The $F$ distribution can be constructed as the ratio of two chi-square
+distributions (suitably scaled).
+\begin{verbatim}
+y <- (x1/sqrt(n))/(x2/sqrt(m))
+x1 ~ dchisqr(n)
+x2 ~ dchisqr(m)
+\end{verbatim}
+The F distribution has mean $m/(m-2)$ for $m > 2$. The variance is
+finite for $m > 4$.
+
+\subsection{Gamma}
+\lable{bugs:dgamma}
+
+The gamma distribution with shape $r$ and rate $\lambda$ (lambda) is
+defined by
+\begin{verbatim}
+y ~ dgamma(r, lambda)
+\end{verbatim}
+for $\lambda > 0$ and $r > 0$. It has probability density function
+\[
+\frac{\textstyle \lambda^r y^{r - 1} \exp(-\lambda y)}
+     {\textstyle \Gamma(r)}
+\]
+for $y \geq 0$.
+
+When $r=1$ the gamma distribution reduces to the exponential distribution
+with rate $\lambda$. The chi-square distribution is also a special case
+of the gamma distribution. See section \ref{bugs:dchisqr}.
+
+\subsection{Generalized gamma}      
+\label{bugs:dgen.gamma}
+
+The generalized gamma distribution is a flexible 3-parameter family
+that includes both the gamma distribution and the Weibull distribution
+as special cases.
+
+The generalized gamma distribution with parameters $r$, $b$, and
+$\lambda$ (lambda) is defined by
+\begin{verbatim}
+y ~ dgen.gamma(r, lambda, b)
+\end{verbatim}
+for $r > 0, b > 0, \lambda > 0$.
+
+For compatibility with OpenBUGS, the alias \texttt{dggamma} may also
+be used as the name of the generalized gamma distribution.
+
+The generalized gamma distribution has probability density
+\[
+\frac{\textstyle b \lambda^{b r} y^{b r - 1}  \exp\{-(\lambda y)^{b}\}}
+     {\textstyle \Gamma(r)}
+\]
+for $y \geq 0$.
+
+When $b=1$ the generalized gamma reduces to the gamma distribution
+with shape $r$ and rate $\lambda$. When $r=1$ it reduces to the
+Weibull distribution. However, it should be noted that the
+parameterization of the \texttt{dweib} distribution is not the same as
+the one used by the \texttt{dgen.gamma} distribution. See section
+\ref{bugs:dweib} for more details.
+
+\subsection{Logistic}
+\label{bugs:dlogis}
+
+The logistic distribution with mean $\mu$ (mu) and precision $\tau$ (tau) is
+defined by
+\begin{verbatim}
+y ~ dlogis(mu, tau)
+\end{verbatim}
+for $\tau > 0$. It has probability density function
+\[
+\frac{\textstyle \tau \exp\{(y - \mu) \tau\}}
+     {\textstyle  \left[1 + \exp\{(y - \mu) \tau\}\right]^2}
+\]   
+The variance of the logistic distribution is $\pi^2/(3*\tau)$, {\em
+  i.e.} approximately 3.3 times larger than the variance of a normal
+distribution with the same precision parameter.
+
+The cumulative distribution function of the logistic distribution is
+\[
+P(Y \leq y) = \frac{1}{\textstyle  1 + \exp\{ - (y - \mu) \tau\}}
+\]
+which, for $\tau = 1$, is the logistic link function.
+
+\subsection{Log-normal}
+\label{bugs:dlnorm}
+
+The log-normal distribution with parameters $\mu$ (mu) and $\tau$ (tau) is
+defined by
+\begin{verbatim}
+y ~ dlnorm(mu,tau)
+\end{verbatim}
+for $\tau > 0$. Its probability density is
+\[
+\left(
+\frac{\tau}{2\pi}
+\right)^{\frac{1}{2}} y^{-1} \exp \left\{-\tau (\log(y) - \mu)^2 / 2 \right\}
+\]
+for $y > 0$.
+
+As the name suggests, the log-normal distribution is the log transformation
+of a normal distribution with mean $\mu$ and precision $\tau$. It is
+equivalent to
+\begin{verbatim}
+y <- log(x)
+x ~ dnorm(mu, tau)
+\end{verbatim}
+
+\subsection{Non-central chi-square}
+\label{bugs:dnchisqr}
+
+The non-central chi-square distribution on $k$ degrees of freedom with
+non-centrality parameter $\delta$ (delta) is defined by
+\begin{verbatim}
+y ~ dnchisqr(k, delta)
+\end{verbatim}
+for $k > 0$ and $\delta > 0$.
+
+The non-central chi-square distribution is equivalent to a Poisson
+mixture of chi-square distributions:
+\begin{verbatim}
+y ~ dchisqr(k + 2*r)
+r ~ dpois(delta/2)
+\end{verbatim}
+It reduces to the chi-square distribution when $\delta = 0$. See
+section \ref{bugs:dchisqr}.
+
+\subsubsection{Non-central t}
+\label{bugs:dnt}
+
+The non-central Student t-distribution is defined by
+\begin{verbatim}
+y ~ dnt(mu, tau, df)
+\end{verbatim}
+for $\tau > 0$ and $df > 0$. The probability density function has
+no simple closed-form expression, but the distribution can be defined
+constructively in terms of underlying normal and gamma distributions
+\begin{verbatim}
+Y <- U/sqrt(V)
+U ~ dnorm(mu, tau)
+V ~ dgamma(df/2, df/2)
+\end{verbatim}
+The non-central t distribution is usually only defined for $\tau = 1$,
+in which case $\mu$ is the non-centrality parameter. The 3-parameter
+form here is a scaled version of a standard non-central t with
+non-centrality parameter $\delta = \mu tau^{1/2}$. Due to a built-in
+limitation in the R math library, the absolute value of $\delta$ must
+be less than 37.62.
+
+\subsubsection{Normal}
+\label{bugs:dnorm}
+
+The normal (or Gaussian) distribution with mean $\mu$ (mu) and precision
+$\tau$ (tau) is defined by
+\begin{verbatim}
+y ~ dnorm(mu,tau}
+\end{verbatim}
+for $\tau > 0$. Its probability density function is
+\[
+\left(\frac{\tau}{2\pi}\right)^{\frac{1}{2}} \exp\{- \tau (y - \mu)^2 / 2\}
+\]
+The variance of the normal distribution is $1/\tau$.
+
+\subsubsection{Pareto}
+\label{bugs:pareto}
+
+The Pareto distribution with shape parameter $\alpha$ (alpha) and scale
+parameter $c$ is defined by
+\begin{verbatim}
+y ~ dpar(alpha, c)
+\end{verbatim}
+for $\alpha > 0, c > 0$. It has probability density
+\[
+\alpha c^{\alpha} y^{-(\alpha + 1)}
+\]
+for $y \geq c$. So the scale parameter $c$ is the minimum suppported
+value.  The shape parameter $\alpha$ is also known as the {\em tail
+  index} because it determines the behaviour of the tail of the
+distribution:
+\[
+P(Y \geq y) = \left( \frac{c}{y} \right)^\alpha
+\]
+The Pareto distribution has mean $\alpha c/(\alpha-1)$ if $\alpha >
+1$, otherwise the mean is infinite because the tail decays to zero
+very slowly. Similarly, the variance is finite only for $\alpha > 2$.
+
+\subsection{Student t}
+\label{bugs:dt}
+
+The Student t-distribution with location $\mu$ (mu), precision $\tau$
+(tau) and degrees of freedom $k$ is defined by
+\begin{verbatim}
+y ~ dt(mu,tau,k)
+\end{verbatim}
+for $\tau > 0, k > 0$. It has probability density function
+\[
+\frac{\Gamma(\frac{k+1}{2})}{\Gamma(\frac{k}{2})} 
+\left(\frac{\tau}{k\pi} \right)^{\frac{1}{2}} 
+\left\{1 + \frac{\tau (y - \mu)^2}{k} \right\}^{-\frac{(k+1)}{2}}
+\]
+
+The t-distribution is equivalent to a scale mixture of normals:
+\begin{verbatim}
+y <- x/sqrt(s)
+x ~ dnorm(mu, tau)
+s ~ dgamma(k/2, k/2)
+\end{verbatim}
+As $k \rightarrow \infty$ the t-distribution tends to the normal distribution
+with mean $\mu$ and precision $\tau$.
+
+For $k \leq 1$ all moments of the t-distribution are undefined. If $k
+> 1$ then the expectation is $\mu$. The variance is $k/(\tau*(k-2))$
+for $k > 2$ but for $1 < k \leq 2$ it is infinite.
+
+The t-distribution is often represented as a one-parameter family
+indexed by the degrees of freedom parameter $k$. This is due to its
+origins as the distribution of Student's t-statistic. In the BUGS
+language the t-distribution also has location and precision parameters
+so that it can be used as an alternative to the normal distribution
+when heavier tails are required.  A typical choice is $k=4$ degrees of
+freedom, given finite mean and variance and zero skewness, but
+infinite kurtosis.
+
+\subsubsection{Uniform}
+\label{bugs:dunif}
+
+The uniform distribution with limits $a, b$ is defined by
+\begin{verbatim}
+y ~ dunif(a,b)
+\end{verbatim}
+for $a < b$. It has probability density function
+\[
+\frac{\textstyle 1}{\textstyle b - a}
+\]
+for $a \leq y \leq b$.
+
+\subsubsection{Weibull}
+\label{bugs:dweib}
+
+The Weibull distribution with shape parameter $v$ and rate parameter
+$\lambda$ is defined by
+\begin{verbatim}
+y ~ dweib(v, lambda)
+\end{verbatim}
+for $v > 0, \lambda > 0$. Its probability density function is
+\[
+v  \lambda  y^{v - 1} \exp (- \lambda y^v)
+\]
+The Weibull distribution is equivalent to a power transformation of
+an exponential distribution with rate $\lambda$.
+\begin{verbatim}
+y <- z^v
+z ~ dexp(lambda)
+\end{verbatim}
+
+When the \texttt{dweib} distribution is used as a survival
+distribution for an event time $T$, the hazard function is
+\[
+h(t) = \lambda v t^{v-1}
+\]
+Depending on the value of the shape parameter $v$, the hazard can be
+increasing ($v > 1$), decreasing ($v < 1)$ or constant ($v=1$) with
+time $t$. The parameter $\lambda$ can be interpreted as a hazard ratio
+parameter (relative to the baseline hazard $h_0(t) = v t^{v-1}$ with
+$\lambda=1$).
+
+The Weibull distribution has an alternate parameterization for the
+accelerated life model. This is implemented \texttt{dgen.gamma}
+distribution when the first shape parameter set to 1.
+\begin{verbatim}
+y ~ dgen.gamma(1, lambda, b)
+\end{verbatim}
+The hazard function is then
+\[
+h(t) = v \lambda^b t^{b-1}
+\]
+With the \verb{dgen.gamma} distribution $\lambda$ is not a hazard
+ratio. Instead, it is the factor by which the failure time $T$ is
+accelerated as can be seen from the survival function
+\[
+P(T \geq t) = \mbox{exp}\left\{ - \left(\lambda t \right)^b \right\}
+\]
+
+\subsection{Discrete univariate distributions}
+
+\subsubsection{Bernoulli}
+
+The Bernoulli distribution (named after Swiss mathematician Jacobe
+Bernoulli 1655-1705) with probability parameter $p$ is defined by
+\begin{verbatim}
+y ~ dbern(p)
+\end{verbatim}
+for $0 < p < 1$. The \verb{dbern} distribution has probability mass function
+\begin{eqnarray*}
+  P(Y=1) & = & p \\
+  P(Y=0) & = & 1 - p
+\]
+The Bernoulli distribution is a special case of the binomial distribution
+with size parameter equal to 1.
+
+\subsubsection{Binomial}
+
+The binomial distribution with probability parameter $p$ and integer
+size parameter $n$ is defined by
+\begin{verbatim}
+y ~ dbin(p,n)
+\end{verbatim}
+for $0 < p < 1$ and $n \geq 1$. It has probability mass function
+\[
+P(Y=y) = {n \choose x}  p^y (1-p)^{n-y}
+\]
+for $y = 0, 1, \ldots n$.
+
+\subsubsection{Categorical}
+
+The categorical distribution with probability parameter $\pi$ (pi) is
+defined by
+\begin{verbatim}
+y ~ dcat(pi)
+\end{verbatim}
+where $\pi$ (pi) is a vector of non-negative probability weights of
+length $N$. The \texttt{dcat} distribution has probability mass
+function
+\[
+P(Y=y) = \frac{\pi_y}{\sum_{i=1}^N \pi_i}
+\]
+for $y = 1, \ldots N$. Note that the probability weights $\pi$ do not
+need to sum to 1 ({\em i.e.} they are unnormalized), but at least one
+of the weights must be non-zero so that $\sum_i \pi_i > 0$.
+
+\subsubsection{Hypergeometric}
+
+The hypergeometric distribution can be represented as
+\begin{verbatim}
+y1 ~ dhyper(n1,n2,m1,psi)
+\end{verbatim}
+where $n_1, n_2, m_1$ are all integers and $\psi$ (psi) is a continuous
+parameter. The restrictions on the possible parameter values are
+$n_1 > 0$, $n_2 > 0$, $m_1 > 0$, $m_1 \leq n_1 + n_2$ and $\psi > 0$.
+
+The hypergeometric distribution is simplest to describe when the odds
+ratio parameter $\psi$ is equal to 1. The distribution can then be
+explained in terms of an urn model represented in the $2 \times 2$
+table below.
+
+\begin{tabular}{|cc|l}
+  white & black &
+  \hline
+  drawn    $y_1$ & $y_2$ & $m_1$
+  remaining $n_1 - y_1$  & $n_2 - y_1$  & $n_1 + n_2 - m_1$
+  \hline
+  $n_1$ & $n_2$ & $n_1 + n_2$
+\end{tabular}
+
+Suppose that an urn contains $n_1$ white balls and $n_2$ black balls.
+A total of $m_1$ balls are drawn from the urn without replacement.
+Then $y_1$, the number of white balls drawn from the urn, has a
+hypergeometric distribution
+\begin{verbatim}
+y1 ~ dhyper(n1,n2,m1,1)
+\end{verbatim}
+
+The non-central hypergeometric distribution with odds ratio parameter
+$\psi \neq 1$ arises when $m_1$ is the sum of two binomial distributions
+\begin{verbatim}
+m1 ~ sum(y1, y2)
+y1 ~ dbin(p1, n1)
+y2 ~ dbin(p2, n2)
+\end{verbatim}
+If $m_1$ is observed, the conditional distribution of $y_1$ has a
+non-central hypergeometric distribution with odds ratio parameter
+\[
+\psi = \frac{p_1 (1 - p_2)}{(1 - p_1) p_2}
+\]
+There are two important things to note. Firstly, the value of $m_1$ is
+not fixed {\em a priori} but is a random variable. Secondly, the
+distribution does not depend on the absolute values of the underlying
+binomial probability parameters $p_1, p_2$ but only their odds ratio
+$\psi$.
+
+The hypergeometric distribution has probability mass function
+\[
+P(Y=y_1) = \frac{ {n_1 \choose y_1} {n_2 \choose m_1 - y_1} \psi^{y_1}}
+{ \sum_i {n_1 \choose i} {n_2 \choose m_1 - i} \psi^i}
+\]
+for $\text{max}(0, n_1 + n_2 - m_1) \leq y_1 \leq
+\text{min}(n_1,m_1)$.  The rather complex expressions for the lower
+and upper limits of $y_1$ are derived from the restriction that none
+of the cells in the $2 \times 2$ table above can be negative.
+
+\subsubsection{Negative binomial}
+
+The negative binomial distribution with probability parameter $p$
+and size parameter $r$ is defined by
+\begin{verbatim}
+y ~ dnegbin(p, r)
+\end{verbatim}
+for $0 < p \leq 1$ and $r \geq 0$. For compatibility with R, the
+alias \verb{dnbinom} may also be used. The probability mass function is
+\[
+P(Y=y) = {y + r -1 \choose y} p^r (1-p)^y
+\]
+For $y = 0, 1, 2, \ldots$.
+
+The size parameter $r$ does not need to be an integer. However when
+$r$ is an integer, the negative binomial distribution can be
+interpreted in terms of a series of Bernoulli trials, {\em i.e.}
+independent experiments with a binary outcome where the probability of
+``success'' is $p$. The number of failures that occur before $r$
+successes are achieved has a negative binomial distribution.
+
+The negative binomial distribution has mean $r(1-p)/p$ and variance
+$(1 - p)r/p^2$. It collapses to a single point if either $r=0$ or
+$p=1$. In this case $P(Y=0) = 1$. Conversely, the value $p=0$ is not
+permitted (even if $r=0$) because ``success'' in the Bernoulli trials
+is then impossible.
+
+Both the binomial and negative binomial distributions can be explained
+in terms of Bernoulli trials. For the binomial distribution (section
+\ref{bugs:dbin} the number of trials is fixed and the number of
+success is random; for the negative binomial the number of successes
+is fixed and the number of trials is random.
+
+\subsection{Poisson}
+
+The Poisson distribution (named after the French mathematician
+Sim\'{e}on Denis Poisson 1781--1840) with rate $\lambda$ (lambda) is
+defined by
+\begin{verbatim}
+y ~ dpois(lambda)
+\end{verbatim}
+for $\lambda > 0$. It has probability mass function
+\[
+P(Y=y) = \frac{\textstyle \exp(-\lambda) \lambda^y}{\textstyle y!}
+\]
+for $y = 0, 1, 2, \ldots$.
+
+The Poisson distribution has expectation $\lambda$ and variance $\lambda$.
+
+\subsection{Multivariate distributions}
+
+\subsubsection{Dirichlet}
+
+The Dirichlet distribution (named after German mathematician Peter
+Gustave Lejeune Dirichlet\footnote{A note on pronunciation. Although
+  the name Lejeune Dirichlet is of French origin, the {\em ch} is
+  pronounced with a hard ``k'' sound and not a soft ``sh'' as it would
+  be in French} 1805--1859) is defined by
+\begin{verbatim}
+y[1:N] ~ ddirch(alpha[1:N])
+\end{verbatim}
+where alpha ($\alpha$) is a vector of non-negative prior weights. The
+outcome $\pi$ satisfies $\pi_i \geq 0$ and $\sum_i \pi_i = 1$ (i.e. the
+Dirichlet distribution is defined on the N-dimensional simplex).
+
+The name \texttt{ddirch} is due to a historical misspelling of the
+name Dirichlet in WinBUGS. The distribution was renamed
+\texttt{ddirich} in OpenBUGS and so this alias is also allowed in
+JAGS.
+
+When $\alpha_j > 0$ for all elements $j$ of the vector $\alpha$, the
+probability density function of the Dirichlet distribution is 
+\[
+\Gamma(\sum_i \alpha_i) \prod_j 
+\frac{\textstyle y_j^{\alpha_j - 1}}{\textstyle \Gamma(\alpha_j)}
+\]
+JAGS also allows some of the prior weights to be zero representing
+structural zeros. The corresponding elements of the outcome are fixed
+to zero ({\em i.e.}  $\pi_j = 0$ if $\alpha_j = 0$) At least one
+element of $\alpha$ must be non-zero so that $\sum_j \alpha_j > 0$.
+
+The outcome $y$ represents a probability distribution over the
+integers $1 \ldots N$. The Dirichlet distribution is often used as
+a prior distribution for the probability parameters of the \texttt{dcat}
+or \texttt{dmulti} distribution, e.g.
+\begin{verbatim}
+z ~ dcat(pi[1:N])
+pi[1:N] ~ ddirch(alpha[1:N])
+\end{verbatim}
+Note however, that these distributions also accept a vector of
+unnormalized probability weights. In this context, it is worth noting
+that the Dirichlet distribution can be constructed by generating
+independent gamma random and then normalizing them.
+\begin{verbatim}
+for (i in 1:n) {
+   pi[i] <- w[i]/sum(w[1:N])
+   w[i] ~ dgamma(alpha[i], 1)
+}
+\end{verbatim}
+Hence an equivalent prior on the \texttt{dcat} distribution is
+\begin{verbatim}
+z ~ dcat(w[1:N])
+for (i in 1:N) {
+   w[i] ~ dgamma(alpha[i], 1)
+}
+\end{verbatim}
+Using the \texttt{ddirch} distribution is faster, however, as
+JAGS recongizes it as the conjugate prior.
+
+\subsubsection{Multivariate Normal}
+
+There are two distributions in the bugs module representing the
+multivariate normal distribution. The main one is \texttt{dmnorm}
+defined by
+\begin{verbatim}
+y[1:N] ~ dmnorm(mu[1:N], Omega[1:N, 1:N])
+\end{verbatim}
+where $\mu$ (mu) is a vector of mean parameters of length $N$ and
+$\Omega$ (Omega) is an $N \times N$ symmetric positive-definite
+precision matrix.
+
+The probability density function is
+\[
+|\Omega|^{\frac{1}{2}} \left(2\pi\right)^{-\frac{N}{2}}
+\exp\{-(y-\mu)^T \Omega (y-\mu) / 2\}
+\]
+The mean of the multivariate normal distribution is $\mu$ and its
+variance-covariance matrix is $\Omega^{-1}$.
+
+Sometimes is more convenient to express the multivariate normal
+distribution in terms of its variance-covariance matrix $\Sigma$ (Sigma),
+which is the inverse of the precision matrix ($\Sigma = \Omega^{-1}$).
+While the following construction should work in theory
+\begin{verbatim}
+y ~ dnorm(mu, Omega)
+Omega <- inverse(Sigma)
+\end{verbatim}
+in practice it may lead to runtime errors if $\Sigma$ cannot be inverted.
+In such situations it is better to use \texttt{dmnorm.vcov}, which
+is parameterized in terms of the mean and the variance-covariance matrix.
+\begin{verbatim}
+y[1:N] ~ dmnorm.vcov(mu[1:N], Sigma[1:N, 1:N])
+\end{verbatim}
+
+\subsubsection{Multivariate t}
+
+The multivariate t distribution is a generalization of the Student
+t-distribution (section \ref{bugs:dt}) to more than one dimension. It
+is defined by:
+\begin{verbatim}
+y[1:N] ~ dmt(mu[1:N], Omega[1:N, 1:N], k)
+\end{verbatim}
+where $\mu$ (mu) is a vector of location parameters of length $N$,
+$\Omega$ (Omega) is an $N \times N$ symmetric positive-definite
+precision matrix and $k > 0$ is the number of degrees of freedom.
+
+The probability density function of the multivariate t-distribution is
+\[
+\frac{\textstyle \Gamma \{(k+N)/2\}}{\textstyle \Gamma(k/2) (n\pi)^{N/2}}
+|\Omega|^{1/2}
+\left\{1 + \frac{1}{k} (y - \mu)^T \Omega (y - \mu) \right\}^{-\frac{(k+N)}{2}}
+\]
+The multivariate t-distribution can be defined constructively in terms
+of underlying multivariate normal and gamma random variables. It is
+equivalent to:
+\begin{verbatim}
+for (i in 1:N) {
+  y[i] <- z[i]/sqrt(S[i])
+  S[i] ~ dgamma(k/2, k/2)
+}
+z[1:N] ~ dnorm(mu[1:N], Omega[1:N, 1:N])
+\end{verbatim}
+
+When $Omega$ is a diagonal matrix then the elements of $y$ are independent
+and the distribution is equivalent to 
+\begin{verbatim}
+for (i in 1:N) {
+   y[i] ~ dt(mu[i], Omega[i,i], k)
+}
+\end{verbatim}
+Note that the comments about the moments of the t-distribution for
+small values of $k$ also apply to the multivariate t-distribution (See
+section \ref{bugs:dt}).
+
+\subsubsection{Multinomial}
+\label{bugs:dmulti}
+
+The multinomial distribution represents sampling with replacement. 
+\begin{verbatim}
+y[1:N] ~ dmulti(pi[1:N], k)
+\end{verbatim}
+for $\pi$, a vector of unnormalized probability weights of length $N$,
+and integer $k \geq 1$ giving the number of samples to draw. The outcome
+$y$ is a vector of non-negative integers, counting the number of times
+each element was sampled. The outcome always satisfies $\sum_i y_i = k$.
+
+The probability mass function for the multinomial distribution is
+\[
+k! \prod_{j=1}^N
+\frac{\textstyle \pi_j^{x_j}}{\textstyle y_j!}
+\]
+
+For sampling without replacement, see the \texttt{dsample} distribution
+(section \ref{bugs:dsample})
+      
+%\subsubsection{Random walk}
+
+\subsubsection{Sampling with replacement}
+\label{bugs:dsample}
+
+The \texttt{dsample} distribution represents sampling without replacement
+\begin{verbatim}
+y[1:N] ~ dsample(pi[1:N], K)
+\end{verbatim}
+where $\pi$ is a vector of unnormalized probability weights and $K$ is
+an integer in the range $1 \ldots N$ giving the number of samples to
+draw. The outcome $y$, is a vector of binary indicators of length $N$,
+so that $y_i = 1$ if element $i$ has been sampled and $y_i = 0$
+otherwise.
+
+For sampling with replacement, see the multinomial distribution
+(section \ref{bugs:dmulti}).
+
+\subsubsection{Wishart}
+
+The Wishart distribution (named after Scottish mathematician John
+Wishart 1898 -- 1956) is defined by
+\begin{verbatim}
+Omega ~ dwish(R,k)
+\end{verbatim}
+for positive definite $m \times m$ matrix $R$ and degrees of freedom
+$k \geq m$. The resulting matrix $\Omega$ (Omega) is an $m \times m$
+positive-definite matrix.
+
+The probability density function is
+\[
+\frac{\textstyle |\Omega|^{(k-m-1)/2} |R|^{k/2}
+  \exp\{-\text{Tr}(R\Omega/2)\}} {\textstyle 2^{mk/2} \Gamma_p
+  (k/2)}
+\]
+where $\Gamma_p$ is the multivariate gamma function.
+
+The Wishart distribution is often used as a prior for the precision of
+a multivariate normal distribution. It is therefore worth spending
+some time on the interpretation of he parameters $R$ and $k$ in this
+context. There is an implicitly defined prior on the
+variance-covariance matrix $\Sigma = \Omega^{-1}$, which has an
+inverse-Wishart distribution. The expectation of $\Omega$ is
+$kR^{-1}$. Thus $R/k$ is a prior guess for the variance-covariance
+matrix $\Sigma$. When $k=m+1$ the correlation parameters
+\[
+\rho_{ij} = \frac{\sigma_{ij}}{\sqrt{\sigma_{ii} \sigma_{jj}}}
+\]
+for $i \neq j$ have a uniform distribution on the interval
+$[-1,1]$. For $k > m+1$ the prior on $\rho_{ij}$ is concentrated
+around $0$, so that larger values of $k$ incidicate stronger prior
+belief that the elements of the multivariate normal distribution are
+independent. For $k=m$ the Wishart prior puts most weight on the
+extreme values $\rho_{ij} = 1$ and $\rho_{ij} = -1$. This is not
+recommended unless, of course, you have prior information that the
+correlations are strong.
+
 
 \section{Distribution aliases}
 \label{subsection:distributions:aliases}
@@ -1967,7 +2525,14 @@ Dirichlet          & ddirch     & ddirich  & OpenBUGS \\
 
 \chapter{The mix module}
 
-The \verb+mix+ module defines a novel distribution
+%      Beta & \verb+dbetabin(a, b, n)+ &
+%     \multirow{2}{*}{
+%        $\textstyle {a+x-1 \choose x} {b+n-x-1 \choose n - x} 
+%                    {a+b+n-1 \choose n}^{-1}$
+%      } & $0$ & $n$ \\
+%      binomial & $a > 0, b > 0, n \in \mathbb{N}^*$ \\
+
+The \texttt{mix} module defines a novel distribution
 \verb+dnormmix(mu,tau,pi)+ representing a finite mixture of normal
 distributions. In the parameterization of the \verb+dnormmix+
 distribution, $\mu$, $\tau$, and $\pi$ are vectors of the same length,
