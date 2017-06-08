@@ -1041,7 +1041,7 @@ avoid confusion with other statistical software in which distributions
 may have slightly different names. Note however that the alias does
 not change the parameterization. For example, the Weibull distribution
 is parameterized differently in BUGS and R, and using the alias
-``dweibull'' does not change this.
+\texttt{dweibull} does not change this.
 
 \subsection{Observable Functions}
 \label{section:obfun}
@@ -1068,57 +1068,7 @@ unobserved variables.
 %Add warning that observable functions do not give correct deviance
 %statistics
 
-\subsubsection{Interval censored data: \texttt{dinterval}}
 
-\begin{verbatim}
-t <- c(1.2, 4.7, NA, NA, 3.2)
-is.censored <- c(0, 0, 1, 1, 0)
-cutpoint <- 5
-\end{verbatim}
-
-The \texttt{dinterval} distribution represents interval-censored
-data. It has two parameters: $t$ the original continuous variable, and
-$c[]$, a vector of cut points of length $M$, say. If \texttt{Y $\sim$
-  dinterval(t, c)} then
-
-\begin{tabular}{lll}
-$Y=0$   & if & $t \leq c[1]$\\
-$Y=m$   & if & $c[m] < t \leq c[m+1]$ for $1 \leq m < M$\\
-$Y = M$ & if & $c[M] < t$.
-\end{tabular}
-
-\subsubsection{Rounded data: \texttt{dround}}
-
-The \texttt{dround} distribution represents rounded data. It has two
-parameters: $t$ the original continuous variable and $d$, the number
-of decimal places to which the measurements are rounded. Thus if
-$t=1.2345$ and $d=2$ then the rounded value is $1.23$. Note that $d$
-can be negative: if $d=-2$ then the data are rounded to the nearest
-$100$.
-
-\subsubsection{Summed data: \texttt{dsum}}
-
-The \texttt{dsum} distribution represents the sum of two or more
-variables.  It takes a variable number of parameters. If \texttt{Y $\sim$
-dsum(x1,x2,x3)} then $Y=x1+x2+x3$.
-
-These distributions exist to give a likelihood to data that is, in fact,
-a deterministic function of the parameters.  The relation
-\begin{verbatim}
-Y ~ dsum(x1, x2)
-\end{verbatim}
-is logically equivalent to
-\begin{verbatim}
-Y <- x1 + x2
-\end{verbatim}
-But the latter form does not create a contribution to the likelihood,
-and does not allow you to define $Y$ as data.  The likelihood function
-is trivial: it is 1 if the parameters are consistent with the data and
-0 otherwise.  The \texttt{dsum} distribution also requires a special
-sampler, which can currently only handle the case where the parameters
-of \texttt{dsum} are unobserved stochastic nodes, and where the
-parameters are either all discrete-valued or all continuous-valued. A node
-cannot be subject to more than one \texttt{dsum} constraint.
 
 \subsection{Data transformations}
 \label{section:data:tranformations}
@@ -1169,7 +1119,7 @@ data {
    tau.true ~ dgamma(1,3);
 }
 model {
-   for (i in 1:N) {
+   for (i in 1:N) {     
       y[i] ~ dnorm(mu, tau)
    }
    mu ~ dnorm(0, 1.0E-3)
@@ -1619,7 +1569,7 @@ Distribution & Density & Distribution & Quantile \\
 Bernoulli          & dbern     & pbern     & qbern \\
 Beta               & dbeta     & pbeta     & qbeta \\
 Binomial           & dbin      & pbin      & qbin \\
-Chi-square         & dchisqr   & pchisqr   & qchisqr \\
+Chi-squared        & dchisqr   & pchisqr   & qchisqr \\
 Double exponential & ddexp     & pdexp     & qdexp \\
 Exponential        & dexp      & pexp      & qexp \\
 F                  & df        & pf        & qf \\
@@ -1629,7 +1579,7 @@ Noncentral hypergeometric     & dhyper    & phyper    & qhyper \\
 Logistic           & dlogis    & plogis    & qlogis \\
 Log-normal         & dlnorm    & plnorm    & qlnorm \\
 Negative binomial  & dnegbin   & pnegbin   & qnegbin \\
-Noncentral Chi-square & dnchisqr   & pnchisqr   & qnchisqr \\
+Noncentral Chi-squared & dnchisqr   & pnchisqr   & qnchisqr \\
 Normal             & dnorm     & pnorm     & qnorm \\
 Pareto             & dpar      & ppar      & qpar \\
 Poisson            & dpois     & ppois     & qpois \\
@@ -1771,23 +1721,23 @@ for $0 \leq y \leq 1$.
 The Dirichlet distribution (section \ref{bugs:ddirch}) is a
 multivariate generalization of the beta distribution.
 
-\subsubsection{Chi-square}
+\subsubsection{Chi-squared}
 \label{bugs:dchisqr}
 
-The chi-square distribution on $k > 0$ degrees of freedom is defined by
+The chi-squared distribution on $k > 0$ degrees of freedom is defined by
 \begin{verbatim}
 y ~ dchisqr(k)
 \end{verbatim}
 The alias \texttt{dchisq} may also be used for compatibility with R.
 
-The density of the chi-square distribution is
+The density of the chi-squared distribution is
 \[
 \frac{\textstyle y^{\frac{k}{2} - 1} \exp(-y/2)}
      {\textstyle 2^{\frac{k}{2}} \Gamma({\scriptstyle \frac{k}{2}})}
 \]
 for $y \geq 0$.
 
-The chi-square distribution is a special case of the gamma
+The chi-squared distribution is a special case of the gamma
 distribution and is equivalent to
 \begin{verbatim}
 y ~ dgamma(1/2, k/2)
@@ -1828,11 +1778,11 @@ for an event $T$ that has constant hazard $\lambda$.
 \subsection{F}
 \label{bugs:df}
 
-The F distribution on $n >0$ and $m > 0$ degrees of freedom is defined by
+The F distribution on $n$ and $m$ degrees of freedom is defined by
 \begin{verbatim}
 y ~ df(n, m)
 \end{verbatim}
-It has probability density function
+for $n > 0$ and $m > 0$. It has probability density function
 \[
 \frac{\Gamma(\frac{n + m}{2})}
      {\Gamma(\frac{n}{2}) \Gamma(\frac{m}{2})}
@@ -1841,15 +1791,15 @@ It has probability density function
 \]
 for $y \geq 0$.       
 
-The $F$ distribution can be constructed as the ratio of two chi-square
+The $F$ distribution can be constructed as the ratio of two chi-squared
 distributions (suitably scaled).
 \begin{verbatim}
 y <- (x1/sqrt(n))/(x2/sqrt(m))
 x1 ~ dchisqr(n)
 x2 ~ dchisqr(m)
 \end{verbatim}
-The F distribution has mean $m/(m-2)$ for $m > 2$. The variance is
-finite for $m > 4$.
+The F distribution has mean $m/(m-2)$ for $m > 2$, whereas for $0 < m \leq 2$
+the mean is undefined. The variance is finite for $m > 4$.
 
 \subsection{Gamma}
 \lable{bugs:dgamma}
@@ -1867,7 +1817,7 @@ for $\lambda > 0$ and $r > 0$. It has probability density function
 for $y \geq 0$.
 
 When $r=1$ the gamma distribution reduces to the exponential distribution
-with rate $\lambda$. The chi-square distribution is also a special case
+with rate $\lambda$. The chi-squared distribution is also a special case
 of the gamma distribution. See section \ref{bugs:dchisqr}.
 
 \subsection{Generalized gamma}      
@@ -1882,10 +1832,8 @@ $\lambda$ (lambda) is defined by
 \begin{verbatim}
 y ~ dgen.gamma(r, lambda, b)
 \end{verbatim}
-for $r > 0, b > 0, \lambda > 0$.
-
-For compatibility with OpenBUGS, the alias \texttt{dggamma} may also
-be used as the name of the generalized gamma distribution.
+for $r > 0, b > 0, \lambda > 0$. For compatibility with OpenBUGS, the
+alias \texttt{dggamma} may also be used.
 
 The generalized gamma distribution has probability density
 \[
@@ -1948,18 +1896,18 @@ y <- log(x)
 x ~ dnorm(mu, tau)
 \end{verbatim}
 
-\subsection{Non-central chi-square}
+\subsection{Non-central chi-squared}
 \label{bugs:dnchisqr}
 
-The non-central chi-square distribution on $k$ degrees of freedom with
+The non-central chi-squared distribution on $k$ degrees of freedom with
 non-centrality parameter $\delta$ (delta) is defined by
 \begin{verbatim}
 y ~ dnchisqr(k, delta)
 \end{verbatim}
 for $k > 0$ and $\delta > 0$.
 
-The non-central chi-square distribution is equivalent to a Poisson
-mixture of chi-square distributions:
+The non-central chi-squared distribution is equivalent to a Poisson
+mixture of chi-squared distributions:
 \begin{verbatim}
 y ~ dchisqr(k + 2*r)
 r ~ dpois(delta/2)
@@ -2084,7 +2032,13 @@ $\lambda$ is defined by
 \begin{verbatim}
 y ~ dweib(v, lambda)
 \end{verbatim}
-for $v > 0, \lambda > 0$. Its probability density function is
+for $v > 0, \lambda > 0$. For compatibility with R, the alias
+\texttt{dweibull} may also be used. Note, however, that the
+parameterization of the Weibull distribution in JAGS is different from
+the one in R. The latter uses a similar parameterization to the
+generalized gamma. See below.
+
+Its probability density function is
 \[
 v  \lambda  y^{v - 1} \exp (- \lambda y^v)
 \]
@@ -2127,7 +2081,7 @@ P(T \geq t) = \mbox{exp}\left\{ - \left(\lambda t \right)^b \right\}
 
 \subsubsection{Bernoulli}
 
-The Bernoulli distribution (named after Swiss mathematician Jacobe
+The Bernoulli distribution (named after Swiss mathematician Jacob
 Bernoulli 1655-1705) with probability parameter $p$ is defined by
 \begin{verbatim}
 y ~ dbern(p)
@@ -2147,7 +2101,8 @@ size parameter $n$ is defined by
 \begin{verbatim}
 y ~ dbin(p,n)
 \end{verbatim}
-for $0 < p < 1$ and $n \geq 1$. It has probability mass function
+for $0 < p < 1$ and $n \geq 1$. For compatibility with R, the alias
+\texttt{dbinom} may also be used. The probability mass function is
 \[
 P(Y=y) = {n \choose x}  p^y (1-p)^{n-y}
 \]
@@ -2259,7 +2214,7 @@ is then impossible.
 
 Both the binomial and negative binomial distributions can be explained
 in terms of Bernoulli trials. For the binomial distribution (section
-\ref{bugs:dbin} the number of trials is fixed and the number of
+\ref{bugs:dbin}) the number of trials is fixed and the number of
 success is random; for the negative binomial the number of successes
 is fixed and the number of trials is random.
 
@@ -2292,7 +2247,7 @@ Gustave Lejeune Dirichlet\footnote{A note on pronunciation. Although
 y[1:N] ~ ddirch(alpha[1:N])
 \end{verbatim}
 where alpha ($\alpha$) is a vector of non-negative prior weights. The
-outcome $\pi$ satisfies $\pi_i \geq 0$ and $\sum_i \pi_i = 1$ (i.e. the
+outcome $y$ satisfies $y_i \geq 0$ and $\sum_i y_i = 1$ (i.e. the
 Dirichlet distribution is defined on the N-dimensional simplex).
 
 The name \texttt{ddirch} is due to a historical misspelling of the
@@ -2308,7 +2263,7 @@ probability density function of the Dirichlet distribution is
 \]
 JAGS also allows some of the prior weights to be zero representing
 structural zeros. The corresponding elements of the outcome are fixed
-to zero ({\em i.e.}  $\pi_j = 0$ if $\alpha_j = 0$) At least one
+to zero ({\em i.e.}  $y_j = 0$ if $\alpha_j = 0$) At least one
 element of $\alpha$ must be non-zero so that $\sum_j \alpha_j > 0$.
 
 The outcome $y$ represents a probability distribution over the
@@ -2337,7 +2292,7 @@ for (i in 1:N) {
 }
 \end{verbatim}
 Using the \texttt{ddirch} distribution is faster, however, as
-JAGS recongizes it as the conjugate prior.
+JAGS recognizes it as the conjugate prior.
 
 \subsubsection{Multivariate Normal}
 
@@ -2454,6 +2409,7 @@ For sampling with replacement, see the multinomial distribution
 (section \ref{bugs:dmulti}).
 
 \subsubsection{Wishart}
+\label{bugs:dwishart}
 
 The Wishart distribution (named after Scottish mathematician John
 Wishart 1898 -- 1956) is defined by
@@ -2474,12 +2430,13 @@ where $\Gamma_p$ is the multivariate gamma function.
 
 The Wishart distribution is often used as a prior for the precision of
 a multivariate normal distribution. It is therefore worth spending
-some time on the interpretation of he parameters $R$ and $k$ in this
+some time on the interpretation of the parameters $R$ and $k$ in this
 context. There is an implicitly defined prior on the
 variance-covariance matrix $\Sigma = \Omega^{-1}$, which has an
 inverse-Wishart distribution. The expectation of $\Omega$ is
 $kR^{-1}$. Thus $R/k$ is a prior guess for the variance-covariance
-matrix $\Sigma$. When $k=m+1$ the correlation parameters
+matrix $\Sigma$. When $R$ is diagonal and $k=m+1$ the correlation
+parameters
 \[
 \rho_{ij} = \frac{\sigma_{ij}}{\sqrt{\sigma_{ii} \sigma_{jj}}}
 \]
@@ -2492,35 +2449,77 @@ extreme values $\rho_{ij} = 1$ and $\rho_{ij} = -1$. This is not
 recommended unless, of course, you have prior information that the
 correlations are strong.
 
+\subsection{Observable functions in the bugs module}
 
-\section{Distribution aliases}
-\label{subsection:distributions:aliases}
+\subsubsection{Interval censoring: \texttt{dinterval}}
 
+Interval censored data
 
-Table \ref{table:bugs:distributions:alias} shows the distributions in
-the \texttt{bugs} module with an alias.
+\begin{verbatim}
+y <- dinterval(t, c[1:M])
+\end{verbatim}
 
-\begin{table}
-\begin{center}
-\begin{tabular}{llll}
-\hline
-Distribution & Canonical & Alias & Same \\
-             & name      &       & name as \\
-\hline
-Binomial           & dbin       & dbinom   & R   \\
-Chi-square         & dchisqr    & dchisq   & R   \\ 
-Generalized gamma  & dgen.gamma & dggamma  & OpenBUGS \\
-Negative binomial  & dnegbin    & dnbinom  & R   \\
-Weibull            & dweib      & dweibull & R   \\ 
-Dirichlet          & ddirch     & ddirich  & OpenBUGS \\
-\hline
+%Add a tikz picture here
+
+\begin{tabular}{lll}
+  $y = 0$   & if & $t \leq c_1$\\
+  $y = 1$   & if $ $c_1 < t \leq c_2$ \\
+  $\ldots$  & \\
+  $y = M-1$   & if & $c_{M-1} < t \leq c_M$
+  $y = M$   & if & $c_M < t$.
 \end{tabular}
-\caption{Distributions with aliases in \texttt{bugs} module
-  \label{table:bugs:distributions:alias}}
-\end{center}
-\end{table}
 
+If $c$ is of length 1 then \verb+y <- dinterval(t, c)+ is equivalent to
+\verb+y <- t <= c+.
+
+
+\begin{verbatim}
+t <- c(1.2, 4.7, NA, NA, 3.2)
+is.censored <- c(0, 0, 1, 1, 0)
+cutpoint <- 5
+\end{verbatim}
+
+The \texttt{dinterval} distribution represents interval-censored
+data. It has two parameters: $t$ the original continuous variable, and
+$c[]$, a vector of cut points of length $M$, say. If \texttt{Y $\sim$
+  dinterval(t, c)} then
+
+
+
+\subsubsection{Rounded data: \texttt{dround}}
+
+The \texttt{dround} distribution represents rounded data. It has two
+parameters: $t$ the original continuous variable and $d$, the number
+of decimal places to which the measurements are rounded. Thus if
+$t=1.2345$ and $d=2$ then the rounded value is $1.23$. Note that $d$
+can be negative: if $d=-2$ then the data are rounded to the nearest
+$100$.
+
+\subsubsection{Summed data: \texttt{dsum}}
+
+The \texttt{dsum} distribution represents the sum of two or more
+variables.  It takes a variable number of parameters. If \texttt{Y $\sim$
+dsum(x1,x2,x3)} then $Y=x1+x2+x3$.
+
+These distributions exist to give a likelihood to data that is, in fact,
+a deterministic function of the parameters.  The relation
+\begin{verbatim}
+Y ~ dsum(x1, x2)
+\end{verbatim}
+is logically equivalent to
+\begin{verbatim}
+Y <- x1 + x2
+\end{verbatim}
+But the latter form does not create a contribution to the likelihood,
+and does not allow you to define $Y$ as data.  The likelihood function
+is trivial: it is 1 if the parameters are consistent with the data and
+0 otherwise.  The \texttt{dsum} distribution also requires a special
+sampler, which can currently only handle the case where the parameters
+of \texttt{dsum} are unobserved stochastic nodes, and where the
+parameters are either all discrete-valued or all continuous-valued. A node
+cannot be subject to more than one \texttt{dsum} constraint.
 \subsection{Samplers in the bugs module}
+
 
 
 \chapter{The mix module}
