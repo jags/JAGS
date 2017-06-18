@@ -52,7 +52,7 @@ namespace jags {
 		i = smap.find(*p);
 		if (!SumMethod::canSample(i->second, graph)) continue;
 
-		GraphView *gv = new GraphView(i->second, graph);		
+		GraphView *gv = new GraphView(i->second, graph, true);		
 		unsigned int N = nchain(gv);
 		vector<MutableSampleMethod*> methods(N);
 		for (unsigned int ch = 0; ch < N; ++ch) {
