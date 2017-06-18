@@ -20,7 +20,7 @@ static inline double value(vector<double const *> const &par)
     return fround(T(par), NDIGITS(par));
 }
 
-static double tol = sqrt(DBL_EPSILON);
+static double tol = 16 * DBL_EPSILON;
 
 namespace jags {
 namespace bugs {
