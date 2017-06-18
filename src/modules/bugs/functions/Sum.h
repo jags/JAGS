@@ -11,7 +11,7 @@ namespace bugs {
      * Sum calculates the sum of the elements of an array
      * @see Mean
      * <pre>
-     * y <- sum(x[])
+     * y <- sum(x1[], x2[], ...)
      * </pre>
      */
     class Sum : public ScalarVectorFunction
