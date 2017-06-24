@@ -5,6 +5,8 @@
 \usepackage{url}
 \usepackage{multirow}
 \usepackage{amsfonts}
+\usepackage{graphicx}
+
 \newcommand{\release}{4.3.0}
 \newcommand{\JAGS}{\textsf{JAGS}}
 \newcommand{\rjags}{\textsf{rjags}}
@@ -12,6 +14,7 @@
 \newcommand{\OpenBUGS}{\textsf{OpenBUGS}}
 \newcommand{\R}{\textsf{R}}
 \newcommand{\CODA}{\textsf{coda}}
+
 \begin{document}
 
 \title{JAGS Version \release\ user manual}
@@ -250,7 +253,7 @@ sequence if $n < m$.
 
 The data are defined in a separate file from the model definition, in
 the format created by the \texttt{dump()} function in \R (See appendix
-\cite{appendix:data}).  Data values may be supplied for stochastic
+\ref{appendix:data}).  Data values may be supplied for stochastic
 nodes and constants (including constant values used inside for
 loops). It is an error to supply a data value for a deterministic
 node. (See, however, section \ref{section:obfun} on observable
@@ -406,8 +409,8 @@ steps in the initialization of a model:
 The user may supply initial value files -- one for each chain --
 containing initial values for the model parameters. The files may not
 contain values for logical or constant nodes. The format is the same
-as the data file (see (See appendix \cite{appendix:data}).
-Section \cite{parameters:in} describes how to read the initial value
+as the data file (see (See appendix \ref{appendix:data}).
+Section \ref{parameters:in} describes how to read the initial value
 files into the model.
 
 As with the data file, you may supply missing values in the initial
@@ -648,6 +651,8 @@ to a table file with two columns:
 \item The value (pooled over all iterations)
 \end{enumerate}
 
+%Chapter Running JAGS from R
+
 \chapter{Running \JAGS}
 
 \JAGS\ has a command line interface. To invoke jags interactively,
@@ -833,7 +838,7 @@ More complex monitors can be defined that do additional calculations.
 For example, the \verb+dic+ module defines a ``deviance'' monitor that
 records the deviance of the model at each iteration, and a ``pD''
 monitor that calculates an estimate of the effective number of
-parameters on the model \cite{spiegelhalter:etal:2002}.  
+parameters on the model \citep{spiegelhalter:etal:2002}.  
 
 \begin{verbatim}
 . monitor clear <varname> [type(<montype>)]
@@ -910,7 +915,7 @@ the prior are not listed.
 \begin{verbatim}
 . load <module>
 \end{verbatim}
-Loads a module into \JAGS\ (see chapter \ref{section:modules}). Loading
+Loads a module into \JAGS\ (see chapter \ref{chapter:modules}). Loading
 a module does not affect any previously initialized models, but will
 affect the future behaviour of the compiler and model initialization.
 
@@ -1069,6 +1074,72 @@ may have slightly different names. Note however that the alias does
 not change the parameterization. For example, the Weibull distribution
 is parameterized differently in BUGS and R, and using the alias
 \texttt{dweibull} does not change this.
+
+\section{Functions associated with distributions}
+
+All distributions in JAGS have a log density function associated with
+them.  For example, if variable \texttt{x} has a normal distribution
+with mean \texttt{mu} and precision \texttt{tau}:
+\begin{verbatim}
+x ~ dnorm(mu, tau)
+\end{verbatim}
+then the log density of \texttt{x} is given by
+\begin{verbatim}
+ldx <- logdensity.norm(x, mu, tau)
+\end{verbatim}
+In general, if ``\texttt{dfoo}'' is the name of a distribution then
+the associated log density function is
+``\texttt{logdensity.foo}''. The first argument of the log-density
+function is the sample value at which the log-density is evaluated and
+the remaining arguments are the parameters of the distribution.
+
+For some scalar-valued distributions, additional functions are
+available that give the probability density, probability function and
+the quantile function. These distributions and associated functions
+are given in table~\ref{table:dpq}. These distributions are all in the
+\texttt{bugs} module. See section \ref{section:bugs:distributions} for
+details on the parameterization of these distributions.
+
+The density, probability, and quantile functions associated with the
+normal distribution are illustrated below:
+\begin{verbatim}
+density.x  <- dnorm(x, mu, tau)     # Density of normal distribution at x
+prob.x     <- pnorm(x, mu, tau)     # P(X <= x)
+quantile90.x <- qnorm(0.9, mu, tau) # 90th percentile
+\end{verbatim}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Distribution & Distribution & Quantile \\
+\hline
+Bernoulli          & dbern     & pbern     & qbern \\
+Beta               & dbeta     & pbeta     & qbeta \\
+Binomial           & dbin      & pbin      & qbin \\
+Chi-squared        & dchisqr   & pchisqr   & qchisqr \\
+Double exponential & ddexp     & pdexp     & qdexp \\
+Exponential        & dexp      & pexp      & qexp \\
+F                  & df        & pf        & qf \\
+Gamma              & dgamma    & pgamma    & qgamma \\
+Generalized gamma  & dgen.gamma & pgen.gamma & qgen.gamma \\
+Noncentral hypergeometric     & dhyper    & phyper    & qhyper \\
+Logistic           & dlogis    & plogis    & qlogis \\
+Log-normal         & dlnorm    & plnorm    & qlnorm \\
+Negative binomial  & dnegbin   & pnegbin   & qnegbin \\
+Noncentral Chi-squared & dnchisqr   & pnchisqr   & qnchisqr \\
+Normal             & dnorm     & pnorm     & qnorm \\
+Pareto             & dpar      & ppar      & qpar \\
+Poisson            & dpois     & ppois     & qpois \\
+Student t          & dt        & pt        & qt \\
+Weibull            & dweib     & pweib     & qweib \\
+\hline
+\end{tabular}
+\caption{Functions to calculate the probability density, probability
+  function, and quantiles of some of the distributions provided by the
+  \texttt{bugs} module. \label{table:dpq}}
+\end{center}
+\end{table}
 
 \subsection{Observable Functions}
 \label{section:obfun}
@@ -1409,7 +1480,7 @@ Power function & \verb+x^y+ & \\
 
 There is no logical data type in the BUGS language.  Logical
 operators, like all other functions in JAGS, take numeric arguments
-and return numerical values Zero values are considered to be FALSE and
+and return numerical values. Zero arguments are considered to be FALSE and
 non-zero arguments to be TRUE. If the result of a logical operator is
 TRUE then the value 1 is returned, or if it is FALSE the value 0 is
 returned.
@@ -1435,7 +1506,7 @@ and returns a vector of length $n - m + 1$ containing the increasing
 integer sequence $m, m+1, \ldots, n-1, n$. Since the length of the
 resulting vector may not change from one iteration to another, the
 arguments $m$ and $n$ must be fixed.  If $n < m$ then \verb+m:n+
-returns a vector of length zero. See section \label{section:forloops}
+returns a vector of length zero. See section \ref{section:forloops}
 for the consequences of this in for loops.
 
 For compatibility with OpenBUGS, the expression \verb+x^y+ can also be
@@ -1462,7 +1533,20 @@ limit is made for nodes with a \texttt{dcat} prior, which may be
 arbitrarily large.
 
 \subsection{Slice sampling}
-  
+
+Slice sampling \citep{Neal2003} is the ``work horse'' sampling method
+in \JAGS. The \texttt{base:Slice} factory produces three samplers
+based on slice sampling:
+\begin{itemize}
+\item \texttt{base::RealSlicer} samples continuous scalar
+  distributions
+\item \texttt{base::DiscreteSlicer} samples discrete scalar
+  distribution
+\item \texttt{base::MSlicer} samples multivariate continuous
+  distributions.
+\end{itemize}
+
+%FIXME ADD REFERENCE TO NEAL
 \subsection
 Three samplers are currently defined:
 \begin{enumerate}
@@ -1475,9 +1559,11 @@ Three samplers are currently defined:
   stochastic node.
 \end{enumerate}
 
-\subsection{Base RNGs}
+%MSLICER
 
-The \verb+base+ module defines four RNGs, taken directly from \R,
+\subsection{RNGs in the base module}
+
+The \texttt{base} module defines four RNGs, taken directly from \R,
 with the following names:
 \begin{enumerate}
 \item \verb+"base::Wichmann-Hill"+
@@ -1497,11 +1583,34 @@ recycle the same four RNGs, but using different seeds. If you want
 many parallel chains then you may wish to load the \verb+lecuyer+
 module.
 
-\subsection{Base Monitors}
+%FIXME: Lecuyer module is not documented
 
-The \verb+base+ module defines the TraceMonitor class (type
-``trace''). This is the monitor class that simply records the current
-value of the node at each iteration.
+\subsection{Monitors in the base module}
+
+\subsubsection{Trace monitor}
+
+A trace monitor records the current value of a given node at each
+iteration. It is the default monitor type in \JAGS, but it can be
+explicitly selected by choosing monitor type ``trace''.
+
+\subsubsection{Mean monitor}
+
+A mean monitor records a running mean of a given node. It is selected
+by choosing monitor type ``mean''. If you are only interested in the
+posterior mean of a node then a mean monitor is much more
+memory-efficient than a trace monitor. This is especially true if you
+want to estimate the posterior mean of thousands of nodes.
+
+If you use a mean monitor then it is important to run several parallel
+chains in order to assess the sample variance.
+
+\subsubsection{Variance monitor}
+
+A variance monitor records the running variance of a given node. It is
+selected by choosing type ``variance''. See also mean monitor, above.
+
+For a vector-valued node, a variance monitor records the variance of
+each element, but not the covariances between elements.
 
 \chapter{The bugs module}
 \label{chapter:bugs}
@@ -1537,25 +1646,13 @@ y <- exp(x)
 This usage comes from the use of link functions in generalized linear
 models.
 
-Table \ref{table:bugs:dpq} shows functions to calculate the
-probability density, probability function, and quantiles of some of
-the distributions provided by the \texttt{bugs} module. These
-functions are parameterized in the same way as the corresponding
-distribution.  For example, if $x$ has a normal distribution with mean
-$\mu$ and precision $\tau$
-\begin{verbatim}
-x ~ dnorm(mu, tau)
-\end{verbatim}
-Then the usage of the corresponding density, probability, and quantile
-functions is: 
-\begin{verbatim}
-density.x  <- dnorm(x, mu, tau)     # Density of normal distribution at x
-prob.x     <- pnorm(x, mu, tau)     # P(X <= x)
-quantile90.x <- qnorm(0.9, mu, tau) # 90th percentile
-\end{verbatim}
-For details of the parameterization of the other distributions, see
-tables \ref{table:bugs:distributions:real} and
-\ref{table:bugs:distributions:discrete}.
+%% FIXME: Move this to the distributions section
+
+
+
+%For details of the parameterization of the other distributions, see
+%sections \ref{table:bugs:distributions:real} and
+%\ref{table:bugs:distributions:discrete}.
 
 \begin{table}
 \begin{center}
@@ -1602,38 +1699,7 @@ Usage  & Description & Value & Restrictions on arguments \\
 \end{center}
 \end{table}
 
-\begin{table}
-\begin{center}
-\begin{tabular}{llll}
-\hline
-Distribution & Density & Distribution & Quantile \\
-\hline
-Bernoulli          & dbern     & pbern     & qbern \\
-Beta               & dbeta     & pbeta     & qbeta \\
-Binomial           & dbin      & pbin      & qbin \\
-Chi-squared        & dchisqr   & pchisqr   & qchisqr \\
-Double exponential & ddexp     & pdexp     & qdexp \\
-Exponential        & dexp      & pexp      & qexp \\
-F                  & df        & pf        & qf \\
-Gamma              & dgamma    & pgamma    & qgamma \\
-Generalized gamma  & dgen.gamma & pgen.gamma & qgen.gamma \\
-Noncentral hypergeometric     & dhyper    & phyper    & qhyper \\
-Logistic           & dlogis    & plogis    & qlogis \\
-Log-normal         & dlnorm    & plnorm    & qlnorm \\
-Negative binomial  & dnegbin   & pnegbin   & qnegbin \\
-Noncentral Chi-squared & dnchisqr   & pnchisqr   & qnchisqr \\
-Normal             & dnorm     & pnorm     & qnorm \\
-Pareto             & dpar      & ppar      & qpar \\
-Poisson            & dpois     & ppois     & qpois \\
-Student t          & dt        & pt        & qt \\
-Weibull            & dweib     & pweib     & qweib \\
-\hline
-\end{tabular}
-\caption{Functions to calculate the probability density, probability
-  function, and quantiles of some of the distributions provided by the
-  \texttt{bugs} module. \label{table:bugs:dpq}}
-\end{center}
-\end{table}
+
 
 \begin{table}
 \begin{center}
@@ -1651,17 +1717,12 @@ Link function         & Description & Range & Inverse \\
 \end{center}
 \end{table}
 
-\subsection{Scalar-valued functions with vector arguments}
+\subsection{Scalar-valued functions with array arguments}
 
 Table \ref{table:bugs:scalar2} lists the scalar-valued functions in the
 \texttt{bugs} module that take general arguments. Unless otherwise
 stated in table \ref{table:bugs:scalar2}, the arguments to these functions
 may be scalar, vector, or higher-dimensional arrays.
-
-The \verb+max()+ and \verb+min()+ functions work like the
-corresponding \R\ functions. They take a variable number of arguments
-and return the maximum/minimum element over all supplied
-arguments. This usage is  compatible with \OpenBUGS, although more general.
 
 \begin{table}
 \begin{tabular}{lll}
@@ -1672,18 +1733,18 @@ Function & Description & Restrictions \\
 \verb+inprod(x1,x2)+ & Inner product & Dimensions of $x1$, $x2$ conform \\
 \verb+interp.lin(e,v1,v2)+ & Linear Interpolation & $e$ scalar, \\
                           &                     & $v1,v2$ conforming vectors \\
-\verb+logdet(m)+ & Log determinant & $m$ is a symmetric positive definite matrix \\
+\verb+logdet(m)+ & Log determinant & $m$ symmetric positive definite matrix \\
 \verb+max(x1,x2,...)+ & Maximum element among all arguments & \\
 \verb+mean(x)+  & Mean of elements of $x$ & \\
 \verb+min(x1,x2,...)+ & Minimum element among all arguments & \\
 \verb+prod(x)+  & Product of elements of $x$ & \\
-\verb+sum(x1,x2,...)+   & Sum of elements of all arguments & \\
 \verb+sd(x)+    & Standard deviation of elements of $x$ & \\
+\verb+sum(x1,x2,...)+   & Sum of elements of all arguments & \\
 \hline
 \end{tabular}
 \caption{Scalar-valued functions with general
   arguments in the \texttt{bugs} module \label{table:bugs:scalar2},
-  Elipses $\ldots$ mean that the function takes a variable number of
+  Ellipses ($\ldots$) mean that the function takes a variable number of
   arguments}
 \end{table}
 
@@ -1697,7 +1758,7 @@ The \texttt{rep} function replicates elements of a vector. If
 y <- rep(v[1:M], 2)
 \end{verbatim}
 then $y$ is of length $2M$ taking values \verb+v[1]+, \verb+v[1]+,
-\verb+v[2]+, \verb+v[2]+, $\ldots$ \verb+v[M]+, \verb+v[M]+, $\ldots$.
+\verb+v[2]+, \verb+v[2]+, $\ldots$ \verb+v[M]+, \verb+v[M]+.
 The second argument can also be a vector of the same length as $v$,
 e.g.
 \begin{verbatim}
@@ -1705,15 +1766,13 @@ y <- rep(v[1:M], t[1:M])
 \end{verbatim}
 In this case element \verb+v[i]+ is replicated \verb+t[i]+ times.
 
-The functions \texttt{sort}, \texttt{rank}, and \texttt{order} behave
-like their R namesakes: \texttt{sort} accepts a vector and returns the
+The  \texttt{sort} function accepts a vector and returns the
 same values sorted in ascending order; \texttt{rank} returns a vector
 of ranks of the elements; \texttt{order} returns a permutation that
 sorts the elements of the vector in ascending order.  Ties are broken
 by giving the smallest rank/order in the output vector to the element
-with the smallest index in the input vector. The \texttt{rank}
-function is distinct from \OpenBUGS, which has two scalar-valued
-functions \verb+rank+ and \verb+ranked+.
+with the smallest index in the input vector.
+
 
 The \texttt{order} and \texttt{rank} functions are complementary
 in the sense that if
@@ -1811,7 +1870,7 @@ The density of the beta distribution is
 \]
 for $0 \leq y \leq 1$.
 
-The Dirichlet distribution (section \ref{bugs:ddirch}) is a
+The Dirichlet distribution (page~\pageref{bugs:ddirch}) is a
 multivariate generalization of the beta distribution.
 
 \subsubsection{Chi-squared}
@@ -1828,13 +1887,14 @@ The density of the chi-squared distribution is
 \frac{\textstyle y^{\frac{k}{2} - 1} \exp(-y/2)}
      {\textstyle 2^{\frac{k}{2}} \Gamma({\scriptstyle \frac{k}{2}})}
 \]
-for $y \geq 0$.
+for $y \geq 0$. The chi-squared distribution has mean $k$ and variance $2k$.
 
 The chi-squared distribution is a special case of the gamma
 distribution and is equivalent to
 \begin{verbatim}
 y ~ dgamma(1/2, k/2)
 \end{verbatim}
+The degrees of freedom parameter $k$ does not need to be an integer.
 
 \subsubsection{Double exponential}
 \label{bugs:ddexp}
@@ -1853,7 +1913,7 @@ The variance of the double exponential distribution is $1/\tau$.
 \subsubsection{Exponential}
 \label{bugs:dexp}
 
-The exponential distribution with rate lambda ($\lambda$) is defined by
+The exponential distribution with rate $\lambda$ (lambda) is defined by
 \begin{verbatim}
 y ~ dexp(lambda)
 \end{verbatim}
@@ -1861,14 +1921,13 @@ for $\lambda > 0$. It has probability density function
 \[
 \lambda \exp(-\lambda y)
 \]
-for $y \geq 0$.
+for $y \geq 0$. The exponential distribution has mean $1/\lambda$ and
+variance $1/\lambda$.
 
-The exponential distribution has mean $1/\lambda$ and variance $1/\lambda$.
-
-In survival analysis, $T ~ dexp(lambda)$ is the survival distribution
+In survival analysis, \verb+T ~ dexp(lambda)+ is the survival distribution
 for an event $T$ that has constant hazard $\lambda$.
 
-\subsection{F}
+\subsubsection{F}
 \label{bugs:df}
 
 The F distribution on $n$ and $m$ degrees of freedom is defined by
@@ -1894,8 +1953,8 @@ x2 ~ dchisqr(m)
 The F distribution has mean $m/(m-2)$ for $m > 2$, whereas for $0 < m \leq 2$
 the mean is undefined. The variance is finite for $m > 4$.
 
-\subsection{Gamma}
-\lable{bugs:dgamma}
+\subsubsection{Gamma}
+\label{bugs:dgamma}
 
 The gamma distribution with shape $r$ and rate $\lambda$ (lambda) is
 defined by
@@ -1911,9 +1970,9 @@ for $y \geq 0$.
 
 When $r=1$ the gamma distribution reduces to the exponential distribution
 with rate $\lambda$. The chi-squared distribution is also a special case
-of the gamma distribution. See section \ref{bugs:dchisqr}.
+of the gamma distribution. See page~\pageref{bugs:dchisqr}.
 
-\subsection{Generalized gamma}      
+\subsubsection{Generalized gamma}      
 \label{bugs:dgen.gamma}
 
 The generalized gamma distribution is a flexible 3-parameter family
@@ -1939,10 +1998,10 @@ When $b=1$ the generalized gamma reduces to the gamma distribution
 with shape $r$ and rate $\lambda$. When $r=1$ it reduces to the
 Weibull distribution. However, it should be noted that the
 parameterization of the \texttt{dweib} distribution is not the same as
-the one used by the \texttt{dgen.gamma} distribution. See section
-\ref{bugs:dweib} for more details.
+the one used by the \texttt{dgen.gamma} distribution. See
+page~\ref{bugs:dweib} for more details.
 
-\subsection{Logistic}
+\subsubsection{Logistic}
 \label{bugs:dlogis}
 
 The logistic distribution with mean $\mu$ (mu) and precision $\tau$ (tau) is
@@ -1965,7 +2024,7 @@ P(Y \leq y) = \frac{1}{\textstyle  1 + \exp\{ - (y - \mu) \tau\}}
 \]
 which, for $\tau = 1$, is the logistic link function.
 
-\subsection{Log-normal}
+\subsubsection{Log-normal}
 \label{bugs:dlnorm}
 
 The log-normal distribution with parameters $\mu$ (mu) and $\tau$ (tau) is
@@ -1989,7 +2048,7 @@ y <- log(x)
 x ~ dnorm(mu, tau)
 \end{verbatim}
 
-\subsection{Non-central chi-squared}
+\subsubsection{Non-central chi-squared}
 \label{bugs:dnchisqr}
 
 The non-central chi-squared distribution on $k$ degrees of freedom with
@@ -2005,8 +2064,8 @@ mixture of chi-squared distributions:
 y ~ dchisqr(k + 2*r)
 r ~ dpois(delta/2)
 \end{verbatim}
-It reduces to the chi-square distribution when $\delta = 0$. See
-section \ref{bugs:dchisqr}.
+It reduces to the chi-squared distribution when $\delta = 0$. See
+page~\pageref{bugs:dchisqr}.
 
 \subsubsection{Non-central t}
 \label{bugs:dnt}
@@ -2026,7 +2085,7 @@ V ~ dgamma(df/2, df/2)
 The non-central t distribution is usually only defined for $\tau = 1$,
 in which case $\mu$ is the non-centrality parameter. The 3-parameter
 form here is a scaled version of a standard non-central t with
-non-centrality parameter $\delta = \mu tau^{1/2}$. Due to a built-in
+non-centrality parameter $\delta = \mu \, \tau^{1/2}$. Due to a built-in
 limitation in the R math library, the absolute value of $\delta$ must
 be less than 37.62.
 
@@ -2044,6 +2103,8 @@ for $\tau > 0$. Its probability density function is
 \]
 The variance of the normal distribution is $1/\tau$.
 
+%FIXME: Something about diffuse priors?
+
 \subsubsection{Pareto}
 \label{bugs:pareto}
 
@@ -2056,8 +2117,7 @@ for $\alpha > 0, c > 0$. It has probability density
 \[
 \alpha c^{\alpha} y^{-(\alpha + 1)}
 \]
-for $y \geq c$. So the scale parameter $c$ is the minimum suppported
-value.  The shape parameter $\alpha$ is also known as the {\em tail
+for $y \geq c$. The shape parameter $\alpha$ is also known as the {\em tail
   index} because it determines the behaviour of the tail of the
 distribution:
 \[
@@ -2067,7 +2127,7 @@ The Pareto distribution has mean $\alpha c/(\alpha-1)$ if $\alpha >
 1$, otherwise the mean is infinite because the tail decays to zero
 very slowly. Similarly, the variance is finite only for $\alpha > 2$.
 
-\subsection{Student t}
+\subsubsection{Student t}
 \label{bugs:dt}
 
 The Student t-distribution with location $\mu$ (mu), precision $\tau$
@@ -2121,14 +2181,14 @@ for $a \leq y \leq b$.
 \label{bugs:dweib}
 
 The Weibull distribution with shape parameter $v$ and rate parameter
-$\lambda$ is defined by
+$\lambda$ (lambda) is defined by
 \begin{verbatim}
 y ~ dweib(v, lambda)
 \end{verbatim}
 for $v > 0, \lambda > 0$. For compatibility with R, the alias
 \texttt{dweibull} may also be used. Note, however, that the
 parameterization of the Weibull distribution in JAGS is different from
-the one in R. The latter uses a similar parameterization to the
+the one in R, which uses a similar parameterization to the
 generalized gamma. See below.
 
 Its probability density function is
@@ -2163,7 +2223,7 @@ The hazard function is then
 \[
 h(t) = v \lambda^b t^{b-1}
 \]
-With the \verb{dgen.gamma} distribution $\lambda$ is not a hazard
+With the \texttt{dgen.gamma} distribution $\lambda$ is not a hazard
 ratio. Instead, it is the factor by which the failure time $T$ is
 accelerated as can be seen from the survival function
 \[
@@ -2179,15 +2239,16 @@ Bernoulli 1655-1705) with probability parameter $p$ is defined by
 \begin{verbatim}
 y ~ dbern(p)
 \end{verbatim}
-for $0 < p < 1$. The \verb{dbern} distribution has probability mass function
+for $0 < p < 1$. The \texttt{dbern} distribution has probability mass function
 \begin{eqnarray*}
   P(Y=1) & = & p \\
   P(Y=0) & = & 1 - p
-\]
+\end{eqnarray*}
 The Bernoulli distribution is a special case of the binomial distribution
 with size parameter equal to 1.
 
 \subsubsection{Binomial}
+\label{bugs:dbin}
 
 The binomial distribution with probability parameter $p$ and integer
 size parameter $n$ is defined by
@@ -2208,7 +2269,7 @@ defined by
 \begin{verbatim}
 y ~ dcat(pi)
 \end{verbatim}
-where $\pi$ (pi) is a vector of non-negative probability weights of
+where $\pi$ is a vector of non-negative probability weights of
 length $N$. The \texttt{dcat} distribution has probability mass
 function
 \[
@@ -2234,15 +2295,17 @@ ratio parameter $\psi$ is equal to 1. The distribution can then be
 explained in terms of an urn model represented in the $2 \times 2$
 table below.
 
-\begin{tabular}{|cc|l}
-  white & black &
+\begin{center}
+\begin{tabular}{l|cc|l}
+   & white & black & total \\
   \hline
-  drawn    $y_1$ & $y_2$ & $m_1$
-  remaining $n_1 - y_1$  & $n_2 - y_1$  & $n_1 + n_2 - m_1$
+  drawn    & $y_1$ & $y_2$ & $m_1$ \\
+  remaining & $n_1 - y_1$  & $n_2 - y_1$  & $n_1 + n_2 - m_1$ \\
   \hline
-  $n_1$ & $n_2$ & $n_1 + n_2$
+  & $n_1$ & $n_2$ & $n_1 + n_2$ \\
 \end{tabular}
-
+\end{center}
+  
 Suppose that an urn contains $n_1$ white balls and $n_2$ black balls.
 A total of $m_1$ balls are drawn from the urn without replacement.
 Then $y_1$, the number of white balls drawn from the urn, has a
@@ -2265,9 +2328,9 @@ non-central hypergeometric distribution with odds ratio parameter
 \]
 There are two important things to note. Firstly, the value of $m_1$ is
 not fixed {\em a priori} but is a random variable. Secondly, the
-distribution does not depend on the absolute values of the underlying
-binomial probability parameters $p_1, p_2$ but only their odds ratio
-$\psi$.
+hypergeometric distribution does not depend on the absolute values of
+the underlying binomial probability parameters $p_1, p_2$ but only
+their odds ratio $\psi$.
 
 The hypergeometric distribution has probability mass function
 \[
@@ -2287,7 +2350,7 @@ and size parameter $r$ is defined by
 y ~ dnegbin(p, r)
 \end{verbatim}
 for $0 < p \leq 1$ and $r \geq 0$. For compatibility with R, the
-alias \verb{dnbinom} may also be used. The probability mass function is
+alias \texttt{dnbinom} may also be used. The probability mass function is
 \[
 P(Y=y) = {y + r -1 \choose y} p^r (1-p)^y
 \]
@@ -2307,12 +2370,12 @@ permitted (even if $r=0$) because ``success'' in the Bernoulli trials
 is then impossible.
 
 Both the binomial and negative binomial distributions can be explained
-in terms of Bernoulli trials. For the binomial distribution (section
-\ref{bugs:dbin}) the number of trials is fixed and the number of
+in terms of Bernoulli trials. For the binomial distribution
+(page~\pageref{bugs:dbin}) the number of trials is fixed and the number of
 success is random; for the negative binomial the number of successes
 is fixed and the number of trials is random.
 
-\subsection{Poisson}
+\subsubsection{Poisson}
 
 The Poisson distribution (named after the French mathematician
 Sim\'{e}on Denis Poisson 1781--1840) with rate $\lambda$ (lambda) is
@@ -2324,13 +2387,14 @@ for $\lambda > 0$. It has probability mass function
 \[
 P(Y=y) = \frac{\textstyle \exp(-\lambda) \lambda^y}{\textstyle y!}
 \]
-for $y = 0, 1, 2, \ldots$.
+for $y = 0, 1, 2 \ldots$.
 
 The Poisson distribution has expectation $\lambda$ and variance $\lambda$.
 
 \subsection{Multivariate distributions}
 
 \subsubsection{Dirichlet}
+\label{bugs:ddirch}
 
 The Dirichlet distribution (named after German mathematician Peter
 Gustave Lejeune Dirichlet\footnote{A note on pronunciation. Although
@@ -2396,8 +2460,8 @@ defined by
 \begin{verbatim}
 y[1:N] ~ dmnorm(mu[1:N], Omega[1:N, 1:N])
 \end{verbatim}
-where $\mu$ (mu) is a vector of mean parameters of length $N$ and
-$\Omega$ (Omega) is an $N \times N$ symmetric positive-definite
+where mu ($\mu$) is a vector of mean parameters of length $N$ and
+Omega ($\Omega$) is an $N \times N$ symmetric positive-definite
 precision matrix.
 
 The probability density function is
@@ -2426,7 +2490,7 @@ y[1:N] ~ dmnorm.vcov(mu[1:N], Sigma[1:N, 1:N])
 \subsubsection{Multivariate t}
 
 The multivariate t distribution is a generalization of the Student
-t-distribution (section \ref{bugs:dt}) to more than one dimension. It
+t-distribution (page~\pageref{bugs:dt}) to more than one dimension. It
 is defined by:
 \begin{verbatim}
 y[1:N] ~ dmt(mu[1:N], Omega[1:N, 1:N], k)
@@ -2459,9 +2523,9 @@ for (i in 1:N) {
    y[i] ~ dt(mu[i], Omega[i,i], k)
 }
 \end{verbatim}
-Note that the comments about the moments of the t-distribution for
+Note that the comments about the moments of the t-distribution \texttt{dt} for
 small values of $k$ also apply to the multivariate t-distribution (See
-section \ref{bugs:dt}).
+page~\pageref{bugs:dt}).
 
 \subsubsection{Multinomial}
 \label{bugs:dmulti}
@@ -2470,7 +2534,7 @@ The multinomial distribution represents sampling with replacement.
 \begin{verbatim}
 y[1:N] ~ dmulti(pi[1:N], k)
 \end{verbatim}
-for $\pi$, a vector of unnormalized probability weights of length $N$,
+for pi ($\pi$), a vector of unnormalized probability weights of length $N$,
 and integer $k \geq 1$ giving the number of samples to draw. The outcome
 $y$ is a vector of non-negative integers, counting the number of times
 each element was sampled. The outcome always satisfies $\sum_i y_i = k$.
@@ -2481,8 +2545,8 @@ k! \prod_{j=1}^N
 \frac{\textstyle \pi_j^{x_j}}{\textstyle y_j!}
 \]
 
-For sampling without replacement, see the \texttt{dsample} distribution
-(section \ref{bugs:dsample})
+For sampling without replacement, see the \texttt{dsample}
+distribution below.
       
 %\subsubsection{Random walk}
 
@@ -2491,16 +2555,15 @@ For sampling without replacement, see the \texttt{dsample} distribution
 
 The \texttt{dsample} distribution represents sampling without replacement
 \begin{verbatim}
-y[1:N] ~ dsample(pi[1:N], K)
+y[1:N] ~ dsample(pi[1:N], k)
 \end{verbatim}
-where $\pi$ is a vector of unnormalized probability weights and $K$ is
-an integer in the range $1 \ldots N$ giving the number of samples to
-draw. The outcome $y$, is a vector of binary indicators of length $N$,
-so that $y_i = 1$ if element $i$ has been sampled and $y_i = 0$
-otherwise.
+where \texttt{pi} ($\pi$) is a vector of unnormalized probability
+weights and $k$ is an integer in the range $1 \ldots N$ giving the
+number of samples to draw. The outcome $y$, is a vector of binary
+indicators of length $N$, so that $y_i = 1$ if element $i$ has been
+sampled and $y_i = 0$ otherwise.
 
-For sampling with replacement, see the multinomial distribution
-(section \ref{bugs:dmulti}).
+For sampling with replacement, see the multinomial distribution.
 
 \subsubsection{Wishart}
 \label{bugs:dwishart}
@@ -2545,7 +2608,7 @@ correlations are strong.
 
 \subsection{Observable functions in the bugs module}
 
-%Cross reference
+%FIXME: Cross reference
 
 \subsubsection{Interval censoring: \texttt{dinterval}}
 \label{bugs:dinterval}
@@ -2564,15 +2627,17 @@ y <- dinterval(t, c[1:M])
 where $c_1 \ldots c_M$ is an increasing vector of cut points. The value
 of $y$ is given by the table below.
 
+\begin{center}
 \begin{tabular}{lll}
   \hline
   $y = 0$   & if & $t \leq c_1$\\
-  $y = 1$   & if $ $c_1 < t \leq c_2$ \\
+  $y = 1$   & if & $c_1 < t \leq c_2$ \\
   $\ldots$  & \\
   $y = M-1$   & if & $c_{M-1} < t \leq c_M$ \\
   $y = M$   & if & $c_M < t$. \\
   \hline
 \end{tabular}
+\end{center}
 
 When \texttt{dinterval} is used as a distribution:
 \begin{verbatim}
@@ -2583,25 +2648,27 @@ $t$ that takes the value 1 when $t$ lies within an interval defined by
 the cutpoints $c_1 \ldots c_M$ and 0 otherwise. The lower and upper
 limits of the interval are defined by the table below:
 
+\begin{center}
 \begin{tabular}{lll}
   \hline
   Value   & Lower     & Upper   \\
   of y    & limit     & limit   \\
   \hline
-  0       & $-\infty$ & c_1     \\
-  1       & c_1       & c_2     \\
+  0       & $-\infty$ & $c_1$     \\
+  1       & $c_1$     & $c_2$     \\
   \ldots  &           &         \\
-  M-1     & c_{M-1}    & c_M     \\
-  M       & c_{M}      & $\infty$ \\
-  \hilne
+  M-1     & $c_{M-1}$  & $c_M$     \\
+  M       & $c_{M}$   & $\infty$ \\
+  \hline
 \end{tabular}
+\end{center}
 
 More succinctly, if we define $c_0 = -\infty$ and $c_{M+1} = \infty$ then
 \[
 P(y \mid t, c) = \left\{
-\begin{array}{cc}
-  1 & if $c_{y} < t \leq c_{y+1}$ \\
-  0 & otherwise
+\begin{array}{cl}
+  1 & \mbox{if} \; c_{y} < t \leq c_{y+1} \\
+  0 & \mbox{otherwise}
 \end{array}
 \right.
 \]
@@ -2616,7 +2683,7 @@ certain value (left-censoring), or in between two values
 to represent all three forms of censoring.
 
 To set up a right-censored survival model the failure time $t_j$ is
-augmented with a {\em potential} censoring time $c_j$ and a binary
+augmented with a {\em potential censoring time} $c_j$ and a binary
 censoring indicator $I_j$ for each observation.
 \begin{verbatim}
 I[j] ~ dinterval(t[j], c[j])
@@ -2643,9 +2710,17 @@ t <- c(1.2, 4.7, NA, NA, 3.2)
 c <- c(tmax, tmax, 2.1, 0.7, tmax)
 I <- c(0, 0, 1, 1, 0)
 \end{verbatim}
-
-%initial values need to be consistent
-%or you could fix the censored sampler
+A practical disadvantage of the \texttt{dinterval} distribution is that
+initial values must be set for the censored times. In the above example,
+suitable starting values would be. %FIXME: cross-reference to initial values
+\begin{verbatim}
+t <- c(NA, NA, 2.2, 0.8, NA)
+\end{verbatim}
+Here the censored times are set to a value slightly higher than the
+censoring time. Failure to set appropriate initial values for censored
+times when using the \texttt{dinterval} distribution will result in
+the error message ``invalid parent values''for the censoring
+indicator.
 
 Further examples of right-censored survival data can be found in the
 MICE and KIDNEY examples in the ``classic bugs'' set of examples.
@@ -2655,9 +2730,10 @@ MICE and KIDNEY examples in the ``classic bugs'' set of examples.
 The \texttt{dround} distribution represents rounded data. It has two
 parameters: $t$ the original continuous variable and $d$, the number
 of decimal places to which the measurements are rounded. Thus if
-$t=1.2345$ and $d=2$ then the rounded value is $1.23$. Note that $d$
-can be negative, {\em e.g.} if $d=-2$ then the data are rounded to the
-nearest $100$.
+$t=1.2345$ and $d=2$ then the rounded value is $1.23$. If $d=0$ then
+\texttt{dround} rounds to the nearest whole number and of $d < 0$ it
+rounds to a power of 10, e.g. if $d=-2$ then the data are rounded to
+the nearest $100$.
 
 When used as a function
 \begin{verbatim}
@@ -2670,16 +2746,15 @@ y ~ dround(t, d)
 \end{verbatim}
 \texttt{dround} generates a likelihood for parameters $t$, $d$ that is
 equal to 1 if $y$ is equal to $t$ rounded to $d$ decimal places, and 0
-otherwise. Hence if 
-
-There is a small amount of tolerence for ``near equality´´
-is allowed in this comparison to allow for the fact that, in general,
+otherwise. A small amount of tolerence for ``near equality´´ is
+allowed in this comparison to allow for the fact that, in general,
 decimal fractions cannot represented exactly.
 
 \subsubsection{Summing: \texttt{sum}}
+\label{bugs:sum}
 
-The \texttt{sum} function (See table \label{table:bugs:scalar2}) is
-a scalar-valued function that return the sum of all of its arguments.
+The \texttt{sum} function (See table~\ref{table:bugs:scalar2}) is
+a scalar-valued function that returns the sum of all of its arguments.
 \begin{verbatim}
 y <- sum(x1, x2, x3)
 \end{verbatim}
@@ -2692,17 +2767,17 @@ or more unobserved nodes
 y ~ sum(x1, x2, x3)
 \end{verbatim}
 where the arguments must be either all discrete or all continuous.  An
-example can be seen in section \ref{bugs:dhyper}, where the
+example can be seen on page~\pageref{bugs:dhyper}, where the
 hypergeometric distribution is represented using the observed sum of
 two unobserved binomials.
 
 The use of \texttt{sum} as an observable function is facilitated by an
 associated sampler \texttt{bugs::Sum}. If at least two of the
 arguments to \texttt{sum} are unobserved, then the sampler will update
-them together ensuring that the constraint that $y$ is the sum of the
-arguments $x1, x2, \ldots$ is preserved. Furthermore, if one of the
-arguments is itself the sum of unobserved stochastic nodes, then the
-\texttt{bugs::Sum} sampler will update them together. For example, if
+them together ensuring that the sum constraint is preserved.
+Furthermore, if one of the arguments is itself the sum of unobserved
+stochastic nodes, then the \texttt{bugs::Sum} sampler will update them
+together. For example, if
 \begin{verbatim}
 y ~ dsum(x1, z)
 z <- x2 + x3
@@ -2724,18 +2799,18 @@ constraint.
 \subsubsection{\texttt{bugs::Censored}}
 
 The \texttt{bugs::Censored} factory creates samplers for nodes that
-are censored by the \texttt{dinterval} distribution (See section
-\ref{bugs:dinterval}). If the node has a distribution that can be
+are censored by the \texttt{dinterval} distribution (See
+page~\pageref{bugs:dinterval}). If the node has a distribution that can be
 bounded then the \texttt{bugs::Censored} sampler draws samples from
 the truncated distribution.
 
-\subsubsection{\textt{bugs::Sum}}
+\subsubsection{\texttt{bugs::Sum}}
 
 The \texttt{bugs::Sum} factory creates samplers for nodes that are
-constrained by the \textttt{sum} observable function. See section
-\ref{bugs:sum} for more details.
+constrained by the \texttt{sum} observable function. See
+page~\pageref{bugs:sum} for more details.
 
-\subsubsection{\\texttt{bugs::Conjugate}}
+\subsubsection{\texttt{bugs::Conjugate}}
 
 The \texttt{bugs::Conjugate} factory creates samplers for nodes with
 conjugate distributions, {\em i.e.} where the full conditional
@@ -2746,8 +2821,7 @@ distribution of the node belongs to the same family as the prior.
 The \texttt{bugs::Dirichlet} factory creates samplers for nodes with a
 Dirichlet prior distribution when the posterior distribution is {\em
   not} conjugate It does this by modeling the Dirichlet distribution
-as a set of normalized gamma distributions. (See section
-\ref{bugs:ddirch})
+as a set of normalized gamma distributions. (See page~\pageref{bugs:ddirch})
 
 \subsubsection{\texttt{bugs::MNormal}}
 
@@ -2759,128 +2833,11 @@ The \texttt{bugs::MNormal} sampler uses an adaptive random walk
 Metropolis algorithm. It can be very inefficient. In particular, it
 may require an extremely long adaptation period.
 
-\chapter{The mix module}
-
-%      Beta & \verb+dbetabin(a, b, n)+ &
-%     \multirow{2}{*}{
-%        $\textstyle {a+x-1 \choose x} {b+n-x-1 \choose n - x} 
-%                    {a+b+n-1 \choose n}^{-1}$
-%      } & $0$ & $n$ \\
-%      binomial & $a > 0, b > 0, n \in \mathbb{N}^*$ \\
-
-The \texttt{mix} module defines a novel distribution
-\verb+dnormmix(mu,tau,pi)+ representing a finite mixture of normal
-distributions. In the parameterization of the \verb+dnormmix+
-distribution, $\mu$, $\tau$, and $\pi$ are vectors of the same length,
-and the density of \verb+y ~ dnormmix(mu, tau, pi)+ is
-\[
-f(y | \mu, \tau, \pi) = \sum_i \pi_i \tau_i^{\frac{1}{2}} \phi( \tau^{\frac{1}{2}}_i (y - \mu_i))
-\]
-where $\phi()$ is the probability density function of a standard
-normal distribution.
-
-The \verb+mix+ module also defines a sampler that is designed to act
-on finite normal mixtures. It uses tempered transitions to jump
-between distant modes of the multi-modal posterior distribution
-generated by such models \cite{Neal94,Celeux99}. The tempered
-transition method is computationally very expensive. If you want to
-use the \verb+dnormmix+ distribution but do not care about label
-switching, then you can disable the tempered transition sampler with
-\begin{verbatim}
-set factory "mix::TemperedMix" off, type(sampler)
-\end{verbatim}
-
-\chapter{The dic module}
-
-The \verb+dic+ module defines new monitor classes for Bayesian model
-criticism using deviance-based measures. 
-
-\subsection{The deviance monitor}
-
-The deviance monitor records the deviance of the model ({\em i.e.} the
-sum of the deviances of all the observed stochastic nodes) at each
-iteration. The command
-\begin{verbatim}
-monitor deviance
-\end{verbatim}
-will create a deviance monitor {\em unless} you have defined a node
-called ``deviance'' in your model. In this case, you will get a trace
-monitor for your deviance node.
-
-\subsection{The \texttt{pD} monitor}
-
-The \verb+pD+ monitor is used to estimate the effective number of
-parameters ($p_D$) of the model \cite{spiegelhalter:etal:2002}. It
-requires at least two parallel chains in the model, but calculates
-a single estimate of $p_D$ across all chains \cite{plummer:2002}.
-A pD monitor can be created using the command:
-\begin{verbatim}
-monitor pD
-\end{verbatim}
-Like the deviance monitor, however, if you have defined a node called
-``pD'' in your model then this will take precedence, and you will get
-a trace monitor for your \verb+pD+ node.
-
-Since the $p_D$ monitor pools its value across all chains, its values
-will be written out to the index file ``CODAindex0.txt'' and
-output file ``CODAoutput0.txt'' when you use the CODA command.
-
-The effective number of parameters is the sum of separate contributions
-from all observed stochastic nodes: $p_D = \sum_i p_{D_i}$. There is
-also a monitor that stores the sample mean of $p_{D_i}$. These statistics
-may be used as influence diagnostics \cite{spiegelhalter:etal:2002}.
-The mean monitor for $p_{D_i}$ is created with:
-\begin{verbatim}
-monitor pD, type(mean)
-\end{verbatim}
-Its values can be written out to a file ``PDtable0.txt'' with
-\begin{verbatim}
-coda pD, type(mean) stem(PD)
-\end{verbatim}
-
-\subsection{The \texttt{popt} monitor}
-
-The \verb+popt+ monitor works exactly like the mean monitor for $p_D$,
-but records contributions to the optimism of the expected deviance
-($p_{opt_i}$). The total optimism $p_{opt} = \sum_i p_{opt_i}$  can be
-added to the mean deviance to give the penalized expected deviance
-\cite{plummer:2008}.
-
-The mean monitor for $p_{opt_i}$ is created with
-\begin{verbatim}
-monitor popt, type(mean)
-\end{verbatim}
-Its values can be written out to a file ``POPTtable0.txt'' with
-\begin{verbatim}
-coda popt, type(mean) step(POPT)
-\end{verbatim}
-Under asymptotically favourable conditions in which $p_{D_i} \ll 1
-\forall i$,
-\[
-p_{opt} \approx 2 p_D
-\]
-For generalized linear models, a better approximation is
-\[
-p_{opt} \approx \sum_{i=1}^n \frac {p_{D_i}}{1 - p_{D_i}}
-\]
-
-The \verb+popt+ monitor uses importance weights to estimate
-$p_{opt}$. The resulting estimates may be numerically unstable when
-$p_{D_i}$ is not small.  This typically occurs in random-effects
-models, so it is recommended to use caution with the \verb+popt+
-until I can find a better way of estimating $p_{opt_i}$.
-
-\chapter{The msm module}
-
-The \verb+msm+ module defines the matrix exponential function
-\verb+mexp+ and the multi-state distribution \verb+dmstate+ which
-describes the transitions between observed states in continuous-time
-multi-state Markov transition models. 
 
 \chapter{The glm module}
 
 \section{Distributions in the glm module}
-\label{section:base:functions}
+\label{section:glm:distributions}
 
 \subsection{Ordered logistic distribution: \texttt{dordered.logit}}
 \label{glm:dordered.logit}
@@ -2909,7 +2866,7 @@ Then
 \]
 If the location parameter $\mu$ is a linear predictor then the
 \texttt{dordered.logit} distribution can be used to represent the
-ordered logistic regression model \cite{McCullagh1980}. For example,
+ordered logistic regression model \citep{McCullagh1980}. For example,
 suppose
 \[
 \mu = \alpha + \beta x
@@ -2937,7 +2894,7 @@ y ~ dordered.probit(mu, c[1:M])
 where $c$ is an ordered vector of cutpoints of length $M$. The
 \texttt{dordered.logit} distribution is a discrete distribution taking
 values in the range $1, \ldots M+1$, It is similar to the ordered
-logistic distribution (section \ref{glm:dordered.logit}) except that
+logistic distribution (\texttt{dordered.logit}) except that
 the probabilities $P(Y=y)$ are determined by the cumulative
 distribution function of the normal distribution
 \[
@@ -3023,7 +2980,8 @@ freedom is to diminish the weight of the tail.
 }
 \caption{The half-t distribution with scale $S$ and 2 degrees of
   freedom (solid line). The dotted line shows the limit as the
-  degrees of freedom increases to infinity}
+  degrees of freedom increases to infinity \label{figure:halft}}
+\end{figure}
 
 \subsubsection{Scaled Wishart: \texttt{dscaled.wishart}}
 
@@ -3062,21 +3020,21 @@ The \verb+glm+ module implements samplers for efficient updating of
 generalized linear mixed models.  The fundamental idea is to do block
 updating of the parameters in the linear predictor.  The \verb+glm+
 module is built on top of the \textsf{Csparse} and \textsf{CHOLMOD}
-sparse matrix libraries \cite{Davis2006, Davis1999} which allows
+sparse matrix libraries \citep{Davis2006, Davis1999} which allows
 updating of both fixed and random effects in the same
 block. Currently, the methods only work on parameters that have a
 normal prior distribution.
 
 Some of the samplers are based in the idea of introducing latent
 normal variables that reduce the GLM to a linear model. This idea was
-introduced by Albert and Chib \cite{AlbertChib93} for probit
+introduced by \citet{AlbertChib93} for probit
 regression with a binary outcome, and was later refined and extended
-to logistic regression with binary outcomes by Holmes and Held
-\cite{HolmesHeld06}. Another approach, auxiliary mixture sampling,
-was developed by Fr{\"u}hwirth-Schnatter {\em et al}
-\cite{Fruhwirth-Schnatter09} and is used for more general Poisson
+to logistic regression with binary outcomes by 
+\citet{HolmesHeld06}. Another approach, auxiliary mixture sampling,
+was developed by 
+\citet{Fruhwirth-Schnatter09} and is used for more general Poisson
 regression and logistic regression models with binomial outcomes.
-Gamerman \cite{Gamerman97} proposed a stochastic version of the iteratively
+\citet{Gamerman97} proposed a stochastic version of the iteratively
 weighted least squares algorithm for GLMs, which is also implemented
 in the \verb+glm+ module. However the IWLS sampler tends to break down
 when there are many random effects in the model. It uses
@@ -3095,12 +3053,130 @@ mu[i] <- alpha + beta * x[i]
 \end{verbatim}
 without affecting the mixing of the Markov chain.  
 
+\chapter{The mix module}
+
+%      Beta & \verb+dbetabin(a, b, n)+ &
+%     \multirow{2}{*}{
+%        $\textstyle {a+x-1 \choose x} {b+n-x-1 \choose n - x} 
+%                    {a+b+n-1 \choose n}^{-1}$
+%      } & $0$ & $n$ \\
+%      binomial & $a > 0, b > 0, n \in \mathbb{N}^*$ \\
+
+The \texttt{mix} module defines a novel distribution
+\verb+dnormmix(mu,tau,pi)+ representing a finite mixture of normal
+distributions. In the parameterization of the \verb+dnormmix+
+distribution, $\mu$, $\tau$, and $\pi$ are vectors of the same length,
+and the density of \verb+y ~ dnormmix(mu, tau, pi)+ is
+\[
+f(y | \mu, \tau, \pi) = \sum_i \pi_i \tau_i^{\frac{1}{2}} \phi( \tau^{\frac{1}{2}}_i (y - \mu_i))
+\]
+where $\phi()$ is the probability density function of a standard
+normal distribution.
+
+The \verb+mix+ module also defines a sampler that is designed to act
+on finite normal mixtures. It uses tempered transitions to jump
+between distant modes of the multi-modal posterior distribution
+generated by such models \citep{Neal94,Celeux99}. The tempered
+transition method is computationally very expensive. If you want to
+use the \verb+dnormmix+ distribution but do not care about label
+switching, then you can disable the tempered transition sampler with
+\begin{verbatim}
+set factory "mix::TemperedMix" off, type(sampler)
+\end{verbatim}
+
+\chapter{The dic module}
+
+The \verb+dic+ module defines new monitor classes for Bayesian model
+criticism using deviance-based measures. 
+
+\subsection{The deviance monitor}
+
+The deviance monitor records the deviance of the model ({\em i.e.} the
+sum of the deviances of all the observed stochastic nodes) at each
+iteration. The command
+\begin{verbatim}
+monitor deviance
+\end{verbatim}
+will create a deviance monitor {\em unless} you have defined a node
+called ``deviance'' in your model. In this case, you will get a trace
+monitor for your deviance node.
+
+\subsection{The \texttt{pD} monitor}
+
+The \verb+pD+ monitor is used to estimate the effective number of
+parameters ($p_D$) of the model \citep{spiegelhalter:etal:2002}. It
+requires at least two parallel chains in the model, but calculates
+a single estimate of $p_D$ across all chains \citep{plummer:2002}.
+A pD monitor can be created using the command:
+\begin{verbatim}
+monitor pD
+\end{verbatim}
+Like the deviance monitor, however, if you have defined a node called
+``pD'' in your model then this will take precedence, and you will get
+a trace monitor for your \verb+pD+ node.
+
+Since the $p_D$ monitor pools its value across all chains, its values
+will be written out to the index file ``CODAindex0.txt'' and
+output file ``CODAoutput0.txt'' when you use the CODA command.
+
+The effective number of parameters is the sum of separate contributions
+from all observed stochastic nodes: $p_D = \sum_i p_{D_i}$. There is
+also a monitor that stores the sample mean of $p_{D_i}$. These statistics
+may be used as influence diagnostics \citep{spiegelhalter:etal:2002}.
+The mean monitor for $p_{D_i}$ is created with:
+\begin{verbatim}
+monitor pD, type(mean)
+\end{verbatim}
+Its values can be written out to a file ``PDtable0.txt'' with
+\begin{verbatim}
+coda pD, type(mean) stem(PD)
+\end{verbatim}
+
+\subsection{The \texttt{popt} monitor}
+
+The \verb+popt+ monitor works exactly like the mean monitor for $p_D$,
+but records contributions to the optimism of the expected deviance
+($p_{opt_i}$). The total optimism $p_{opt} = \sum_i p_{opt_i}$  can be
+added to the mean deviance to give the penalized expected deviance
+\citep{plummer:2008}.
+
+The mean monitor for $p_{opt_i}$ is created with
+\begin{verbatim}
+monitor popt, type(mean)
+\end{verbatim}
+Its values can be written out to a file ``POPTtable0.txt'' with
+\begin{verbatim}
+coda popt, type(mean) step(POPT)
+\end{verbatim}
+Under asymptotically favourable conditions in which $p_{D_i} \ll 1
+\forall i$,
+\[
+p_{opt} \approx 2 p_D
+\]
+For generalized linear models, a better approximation is
+\[
+p_{opt} \approx \sum_{i=1}^n \frac {p_{D_i}}{1 - p_{D_i}}
+\]
+
+The \verb+popt+ monitor uses importance weights to estimate
+$p_{opt}$. The resulting estimates may be numerically unstable when
+$p_{D_i}$ is not small.  This typically occurs in random-effects
+models, so it is recommended to use caution with the \verb+popt+
+until I can find a better way of estimating $p_{opt_i}$.
+
+\chapter{The msm module}
+
+The \verb+msm+ module defines the matrix exponential function
+\verb+mexp+ and the multi-state distribution \verb+dmstate+ which
+describes the transitions between observed states in continuous-time
+multi-state Markov transition models. 
+
 \chapter{Differences between \JAGS\ and \OpenBUGS}
 
 Although \JAGS\ aims for the same functionality as \OpenBUGS, there are
 a number of important differences.
 
-\subsection{Data format}
+\section{Data format}
 
 There is no need to transpose matrices and arrays when transferring
 data between \R\ and \JAGS, since \JAGS\ stores the values of an array
@@ -3111,7 +3187,7 @@ If you have an \textsf{S}-style data file for \OpenBUGS\ and you wish
 to convert it for \JAGS, then use the command \texttt{bugs2jags},
 which is supplied with the \CODA\ package.
 
-\subsection{Distributions}
+\section{Distributions}
 
 Structural zeros are allowed in the Dirichlet distribution. If
 \begin{verbatim}
@@ -3161,6 +3237,16 @@ n1 & n2 & - \\
 \hline
 \end{tabular}
 \end{center}
+
+\section{Functions}
+
+The \verb+max()+ and \verb+min()+ functions work like the
+corresponding \R\ functions. They take a variable number of arguments
+and return the maximum/minimum element over all supplied
+arguments. This usage is  compatible with \OpenBUGS, although more general.
+
+The \texttt{rank} function is distinct from \OpenBUGS, which has two
+scalar-valued functions \verb+rank+ and \verb+ranked+.
 
 
 \chapter{Acknowledgments}
@@ -3242,7 +3328,7 @@ frames cannot be parsed by \JAGS\, nor can non-numeric vectors.  Any
 \R\ attributes of the data (such as names and dimnames) are ignored
 when they are read into \JAGS. 
 
-\bibliographystyle{plain}
+\bibliographystyle{abbrvnat}
 \bibliography{jags_user_manual}
 
 \end{document}
