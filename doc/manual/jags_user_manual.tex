@@ -107,7 +107,8 @@ Relations can be of two types. A {\em stochastic relation} (\verb+~+)
 defines a stochastic node, representing a random variable in the
 model. A {\em deterministic relation} (\verb+<-+) defines a
 deterministic node, the value of which is determined exactly by the
-values of its parents.
+values of its parents. The equals sign (\verb+=+) can be used
+for a deterministic relation in place of the left arrow (\verb+<-+).
 
 \subsubsection{Parameters and arguments}
 
@@ -411,7 +412,7 @@ containing initial values for the model parameters. The files may not
 contain values for logical or constant nodes. The format is the same
 as the data file (see (See appendix \ref{appendix:data}).
 Section \ref{parameters:in} describes how to read the initial value
-files into the model.
+files into the model.%FIXME
 
 As with the data file, you may supply missing values in the initial
 values file.  This need typically arises with contrast parameters.
@@ -528,11 +529,11 @@ module that defines a new Sampler Factory. The module will insert the
 new Sampler Factory at the beginning of the list, where it will be
 queried before all of the other Sampler Factories. You can also 
 optionally turn on and off sampler factories using the ``SET FACTORY''
-command. See \ref{set:factory}.
+command. See page~\pageref{set:factory}.
 
 A report on the samplers chosen by the model, and the stochastic nodes
 they act on, can be generated using the ``SAMPLERS TO'' command. See 
-section \ref{samplers:to}.
+page \pageref{samplers:to}.
  
 \section{Adaptation and burn-in}
 
@@ -567,7 +568,7 @@ any sampler fails this validation test, a warning will be printed. To
 ensure optimal sampling behaviour, the model should be run again from
 scratch using a longer adaptation period.
 
-The \texttt{adapt} command (see section \ref{section:adapt}) can be
+The \texttt{adapt} command (see page~\pageref{section:adapt}) can be
 used for more control over the adaptive phase.  The \texttt{adapt}
 command updates the model but keeps it in adaptive mode. At the end of
 each update, the convergence test is called. The message ``Adaptation
@@ -653,7 +654,7 @@ to a table file with two columns:
 
 %Chapter Running JAGS from R
 
-\chapter{Running \JAGS}
+\chapter{Running \JAGS\ on the command line}
 
 \JAGS\ has a command line interface. To invoke jags interactively,
 simply type \texttt{jags} at the shell prompt on Unix, a Terminal window on MacOS, or the Windows
@@ -706,7 +707,7 @@ correct value by you.  Anything inside square brackets \verb+[]+ is
 optional. Do not type the square brackets if you wish to use an
 option.
 
-\subsection{MODEL IN}
+\subsubsection{MODEL IN}
 
 \begin{verbatim}
 . model in <file>
@@ -715,9 +716,9 @@ Checks the syntactic correctness of the model description in
 \texttt{file} and reads it into memory. The next compilation
 statement will compile this model. 
 
-See also: MODEL CLEAR (\ref{model:clear})
+See also: MODEL CLEAR (page \pageref{model:clear})
 
-\subsection{DATA IN}
+\subsubsection{DATA IN}
 \label{data:in}
 
 \begin{verbatim}
@@ -731,9 +732,9 @@ Several data statements may be used to read in data from more than one
 file. If two data files contain data for the same node array, the second
 set of values will overwrite the first, and a warning will be printed.
 
-See also: DATA TO (\ref{data:to}).
+See also: DATA TO (page \pageref{data:to}).
 
-\subsection{COMPILE}
+\subsubsection{COMPILE}
 
 \begin{verbatim}
 . compile [, nchains(<n>)]
@@ -747,7 +748,7 @@ Following the compilation of the model, further DATA IN statements are
 legal, but have no effect.  A new model statement, on the other hand,
 will replace the current model.
 
-\subsection{PARAMETERS IN}
+\subsubsection{PARAMETERS IN}
 \label{parameters:in}
 
 \begin{verbatim}
@@ -764,9 +765,9 @@ and before the INITIALIZE statement.  You may only supply the values of
 unobserved stochastic nodes in the parameters file, not logical or
 constant nodes.
 
-See also: PARAMETERS TO (\ref{parameters:to})
+See also: PARAMETERS TO (page \pageref{parameters:to})
 
-\subsection{INITIALIZE}
+\subsubsection{INITIALIZE}
 
 \begin{verbatim}
 . initialize
@@ -774,7 +775,7 @@ See also: PARAMETERS TO (\ref{parameters:to})
 Initializes the model using the previously supplied data and parameter
 values supplied for each chain.
 
-\subsection{UPDATE}
+\subsubsection{UPDATE}
 
 \begin{verbatim}
 . update <n> [,by(<m>)]
@@ -802,7 +803,7 @@ model again with a longer adaptation phase, starting from the MODEL IN
 statement. Alternatively, you may use an ADAPT statement (see below)
 immediately after initialization.
 
-\subsection{ADAPT}
+\subsubsection{ADAPT}
 \label{section:adapt}
 
 \begin{verbatim}
@@ -820,7 +821,7 @@ control over the length of the adaptive sampling phase.
 Like the UPDATE statement, the ADAPT statement prints a progress
 bar, but with plus signs instead of asterisks.
 
-\subsection{MONITOR}
+\subsubsection{MONITOR}
 \label{section:monitor}
 
 In \JAGS, a monitor is an object that calculates summary statistics
@@ -846,7 +847,7 @@ parameters on the model \citep{spiegelhalter:etal:2002}.
 Clears the monitor of the given type associated with variable
 \texttt{<varname>}. 
 
-\subsection{CODA}
+\subsubsection{CODA}
 \label{coda}
 
 \begin{verbatim}
@@ -859,14 +860,14 @@ of to files \texttt{CODAindex.txt}, \texttt{CODAindex1.out},
 prefix from ``CODA'' to another string.  The wild-card character ``*''
 may be used to dump all monitored nodes
 
-\subsection{EXIT}
+\subsubsection{EXIT}
 
 \begin{verbatim}
 . exit
 \end{verbatim}
 Exits \JAGS. \JAGS\ will also exit when it reads an end-of-file character.
 
-\subsection{DATA TO}
+\subsubsection{DATA TO}
 \label{data:to}
 \begin{verbatim}
 . data to <filename>
@@ -875,9 +876,9 @@ Writes the data ({\em i.e.} the values of the observed nodes) to a
 file in the R \texttt{dump} format. The same file can be used in a
 DATA IN statement for a subsequent model.
 
-See also: DATA IN (\ref{data:in})
+See also: DATA IN (page \pageref{data:in})
 
-\subsection{PARAMETERS TO}
+\subsubsection{PARAMETERS TO}
 \label{parameters:to}
 \begin{verbatim}
 . parameters to <file> [, chain(<n>)]
@@ -888,9 +889,9 @@ format. The name and current state of the RNG for chain \texttt{<n>}
 is also dumped to the file.  The same file can be used as input in a
 PARAMETERS IN statement in a subsequent run.
 
-See also: PARAMETERS IN (\ref{parameters:in})
+See also: PARAMETERS IN (page \pageref{parameters:in})
 
-\subsection{SAMPLERS TO}
+\subsubsection{SAMPLERS TO}
 \label{samplers:to}
 \begin{verbatim}
 . samplers to <file>
@@ -910,7 +911,7 @@ Note that the list includes only those nodes that are updated by a
 Sampler.  Stochastic nodes that are updated by forward sampling from
 the prior are not listed.
 
-\subsection{LOAD}
+\subsubsection{LOAD}
 \label{load}
 \begin{verbatim}
 . load <module>
@@ -919,7 +920,7 @@ Loads a module into \JAGS\ (see chapter \ref{chapter:modules}). Loading
 a module does not affect any previously initialized models, but will
 affect the future behaviour of the compiler and model initialization.
 
-\subsection{UNLOAD}
+\subsubsection{UNLOAD}
 \label{unload}
 \begin{verbatim}
 . unload <module>
@@ -928,14 +929,14 @@ Unloads a module. Currently initialized models are unaffected, but
 the functions, distribution, and factory objects in the model will not
 be accessible to future models.
 
-\subsection{LIST MODULES}
+\subsubsection{LIST MODULES}
 \label{list:modules}
 \begin{verbatim}
 . list modules
 \end{verbatim}
 Prints a list of the currently loaded modules.
 
-\subsection{LIST FACTORIES}
+\subsubsection{LIST FACTORIES}
 \label{list:factories}
 \begin{verbatim}
 . list factories, type(<factype>)
@@ -944,7 +945,7 @@ List the currently loaded factory objects and whether or not they are
 active.  The \verb+type+ option must be given, and the three possible values
 of \verb+<factype>+ are \verb+sampler+, \verb+monitor+, and \verb+rng+.
 
-\subsection{SET FACTORY}
+\subsubsection{SET FACTORY}
 \label{set:factory}
 \begin{verbatim}
 . set factory "<facname>" <status>, type(<factype>)
@@ -953,15 +954,15 @@ Sets the status of a factor object. The possible values of \verb+<status>+
 are \verb+on+ and \verb+off+. Possible factory names are given from the
 LIST MODULES command.
 
-\subsection{MODEL CLEAR}
+\subsubsection{MODEL CLEAR}
 \label{model:clear}
 \begin{verbatim}
 . model clear
 \end{verbatim}
-Clears the current model.  The data table (see section \ref{data:in})
+Clears the current model.  The data table (see page~\pageref{data:in})
 remains intact
 
-\subsection{Print Working Directory (PWD)}
+\subsubsection{Print Working Directory (PWD)}
 \begin{verbatim}
 . pwd
 \end{verbatim}
@@ -969,19 +970,19 @@ Prints the name of the current working directory. This is where \JAGS\
 will look for files when the file name is given without a full path, 
 {\em e.g.} \verb+"mymodel.bug"+.
 
-\subsection{Change Directory (CD)}
+\subsubsection{Change Directory (CD)}
 \begin{verbatim}
 . cd <dirname>
 \end{verbatim}
 Changes the working directory to \texttt{<dirname>}
 
-\subsection{Directory list (DIR)}
+\subsubsection{Directory list (DIR)}
 \begin{verbatim}
 . dir
 \end{verbatim}
 Lists the files in the current working directory.
 
-\subsection{RUN}
+\subsubsection{RUN}
 \begin{verbatim}
 . run <cmdfile>
 \end{verbatim}
@@ -1020,15 +1021,57 @@ each chain when the error occurred.
 \chapter{Functions}
 \label{section:functions}
 
-Functions allow deterministic nodes to be defined using the \verb+<-+
-(``gets'') operator.  Most of the functions in \JAGS\ are scalar
-functions taking scalar arguments. However, \JAGS\ also allows
-arbitrary vector- and array-valued functions, such as the matrix
-multiplication operator \verb+%*%+ and the transpose function
-\verb+t()+ defined in the \verb+bugs+ module, and the matrix
+Functions allow deterministic nodes to be defined using a left arrow
+\verb+<-+ or an equals sign \verb+=+ .  Most of the functions in
+\JAGS\ are scalar functions taking scalar arguments. However,
+\JAGS\ also allows arbitrary vector- and array-valued functions, such
+as the matrix multiplication operator \verb+%*%+ and the transpose
+function \verb+t()+ defined in the \verb+bugs+ module, and the matrix
 exponential function \verb+mexp()+ defined in the \verb+msm+
 module. \JAGS\ also uses an enriched dialect of the BUGS language with
 a number of operators that are used in the S language.
+
+A function may optionally have an alias, which can be used in the
+model definition in place of the canonical name. Aliases are used to
+to avoid confusion with other software in which functions may have
+different names.
+
+\section{Link Functions}
+
+Table \ref{table:bugs:link} lists the link functions in the
+\texttt{bugs} module.  These are smooth scalar-valued functions that
+may be specified using an S-style replacement function notation. So,
+for example, the log link
+\begin{verbatim}
+log(y) <- x
+\end{verbatim}
+is equivalent to the more direct use of its inverse, the exponential
+function:
+\begin{verbatim}
+y <- exp(x)
+\end{verbatim}
+This usage comes from the use of link functions in generalized linear
+models.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Link function         & Description & Range & Inverse \\
+\hline
+\verb+cloglog(y) <- x+ & Complementary log log & $0 < y < 1$ & \verb+y <- icloglog(x)+ \\
+\verb+log(y) <- x+    & Log           & $0 < y$ &  \verb+y <- exp(x)+ \\
+\verb+logit(y) <- x+  & Logit         & $0 < y < 1$ &  \verb+y <- ilogit(x)+ \\
+\verb+probit(y) <- x+ & Probit        & $0 < y < 1$ &  \verb+y <- phi(x)+\\
+\hline
+\end{tabular}
+\caption{Link functions in the \texttt{bugs} module \label{table:bugs:link}}
+\end{center}
+\end{table}
+
+% Nested indexing
+
+\section{Vectorization}
 
 Scalar functions taking scalar arguments are automatically vectorized.
 They can also be called when the arguments are arrays with conforming
@@ -1049,10 +1092,7 @@ for (i in 1:D[1])
 Inverse link functions are an exception to this rule ({\em i.e.} exp,
 icloglog, ilogit, phi) and cannot be vectorized. 
 
-A function may optionally have an alias, which can be used in the
-model definition in place of the canonical name. Aliases are used to
-to avoid confusion with other software in which functions may have
-different names.
+%General discussion of whether to vectorize
 
 \chapter{Distributions}
 \label{chapter:distributions}
@@ -1183,6 +1223,7 @@ sampler, which can currently only handle the case where the parameters
 of \texttt{dsum} are unobserved stochastic nodes, and where the
 parameters are either all discrete-valued or all continuous-valued.
 
+%Should be in chapter on bugs language
 \subsection{Data transformations}
 \label{section:data:tranformations}
 
@@ -1546,20 +1587,15 @@ based on slice sampling:
   distributions.
 \end{itemize}
 
-%FIXME ADD REFERENCE TO NEAL
-\subsection
-Three samplers are currently defined:
-\begin{enumerate}
-\item The Finite sampler can sample a discrete-valued node with fixed
-  support of less than 20 possible values. The node must not be
-  bounded using the \verb+T(,)+ construct
-\item The Real Slice Sampler can sample any scalar real-valued
-  stochastic node.
-\item The Discrete Slice Sampler can sample any scalar discrete-valued
-  stochastic node.
-\end{enumerate}
-
-%MSLICER
+Occasionally a slice sampler may fail with the message ``Slicer stuck
+at value with infinite density''. This occurs when sampling the gamma
+distribution (page~\pageref{bugs:dgamma}) with shape parameter less
+than 1, or the beta distribution (page~\pageref{bugs:dbeta}) when
+either parameter is less than 1.  In such cases, the density function
+is not bounded but goes to infinity at the boundary of the support (0
+for the gamma distribution; 0 or 1 for the beta distribution). If this
+occurs, one solution is to use the \texttt{T(,)} construct to keep the
+distribution away from the boundary.
 
 \subsection{RNGs in the base module}
 
@@ -1631,28 +1667,7 @@ are automatically vectorized when they are given vector, matrix, or
 array arguments with conforming dimensions.
 %Cross-reference to language chapter on functions
 
-Table \ref{table:bugs:link} lists the link functions in the
-\texttt{bugs} module.  These are smooth scalar-valued functions that
-may be specified using an S-style replacement function notation. So,
-for example, the log link
-\begin{verbatim}
-log(y) <- x
-\end{verbatim}
-is equivalent to the more direct use of its inverse, the exponential
-function:
-\begin{verbatim}
-y <- exp(x)
-\end{verbatim}
-This usage comes from the use of link functions in generalized linear
-models.
 
-%% FIXME: Move this to the distributions section
-
-
-
-%For details of the parameterization of the other distributions, see
-%sections \ref{table:bugs:distributions:real} and
-%\ref{table:bugs:distributions:discrete}.
 
 \begin{table}
 \begin{center}
@@ -1700,22 +1715,6 @@ Usage  & Description & Value & Restrictions on arguments \\
 \end{table}
 
 
-
-\begin{table}
-\begin{center}
-\begin{tabular}{llll}
-\hline
-Link function         & Description & Range & Inverse \\
-\hline
-\verb+cloglog(y) <- x+ & Complementary log log & $0 < y < 1$ & \verb+y <- icloglog(x)+ \\
-\verb+log(y) <- x+    & Log           & $0 < y$ &  \verb+y <- exp(x)+ \\
-\verb+logit(y) <- x+  & Logit         & $0 < y < 1$ &  \verb+y <- ilogit(x)+ \\
-\verb+probit(y) <- x+ & Probit        & $0 < y < 1$ &  \verb+y <- phi(x)+\\
-\hline
-\end{tabular}
-\caption{Link functions in the \texttt{bugs} module \label{table:bugs:link}}
-\end{center}
-\end{table}
 
 \subsection{Scalar-valued functions with array arguments}
 
