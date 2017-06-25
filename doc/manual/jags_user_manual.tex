@@ -19,63 +19,86 @@
 
 \title{JAGS Version \release\ user manual}
 \author{Martyn Plummer}
-\date{15 May 2017}
+\date{25 June 2017}
 \maketitle
 
 \tableofcontents
 
 \chapter{Introduction}
 
-JAGS is Just Another Gibbs Sampler.  It is a program for the analysis
-of Bayesian models using Markov Chain Monte Carlo (MCMC) which is not
-wholly unlike
-\OpenBUGS\ (\url{http://www.openbugs.info}). \JAGS\ was written
-with three aims in mind: to have an engine for the \BUGS\ language
-that runs on Unix; to be extensible, allowing users to write their own
-functions, distributions, and samplers; and to be a platform for
-experimentation with ideas in Bayesian modelling.
+\JAGS\ is ``Just Another Gibbs Sampler''.  It is a program for the
+analysis of Bayesian models using Markov Chain Monte Carlo (MCMC)
+which is not wholly unlike
+\OpenBUGS\ (\url{http://www.openbugs.info}). \JAGS\ is written in
+C++ and is portable to all major operating systems. %Cite the bugs book
 
 \JAGS\ is designed to work closely with the \R\ language and
 environment for statistical computation and graphics
 (\url{http://www.r-project.org}).  You will find it useful to install
-the \CODA\ package for \R\ to analyze the output. You can also use the
-\rjags\ package to work directly with \JAGS\ from within R (but note
-that the \rjags\ package is not described in this manual).
+the \CODA\ package for \R\ to analyze the output. Several \R\ packages
+are available to run a \JAGS\ model. See chapter~\ref{sec:R}
 
-\JAGS\ is licensed under the GNU General Public License
-version 2. You may freely modify and redistribute it under certain
-conditions (see the file \texttt{COPYING} for details).
+\JAGS\ is licensed under the GNU General Public License version 2. You
+may freely modify and redistribute it under certain conditions (see
+the file \texttt{COPYING} for details).
 
-\chapter{Running a model in \JAGS}
+\section{Downloading \JAGS}
 
-\JAGS\ is designed for inference on Bayesian models using Markov Chain
-Monte Carlo (MCMC) simulation.  Running a model refers to generating
-samples from the posterior distribution of the model parameters.  This
-takes place in five steps:
-\begin{enumerate}
-\item Definition of the model
-\item Compilation
-\item Initialization
-\item Adaptation and burn-in
-\item Monitoring
-\end{enumerate}
-The next stages of analysis are done outside of \JAGS: convergence
-diagnostics, model criticism, and summarizing the samples must be done
-using other packages more suited to this task. There are several
-\R\ packages designed for analyzing MCMC output, and \JAGS\ can be
-used from within \R\ using the \rjags\ package.
+\JAGS\ is hosted on Sourceforge at
+\url{https://sourceforge.net/projects/mcmc-jags/}. Binary
+distributions of \JAGS\ for Windows and macOS can be downloaded
+directly from there.  Binaries for various Linux distributions are
+also available, but not directly from Sourceforge. See
+\url{http://mcmc-jags.sourceforge.net} for details.
 
-\section{Definition}
+You can also download the source tarball from Sourceforge. Details
+on installing \JAGS\ from source are given in a separate \JAGS\
+Installation manual.
 
-There are two parts to the definition of a model in \JAGS: a
-description of the model and the definition of the data.
+\section{Getting help}
 
-\subsection{Model definition}
+The best way to get help on \JAGS\ is to use the discussion forums
+hosted on Sourceforge at
+\url{https://sourceforge.net/p/mcmc-jags/discussion/}.  You will need
+to create a Sourceforge account in order to post.
 
-The model is defined in a text file using a dialect of the
+I am particularly interested in the following issues:
+\begin{itemize}
+\item Crashes, including both segmentation faults and uncaught exceptions.
+\item Incomprehensible error messages
+\item Models that should compile, but don't 
+\item Output that cannot be validated against other software such as
+  \OpenBUGS
+\item Documentation erors
+\end{itemize}
+
+Bug reports can be sent to \url{martyn_plummer@users.sourceforge.net}.
+Occasionally, \JAGS\ will stop with an error instructing you to send a
+message to this address.
+
+If you submit a bug report, it must be reproducible. Please send the
+model file, the data file, the initial value file and a script file
+that will reproduce the problem. Describe what you think should
+happen, and what did happen.
+
+\section{Acknowledgements}
+
+Many thanks to the \BUGS\ development team, without whom \JAGS\ would
+not exist.  Thanks also to Simon Frost for pioneering \JAGS\ on
+Windows and Bill Northcott for getting \JAGS\ on Mac OS X to
+work. Kostas Oikonomou found many bugs while getting \JAGS\ to work on
+Solaris using Sun development tools and libraries.  Bettina Gruen,
+Chris Jackson, Greg Ridgeway and Geoff Evans also provided useful
+feedback.  Special thanks to Jean-Baptiste Denis who has been very
+diligent in providing feedback on JAGS. Matt Denwood is a co-developer
+of \JAGS\ with full access to the Sourceforge repository.
+
+\chapter{The BUGS language}
+
+A \JAGS\ model is defined in a text file using a dialect of the
 \BUGS\ language.  The model definition consists of a series of
 relations inside a block delimited by curly brackets \verb+{+ and
-\verb+}+ and preceded by the keyword \verb+model+. Here is the standard
+\verb+}+ and preceded by the keyword \verb+model+. Here is a simple
 linear regression example:
 
 \begin{verbatim}
@@ -92,16 +115,18 @@ model {
 }
 \end{verbatim}
 
-\subsubsection{Relations}
+%Something about verbosity
 
-Each relation defines a node in the model in terms of other nodes that
-appear on the right hand side. These are referred to as the parent
-nodes. Taken together, the nodes in the model (together with the
-parent/child relationships represented as directed edges) form a
-directed acyclic graph. The very top-level nodes in the graph, with no
-parents, are constant nodes, which are defined either in the model
-definition ({\em e.g.}  \verb+1.0E-3+), or in the data file ({\em
-  e.g.}  \verb+x[1]+).
+\subsection{Relations}
+
+Each relation defines a node in the model. The node on the left of a
+relation is defined in terms of other nodes -- referred to as parent
+nodes -- that appear on the right hand side. Taken together, the nodes
+in the model (together with the parent/child relationships represented
+as directed edges) form a directed acyclic graph. The very top-level
+nodes in the graph, with no parents, are constant nodes, which are
+defined either in the model definition ({\em e.g.}  \verb+1.0E-3+), or
+in the data file ({\em e.g.}  \verb+x[1]+).
 
 Relations can be of two types. A {\em stochastic relation} (\verb+~+)
 defines a stochastic node, representing a random variable in the
@@ -110,15 +135,7 @@ deterministic node, the value of which is determined exactly by the
 values of its parents. The equals sign (\verb+=+) can be used
 for a deterministic relation in place of the left arrow (\verb+<-+).
 
-\subsubsection{Parameters and arguments}
-
-Deterministic nodes do not need to be embedded in node arrays. The
-node \verb+Y[i]+ could equivalently be defined as
-\begin{verbatim}
-Y[i] ~ dnorm(alpha + beta * (x[i] - x.bar), tau)
-\end{verbatim}
-
-\subsubsection{Arrays and subsetting}
+\section{Arrays and subsetting}
 
 Nodes defined by a relation are embedded in named arrays. Arrays can
 be vectors (one-dimensional), or matrices (two-dimensional), or they
@@ -132,10 +149,12 @@ $N$ nodes (\verb+mu[1]+, $\ldots$, \verb+mu[N]+). The node array
 that scalars are considered as vectors of length 1. Hence the array
 \verb+alpha+ contains a single node \verb+alpha[1]+.
 
+\subsection{Subsetting vectors}
+
 Subsets of node arrays may be obtained with expressions of the form
 \verb+alpha[e]+ where \verb+e+ is any expression that evaluates to an
 integer vector. Typically expressions of the form \verb+L:U+ are used,
-where $L$ and $U$ are integer arguments to the operator $:$. This
+where $L$ and $U$ are integer arguments to the operator ``\textt{:}''. This
 creates an integer vector of length $U - L + 1$ with elements $L, L+1,
 \ldots U-1, U$.\footnote{If $L > U$ then the operator $:$ returns a
   vector of length zero, which may not be used to take array subsets}
@@ -148,6 +167,8 @@ the \textsf{bugs} module, {\em  e.g.}
 y <- c(x1, x2, x3)
 \end{verbatim}
 creates a new vector $y$ combining the elements of $x1$, $x2$, and $x3$.    
+
+\subsection{Subsetting matrices}
 
 For a two-dimensional array \verb+B+, the element in row $r$ and
 column $c$ is accessed as \verb+B[r,c]+. Complex subsets may be
@@ -177,6 +198,8 @@ this is equivalent to
 v <- c(a[1,1], a[2,1], a[1,2], a[2,2])
 \end{verbatim}
 
+\subsection{Restrictions on index expressions}
+
 There are some restrictions on index expressions that are allowed on
 the left hand side of a relation. Firstly, they must be fixed, meaning
 that they must be expressed in terms of data, or constants defined in
@@ -201,11 +224,11 @@ normal random variable.  However, this code snippet is illegal:
 \end{verbatim}
 as it implies writing two different values to the same element \verb+x[1]+.
 
-\subsubsection{For loops}
+\section{For loops}
 \label{section:forloops}
 
-Node arrays can be traversed with for loops. 
-A general expression for a for loop takes the form
+For loops are used in the the \BUGS\ language to simplify writing
+repeated expressions. A for loop takes the form:
 \begin{verbatim}
 for (i in exp) {
 }
@@ -249,44 +272,89 @@ skipped. Note that this behaviour is different from the sequence
 operator in R, where \verb+m:n+ will produce a {\em decreasing}
 sequence if $n < m$.
 
-\subsection{Data}
-\label{section:data}
+\section{Data transformations}
+\label{section:data:tranformations}
 
-The data are defined in a separate file from the model definition, in
-the format created by the \texttt{dump()} function in \R (See appendix
-\ref{appendix:data}).  Data values may be supplied for stochastic
-nodes and constants (including constant values used inside for
-loops). It is an error to supply a data value for a deterministic
-node. (See, however, section \ref{section:obfun} on observable
-functions).
+Sometimes it is useful to transform the data before analysing them.
+For example, a transformation of outcomes may be necessary to
+reduce skewness and allow the outcome to be represented by a normal
+or other symmetric distribution.
 
-Here are the data for the \verb+LINE+ example:
+You can transform the data supplied to \JAGS\ in a separate block of
+relations preceded by the keyword \texttt{data}. Here for example,
+the input data \texttt{y} is transformed via a square-root transformation
+to \texttt{z}, which is then used as an outcome variable in the model block:
 \begin{verbatim}
-`x` <- c(1, 2, 3, 4, 5)
-#R-style comments, like this one, can be embedded in the data file
-`Y` <- c(1, 3, 3, 3, 5)
-`N` <- 5
+data {
+   for (i in 1:N) {
+      z[i] <- sqrt(y[i])
+   }
+}
+model {
+   for (i in 1:N) {
+      z[i] ~ dnorm(mu, tau)
+   }
+   ...
+}
 \end{verbatim}
+In effect, the data block defines a distinct model, which describes
+how the data are generated. Each node in this model is forward-sampled
+once, and then the node values are read back into the data table.
 
-The unobserved stochastic nodes are referred to as the {\em
-  parameters} of the model. The data file therefore defines the
-parameters of the model by omission. In the \verb+LINE+ example, the
-parameters are \texttt{alpha}, \texttt{beta} and \texttt{tau}.
+\subsection{Modelling simulated data}
 
-If a node array contains both observed and unobserved nodes, then the
-data should contain missing values (\texttt{NA}) for the unobserved
-elements. In the \verb+LINE+ example, if \verb+Y[2]+ and \verb+Y[5]+
-were unobserved, then the data would be
+The data block is not limited to logical relations, but may also
+include stochastic relations. You may therefore use it in simulations,
+generating data from a stochastic model that is different from the one
+used to analyse the data in the \texttt{model} statement.
+
+This example shows a simple location-scale problem in which the ``true''
+values of the parameters \texttt{mu} and \texttt{tau} are generated
+from a given prior in the \texttt{data} block, and the generated
+data is analyzed in the \texttt{model} block.
 \begin{verbatim}
-`Y` <- c(1, NA, 3, 3, NA)
+data {
+   for (i in 1:N) {
+      y[i] ~ dnorm(mu.true, tau.true) 
+   }
+   mu.true ~ dnorm(0,1);
+   tau.true ~ dgamma(1,3);
+}
+model {
+   for (i in 1:N) {     
+      y[i] ~ dnorm(mu, tau)
+   }
+   mu ~ dnorm(0, 1.0E-3)
+   tau ~ dgamma(1.0E-3, 1.0E-3)
+}
 \end{verbatim}
-Multivariate nodes cannot be partially observed, so if a node takes up
-two or more elements of a node array, then the corresponding data
-values must be all present or all missing.
+Beware, however, that every node in the \texttt{data} statement will
+be considered as data in the subsequent \texttt{model} statement. This
+example, although superficially similar, has a quite different interpretation.
+\begin{verbatim}
+data {
+   for (i in 1:N) {
+      y[i] ~ dnorm(mu, tau) 
+   }
+   mu ~ dnorm(0,1);
+   tau ~ dgamma(1,3);
+}
+model {
+   for (i in 1:N) {
+      y[i] ~ dnorm(mu, tau)
+   }
+   mu ~ dnorm(0, 1.0E-3)
+   tau ~ dgamma(1.0E-3, 1.0E-3)
+}
+\end{verbatim}
+Since the names \texttt{mu} and \texttt{tau} are used in both
+\texttt{data} and \texttt{model} blocks, these nodes will be
+considered as {\em observed} in the model and their values will be
+fixed at those values generated in the \texttt{data} block.
 
-\subsection{Node Array dimensions}
+\section{Node Array dimensions}
 
-\subsubsection*{Array declarations}
+\subsection*{Array declarations}
 
 \JAGS\ allows the option of declaring the dimensions of node arrays in
 the model file. The declarations consist of the keyword \texttt{var}
@@ -300,7 +368,7 @@ In the linear regression example, the model block could be preceded by
 var x[N], Y[N], mu[N], alpha, beta, tau, sigma, x.bar;
 \end{verbatim}
 
-\subsubsection*{Undeclared nodes}
+\subsection*{Undeclared nodes}
 
 If a node array is not declared then JAGS has three methods of
 determining its size.
@@ -331,7 +399,7 @@ B <- inverse(A)
 Then \verb+B+ is also an $N \times N$ matrix.
 \end{enumerate}
 
-\subsubsection*{Querying array dimensions}  
+\subsection*{Querying array dimensions}  
 
 The \JAGS\ compiler has two built-in functions for querying array
 sizes.  The \verb+length()+ function returns the number of elements in
@@ -375,20 +443,117 @@ from all other functions in \JAGS: they do not act on nodes, but only
 on node {\em arrays}. As a consequence, an expression such as
 \verb+dim(a %*% b)+ is syntactically incorrect.
 
+\chapter{Steps in running a model}
+
+\JAGS\ is designed for inference on Bayesian models using Markov Chain
+Monte Carlo (MCMC) simulation.  Running a model refers to generating
+samples from the posterior distribution of the model parameters.  This
+takes place in five steps:
+\begin{enumerate}
+\item Definition of the model
+\item Compilation
+\item Initialization
+\item Adaptation and burn-in
+\item Monitoring
+\end{enumerate}
+The next stages of analysis are done outside of \JAGS: convergence
+diagnostics, model criticism, and summarizing the samples must be done
+using other packages more suited to this task. There are several
+\R\ packages designed for analyzing MCMC output, and \JAGS\ can be
+used from within \R\ using the \rjags\ package.
+
 \section{Compilation}
 
-When a model is compiled, a graph representing the model is created in
-computer memory. Compilation can fail for a number of reasons:
+When a \JAGS\ model is compiled, the model description is combined
+with the data to create a {\em virtual graphical model}, a
+representation of the model as a directed acyclic graph (DAG) in
+computer memory.%compilation vs interpretation
+
+One of the interesting features of the \BUGS\ language is that it does
+not clearly distinguish between data and parameters.  A stochastic
+node -- {\em i.e.} a node defined on the left hand side of a
+stochastic relation -- may be either observed (data) or unobserved
+(parameter). The distinction is made only when the model is compiled
+and depends entirely on whether a data value was supplied or not.
+
+Data may also be supplied for {\em constant nodes}. These are nodes
+that are used on the right hand side of a relation (or in the index
+expression of a for loop) but are never defined on the left hand
+side. In fact you must supply data for these nodes or the
+\JAGS\ compiler will stop with an error message (See below).
+
+Data may not be supplied for deterministic nodes -- {\em i.e.} those
+defined on the left hand side of a deterministic relation. These nodes
+always calculate their value according to the current value of the
+parents. 
+
+Recall the simple linear regression model
+\begin{verbatim}
+model {
+    for (i in 1:N) {
+          Y[i]   ~ dnorm(mu[i], tau)
+          mu[i] <- alpha + beta * (x[i] - x.bar)
+    }
+    x.bar   <- mean(x)
+    alpha    ~ dnorm(0.0, 1.0E-4)
+    beta     ~ dnorm(0.0, 1.0E-4)
+    sigma   <- 1.0/sqrt(tau)
+    tau      ~ dgamma(1.0E-3, 1.0E-3)
+}
+\end{verbatim}
+This model may be compiled by combining it with the following data.
+\begin{verbatim}
+x <- c(1, 2, 3, 4, 5)
+Y <- c(1, 3, 3, 3, 5)
+N <- 5
+\end{verbatim}
+In this model, data values must always be supplied for \texttt{N},
+since it is used to index the for loop, and \texttt{x} since it is
+used on the right hand side of the relation defining \textt{mu} but
+never defined on the left hand side of a relation.
+
+%One way to think about the minimal data for a model is that it
+%\JAGS\ be able to sample values from the prior distribution.
+
+In this example data values are also supplied for the outcome
+variables \verb+Y[1]+ to \verb+Y[5]+. The parameters of the model are
+the three stochastic nodes for which no data are supplied:
+\texttt{alpha}, \texttt{beta} and \texttt{tau}.  \JAGS\ will generate
+samples from the posterior distribution of these parameters given
+\texttt{Y}.
+
+As can be seen from the example above, data values are supplied for
+whole node arrays If a node array contains both observed and
+unobserved nodes, then the data should contain missing values
+(\texttt{NA}) for the unobserved elements. Suppose that if \verb+Y[2]+
+and \verb+Y[5]+ were unobserved, then the data supplied for the
+node array \texttt{Y} would be.
+\begin{verbatim}
+Y <- c(1, NA, 3, 3, NA)
+\end{verbatim}
+Then \verb+Y[2]+ and \verb+Y[5]+ are parameters and \JAGS\ will
+generate samples from their posterior predictive distributions, given
+the observed \texttt{Y} values.
+
+Multivariate nodes cannot be partially observed, so if a node takes up
+two or more elements of a node array, then the corresponding data
+values must be all present or all missing.
+
+\subsection{Compilation failures}
+
+Compilation may fail for a number of reasons. The three most common are:
 \begin{enumerate}
-\item The graph contains a directed cycle.  These are forbidden
-in \JAGS.
-\item A top-level parameter is undefined. Any node that is used on
-the right hand side of a relation, but is not defined on the left
-hand side of any relation, is assumed to be a constant node. Its value
-must be supplied in the data file. 
 \item The model uses a function or distribution that has not been
-defined in any of the loaded modules.
+  defined in any of the loaded modules. %crossref
+\item The graph contains a directed cycle.  These are forbidden
+  in \JAGS.
+\item A node is used in an expression but never defined by a relation
+  or supplied with the data.
 \end{enumerate}
+%Causes 
+
+\subsection{Parallel chains}
+
 The number of parallel chains to be run by \JAGS\ is also defined at
 compilation time.  Each parallel chain should produce an independent
 sequence of samples from the posterior distribution. By default,
@@ -408,19 +573,14 @@ steps in the initialization of a model:
 \subsection{Parameter values}
 
 The user may supply initial value files -- one for each chain --
-containing initial values for the model parameters. The files may not
-contain values for logical or constant nodes. The format is the same
-as the data file (see (See appendix \ref{appendix:data}).
-Section \ref{parameters:in} describes how to read the initial value
-files into the model.%FIXME
+containing initial values for the model parameters. Initial values may
+not be supplied for logical or constant nodes.
 
-As with the data file, you may supply missing values in the initial
-values file.  This need typically arises with contrast parameters.
-Suppose $X$ is a categorical covariate taking values from 1 to
-4. There is one parameter for each level of x ($\beta_1 \ldots
-\beta_4$) , but the first parameter $\beta_1$ is set to zero for
-identifiability. The remaining parameters $\beta_2 \ldots \beta_4$
-represent contrasts with respect to the first level of $X$.
+As with the data, initial values are supplied for whole node arrays
+and you may include missing values in the initial values.  This need
+typically arises with contrast parameters.  Suppose $X$ is a
+categorical covariate, taking values from 1 to 4, which is used a a
+predictor variable in a linear model:
 \begin{verbatim}
 for (i in 1:N) {
    Y[i] ~ alpha + beta[x[i]]
@@ -432,6 +592,11 @@ for(i in 2:4) {
    beta[i] ~ dnorm(0, 1.0E-3)
 }
 \end{verbatim}
+There is one parameter for each level of x ($\beta_1 \ldots \beta_4$),
+but the first parameter $\beta_1$ is set to zero for
+identifiability. The remaining parameters $\beta_2 \ldots \beta_4$
+represent contrasts with respect to the first level of $X$.
+
 A suitable initial value for \verb+beta+ would be
 \begin{verbatim}
 `beta` <- c(NA, 1.03, -2.03, 0.52)
@@ -448,21 +613,19 @@ or mode.
 
 If you rely on automatic initial value generation and are running
 multiple parallel chains, then the initial values will be the same in
-all chains.  You may not want this behaviour, especially if you are
-using the Gelman and Rubin convergence diagnostic, which assumes that
-the initial values are over-dispersed with respect to the posterior
-distribution. In this case, you are advised to set the starting values
-manually using the "parameters in" statement.
+all chains. This is undesirable behaviour and it will be changed in a
+future release of \JAGS. You are advised to set the starting values
+manually.
 
-\subsection{RNGs}
+\subsection{Random Number Generators}
 \label{section:rngs}
 
 Each chain in \JAGS\ has its own random number generator (RNG). RNGs
 are more correctly referred to as {\em pseudo}-random number
 generators. They generate a sequence of numbers that merely looks
 random but is, in fact, entirely determined by the initial state.  You
-may optionally set the name of the RNG and its initial state in the
-initial values file.
+may optionally set the name of the RNG and its initial state with the
+initial values for the parameters.
 
 The name of the RNG is set as follows. 
 \begin{verbatim}
@@ -483,9 +646,8 @@ is to supply an integer value to \texttt{.RNG.seed}, {\em e.g.}
 ".RNG.seed" <- 314159
 \end{verbatim}
 The second is way to save the state of the RNG from one JAGS session
-(see the ``PARAMETERS TO'' statement, section \ref{parameters:to}) and
-use this as the initial state of a new chain. The state of any RNG in
-JAGS can be saved and loaded as an integer vector with the name
+and use this as the initial state of a new chain. The state of any RNG
+in JAGS can be saved and loaded as an integer vector with the name
 \texttt{.RNG.state}. For example,
 \begin{verbatim}
 ".RNG.state" <- as.integer(c(20899,10892,29018))
@@ -512,28 +674,23 @@ explicitly set the \verb+.RNG.seed+ for each chain.
 
 A Sampler is an object that acts on a set of parameters and updates
 them from one iteration to the next. During initialization of the
-model, Samplers are chosen automatically for all parameters. 
+model, samplers are chosen automatically for all parameters.
 
-The Model holds an internal list of {\em Sampler Factory} objects,
-which inspect the graph, recognize sets of parameters that can be
-updated with specific methods, and generate Sampler objects for
-them. The list of Sampler Factories is traversed in order, starting with
-sampling methods that are efficient, but limited to certain specific
-model structures and ending with the most generic, possibly
-inefficient, methods. If no suitable Sampler can be generated for one
-of the model parameters, an error message is generated.
+\JAGS\ holds a list of {\em sampler factory} objects, which inspect
+the graph, recognize sets of parameters that can be updated with
+specific methods, and generate sampler objects for them. The list of
+sampler factories is traversed in order, starting with sampling
+methods that are efficient, but limited to certain specific model
+structures and ending with the most generic, possibly inefficient,
+methods. If no suitable sampler can be generated for one of the model
+parameters, an error message is generated.
 
 The user has no direct control over the process of choosing
-Samplers. However, you may indirectly control the process by loading a
-module that defines a new Sampler Factory. The module will insert the
+samplers. However, you may indirectly control the process by loading a
+module that defines a new sampler factory. The module will insert the
 new Sampler Factory at the beginning of the list, where it will be
-queried before all of the other Sampler Factories. You can also 
-optionally turn on and off sampler factories using the ``SET FACTORY''
-command. See page~\pageref{set:factory}.
-
-A report on the samplers chosen by the model, and the stochastic nodes
-they act on, can be generated using the ``SAMPLERS TO'' command. See 
-page \pageref{samplers:to}.
+queried before all of the other Sampler Factories. You can also
+optionally turn on and off sampler factories. %crossref
  
 \section{Adaptation and burn-in}
 
@@ -561,104 +718,42 @@ distribution. Therefore, adaptive mode must be turned off at some
 point during burn-in, and a sufficient number of iterations must take
 place {\em after} the adaptive phase to ensure successful burnin.
 
-By default, adaptive mode is turned off half way through first update
-of a \JAGS\ model. All samplers have a built in test to determine
-whether they have converged to their optimal sampling behaviour.  If
-any sampler fails this validation test, a warning will be printed. To
-ensure optimal sampling behaviour, the model should be run again from
-scratch using a longer adaptation period.
-
-The \texttt{adapt} command (see page~\pageref{section:adapt}) can be
-used for more control over the adaptive phase.  The \texttt{adapt}
-command updates the model but keeps it in adaptive mode. At the end of
-each update, the convergence test is called. The message ``Adaptation
-successful'' will be printed if the convergence test is successful,
-otherwise the message will read ``Adaptation incomplete''.  Successive
-calls to \texttt{adapt} are possible while keeping the model in
-adaptive mode. The next \texttt{update} command will immediately turn
-off adaptive mode.
+All samplers have a built in test to determine whether they have
+converged to their optimal sampling behaviour.  If any sampler fails
+this validation test, a warning will be printed. To ensure optimal
+sampling behaviour, the model should be run again from scratch using a
+longer adaptation period.
 
 \section{Monitoring}
 \label{section:monitoring}
 
 A {\em monitor} in \JAGS\ is an object that records sampled
 values. The simplest monitor is a {\em trace monitor}, which stores
-the sampled value of a node at each iteration.
+the sampled value of a node at each iteration. Other types of monitor
+are avaiable: monitors of type ``mean'' and ``variance'' defined by
+the base module store the running mean and variance, respectively,
+of a given node (See section \ref{section:base:monitors}). The dic module
+defines various monitors based on deviance statistics for model
+criticism (See section \ref{section:dic})
 
-\JAGS\ cannot monitor a node unless it has been defined in the model
-file.  For vector- or array-valued nodes, this means that every
-element must be defined. Here is an example of a simple for loop that
-only defines elements $2$ to $N$ of \verb+theta+
+\chapter{Running JAGS from R}
 
-\begin{verbatim}
-for (i in 2:N) {
-   theta[i] ~ dnorm(0,1);
-}
-\end{verbatim}
+\section{The rjags package}
 
-Unless \verb+theta[1]+ is defined somewhere else in the model file,
-the multivariate node \verb+theta+ is undefined and therefore it
-will not be possible to monitor \verb+theta+ as a whole.  In such
-cases you can request each element separately , e.g. \verb+theta[2]+,
-\verb+theta[3]+, {\em etc.}, or request a subset that is fully defined,
-e.g. \verb+theta[2:6]+.
+\section{The runjags package}
 
-Monitors can be classified according to whether they pool values over
-iterations and whether they pool values over parallel chains (The
-standard trace monitor does neither). When monitor values are written
-out to file using the CODA command, the output files created depend
-on the pooling of the monitor, as shown in table \ref{table:coda}. By
-default, all of these files have the prefix CODA, but this may be changed
-to any other name using the ``stem'' option to the CODA command
-(See \ref{coda}).
+\section{The jagsUI package}
 
-\begin{table}[h]
-\begin{tabular}{ccl}
-\hline
-Pool       & Pool   & Output files \\
-iterations & chains &              \\
-\hline
-no         & no     & CODAindex.txt, CODAchain1.txt, ... 
-                      CODAchainN.txt \\
-no         & yes    & CODAindex0.txt, CODAchain0.txt \\
-yes        & no     & CODAtable1.txt, ... CODAtableN.txt \\
-yes        & yes    & CODAtable0.txt \\
-\hline
-\end{tabular}
-\caption{Output files created by the CODA command depending on whether
-a monitor pools its values over chains or over iterations \label{table:coda}}
-\end{table}
+\section{The dclone package}
 
-The standard CODA format for monitors that do not pool values over
-iterations is to create an index file and one or more output files.
-The index file is has three columns with, one each line,
-\begin{enumerate}
-\item A string giving the name of the (scalar) value being recorded
-\item The first line in the output file(s)
-\item The last line in the output file(s)
-\end{enumerate}
-The output file(s) contain two columns:
-\begin{enumerate}
-\item The iteration number
-\item The value at that iteration
-\end{enumerate}
-
-Some monitors pool values over iterations. For example a mean monitor
-may record only the sample mean of a node, without keeping the
-individual values from each iteration. Such monitors are written out
-to a table file with two columns:
-\begin{enumerate}
-\item A string giving the name of the (scalar) value being recorded
-\item The value (pooled over all iterations)
-\end{enumerate}
-
-%Chapter Running JAGS from R
 
 \chapter{Running \JAGS\ on the command line}
+\label{sec:cmdline}
 
 \JAGS\ has a command line interface. To invoke jags interactively,
-simply type \texttt{jags} at the shell prompt on Unix, a Terminal window on MacOS, or the Windows
-command prompt on Windows. To invoke JAGS with a script file, type
+simply type \texttt{jags} at the shell prompt on Unix, a Terminal
+window on MacOS, or the Windows command prompt on Windows. To invoke
+JAGS with a script file, type
 \begin{verbatim}
 jags <script file>
 \end{verbatim}
@@ -726,7 +821,8 @@ See also: MODEL CLEAR (page \pageref{model:clear})
 \end{verbatim}
 JAGS keeps an internal data table containing the values of observed
 nodes inside each node array.  The DATA IN statement reads data from a
-file into this data table.
+file into this data table. See section \ref{sec:cmdline:data} for
+details on the file format.
 
 Several data statements may be used to read in data from more than one
 file. If two data files contain data for the same node array, the second
@@ -853,12 +949,58 @@ Clears the monitor of the given type associated with variable
 \begin{verbatim}
 . coda <varname> [, stem(<filename>)]
 \end{verbatim}
-If the named node has a trace monitor, this dumps the monitored values
-of to files \texttt{CODAindex.txt}, \texttt{CODAindex1.out},
-\texttt{CODAindex2.txt}, \ldots in a form that can be read by the
-\CODA\ package of \R.  The stem option may be used to modify the
-prefix from ``CODA'' to another string.  The wild-card character ``*''
-may be used to dump all monitored nodes
+This dumps monitored values for a given node to file in a form that
+can be read by the \CODA\ package of \R.  The wild-card character
+``*'' may be used to dump all monitored nodes
+
+Monitor types can be classified according to whether they pool values
+over iterations and whether they pool values over parallel chains (The
+standard trace monitor does neither). When monitor values are written
+out to file using the CODA command, the output files created depend on
+the pooling of the monitor, as shown in table \ref{table:coda}. By
+default, all of these files have the prefix CODA, but this may be
+changed to any other name using the ``stem'' option to the CODA
+command.
+
+\begin{table}[h]
+\begin{tabular}{ccl}
+\hline
+Pool       & Pool   & Output files \\
+iterations & chains &              \\
+\hline
+no         & no     & CODAindex.txt, CODAchain1.txt, ... 
+                      CODAchainN.txt \\
+no         & yes    & CODAindex0.txt, CODAchain0.txt \\
+yes        & no     & CODAtable1.txt, ... CODAtableN.txt \\
+yes        & yes    & CODAtable0.txt \\
+\hline
+\end{tabular}
+\caption{Output files created by the CODA command depending on whether
+a monitor pools its values over chains or over iterations \label{table:coda}}
+\end{table}
+
+The standard CODA format for monitors that do not pool values over
+iterations is to create an index file and one or more output files.
+The index file is has three columns with, one each line,
+\begin{enumerate}
+\item A string giving the name of the (scalar) value being recorded
+\item The first line in the output file(s)
+\item The last line in the output file(s)
+\end{enumerate}
+The output file(s) contain two columns:
+\begin{enumerate}
+\item The iteration number
+\item The value at that iteration
+\end{enumerate}
+
+Some monitors pool values over iterations. For example a mean monitor
+may record only the sample mean of a node, without keeping the
+individual values from each iteration. Such monitors are written out
+to a table file with two columns:
+\begin{enumerate}
+\item A string giving the name of the (scalar) value being recorded
+\item The value (pooled over all iterations)
+\end{enumerate}
 
 \subsubsection{EXIT}
 
@@ -989,6 +1131,73 @@ Lists the files in the current working directory.
 Opens the file \texttt{<cmdfile>} and reads further scripting commands
 until the end of the file.  Note that if the file contains an EXIT
 statement, then the \JAGS\ session will terminate. 
+
+\section{Data format}
+\label{sec:cmdlline:data}
+
+The file format used by JAGS for representing data and initial values
+is the \verb+dump()+ format used by R.  This format is valid R code,
+so a JAGS data file can be read into R using the \verb+source()+ function.
+Since R is a functional language, the code consists of a sequence
+of assignments and function calls.
+\begin{description}
+\item[Assignments] are represented by a left arrow (\verb+<-+) with
+  the variable name on the left hand side and a numeric value or
+  function call on the right hand side. The variable name may
+  optionally be enclosed in single quotes, double quotes, or back-ticks.
+\item[Function calls] are represented by the function name, followed
+  by a list of comma-separated arguments inside round brackets.
+  Optional arguments need to be tagged (i.e. given in the form
+  tag=value).
+\end{description}
+The \JAGS\ parser ignores all white space.  Long expressions can
+therefore be split over several lines.
+
+Scalar values are represented by a simple assignment statement 
+\begin{verbatim}
+theta <- 0.1243
+\end{verbatim}
+All numeric values are read in to JAGS as doubles, even if they are
+represented as integers (i.e. `12' and `12.0' are
+equivalent). Engineering notation may be used to represent large or
+small values (e.g 1.5e-3 is equivalent to 0.0015).
+
+Vectors are denoted by the \R\ collection function ``c'', which takes
+a number of arguments equal to the length of the vector.  The
+following code denotes a vector of length 4:
+\begin{verbatim}
+x <- c(2, 3.5, 1.3e-2, 88)
+\end{verbatim}
+There is no distinction between row and column-vectors. 
+
+Matrices and higher-dimensional arrays in R are created by adding a
+dimension attribute (\verb+.Dim+) to a vector. In the R dump format
+this is done using the ``structure'' function.  The first argument to
+the structure function is a vector of numeric values of the matrix,
+given in column major order (i.e. filling the left index first). The
+second argument, which must be given the tag \verb+.Dim+, is the
+number of dimensions of the array, represented by a vector of integer
+values. For example, if the matrix ``A'' takes values
+\[
+\left(
+\begin{array}{cc}
+  1 & 4 \\
+  2 & 5 \\
+  3 & 6 
+\end{array}
+\right)
+\]
+it is represented as
+\begin{verbatim}
+`A` <- structure(c(1, 2, 3, 4, 5, 6), .Dim=c(3,2))
+\end{verbatim}
+
+The simplest way to prepare your data is to read them into \R\ and
+then dump them.  Only numeric vectors, matrices and arrays are
+allowed. More complex data structures such as factors, lists and data
+frames cannot be parsed by \JAGS\, nor can non-numeric vectors.  Any
+\R\ attributes of the data (such as names and dimnames) are ignored
+when they are read into \JAGS. 
 
 
 \section{Errors}
@@ -1224,85 +1433,6 @@ of \texttt{dsum} are unobserved stochastic nodes, and where the
 parameters are either all discrete-valued or all continuous-valued.
 
 %Should be in chapter on bugs language
-\subsection{Data transformations}
-\label{section:data:tranformations}
-
-\JAGS\ allows data transformations, but the syntax is different from
-\BUGS.  \BUGS\ allows you to put a stochastic node twice on the left
-hand side of a relation, as in this example taken from the manual
-\begin{verbatim}
-   for (i in 1:N) {
-      z[i] <- sqrt(y[i])
-      z[i] ~ dnorm(mu, tau)
-   }
-\end{verbatim}
-This is forbidden in \JAGS. You must put data transformations in a 
-separate block of relations preceded by the keyword \texttt{data}:
-\begin{verbatim}
-data {
-   for (i in 1:N) {
-      z[i] <- sqrt(y[i])
-   }
-}
-model {
-   for (i in 1:N) {
-      z[i] ~ dnorm(mu, tau)
-   }
-   ...
-}
-\end{verbatim}
-This syntax preserves the declarative nature of the \BUGS\ language.
-In effect, the data block defines a distinct model, which describes
-how the data is generated. Each node in this model is forward-sampled
-once, and then the node values are read back into the data table. The
-data block is not limited to logical relations, but may also include
-stochastic relations. You may therefore use it in simulations,
-generating data from a stochastic model that is different from the one
-used to analyse the data in the \texttt{model} statement.
-
-This example shows a simple location-scale problem in which the ``true''
-values of the parameters \texttt{mu} and \texttt{tau} are generated
-from a given prior in the \texttt{data} block, and the generated
-data is analyzed in the \texttt{model} block.
-\begin{verbatim}
-data {
-   for (i in 1:N) {
-      y[i] ~ dnorm(mu.true, tau.true) 
-   }
-   mu.true ~ dnorm(0,1);
-   tau.true ~ dgamma(1,3);
-}
-model {
-   for (i in 1:N) {     
-      y[i] ~ dnorm(mu, tau)
-   }
-   mu ~ dnorm(0, 1.0E-3)
-   tau ~ dgamma(1.0E-3, 1.0E-3)
-}
-\end{verbatim}
-Beware, however, that every node in the \texttt{data} statement will
-be considered as data in the subsequent \texttt{model} statement. This
-example, although superficially similar, has a quite different interpretation.
-\begin{verbatim}
-data {
-   for (i in 1:N) {
-      y[i] ~ dnorm(mu, tau) 
-   }
-   mu ~ dnorm(0,1);
-   tau ~ dgamma(1,3);
-}
-model {
-   for (i in 1:N) {
-      y[i] ~ dnorm(mu, tau)
-   }
-   mu ~ dnorm(0, 1.0E-3)
-   tau ~ dgamma(1.0E-3, 1.0E-3)
-}
-\end{verbatim}
-Since the names \texttt{mu} and \texttt{tau} are used in both
-\texttt{data} and \texttt{model} blocks, these nodes will be
-considered as {\em observed} in the model and their values will be
-fixed at those values generated in the \texttt{data} block.
 
 \subsection{Directed cycles}
 
@@ -1425,24 +1555,6 @@ for (i in 1:3) {
 }
 alpha[1:3] <- sort(alpha0)
 \end{verbatim}
-
-\chapter{Feedback}
-
-Please send feedback to \url{martyn_plummer@users.sourceforge.net}.
-I am particularly interested in the following problems:
-
-\begin{itemize}
-\item Crashes, including both segmentation faults and uncaught exceptions.
-\item Incomprehensible error messages
-\item Models that should compile, but don't 
-\item Output that cannot be validated against \OpenBUGS
-\item Documentation erors
-\end{itemize}
-
-If you want to send a bug report, it must be reproducible. Send the
-model file, the data file, the initial value file and a script file
-that will reproduce the problem. Describe what you think should
-happen, and what did happen.
 
 \chapter{Modules}
 \label{chapter:modules}
@@ -3170,6 +3282,8 @@ The \verb+msm+ module defines the matrix exponential function
 describes the transitions between observed states in continuous-time
 multi-state Markov transition models. 
 
+\appendix
+
 \chapter{Differences between \JAGS\ and \OpenBUGS}
 
 Although \JAGS\ aims for the same functionality as \OpenBUGS, there are
@@ -3237,7 +3351,39 @@ n1 & n2 & - \\
 \end{tabular}
 \end{center}
 
-\section{Functions}
+\section{Data transformations}
+
+\JAGS\ allows data transformations, but the syntax is different from
+\BUGS.  \BUGS\ allows you to put a stochastic node twice on the left
+hand side of a relation, as in this example taken from the manual
+\begin{verbatim}
+   for (i in 1:N) {
+      z[i] <- sqrt(y[i])
+      z[i] ~ dnorm(mu, tau)
+   }
+\end{verbatim}
+This is forbidden in \JAGS. You must put data transformations in a 
+separate block of relations preceded by the keyword \texttt{data}:
+\begin{verbatim}
+data {
+   for (i in 1:N) {
+      z[i] <- sqrt(y[i])
+   }
+}
+model {
+   for (i in 1:N) {
+      z[i] ~ dnorm(mu, tau)
+   }
+   ...
+}
+\end{verbatim}
+
+%Different precedence of : operator
+
+\bibliographystyle{abbrvnat}
+\bibliography{jags_user_manual}
+
+\end{document}
 
 The \verb+max()+ and \verb+min()+ functions work like the
 corresponding \R\ functions. They take a variable number of arguments
@@ -3248,89 +3394,11 @@ The \texttt{rank} function is distinct from \OpenBUGS, which has two
 scalar-valued functions \verb+rank+ and \verb+ranked+.
 
 
-\chapter{Acknowledgments}
 
-Many thanks to the \BUGS\ development team, without whom \JAGS\ would
-not exist.  Thanks also to Simon Frost for pioneering \JAGS\ on
-Windows and Bill Northcott for getting \JAGS\ on Mac OS X to
-work. Kostas Oikonomou found many bugs while getting \JAGS\ to work on
-Solaris using Sun development tools and libraries.  Bettina Gruen,
-Chris Jackson, Greg Ridgeway and Geoff Evans also provided useful
-feedback.  Special thanks to Jean-Baptiste Denis who has been very
-diligent in providing feedback on JAGS.
+\subsubsection{Parameters and arguments}
 
-\appendix
-\chapter{Data format}
-\label{appendix:data}
-
-The file format used by JAGS for representing data and initial values
-is the \verb+dump()+ format used by R.  This format is valid R code,
-so a JAGS data file can be read into R using the \verb+source()+ function.
-Since R is a functional language, the code consists of a sequence
-of assignments and function calls.
-\begin{description}
-\item[Assignments] are represented by a left arrow (\verb+<-+) with
-  the variable name on the left hand side and a numeric value or
-  function call on the right hand side. The variable name may
-  optionally be enclosed in single quotes, double quotes, or back-ticks.
-\item[Function calls] are represented by the function name, followed
-  by a list of comma-separated arguments inside round brackets.
-  Optional arguments need to be tagged (i.e. given in the form
-  tag=value).
-\end{description}
-The \JAGS\ parser ignores all white space.  Long expressions can
-therefore be split over several lines.
-
-Scalar values are represented by a simple assignment statement 
+Deterministic nodes do not need to be embedded in node arrays. The
+node \verb+Y[i]+ could equivalently be defined as
 \begin{verbatim}
-theta <- 0.1243
+Y[i] ~ dnorm(alpha + beta * (x[i] - x.bar), tau)
 \end{verbatim}
-All numeric values are read in to JAGS as doubles, even if they are
-represented as integers (i.e. `12' and `12.0' are
-equivalent). Engineering notation may be used to represent large or
-small values (e.g 1.5e-3 is equivalent to 0.0015).
-
-Vectors are denoted by the \R\ collection function ``c'', which takes
-a number of arguments equal to the length of the vector.  The
-following code denotes a vector of length 4:
-\begin{verbatim}
-x <- c(2, 3.5, 1.3e-2, 88)
-\end{verbatim}
-There is no distinction between row and column-vectors. 
-
-Matrices and higher-dimensional arrays in R are created by adding a
-dimension attribute (\verb+.Dim+) to a vector. In the R dump format
-this is done using the ``structure'' function.  The first argument to
-the structure function is a vector of numeric values of the matrix,
-given in column major order (i.e. filling the left index first). The
-second argument, which must be given the tag \verb+.Dim+, is the
-number of dimensions of the array, represented by a vector of integer
-values. For example, if the matrix ``A'' takes values
-\[
-\left(
-\begin{array}{cc}
-  1 & 4 \\
-  2 & 5 \\
-  3 & 6 
-\end{array}
-\right)
-\]
-it is represented as
-\begin{verbatim}
-`A` <- structure(c(1, 2, 3, 4, 5, 6), .Dim=c(3,2))
-\end{verbatim}
-
-The simplest way to prepare your data is to read them into \R\ and
-then dump them.  Only numeric vectors, matrices and arrays are
-allowed. More complex data structures such as factors, lists and data
-frames cannot be parsed by \JAGS\, nor can non-numeric vectors.  Any
-\R\ attributes of the data (such as names and dimnames) are ignored
-when they are read into \JAGS. 
-
-\bibliographystyle{abbrvnat}
-\bibliography{jags_user_manual}
-
-\end{document}
-
-
-
