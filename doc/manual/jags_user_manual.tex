@@ -56,13 +56,17 @@ on installing \JAGS\ from source are given in a separate \JAGS\
 Installation manual.
 
 \section{Getting help}
+\label{section:help}
 
 The best way to get help on \JAGS\ is to use the discussion forums
 hosted on Sourceforge at
 \url{https://sourceforge.net/p/mcmc-jags/discussion/}.  You will need
 to create a Sourceforge account in order to post.
 
-I am particularly interested in the following issues:
+Bug reports can be sent to \url{martyn_plummer@users.sourceforge.net}.
+Occasionally, \JAGS\ will stop with an error instructing you to send a
+message to this address. I am particularly interested in the following
+issues:
 \begin{itemize}
 \item Crashes, including both segmentation faults and uncaught exceptions.
 \item Incomprehensible error messages
@@ -71,10 +75,6 @@ I am particularly interested in the following issues:
   \OpenBUGS
 \item Documentation erors
 \end{itemize}
-
-Bug reports can be sent to \url{martyn_plummer@users.sourceforge.net}.
-Occasionally, \JAGS\ will stop with an error instructing you to send a
-message to this address.
 
 If you submit a bug report, it must be reproducible. Please send the
 model file, the data file, the initial value file and a script file
@@ -94,6 +94,7 @@ diligent in providing feedback on JAGS. Matt Denwood is a co-developer
 of \JAGS\ with full access to the Sourceforge repository.
 
 \chapter{The BUGS language}
+\label{chapter:bugslang}
 
 A \JAGS\ model is defined in a text file using a dialect of the
 \BUGS\ language.  The model definition consists of a series of
@@ -444,6 +445,7 @@ on node {\em arrays}. As a consequence, an expression such as
 \verb+dim(a %*% b)+ is syntactically incorrect.
 
 \chapter{Steps in running a model}
+\label{chapter:running}
 
 \JAGS\ is designed for inference on Bayesian models using Markov Chain
 Monte Carlo (MCMC) simulation.  Running a model refers to generating
@@ -487,7 +489,7 @@ important to load the modules you need {\rm before} running the model.
 The two most useful optional modules are the \texttt{glm} module
 (chapter~\ref{chapter:glm}), which provides efficient samplers for
 generalized linear mixed modules, and the \texttt{dic} module
-(\chapter~\ref{chapter:dic}), which provides novel monitors for
+(chapter~\ref{chapter:dic}), which provides novel monitors for
 assessing model fit using deviance statistics.
 
 \section{Compilation}
@@ -764,31 +766,84 @@ of a given node (See section \ref{section:base:monitors}). The dic module
 defines various monitors based on deviance statistics for model
 criticism (See chapter~\ref{chapter:dic})
 
+\section{Errors}
+
+There are two kinds of errors in \JAGS: runtime errors, which are due to
+mistakes in the model specification, and logic errors which are internal
+errors in the JAGS program. 
+
+Logic errors are generally created in the lower-level parts of the
+\JAGS\ library, where it is not possible to give an informative error
+message.  The upper layers of the \JAGS\ program are supposed to catch
+such errors before they occur, and return a useful error message that
+will help you diagnose the problem.  Inevitably, some errors slip
+through. Hence, if you get a logic error, there is probably an error
+in your input to \JAGS, although it may not be obvious what it
+is. Please send a bug report (see ``Feedback'' on
+page~\pageref{section:help}) whenever you get a logic error.
+
+Error messages may also be generated when parsing files (model files,
+data files, command files).  The error messages generated in this case
+are created automatically by the program \texttt{bison}. They
+generally take the form ``syntax error, unexpected FOO, expecting BAR''
+and are not always abundantly clear, but this is out of my control.
+
 \chapter{Running JAGS from R}
 \label{chapter:R} 
 
-\section{rjags}
+The native interface from R to \JAGS\ is the \texttt{rjags} package
+\citep{Plummer2016}. This provides an object-based functional
+interface to \JAGS, in which most of the steps of running a model are
+separated into different function calls. Several alternative packages
+have been developed that offer a simplified interface to \JAGS. The
+main ones are detailed below. There are many other R packages that
+interface to \JAGS. See the list of reverse depends, imports, suggests
+and enhances at \url{https://cran.r-project.org/package=rjags}
 
-%default iterations
+To illustrate each package, we consider the linear regression
+model from chapter~\ref{chapter:bugslang} with a trivial data set
+of 5 observations. The data and initial values for this model
+are given below and are used by all R interfaces:
+\begin{verbatim}
+line_data <- list("x" = c(1, 2, 3, 4, 5), "Y" = c(1, 3, 3, 3, 5), "N"=5)
+line_inits <- list(list("alpha" = 3, "beta"= 0, "tau" = 1.5),
+                   list("alpha" = 0, "beta" = 1, "tau" = 0.375))
+\end{verbatim}
+
+\section{rjags}
+\label{section:rjags}
+
+To run a model with the \texttt{rjags} package, we first create a model
+object with the \texttt{jags.model()} function.
 \begin{verbatim}
 library(rjags)
 model <- jags.model("line.bug", data=line_data, inits=line_inits, n.chains=2)
 \end{verbatim}
-The resulting object \texttt{model} is of class ``jags´´. It does not
-contain any samples from the posterior. To get parameter samples, we use
-the \texttt{coda.samples} function after first using the \texttt{update} function
-to run the Markov Chain for a burn-in period of 1000 iterations.
+This compiles and initializes the model, and if necessary runs an
+adaptive phase for 1000 iterations (see chapter~\ref{chapter:running}
+for an explanation of these steps). If adaptation is required then a
+progress bar made of \texttt{'+'} signs will be printed.
+
+The object created by \texttt{jags.model} is of class ``jags´´. It is
+an R interface to the virtual graphical model created by \JAGS\ and does
+not contain any samples.
+
+To get samples from the posterior distribution of the parameteres, we
+use the \texttt{coda.samples} function after first using the
+\texttt{update} function to run the Markov Chain for a burn-in period
+of 1000 iterations.
 \begin{verbatim}
 update(model, n.iter=1000) 
-samples <- coda.samples(model, c("alpha", "beta", "sigma"), n.iter=1000)
+samples <- coda.samples(model, variable.names=c("alpha", "beta", "sigma"), 
+                        n.iter=1000)
 \end{verbatim}
 The \texttt{samples} object is of class \texttt{mcmc.list} defined by
-the \texttt{coda} package \citep{coda}. It contains monitored samples
-  of the variables \texttt{alpha}, \texttt{beta}, and \texttt{sigma}
-  for the two parallel chains.
+the \texttt{coda} package \citep{PlummerEtal2005}. It contains
+monitored samples of the variables \texttt{alpha}, \texttt{beta}, and
+\texttt{sigma} for the two parallel chains.
 
-To get a readable summary of the samples, we use the \texttt{summary}
-function:
+To get an informative summary of the samples, we use the
+\texttt{summary} function:
 \begin{verbatim}
 > summary(samples)
 
@@ -820,19 +875,138 @@ will produce trace plots and density plots for the sampled values.
 
 \section{runjags}
 
-%default iterations
+The \texttt{runjags} package \citep{Denwood2016} includes many
+enhancements to \JAGS, including a custom \JAGS\ module that contains
+some novel distributions.
+
+The basic function for running a model with the \texttt{runjags}
+package is the \texttt{run.jags()} function:
+\begin{verbatim}
+library(runjags)
+out <- run.jags(model="line.bug", monitor=c("alpha","beta","sigma"),
+                data=line_data, n.chains=2, inits=line_inits)
+\end{verbatim}
+The optional \texttt{method} argument to \texttt{run.jags} allows the
+user to choose whether the model is run through the \texttt{rjags}
+interface (section~\ref{section:rjags}) or through the command line
+interface of \JAGS\ (chapter~\ref{chapter:cmdline}). In addition, the
+\texttt{method} argument controls how parallel chains are run. Running
+parallel chains in different processes can offer considerable speed
+improvements on a multi-processor computer.
+
+The output of the \texttt{run.jags()} function is an object of class
+``runjags''. The print method for ``runjags'' objects prints a summary
+of the posterior distribution of the parameters.
+\begin{verbatim}
+> print(out)
+
+JAGS model summary statistics from 20000 samples 
+(chains = 2; adapt+burnin = 5000):
+                                                                          
+       Lower95  Median Upper95   Mean      SD Mode     MCerr MC%ofSD SSeff
+alpha   1.9761  2.9997  4.0406  3.002  0.5363   -- 0.0037448     0.7 20509
+beta  0.065332 0.79686   1.503 0.8001 0.39573   -- 0.0027221     0.7 21135
+sigma  0.32386 0.82087  2.1403 1.0062 0.72386   -- 0.0094204     1.3  5904
+                       
+           AC.10   psrf
+alpha -0.0052736 1.0001
+beta    -0.00539  1.001
+sigma -0.0034472 1.0001
+
+Total time taken: 0.6 seconds
+\end{verbatim}
+The print method also shows some convergence diagnostics for each
+parameter: \texttt{SSeff} is the effective sample size, controlling
+for autocorrelation of the Markov chain; \texttt{AC.10} is the autocorrelation
+at lag 10; and \texttt{psrf} is the Gelman-Rubin convergence diagnostic
+\citep{GelmanRubin1992}, or the {\em potential scale reduction factor}.
+
+If the chain is showing signs of poor mixing then the
+\texttt{extend.jags} function can be used to continue running the
+model. The \texttt{autorun.jags} is an alternative to
+\texttt{run.jags} that takes control of the run-length of the MCMC
+process and runs the chain until convergence.
+
+The plot method for \texttt{runjags} objects shows: a traceplot, the
+cumulative distribution function, the density function and the
+autocorrelation function for each variable. A cross-correlation plot
+for all variables is also generated.
 
 \section{R2jags}
 
+The R2jags package \citep{SuYajima2015} was modelled on the
+pre-existing R2WinBUGS package \citep{SturtzEtal2005} which provided
+the first interface from WinBUGS to R. With R2jags and R2WinBUGS the
+user may switch between the two BUGS engines while keeping a
+consistent R interface. The R2OpenBUGS package is an updated version
+of R2WinBUGS that works with OpenBUGS.
+
+Like the \texttt{runjags} package, the \texttt{R2jags} package offers
+a single interface to \JAGS that carries out all the steps of running
+the model, with reasonable default values. The interface function is
+\texttt{jags()}.
+\begin{verbatim}
+library(R2jags)
+out <- jags(data=line_data, inits=line_inits,
+            parameters.to.save=c("alpha","beta","sigma"),
+            model.file="line.bug", n.chains=2)
+\end{verbatim}
+The output from the \texttt{jags} function is an object of class ``rjags''.
+The print method for ``rjags'' objects summarizes the output (There is
+also a \texttt{plot} method).
+\begin{verbatim}
+> out
+Inference for Bugs model at "line.bug", fit using jags,
+ 2 chains, each with 2000 iterations (first 1000 discarded)
+ n.sims = 2000 iterations saved
+         mu.vect sd.vect  2.5%    25%    50%    75%  97.5%  Rhat n.eff
+alpha      2.992   0.552 1.888  2.757  3.002  3.258  4.037 1.001  2000
+beta       0.797   0.381 0.041  0.618  0.795  0.988  1.549 1.005  1000
+sigma      1.014   0.664 0.417  0.636  0.840  1.165  2.581 1.002  2000
+deviance  12.981   3.595 8.832 10.358 12.104 14.660 22.215 1.002  1100
+
+For each parameter, n.eff is a crude measure of effective sample size,
+and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+
+DIC info (using the rule, pD = var(deviance)/2)
+pD = 6.5 and DIC = 19.4
+DIC is an estimate of expected predictive error (lower deviance is better).
+\end{verbatim}
+In addition to summaries of the posterior distribution, the print method
+for ``rjags'' objects includes \texttt{Rhat}, the Gelman-Rubin convergence
+diagnostic \citep{GelmanRubin1992} and \texttt{n.eff} the effective
+sample size.
+
+The \texttt{autojags}
 
 \section{jagsUI}
 
-\begin{verbatim}
-out <- autojags(data=line_data, inits=line_inits,
-                parameters.to.save=c("alpha","beta","sigma"),
-                model.file="line.bug", n.chains=2)
-\end{verbatim}
+The \texttt{jagsUI} package offers similar facilities to the
+\texttt{runjags} and \texttt{R2jags} package. In fact \texttt{jagsUI}
+offers two interface functions -- \texttt{jags()} and
+\texttt{autojags()} -- with the same names as the ones in the
+\texttt{R2jags} package. It is therefore not a good idea to load both
+packages.
 
+Compared with the other packages, the output from \texttt{jagsUI}
+tends to be more verbose and didactic. It may therefore be suitable
+for users who are not familiar with MCMC.
+
+The \texttt{jags} function is illustrated below.
+\begin{verbatim}
+out <- jags(data=line_data, inits=line_inits,
+            parameters.to.save=c("alpha","beta","sigma"),
+            model.file="line.bug", n.chains=2,
+            n.iter=2000, n.burnin=1000)
+\end{verbatim}
+Note that you must supply arguments \texttt{n.iter} and
+\texttt{n.burnin}. However, noted above, there is also an
+\texttt{autojags()} function that controls the run length for you.
+
+The output of the \texttt{jags} function is an object of class
+``jagsUI''.  The print method for ``jagsUI'' objects gives summary
+statistics and diagnostics similar to the \texttt{R2jags} package, but
+with more explanation.
 \begin{verbatim}
 JAGS output for model 'line.bug', generated by jagsUI.
 Estimates based on 2 chains of 1000 iterations,
@@ -859,10 +1033,8 @@ pD = 7.5 and DIC = 20.51
 DIC is an estimate of expected predictive error (lower is better).
 \end{verbatim}
 
-%default iterations
-
 \chapter{Running \JAGS\ on the command line}
-\label{sec:cmdline}
+\label{chapter:cmdline}
 
 \JAGS\ has a command line interface. To invoke jags interactively,
 simply type \texttt{jags} at the shell prompt on Unix, a Terminal
@@ -871,7 +1043,8 @@ JAGS with a script file, type
 \begin{verbatim}
 jags <script file>
 \end{verbatim}
-A typical script file has the following commands: 
+The linear regression model from chapter~\ref{chapter:bugslang} can
+be run with the following commands
 \begin{verbatim}
 model in "line.bug"      # Read model file
 data in "line-data.R"    # Read data in from file
@@ -1314,33 +1487,6 @@ frames cannot be parsed by \JAGS\, nor can non-numeric vectors.  Any
 when they are read into \JAGS. 
 
 
-\section{Errors}
-
-There are two kinds of errors in \JAGS: runtime errors, which are due to
-mistakes in the model specification, and logic errors which are internal
-errors in the JAGS program. 
-
-Logic errors are generally created in the lower-level parts of the \JAGS\
-library, where it is not possible to give an informative error message.
-The upper layers of the \JAGS\ program are supposed to catch such errors
-before they occur, and return a useful error message that will help you
-diagnose the problem.  Inevitably, some errors slip through. Hence,
-if you get a logic error, there is probably an error in your input to
-\JAGS, although it may not be obvious what it is. Please send a bug
-report (see ``Feedback'' below) whenever you get a logic error.
-
-Error messages may also be generated when parsing files (model files,
-data files, command files).  The error messages generated in this case
-are created automatically by the program \texttt{bison}. They
-generally take the form ``syntax error, unexpected FOO, expecting BAR''
-and are not always abundantly clear.
-
-If a model compiles and initializes correctly, but an error occurs
-during updating, then the current state of the model will be dumped
-to a file named \verb+jags.dumpN.R+ where $N$ is the chain number.
-You should then load the dumped data into R to inspect the state of
-each chain when the error occurred.
-
 \chapter{Functions}
 \label{section:functions}
 
@@ -1564,9 +1710,7 @@ distribution?
   \texttt{dinterval} distribution (section~\ref{bugs:dinterval}).
 \end{itemize}
 
-
-
-\subsection{Observable Functions}
+\section{Observable Functions}
 \label{section:obfun}
 
 Logical nodes in the \BUGS\ language are a convenient way of
@@ -1824,7 +1968,7 @@ For a vector-valued node, a variance monitor records the variance of
 each element, but not the covariances between elements.
 
 \chapter{The bugs module}
-\label{chapter:bugs}
+\label{chapter:bugsmod}
 
 The \texttt{bugs} module was originally intended to include the
 functions and distributions from \OpenBUGS. It has expanded somewhat
