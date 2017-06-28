@@ -19,7 +19,7 @@
 
 \title{JAGS Version \release\ user manual}
 \author{Martyn Plummer}
-\date{25 June 2017}
+\date{28 June 2017}
 \maketitle
 
 \tableofcontents
@@ -36,7 +36,7 @@ C++ and is portable to all major operating systems. %Cite the bugs book
 environment for statistical computation and graphics
 (\url{http://www.r-project.org}).  You will find it useful to install
 the \CODA\ package for \R\ to analyze the output. Several \R\ packages
-are available to run a \JAGS\ model. See chapter~\ref{chapter:R}
+are available to run a \JAGS\ model. See chapter~\ref{chapter:R}.
 
 \JAGS\ is licensed under the GNU General Public License version 2. You
 may freely modify and redistribute it under certain conditions (see
@@ -97,10 +97,10 @@ of \JAGS\ with full access to the Sourceforge repository.
 \label{chapter:bugslang}
 
 A \JAGS\ model is defined in a text file using a dialect of the
-\BUGS\ language.  The model definition consists of a series of
-relations inside a block delimited by curly brackets \verb+{+ and
-\verb+}+ and preceded by the keyword \verb+model+. Here is a simple
-linear regression example:
+\BUGS\ language \citep{LunnEtal2012}.  The model definition consists
+of a series of {\em relations} inside a block delimited by curly brackets
+\verb+{+ and \verb+}+ and preceded by the keyword \verb+model+. Here
+is a simple linear regression example:
 
 \begin{verbatim}
 model {
@@ -123,11 +123,11 @@ model {
 Each relation defines a node in the model. The node on the left of a
 relation is defined in terms of other nodes -- referred to as parent
 nodes -- that appear on the right hand side. Taken together, the nodes
-in the model (together with the parent/child relationships represented
-as directed edges) form a directed acyclic graph. The very top-level
+in the model form a directed acyclic graph (with the parent/child
+relationships represented as directed edges). The very top-level
 nodes in the graph, with no parents, are constant nodes, which are
 defined either in the model definition ({\em e.g.}  \verb+1.0E-3+), or
-in the data file ({\em e.g.}  \verb+x[1]+).
+in the data when the model is compiled ({\em e.g.}  \verb+x[1]+).
 
 Relations can be of two types. A {\em stochastic relation} (\verb+~+)
 defines a stochastic node, representing a random variable in the
@@ -162,13 +162,6 @@ creates an integer vector of length $U - L + 1$ with elements $L, L+1,
 Both the arguments $L$ and $U$ must be fixed because JAGS does not
 allow the length of a node to change from one iteration to the next.
 
-Vectors can be constructed using the combine function \texttt{c} from
-the \textsf{bugs} module, {\em  e.g.}
-\begin{verbatim}
-y <- c(x1, x2, x3)
-\end{verbatim}
-creates a new vector $y$ combining the elements of $x1$, $x2$, and $x3$.    
-
 \subsection{Subsetting matrices}
 
 For a two-dimensional array \verb+B+, the element in row $r$ and
@@ -186,18 +179,6 @@ simply write \verb+B+ without any square brackets. Note that writing
 \verb+B[]+ for a 2-dimensional array will result in a compilation
 error: the number of indices separated by commas within the square
 brackets must match the dimensions of the array.
-
-The combine function can be used with a single array argument
-\begin{verbatim}
-v <- c(a)
-\end{verbatim}
-In this case the return value $v$ is a vector with the values of the
-input array $a$ in column-major order (i.e. with the left hand index
-moving fastest). For example if $a$ is a $2 \times 2$ matrix then
-this is equivalent to
-\begin{verbatim}
-v <- c(a[1,1], a[2,1], a[1,2], a[2,2])
-\end{verbatim}
 
 \subsection{Restrictions on index expressions}
 
@@ -224,6 +205,27 @@ normal random variable.  However, this code snippet is illegal:
    x[indices] ~ dmnorm(mu, T)
 \end{verbatim}
 as it implies writing two different values to the same element \verb+x[1]+.
+
+\section{Constructing vectors}
+
+Vectors can be constructed using the combine function \texttt{c} from
+the \textsf{bugs} module, {\em  e.g.}
+\begin{verbatim}
+y <- c(x1, x2, x3)
+\end{verbatim}
+creates a new vector $y$ combining the elements of $x1$, $x2$, and $x3$.    
+
+The combine function can be used with a single array argument
+\begin{verbatim}
+v <- c(a)
+\end{verbatim}
+In this case the return value $v$ is a vector with the values of the
+input array $a$ in column-major order (i.e. with the left hand index
+moving fastest). For example if $a$ is a $2 \times 2$ matrix then
+this is equivalent to
+\begin{verbatim}
+v <- c(a[1,1], a[2,1], a[1,2], a[2,2])
+\end{verbatim}
 
 \section{For loops}
 \label{section:forloops}
@@ -253,7 +255,7 @@ As in the above example, for loops generally use the sequence operator
 \verb+:+ to generate an increasing sequence of integers. This operator
 has high precedence, so is important to use brackets to ensure that
 the expression is interpreted correctly. For example, to get a for
-loop from $1$ to $m-1$ the correct expression is
+loop from $1$ to $m+1$ the correct expression is
 \begin{verbatim}
 for (i in 1:(m+1)) {
 }
@@ -265,13 +267,12 @@ for (i in 1:m+1) {
 \end{verbatim}
 gives a for loop from $2$ to $m+1$.
 
-The sequence operator \verb+:+ can only produce increasing sequences
-(See section \label{base:functions}). If $n < m$ then \verb+m:n+
-produces a vector of length zero and when this is used in a for loop
-index expression the contents of loop inside the curly brackets are
-skipped. Note that this behaviour is different from the sequence
-operator in R, where \verb+m:n+ will produce a {\em decreasing}
-sequence if $n < m$.
+The sequence operator \verb+:+ can only produce increasing
+sequences. If $n < m$ then \verb+m:n+ produces a vector of length zero
+and when this is used in a for loop index expression the contents of
+loop inside the curly brackets are skipped. Note that this behaviour
+is different from the sequence operator in R, where \verb+m:n+ will
+produce a {\em decreasing} sequence if $n < m$.
 
 \section{Data transformations}
 \label{section:data:tranformations}
@@ -355,7 +356,7 @@ fixed at those values generated in the \texttt{data} block.
 
 \section{Node Array dimensions}
 
-\subsection*{Array declarations}
+\subsection{Array declarations}
 
 \JAGS\ allows the option of declaring the dimensions of node arrays in
 the model file. The declarations consist of the keyword \texttt{var}
@@ -369,7 +370,7 @@ In the linear regression example, the model block could be preceded by
 var x[N], Y[N], mu[N], alpha, beta, tau, sigma, x.bar;
 \end{verbatim}
 
-\subsection*{Undeclared nodes}
+\subsection{Undeclared nodes}
 
 If a node array is not declared then JAGS has three methods of
 determining its size.
@@ -400,7 +401,7 @@ B <- inverse(A)
 Then \verb+B+ is also an $N \times N$ matrix.
 \end{enumerate}
 
-\subsection*{Querying array dimensions}  
+\subsection{Querying array dimensions}  
 
 The \JAGS\ compiler has two built-in functions for querying array
 sizes.  The \verb+length()+ function returns the number of elements in
@@ -461,8 +462,8 @@ takes place in five steps:
 The next stages of analysis are done outside of \JAGS: convergence
 diagnostics, model criticism, and summarizing the samples must be done
 using other packages more suited to this task. There are several
-\R\ packages designed for analyzing MCMC output, and \JAGS\ can be
-used from within \R\ using the \rjags\ package.
+\R\ packages designed for running a \JAGS\ model and analyzing the
+output. See chapter~\ref{chapter:R} for details.
 
 \section{Modules}
 \label{section:modules}
@@ -471,14 +472,14 @@ The \JAGS\ library is distributed along with dynamically loadable
 modules that extend its functionality.  A module can define new
 objects of the following classes:
 \begin{enumerate}
-\item {\bf functions} and {\bf distributions}, the basic building
+\item {\bf Functions} and {\bf distributions}, the basic building
 blocks of the BUGS language.
-\item {\bf samplers}, the objects which update the parameters of the
+\item {\bf Samplers}, the objects which update the parameters of the
 model at each iteration, and {\bf sampler factories}, the objects that 
 create new samplers for specific model structures.
-\item {\bf monitors}, the objects that record sampled values for
+\item {\bf Monitors}, the objects that record sampled values for
 later analysis, and {\bf monitor factories} that create them. 
-\item {\bf random number generators}, the objects that drive the
+\item {\bf Random number generators}, the objects that drive the
 MCMC algorithm and {\bf RNG factories} that create them.
 \end{enumerate}
 
@@ -510,14 +511,15 @@ Data may also be supplied for {\em constant nodes}. These are nodes
 that are used on the right hand side of a relation (or in the index
 expression of a for loop) but are never defined on the left hand
 side. In fact you must supply data for these nodes or the
-\JAGS\ compiler will stop with an error message (See below).
+\JAGS\ compiler will stop with an error message.
 
 Data may not be supplied for deterministic nodes -- {\em i.e.} those
 defined on the left hand side of a deterministic relation. These nodes
 always calculate their value according to the current value of the
 parents. 
 
-Recall the simple linear regression model
+Recall the simple linear regression model from
+chapter~\ref{chapter:bugslang}.
 \begin{verbatim}
 model {
     for (i in 1:N) {
@@ -531,16 +533,33 @@ model {
     tau      ~ dgamma(1.0E-3, 1.0E-3)
 }
 \end{verbatim}
-This model may be compiled by combining it with the following data.
+This model may be compiled by combining with data values for \texttt{x},
+\texttt{Y} and \texttt{N}. Exactly how the data are supplied depends
+on which interface is being used. With any of the \R\ interfaces to \JAGS,
+the user can create a list of values to be supplied as data, e.g.
 \begin{verbatim}
-x <- c(1, 2, 3, 4, 5)
-Y <- c(1, 3, 3, 3, 5)
-N <- 5
+line_data <- list("x" = c(1, 2, 3, 4, 5),
+                  "Y" = c(1, 3, 3, 3, 5),
+                  "N" = 5)
 \end{verbatim}
-In this model, data values must always be supplied for \texttt{N},
-since it is used to index the for loop, and \texttt{x} since it is
-used on the right hand side of the relation defining \texttt{mu} but
-never defined on the left hand side of a relation.
+and then supply this list as the \texttt{data} argument to any of the
+modelling functions (NB the above is \R\ code, not \BUGS\ code). This
+is explored in more detail in chapter~\ref{chapter:R}. With the command
+line interface, the data are supplied in a separate file with values
+written in the \texttt{dump()} format of the \R\ language, e.g.
+\begin{verbatim}
+#contents of file line-data.R
+`x` <- c(1, 2, 3, 4, 5)
+`Y` <- c(1, 3, 3, 3, 5)
+`N` <- N
+\end{verbatim}
+See section~ref{section:cmdline:data} for more details.
+
+In our simple linear regression model, data values must always be
+supplied for \texttt{N}, since it is used to index the for loop, and
+\texttt{x} since it is used on the right hand side of the relation
+defining \texttt{mu} but never defined on the left hand side of a
+relation.
 
 %One way to think about the minimal data for a model is that it
 %\JAGS\ be able to sample values from the prior distribution.
@@ -559,7 +578,7 @@ unobserved nodes, then the data should contain missing values
 and \verb+Y[5]+ were unobserved, then the data supplied for the
 node array \texttt{Y} would be.
 \begin{verbatim}
-Y <- c(1, NA, 3, 3, NA)
+Y = c(1, NA, 3, 3, NA)
 \end{verbatim}
 Then \verb+Y[2]+ and \verb+Y[5]+ are parameters and \JAGS\ will
 generate samples from their posterior predictive distributions, given
@@ -586,8 +605,7 @@ Compilation may fail for a number of reasons. The three most common are:
 
 The number of parallel chains to be run by \JAGS\ is also defined at
 compilation time.  Each parallel chain should produce an independent
-sequence of samples from the posterior distribution. By default,
-\JAGS\ only runs a single chain.
+sequence of samples from the posterior distribution.
 
 \section{Initialization}
 
@@ -600,17 +618,20 @@ steps in the initialization of a model:
 \item The Samplers are chosen for each parameter in the model. 
 \end{enumerate}
 
-\subsection{Parameter values}
+\subsection{Initial values}
 
 The user may supply initial value files -- one for each chain --
 containing initial values for the model parameters. Initial values may
 not be supplied for logical or constant nodes.
 
-As with the data, initial values are supplied for whole node arrays
-and you may include missing values in the initial values.  This need
-typically arises with contrast parameters.  Suppose $X$ is a
-categorical covariate, taking values from 1 to 4, which is used a a
-predictor variable in a linear model:
+The format for initial values is the same as the one used for data
+(i.e. a list using the R interface or a separate file when using the
+command line interface). As with the data, initial values are supplied
+for whole node arrays and may include missing values for elements of
+the array that are not to be initialized.  This need typically arises
+with contrast parameters.  Suppose $X$ is a categorical covariate,
+taking values from 1 to 4, which is used a a predictor variable in a
+linear model:
 \begin{verbatim}
 for (i in 1:N) {
    Y[i] ~ alpha + beta[x[i]]
@@ -627,9 +648,9 @@ but the first parameter $\beta_1$ is set to zero for
 identifiability. The remaining parameters $\beta_2 \ldots \beta_4$
 represent contrasts with respect to the first level of $X$.
 
-A suitable initial value for \verb+beta+ would be
+A suitable set of initial values (for a single chain) would be
 \begin{verbatim}
-`beta` <- c(NA, 1.03, -2.03, 0.52)
+list(alpha = 0, beta = c(NA, 1.03, -2.03, 0.52))
 \end{verbatim}
 This allows parameter values to be supplied for the stochastic
 elements of \verb+beta+ but not the constant first element.
@@ -643,8 +664,8 @@ or mode.
 
 If you rely on automatic initial value generation and are running
 multiple parallel chains, then the initial values will be the same in
-all chains. This is undesirable behaviour and it will be changed in a
-future release of \JAGS. You are advised to set the starting values
+all chains.\footnote{This is undesirable behaviour and it will be changed in a
+future release of \JAGS.} You are advised to set the starting values
 manually.
 
 \subsection{Random Number Generators}
@@ -657,10 +678,6 @@ random but is, in fact, entirely determined by the initial state.  You
 may optionally set the name of the RNG and its initial state with the
 initial values for the parameters.
 
-The name of the RNG is set as follows. 
-\begin{verbatim}
-.RNG.name <- "name"
-\end{verbatim}
 There are four RNGs supplied by the \texttt{base} module in \JAGS\
 with the following names:
 \begin{verbatim}
@@ -671,22 +688,30 @@ with the following names:
 \end{verbatim}
 
 There are two ways to set the starting state of the RNG. The simplest
-is to supply an integer value to \texttt{.RNG.seed}, {\em e.g.}
+is to supply the name of the RNG and its seed (a single integer value)
+with the initial values, {\em e.g.} using the \R\ interface to \JAGS:
 \begin{verbatim}
-".RNG.seed" <- 314159
+list(".RNG.name" = "base::Wichmann-Hill",
+     ".RNG.seed" = 314159,
+     ...)
 \end{verbatim}
-The second is way to save the state of the RNG from one JAGS session
+Here we use \texttt{...} to denote that the same list includes initial
+values for the parameters (not shown).
+
+It is also possible to save the state of the RNG from one JAGS session
 and use this as the initial state of a new chain. The state of any RNG
 in JAGS can be saved and loaded as an integer vector with the name
 \texttt{.RNG.state}. For example,
 \begin{verbatim}
-".RNG.state" <- as.integer(c(20899,10892,29018))
+list(".RNG.name" = "base::Marsaglia-Multicarry",
+     ".RNG.state" = as.integer(c(20899,10892,29018),
+     ...)
 \end{verbatim}
 is a valid state for the Marsaglia-Multicarry generator.  You cannot
-supply an arbitrary integer to \texttt{.RNG.state}. Both the length of
-the vector and the permitted values of its elements are determined by
-the class of the RNG. The only safe way to use \texttt{.RNG.state} is
-to re-use a previously saved state.
+supply an arbitrary integer vector to \texttt{.RNG.state}. Both the
+length of the vector and the permitted values of its elements are
+determined by the class of the RNG. The only safe way to use
+\texttt{.RNG.state} is to re-use a previously saved state.
 
 If no RNG names are supplied, then RNGs will be chosen automatically
 so that each chain has its own independent random number stream.  The
@@ -698,7 +723,7 @@ chains, and so on.
 By default, \JAGS\ bases the initial state on the time stamp. This
 means that, when a model is re-run, it generates an independent set of
 samples. If you want your model run to be reproducible, you must
-explicitly set the \verb+.RNG.seed+ for each chain.
+explicitly set the \texttt{.RNG.seed} for each chain.
 
 \subsection{Samplers}
 
@@ -718,8 +743,8 @@ parameters, an error message is generated.
 The user has no direct control over the process of choosing
 samplers. However, you may indirectly control the process by loading a
 module that defines a new sampler factory. The module will insert the
-new Sampler Factory at the beginning of the list, where it will be
-queried before all of the other Sampler Factories. You can also
+new sampler sactory at the beginning of the list, where it will be
+queried before all of the other sampler factories. You can also
 optionally turn on and off sampler factories. %crossref
  
 \section{Adaptation and burn-in}
@@ -760,7 +785,7 @@ longer adaptation period.
 A {\em monitor} in \JAGS\ is an object that records sampled
 values. The simplest monitor is a {\em trace monitor}, which stores
 the sampled value of a node at each iteration. Other types of monitor
-are avaiable: monitors of type ``mean'' and ``variance'' defined by
+are available: monitors of type ``mean'' and ``variance'' defined by
 the base module store the running mean and variance, respectively,
 of a given node (See section \ref{section:base:monitors}). The dic module
 defines various monitors based on deviance statistics for model
@@ -779,7 +804,7 @@ such errors before they occur, and return a useful error message that
 will help you diagnose the problem.  Inevitably, some errors slip
 through. Hence, if you get a logic error, there is probably an error
 in your input to \JAGS, although it may not be obvious what it
-is. Please send a bug report (see ``Feedback'' on
+is. Please send a bug report (see ``Getting help'' on
 page~\pageref{section:help}) whenever you get a logic error.
 
 Error messages may also be generated when parsing files (model files,
@@ -795,7 +820,7 @@ The native interface from R to \JAGS\ is the \texttt{rjags} package
 \citep{Plummer2016}. This provides an object-based functional
 interface to \JAGS, in which most of the steps of running a model are
 separated into different function calls. Several alternative packages
-have been developed that offer a simplified interface to \JAGS. The
+have been developed that offer a unified interface to \JAGS. The
 main ones are detailed below. There are many other R packages that
 interface to \JAGS. See the list of reverse depends, imports, suggests
 and enhances at \url{https://cran.r-project.org/package=rjags}
@@ -824,11 +849,11 @@ adaptive phase for 1000 iterations (see chapter~\ref{chapter:running}
 for an explanation of these steps). If adaptation is required then a
 progress bar made of \texttt{'+'} signs will be printed.
 
-The object created by \texttt{jags.model} is of class ``jags´´. It is
+The object created by \texttt{jags.model} is of class ``jags''. It is
 an R interface to the virtual graphical model created by \JAGS\ and does
 not contain any samples.
 
-To get samples from the posterior distribution of the parameteres, we
+To get samples from the posterior distribution of the parameters, we
 use the \texttt{coda.samples} function after first using the
 \texttt{update} function to run the Markov Chain for a burn-in period
 of 1000 iterations.
@@ -880,7 +905,7 @@ enhancements to \JAGS, including a custom \JAGS\ module that contains
 some novel distributions.
 
 The basic function for running a model with the \texttt{runjags}
-package is the \texttt{run.jags()} function:
+package is \texttt{run.jags()}:
 \begin{verbatim}
 library(runjags)
 out <- run.jags(model="line.bug", monitor=c("alpha","beta","sigma"),
@@ -927,7 +952,7 @@ model. The \texttt{autorun.jags} is an alternative to
 \texttt{run.jags} that takes control of the run-length of the MCMC
 process and runs the chain until convergence.
 
-The plot method for \texttt{runjags} objects shows: a traceplot, the
+The plot method for ``runjags'' objects shows: a traceplot, the
 cumulative distribution function, the density function and the
 autocorrelation function for each variable. A cross-correlation plot
 for all variables is also generated.
@@ -942,7 +967,7 @@ consistent R interface. The R2OpenBUGS package is an updated version
 of R2WinBUGS that works with OpenBUGS.
 
 Like the \texttt{runjags} package, the \texttt{R2jags} package offers
-a single interface to \JAGS that carries out all the steps of running
+a single interface to \JAGS\ that carries out all the steps of running
 the model, with reasonable default values. The interface function is
 \texttt{jags()}.
 \begin{verbatim}
@@ -977,7 +1002,9 @@ for ``rjags'' objects includes \texttt{Rhat}, the Gelman-Rubin convergence
 diagnostic \citep{GelmanRubin1992} and \texttt{n.eff} the effective
 sample size.
 
-The \texttt{autojags}
+If an ``rjags'' object shows signs of lack of convergence, then it
+can be passed to the \texttt{autojags} function which will update it
+until convergence.
 
 \section{jagsUI}
 
@@ -986,7 +1013,7 @@ The \texttt{jagsUI} package offers similar facilities to the
 offers two interface functions -- \texttt{jags()} and
 \texttt{autojags()} -- with the same names as the ones in the
 \texttt{R2jags} package. It is therefore not a good idea to load both
-packages.
+packages in the same \R\ session.
 
 Compared with the other packages, the output from \texttt{jagsUI}
 tends to be more verbose and didactic. It may therefore be suitable
@@ -994,6 +1021,7 @@ for users who are not familiar with MCMC.
 
 The \texttt{jags} function is illustrated below.
 \begin{verbatim}
+library(jagsUI)
 out <- jags(data=line_data, inits=line_inits,
             parameters.to.save=c("alpha","beta","sigma"),
             model.file="line.bug", n.chains=2,
@@ -1061,7 +1089,7 @@ coda *                   # All monitored values are written out to file
 \end{verbatim}
 More examples can be found in the file \verb+classic-bugs.tar.gz+
 which is available from Sourceforge
-(\url{http://sourceforge.net/projects/mcmc-jags/files}.
+(\url{http://sourceforge.net/projects/mcmc-jags/files}).
 
 Output from \JAGS\ is printed to the standard output, even when a
 script file is being used.  
@@ -1219,7 +1247,7 @@ that it will only record every nth value. The \texttt{thin} option
 selects the type of monitor to create. The default type is \texttt{trace}.
 
 More complex monitors can be defined that do additional calculations.
-For example, the \verb+dic+ module defines a ``deviance'' monitor that
+For example, the \texttt{dic} module defines a ``deviance'' monitor that
 records the deviance of the model at each iteration, and a ``pD''
 monitor that calculates an estimate of the effective number of
 parameters on the model \citep{spiegelhalter:etal:2002}.  
@@ -1425,18 +1453,6 @@ statement, then the \JAGS\ session will terminate.
 The file format used by JAGS for representing data and initial values
 is the \verb+dump()+ format used by R.  This format is valid R code,
 so a JAGS data file can be read into R using the \verb+source()+ function.
-Since R is a functional language, the code consists of a sequence
-of assignments and function calls.
-\begin{description}
-\item[Assignments] are represented by a left arrow (\verb+<-+) with
-  the variable name on the left hand side and a numeric value or
-  function call on the right hand side. The variable name may
-  optionally be enclosed in single quotes, double quotes, or back-ticks.
-\item[Function calls] are represented by the function name, followed
-  by a list of comma-separated arguments inside round brackets.
-  Optional arguments need to be tagged (i.e. given in the form
-  tag=value).
-\end{description}
 The \JAGS\ parser ignores all white space.  Long expressions can
 therefore be split over several lines.
 
@@ -1491,19 +1507,7 @@ when they are read into \JAGS.
 \label{section:functions}
 
 Functions allow deterministic nodes to be defined using a left arrow
-\verb+<-+ or an equals sign \verb+=+ .  Most of the functions in
-\JAGS\ are scalar functions taking scalar arguments. However,
-\JAGS\ also allows arbitrary vector- and array-valued functions, such
-as the matrix multiplication operator \verb+%*%+ and the transpose
-function \verb+t()+ defined in the \verb+bugs+ module, and the matrix
-exponential function \verb+mexp()+ defined in the \verb+msm+
-module. \JAGS\ also uses an enriched dialect of the BUGS language with
-a number of operators that are used in the S language.
-
-A function may optionally have an alias, which can be used in the
-model definition in place of the canonical name. Aliases are used to
-to avoid confusion with other software in which functions may have
-different names.
+\verb+<-+ or an equals sign \verb+=+ .
 
 \section{Link Functions}
 
@@ -1563,32 +1567,6 @@ icloglog, ilogit, phi) and cannot be vectorized.
 
 %General discussion of whether to vectorize
 
-\section{Function aliases}
-
-A function may optionally have an alias, which can be used in the
-model definition in place of the canonical name. Aliases are used to
-avoid confusion with other software in which functions may have
-slightly different names. Table \ref{table:bugs:functions:alias} shows
-the functions in the \texttt{bugs} module with an alias.
-
-\begin{table}
-\begin{center}
-\begin{tabular}{llll}
-\hline
-Function               & Canonical & Alias & Compatible  \\
-                       & name      &       & with         \\
-\hline
-Arc-cosine             & arccos    & acos  & R \\
-Hyperbolic arc-cosine  & arccosh   & acosh & R \\
-Arc-sine               & arcsin    & asin  & R \\
-Hyperbolic arc-sine    & arcsinh   & asinh & R \\
-Arc-tangent            & arctan    & atan  & R \\
-\hline
-\end{tabular}
-\caption{Functions with aliases in \texttt{bugs} module
-  \label{table:bugs:functions:alias}}
-\end{center}
-\end{table}
 
 \section{Functions associated with distributions}
 
@@ -1656,11 +1634,35 @@ Weibull            & dweib     & pweib     & qweib \\
 \end{center}
 \end{table}
 
+\section{Function aliases}
+
+A function may optionally have an alias, which can be used in the
+model definition in place of the canonical name. Aliases are used to
+avoid confusion with other software in which functions may have
+slightly different names. Table \ref{table:bugs:functions:alias} shows
+the functions in the \texttt{bugs} module with an alias.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Function               & Canonical & Alias & Compatible  \\
+                       & name      &       & with         \\
+\hline
+Arc-cosine             & arccos    & acos  & R \\
+Hyperbolic arc-cosine  & arccosh   & acosh & R \\
+Arc-sine               & arcsin    & asin  & R \\
+Hyperbolic arc-sine    & arcsinh   & asinh & R \\
+Arc-tangent            & arctan    & atan  & R \\
+\hline
+\end{tabular}
+\caption{Functions with aliases in \texttt{bugs} module
+  \label{table:bugs:functions:alias}}
+\end{center}
+\end{table}
+
 \chapter{Distributions}
 \label{chapter:distributions}
-
-
-
 
 \section{Truncating distributions}
 \label{section:truncation}
@@ -1730,7 +1732,7 @@ but the measurements are rounded to a fixed number of decimal places.
 unobserved variables.
 \end{enumerate}
 The \texttt{bugs} module contains novel distributions to handle these
-situations. These are documented in section~\ref{section:bugs:obfun}
+situations. These are documented in section~\ref{section:bugs:obfun}.
 These distributions are referred to as {\em observable
   functions}. They exist to give a likelihood to data that is, in
 fact, a deterministic function of the parameters.  For example, the
@@ -2894,7 +2896,7 @@ parameters
 \]
 for $i \neq j$ have a uniform distribution on the interval
 $[-1,1]$. For $k > m+1$ the prior on $\rho_{ij}$ is concentrated
-around $0$, so that larger values of $k$ incidicate stronger prior
+around $0$, so that larger values of $k$ indicate stronger prior
 belief that the elements of the multivariate normal distribution are
 independent. For $k=m$ the Wishart prior puts most weight on the
 extreme values $\rho_{ij} = 1$ and $\rho_{ij} = -1$. This is not
@@ -3044,7 +3046,7 @@ y ~ dround(t, d)
 \end{verbatim}
 \texttt{dround} generates a likelihood for parameters $t$, $d$ that is
 equal to 1 if $y$ is equal to $t$ rounded to $d$ decimal places, and 0
-otherwise. A small amount of tolerence for ``near equality´´ is
+otherwise. A small amount of tolerance for ``near equality'' is
 allowed in this comparison to allow for the fact that, in general,
 decimal fractions cannot represented exactly.
 
@@ -3089,8 +3091,7 @@ There are limits to what the \texttt{bugs::Sum} sampler can do. It
 cannot update a node that is subject to more than one \texttt{sum}
 constraint.
 
-
-\subsection{Samplers in the bugs module}
+\section{Samplers in the bugs module}
 
 %RW1Factory
 
@@ -3118,7 +3119,7 @@ distribution of the node belongs to the same family as the prior.
 
 The \texttt{bugs::Dirichlet} factory creates samplers for nodes with a
 Dirichlet prior distribution when the posterior distribution is {\em
-  not} conjugate It does this by modeling the Dirichlet distribution
+  not} conjugate It does this by modelling the Dirichlet distribution
 as a set of normalized gamma distributions. (See page~\pageref{bugs:ddirch})
 
 \subsubsection{\texttt{bugs::MNormal}}
@@ -3138,8 +3139,10 @@ may require an extremely long adaptation period.
 \section{Distributions in the glm module}
 \label{section:glm:distributions}
 
-\subsection{Ordered logistic distribution: \texttt{dordered.logit}}
-\label{glm:dordered.logit}
+\subsection{Ordered categorical distributions}
+\label{glm:dordered.categorical}
+
+\subsubsection{Ordered logistic}
 
 The ordered logistic distribution with location parameter $\mu$ (mu)
 and $c$ is defined by
@@ -3182,7 +3185,7 @@ represents the log odds ratio
 which is constant for $y = 1 \ldots M$
      
 
-\subsection{Ordered probit: \texttt{dordered.probit}}
+\subsubsection{Ordered probit}
 
 The ordered probit distribution with location parameter $\mu$ (mu)
 and $c$ is defined by
@@ -3201,7 +3204,7 @@ F(y \mid \mu) = \int_{-\infty}^y \frac{1}{\sqrt{2\pi}}
 \exp\left\{ -(x - \mu)^2 /2 \right\} dx
 \]
 When $\mu$ is a linear predictor then the \texttt{dordered.probit}
-distribution represents the orderd probit regression model.
+distribution represents the ordered probit regression model.
 
 \subsection{Distributions for precision parameters}
 
@@ -3266,7 +3269,7 @@ S$). These features protect against mis-specification of the prior
 scale $S$.  Choosing a large $S$ is harmless as it simply makes the
 prior flatter, whereas if $S$ is too small then the long flat tail
 ensures that sufficient data will dominate the
-prior. \citet{Gelman2006} calls this a ``weakly informataive''
+prior. \citet{Gelman2006} calls this a ``weakly informative''
 prior. For comparison, figure \ref{figure:halft} also shows the
 density on $\sigma$ in the limit as the degrees of freedom $df$
 increases to infinity. The distribution then becomes a half-normal
@@ -3315,32 +3318,43 @@ important features:
 \section{Samplers in the glm module}
 \label{section:glm::samplers}
 
-The \verb+glm+ module implements samplers for efficient updating of
+The \texttt{glm} module implements samplers for efficient updating of
 generalized linear mixed models.  The fundamental idea is to do block
-updating of the parameters in the linear predictor.  The \verb+glm+
+updating of the parameters in the linear predictor.  The \texttt{glm}
 module is built on top of the \textsf{Csparse} and \textsf{CHOLMOD}
 sparse matrix libraries \citep{Davis2006, Davis1999} which allows
 updating of both fixed and random effects in the same
 block. Currently, the methods only work on parameters that have a
 normal prior distribution.
 
-Some of the samplers are based in the idea of introducing latent
-normal variables that reduce the GLM to a linear model. This idea was
-introduced by \citet{AlbertChib93} for probit
-regression with a binary outcome, and was later refined and extended
-to logistic regression with binary outcomes by 
+Most of the samplers in the \texttt{glm} module are based in the idea
+of introducing latent variables that reduce the GLM to a linear model
+with normal outcomes. This idea was introduced by \citet{AlbertChib93}
+for probit regression with a binary outcome, and was later refined and
+extended to logistic regression with binary outcomes by
 \citet{HolmesHeld06}. Another approach, auxiliary mixture sampling,
-was developed by 
-\citet{Fruhwirth-Schnatter09} and is used for more general Poisson
+was developed by \citet{Fruhwirth-Schnatter09} and is used for Poisson
 regression and logistic regression models with binomial outcomes.
-\citet{Gamerman97} proposed a stochastic version of the iteratively
-weighted least squares algorithm for GLMs, which is also implemented
-in the \verb+glm+ module. However the IWLS sampler tends to break down
-when there are many random effects in the model. It uses
-Metropolis-Hastings updates, and the acceptance probability may be
-very small under these circumstances.
+\citet{PolsonEtal2013} proposed an alternative data augmentation
+scheme for binary logistic regression models based on the
+P\'{o}lya-gamma distribution. Most of these data-augmentation schemes
+are compatible with each other. This means that you can have a
+heterogeneous glm with outcomes that are normal (linear), binary
+(logit or probit link), binomial (logit link), Poisson (log link),
+t (linear), or multivariate normal (linear).
 
-Block updating in GLMMs frees the user from the need to center
+The \texttt{glm} module also includes an alternative sampler for glms
+based on a proposal by \citet{Gamerman97}. It uses a stochastic
+version of the iteratively weighted least squares (IWLS)
+algorithm. However the IWLS sampler tends to break down when there are
+many random effects in the model. It uses Metropolis-Hastings updates,
+and the acceptance probability may be very small under these
+circumstances. Despite the poor performance of the IWLS sampler it
+remains in the \texttt{glm} module (with low priority) because in a
+future version of \JAGS\ it can easily be converted to a
+Metropolis-adjusted Langevin algorithm (MALA).
+
+Block updating in GLMMs frees the user from the need to centre
 predictor variables, like this:
 \begin{verbatim}
 y[i] ~ dnorm(mu[i], tau)
@@ -3352,41 +3366,13 @@ mu[i] <- alpha + beta * x[i]
 \end{verbatim}
 without affecting the mixing of the Markov chain.  
 
-\chapter{The mix module}
-
-%      Beta & \verb+dbetabin(a, b, n)+ &
-%     \multirow{2}{*}{
-%        $\textstyle {a+x-1 \choose x} {b+n-x-1 \choose n - x} 
-%                    {a+b+n-1 \choose n}^{-1}$
-%      } & $0$ & $n$ \\
-%      binomial & $a > 0, b > 0, n \in \mathbb{N}^*$ \\
-
-The \texttt{mix} module defines a novel distribution
-\verb+dnormmix(mu,tau,pi)+ representing a finite mixture of normal
-distributions. In the parameterization of the \verb+dnormmix+
-distribution, $\mu$, $\tau$, and $\pi$ are vectors of the same length,
-and the density of \verb+y ~ dnormmix(mu, tau, pi)+ is
-\[
-f(y | \mu, \tau, \pi) = \sum_i \pi_i \tau_i^{\frac{1}{2}} \phi( \tau^{\frac{1}{2}}_i (y - \mu_i))
-\]
-where $\phi()$ is the probability density function of a standard
-normal distribution.
-
-The \verb+mix+ module also defines a sampler that is designed to act
-on finite normal mixtures. It uses tempered transitions to jump
-between distant modes of the multi-modal posterior distribution
-generated by such models \citep{Neal94,Celeux99}. The tempered
-transition method is computationally very expensive. If you want to
-use the \verb+dnormmix+ distribution but do not care about label
-switching, then you can disable the tempered transition sampler with
-\begin{verbatim}
-set factory "mix::TemperedMix" off, type(sampler)
-\end{verbatim}
 
 \chapter{The dic module}
 \label{chapter:dic}
 
-The \verb+dic+ module defines new monitor classes for Bayesian model
+\section{Monitors in the dic module}
+
+The \texttt{dic} module defines new monitor classes for Bayesian model
 criticism using deviance-based measures. 
 
 \subsection{The deviance monitor}
@@ -3434,7 +3420,7 @@ coda pD, type(mean) stem(PD)
 
 \subsection{The \texttt{popt} monitor}
 
-The \verb+popt+ monitor works exactly like the mean monitor for $p_D$,
+The \texttt{popt} monitor works exactly like the mean monitor for $p_D$,
 but records contributions to the optimism of the expected deviance
 ($p_{opt_i}$). The total optimism $p_{opt} = \sum_i p_{opt_i}$  can be
 added to the mean deviance to give the penalized expected deviance
@@ -3458,18 +3444,62 @@ For generalized linear models, a better approximation is
 p_{opt} \approx \sum_{i=1}^n \frac {p_{D_i}}{1 - p_{D_i}}
 \]
 
-The \verb+popt+ monitor uses importance weights to estimate
+The \texttt{popt} monitor uses importance weights to estimate
 $p_{opt}$. The resulting estimates may be numerically unstable when
 $p_{D_i}$ is not small.  This typically occurs in random-effects
-models, so it is recommended to use caution with the \verb+popt+
-until I can find a better way of estimating $p_{opt_i}$.
+models, so it is recommended to use caution with the \texttt{popt}
+monitor until I can find a better way of estimating $p_{opt_i}$.
+
+\chapter{The mix module}
+
+%      Beta & \verb+dbetabin(a, b, n)+ &
+%     \multirow{2}{*}{
+%        $\textstyle {a+x-1 \choose x} {b+n-x-1 \choose n - x} 
+%                    {a+b+n-1 \choose n}^{-1}$
+%      } & $0$ & $n$ \\
+%      binomial & $a > 0, b > 0, n \in \mathbb{N}^*$ \\
+
+The \texttt{mix} module defines a novel distribution
+\verb+dnormmix(mu,tau,pi)+ representing a finite mixture of normal
+distributions. In the parameterization of the \verb+dnormmix+
+distribution, $\mu$, $\tau$, and $\pi$ are vectors of the same length,
+and the density of \verb+y ~ dnormmix(mu, tau, pi)+ is
+\[
+f(y | \mu, \tau, \pi) = \sum_i \pi_i \tau_i^{\frac{1}{2}} \phi( \tau^{\frac{1}{2}}_i (y - \mu_i))
+\]
+where $\phi()$ is the probability density function of a standard
+normal distribution.
+
+The \texttt{mix} module also defines a sampler that is designed to act
+on finite normal mixtures. It uses tempered transitions to jump
+between distant modes of the multi-modal posterior distribution
+generated by such models \citep{Neal94,Celeux99}. The tempered
+transition method is computationally very expensive. If you want to
+use the \texttt{dnormmix} distribution but do not care about label
+switching, then you can disable the tempered transition sampler with
+\begin{verbatim}
+set factory "mix::TemperedMix" off, type(sampler)
+\end{verbatim}
+on the command line or
+\begin{verbatim}
+set.factory("mix::TemperedMix", FALSE, type="sampler")
+\end{verbatim}
+using the \texttt{rjags} interface.
 
 \chapter{The msm module}
 
-The \verb+msm+ module defines the matrix exponential function
-\verb+mexp+ and the multi-state distribution \verb+dmstate+ which
+The \texttt{msm} module defines the matrix exponential function
+\texttt{mexp} and the multi-state distribution \texttt{dmstate} which
 describes the transitions between observed states in continuous-time
 multi-state Markov transition models. 
+
+\chapter{The lecuyer module}
+
+The \texttt{lecuyer} module provides the RNG factory
+\texttt{lecuyer::RngStream} that implements the random number generator of
+\citet{lecuyer02}.  It is capable of generating a large number of
+independent RNG streams and is therefore useful when running many
+parallel chains.
 
 \appendix
 
