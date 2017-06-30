@@ -17,6 +17,7 @@ namespace jags {
 	    unsigned int _nchain;
 	    std::vector<std::vector<double> > _mlik;
 	    std::vector<std::vector<double> > _vlik;
+	    std::vector<double> _values;
 	    unsigned int _n;
 
 	public:

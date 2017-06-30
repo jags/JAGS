@@ -27,7 +27,7 @@ namespace jags {
 	      _nchain(snodes[0]->nchain()),
 	      _mlik(_nchain, vector<double>(snodes.size(), 0)),
 	      _vlik(_nchain, vector<double>(snodes.size(), 0)),
-	      _values(snodes.size(), 0);
+	      _values(snodes.size(), 0),
 	      _n(1)
 	{
 	}
