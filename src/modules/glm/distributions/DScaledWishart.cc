@@ -10,11 +10,13 @@
 #include <cfloat>
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 #include <JRmath.h>
 
 using std::vector;
 using std::log;
+using std::copy;
 
 #define SCALE(par) (par[0])
 #define DF(par)    (*par[1])

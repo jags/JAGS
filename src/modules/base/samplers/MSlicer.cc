@@ -13,6 +13,7 @@
 
 using std::vector;
 using std::string;
+using std::fabs;
 
 #define MIN_ADAPT 50
 

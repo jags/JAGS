@@ -9,6 +9,7 @@
 using std::vector;
 using std::min;
 using std::max;
+using std::log;
 
 #define PROB(par) (*par[0])
 #define VAL1(par) (*par[1])

@@ -25,6 +25,7 @@ using std::stable_sort;
 using std::string;
 using std::list;
 using std::pair;
+using std::copy;
 
 namespace jags {
 

@@ -127,14 +127,14 @@ namespace jags {
 	
 	PolyaGamma::PolyaGamma(StochasticNode const *snode, unsigned int chain)
 	    : Outcome(snode, chain), _y(snode->value(chain)[0]),
-	      _N(getSize(snode, chain)), _tau(1)
+	      _n(getSize(snode, chain)), _tau(1)
 	{
 	    //fixme: sanity checks on snode
 	}
 	
 	double PolyaGamma::value() const 
 	{
-	    return (_y - _N/2)/_tau;
+	    return (_y - _n/2)/_tau;
 	}
 	
 	double PolyaGamma::precision() const 
@@ -144,7 +144,7 @@ namespace jags {
 	
 	void PolyaGamma::update(RNG *rng)
 	{
-	    unsigned int N = static_cast<unsigned int>(_N);
+	    unsigned int N = static_cast<unsigned int>(_n);
 
 	    _tau = 0.0;
 	    for (unsigned int i = 0; i < N; ++i) {

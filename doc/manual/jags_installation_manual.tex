@@ -356,25 +356,40 @@ rather than the version supplied by the LLVM project (libc++).
 \subsection{Solaris}
 
 \JAGS\ has been successfully built and tested on the Intel x86
-platform under Solaris 11.3 using the Sun Studio 12.3 and 12.4
+platform under Solaris 11.3 using the Oracle Developer Studio 12.6
 compilers.
+
+I experienced some difficulty with the libtool dynamic linker ltdl on
+Solaris. This is due to the fact that output from the solaris utility
+nm does not match what libtool expects. This can be overcome by
+exporting the environment variable NM:
 \begin{verbatim}
-./configure CC=cc CXX=CC F77=f95 \
-CFLAGS="-xO3 -xarch=sse2" \
-FFLAGS="-xO3 -xarch=sse2" \
-CXXFLAGS="-xO3 -xarch=sse2 -library=stlport4"
+export NM=gnm
 \end{verbatim}
+to use the GNU version of nm.
+
+The C++ library \file{libCstd} is not supported. You must therefore
+add the option \option{-library=stlport4} to \option{CXXFLAGS} to use
+the alternative STLPort4 library,
+\begin{verbatim}
+export LEX=flex
+CC=cc CXX="CC -std=sun03" F77=f95 ./configure \
+CFLAGS="-O3 -xarch=sse2" \
+CXXFLAGS="+w -O3 -xarch=sse2 -library=stlport4 -lCrun"
+\end{verbatim}
+or \option{-library=-stdcpp} for the libstdc++ library.
+\begin{verbatim}
+./configure CC=cc CXX="CC -std=c++03"  F77=f95 \
+CFLAGS="-O3 -xarch=sse2" \
+CXXFLAGS="+w -O3 -xarch=sse2 -library=stdcpp"
+\end{verbatim}
+
 The Sun Studio compiler is not optimized by default. Use the option
 \option{-xO3} for optimization (NB This is the letter ``O'' not the
 number 0) In order to use the optimization flag \option{-xO3} you
 must specify the architecture with the \option{-xarch} flag. The options
 above are for an Intel processor with SSE2 instructions. This must be
 adapted to your own platform.
-
-Starting with release 4.1.0, the default C++ library \file{libCstd} is
-no longer supported. You must therefore add the option
-\option{-library=stlport4} to \option{CXXFLAGS} to use the alternative
-STLPort4 library.
 
 %C++11?
 
