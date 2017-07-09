@@ -158,6 +158,25 @@ namespace jags {
 	    case GLM_BERNOULLI:
 		break;
 	    case GLM_BINOMIAL:
+		if (!snode->parents()[1]->isFixed() ||
+		    snode->parents()[1]->value(0)[0] > 19) {
+		    /* 
+		       PolyaGamma competes with AuxMixBinomial for
+		       representing binomial outcomes with logit
+		       link. PolyaGamma is more efficient for small N,
+		       but its complexity is O(N), so it is much
+		       slower for large N.
+
+		       Where is the cutoff? For N = 20, the number of
+		       mixture components used by AuxMixBinomial drops
+		       from 9 to 4 (See LGMix.cc), so this may be a
+		       good choice.
+
+		       FIXME: This means we only use PolyaGamma for
+		       small *fixed* N.
+		    */
+		    return false;
+		}
 		break;
 	    default:
 		return false;		
