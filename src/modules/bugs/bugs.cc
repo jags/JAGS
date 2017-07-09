@@ -97,6 +97,7 @@
 #include <samplers/DirichletFactory.h>
 #include <samplers/SumFactory.h>
 #include <samplers/RW1Factory.h>
+#include <samplers/BinomSliceFactory.h>
 
 using std::vector;
 
@@ -208,6 +209,7 @@ namespace bugs {
 	insert(new SumFactory);
 	insert(new CensoredFactory);
 	insert(new RW1Factory);
+	insert(new BinomSliceFactory);
     }
 
     BUGSModule::~BUGSModule() {
