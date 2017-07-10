@@ -23,13 +23,13 @@
 
 \title{JAGS Version \release\ installation manual}
 \author{Martyn Plummer \and Bill Northcott \and Matt Denwood}
-\date{19 January 2016}
+\date{10 July 2017}
 \maketitle
 
-\JAGS\ is distributed in binary format for Microsoft Windows, Mac OS
-X, and most Linux distributions.  The following instructions are for
+\JAGS\ is distributed in binary format for Microsoft Windows, macOS, 
+and most Linux distributions.  The following instructions are for
 those who wish to build \JAGS\ from source. The manual is divided
-into three sections with instructions for Linux/Unix, Mac OS X, and Windows.
+into three sections with instructions for Linux/Unix, macOS, and Windows.
 
 \section{Linux and UNIX}
 
@@ -405,15 +405,22 @@ The configure script automatically detects the Sun Performance library,
 which implements the BLAS/LAPACK functions.  
 
 \clearpage
-\section{Mac OS X}
+\section{macOS}
 
-There have been big changes in Apple's developer tools over the last few
-years, but as of OS 10.9 things should hopefully be more stable.  These
-instructions are for users that wish to build JAGS using clang and the
-libc++ standard library, which have been the default since OS 10.9.  Users
-needing to build against the libstdc++ library should see section \ref{section:otherosxoptions}, 
-and users with an older version of OS X should refer to the installation
-instructions given in older versions of the \JAGS~manual.
+A binary distribution of \JAGS\ is provided for Mac OS X versions 
+10.9 to 10.11 and macOS 10.12 onwards, which is compatible with the
+current binary distribution of \R\ and the corresponding \texttt{rjags} 
+and \texttt{runjags} packages that are provided on CRAN. These instructions 
+are for those users that want to install \JAGS\ from source.
+
+The recommended procedure is to build JAGS using clang and the libc++ 
+standard library, which have been the default since OS 10.9.  This provides 
+compatibility with all builds of \R\ available on CRAN from version 3.3.0 
+onwards, as well as ``Mavericks builds'' of earlier versions of \R.  Users 
+needing to build against the libstdc++ library should see section 
+\ref{section:otherosxoptions}.  Users with a version of Mac OS X predating 
+10.9 (Mavericks) should refer to the installation instructions given in 
+older versions of the \JAGS~manual.
 
 \subsection{Required tools}
 
@@ -432,7 +439,7 @@ need to install the gfortran package which you can download from:
 
 This setup should be able to build the \JAGS\ sources and also source
 packages in R.  All the necessary libraries such as BLAS and LAPACK are
-included within OS X.  Additional tools are required to run the optional 
+included within macOS.  Additional tools are required to run the optional 
 test suite (see section \ref{section:otherosxoptions}).
 
 
@@ -457,8 +464,6 @@ of the \JAGS\ folder.
 
 The instructions below will create a configuration to build \JAGS\ using 
 libc++ which will only run on 10.9 or later, and is therefore 64-bit only.
-This is compatible with the ``Mavericks build'' of \R\ on CRAN and the 
-corresponding \texttt{rjags} and \texttt{runjags} modules.  
 In your Terminal window copy/paste the following code:
 
 \begin{verbatim}
@@ -469,7 +474,7 @@ export LDFLAGS="-arch x86_64"
 \end{verbatim}
 
 The \texttt{-framework Accelerate} finds the BLAS and LAPACK 
-contained within the OS X installation.  The clang warning
+contained within the macOS installation.  The clang warning
 \texttt{-framework Accelerate: `linker' input unused} can
 be safely ignored.
 
@@ -513,7 +518,7 @@ run as described in the User Manual. You need to ensure that
 \texttt{/usr/local/bin} is in your PATH in order for the command 
 \texttt{jags} to work from a shell prompt.
 
-\subsection{Other installation options for Mac OS X}
+\subsection{Other installation options for macOS}
 \label{section:otherosxoptions}
 
 \subsubsection{Running the test suite}
@@ -544,8 +549,9 @@ make clean
 The instructions below will
 create a configuration to build a ``fat'' binary of \JAGS\ (containing
 32-bit i386 and 64-bit x86\_64 code) using libstdc++ which will run on
-OS 10.6 - 10.9.  This is compatible with the ``Snow Leopard build'' of
-\R\ on CRAN and the corresponding \texttt{rjags} and \texttt{runjags} modules. 
+Mac OS X 10.6 - 10.9.  This is compatible with the ``Snow Leopard builds'' of
+\R\ that have previously been provided on CRAN, and the corresponding 
+modules in the \texttt{rjags} and \texttt{runjags} packages. 
 In addition to the previously stated build requirements, installation of 
 the (free) Xcode application from the Mac App store is required to be
 able to follow these instructions.
@@ -591,7 +597,7 @@ which are contained within the disk images for older versions of \JAGS\ availabl
 \subsubsection{Additional tools}
 \label{section:osxtools}
 
-Apple supplies a compiler suite, BLAS and LAPACK along with OS X developer tools, but some
+Apple supplies a compiler suite, BLAS and LAPACK along with the Xcode developer tools, but some
 additional tools are required to work with code from the \JAGS\ repository.  Probably 
 the easiest way of obtaining the necessary utilities is using
 \url{https://www.macports.org} or \url{http://brew.sh} 
@@ -649,7 +655,7 @@ is possible to use ATLAS which can be installed via MacPorts using:
 sudo port install atlas
 \end{verbatim}
 
-This command will take some hours to complete.  The \texttt{-framework Accelerate} flag can
+This command will take a long time to complete.  The \texttt{-framework Accelerate} flag can
 then be omitted from the instructions given in section \ref{section:osxenvironment}.
 
 
