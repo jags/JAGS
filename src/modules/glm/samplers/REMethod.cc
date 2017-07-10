@@ -266,8 +266,8 @@ namespace jags {
 					    double const *sigma0,
 					    unsigned int m) const
 	{
-	    vector<double> A(m*m);
-	    vector<double> b(m);
+	    vector<double> A(m*m, 0);
+	    vector<double> b(m, 0);
 	    calCoefSigma(&A[0], &b[0], sigma0, m);
 
 	    vector<double> delta(m);
@@ -297,10 +297,10 @@ namespace jags {
 	    vector<StochasticNode *> const &eps = _eps->nodes();
 	    vector<double> eval(_eps->length());
 	    for (unsigned int i = 0; i < eps.size(); ++i) {
-		double const *Y = eps[i]->value(_chain);
-		double const *mu = eps[i]->parents()[0]->value(_chain);
+		double const *e = eps[i]->value(_chain);
+		double const *me = eps[i]->parents()[0]->value(_chain);
 		for (unsigned int j = 0; j < m; ++j) {
-		    eval[m*i + j] = mu[j] + (Y[j] - mu[j]) * sigma_ratio[j];
+		    eval[m*i + j] = me[j] + (e[j] - me[j]) * sigma_ratio[j];
 		}
 	    }
 	    _eps->setValue(eval, _chain);
