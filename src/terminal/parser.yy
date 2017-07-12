@@ -88,6 +88,8 @@
     static bool Jtry(bool ok);
 	// Needed for update (and adapt) functions to dump variable states:
     static bool Jtry_dump(bool ok);
+	// Note: on !ok, Jtry(_dump) only exits if !interactive and otherwise returns ok, 
+	// so the parent function should evaluate the value and return; if appriopriate
     %}
 
 %defines
@@ -1092,7 +1094,7 @@ static void updatestar(long niter, long refresh, int width)
     }
 
     if (refresh == 0) {
-	Jtry_dump(console->update(niter/2));
+	if( !Jtry_dump(console->update(niter/2)) ) return;
 	bool status = true;
 	if (adapt) {
 	    if (!console->checkAdaptation(status)) {
@@ -1104,7 +1106,7 @@ static void updatestar(long niter, long refresh, int width)
 		return;
 	    }
 	}
-	Jtry_dump(console->update(niter - niter/2));
+	if( !Jtry_dump(console->update(niter - niter/2)) ) return;
 	if (!status) {
 	    std::cerr << "WARNING: Adaptation incomplete\n";
 	}
@@ -1175,7 +1177,7 @@ static void autoadaptstar(long maxiter)
 		if(status)
 			break;
 
-		Jtry_dump(console->update(1));
+		if( !Jtry_dump(console->update(1)) ) return;
 	}
 	if (!console->checkAdaptation(status)) {
 	    errordump();
@@ -1209,7 +1211,7 @@ static void adaptstar(long niter, long refresh, int width)
     
     bool status = true;
     if (refresh == 0) {
-	Jtry_dump(console->update(niter));
+	if( !Jtry_dump(console->update(niter)) ) return;
 	if (!console->checkAdaptation(status)) {
 	    errordump();
 	    return;
