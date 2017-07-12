@@ -496,7 +496,7 @@ assessing model fit using deviance statistics.
 \section{Compilation}
 
 When a \JAGS\ model is compiled, the model description is combined
-with the data to create a {\em virtual graphical model}, a
+with the data to create a {\em virtual graphical model}, which is a
 representation of the model as a directed acyclic graph (DAG) in
 computer memory.%compilation vs interpretation
 
@@ -549,22 +549,22 @@ line interface, the data are supplied in a separate file with values
 written in the \texttt{dump()} format of the \R\ language, e.g.
 \begin{verbatim}
 #contents of file line-data.R
-`x` <- c(1, 2, 3, 4, 5)
-`Y` <- c(1, 3, 3, 3, 5)
-`N` <- N
+"x" <- c(1, 2, 3, 4, 5)
+"Y" <- c(1, 3, 3, 3, 5)
+"N" <- 5
 \end{verbatim}
-See section~ref{section:cmdline:data} for more details.
+See section~\ref{section:cmdline:data} for more details.
 
 In our simple linear regression model, data values must always be
-supplied for \texttt{N}, since it is used to index the for loop, and
-\texttt{x} since it is used on the right hand side of the relation
-defining \texttt{mu} but never defined on the left hand side of a
-relation.
+supplied for \texttt{N}, since it is used to index the for loop.  Data
+must also be supplied for \texttt{x} since it is used on the right hand 
+side of the relation defining \texttt{mu} but never defined on the left 
+hand side of a relation.
 
 %One way to think about the minimal data for a model is that it
 %\JAGS\ be able to sample values from the prior distribution.
 
-In this example data values are also supplied for the outcome
+In this example, data values are also supplied for the outcome
 variables \verb+Y[1]+ to \verb+Y[5]+. The parameters of the model are
 the three stochastic nodes for which no data are supplied:
 \texttt{alpha}, \texttt{beta} and \texttt{tau}.  \JAGS\ will generate
@@ -630,7 +630,7 @@ command line interface). As with the data, initial values are supplied
 for whole node arrays and may include missing values for elements of
 the array that are not to be initialized.  This need typically arises
 with contrast parameters.  Suppose $X$ is a categorical covariate,
-taking values from 1 to 4, which is used a a predictor variable in a
+taking values from 1 to 4, which is used as a predictor variable in a
 linear model:
 \begin{verbatim}
 for (i in 1:N) {
@@ -704,7 +704,7 @@ in JAGS can be saved and loaded as an integer vector with the name
 \texttt{.RNG.state}. For example,
 \begin{verbatim}
 list(".RNG.name" = "base::Marsaglia-Multicarry",
-     ".RNG.state" = as.integer(c(20899,10892,29018),
+     ".RNG.state" = as.integer(c(20899,10892,29018)),
      ...)
 \end{verbatim}
 is a valid state for the Marsaglia-Multicarry generator.  You cannot
@@ -789,7 +789,7 @@ are available: monitors of type ``mean'' and ``variance'' defined by
 the base module store the running mean and variance, respectively,
 of a given node (See section \ref{section:base:monitors}). The dic module
 defines various monitors based on deviance statistics for model
-criticism (See chapter~\ref{chapter:dic})
+criticism (See chapter~\ref{chapter:dic}).
 
 \section{Errors}
 
@@ -821,7 +821,7 @@ The native interface from R to \JAGS\ is the \texttt{rjags} package
 interface to \JAGS, in which most of the steps of running a model are
 separated into different function calls. Several alternative packages
 have been developed that offer a unified interface to \JAGS. The
-main ones are detailed below. There are many other R packages that
+main ones are detailed below, but there are many other R packages that
 interface to \JAGS. See the list of reverse depends, imports, suggests
 and enhances at \url{https://cran.r-project.org/package=rjags}
 
@@ -902,13 +902,12 @@ will produce trace plots and density plots for the sampled values.
 
 The \texttt{runjags} package \citep{Denwood2016} includes many
 enhancements to \JAGS, including a custom \JAGS\ module that contains
-some novel distributions.
-
-The basic function for running a model with the \texttt{runjags}
-package is \texttt{run.jags()}:
+some additional distributions in the Pareto family. The basic function for 
+running a model with the \texttt{runjags} package is \texttt{run.jags()}, 
+which can be used as follows:
 \begin{verbatim}
 library(runjags)
-out <- run.jags(model="line.bug", monitor=c("alpha","beta","sigma"),
+out <- run.jags(model="line.bug", monitor=c("alpha","beta","sigma","dic"),
                 data=line_data, n.chains=2, inits=line_inits)
 \end{verbatim}
 The optional \texttt{method} argument to \texttt{run.jags} allows the
@@ -927,18 +926,23 @@ of the posterior distribution of the parameters.
 
 JAGS model summary statistics from 20000 samples 
 (chains = 2; adapt+burnin = 5000):
-                                                                          
-       Lower95  Median Upper95   Mean      SD Mode     MCerr MC%ofSD SSeff
-alpha   1.9761  2.9997  4.0406  3.002  0.5363   -- 0.0037448     0.7 20509
-beta  0.065332 0.79686   1.503 0.8001 0.39573   -- 0.0027221     0.7 21135
-sigma  0.32386 0.82087  2.1403 1.0062 0.72386   -- 0.0094204     1.3  5904
-                       
-           AC.10   psrf
-alpha -0.0052736 1.0001
-beta    -0.00539  1.001
-sigma -0.0034472 1.0001
 
-Total time taken: 0.6 seconds
+       Lower95  Median Upper95    Mean      SD    Mode     MCerr MC%ofSD SSeff
+alpha   1.9171  3.0004  4.0096  2.9971 0.54331  2.9936 0.0037325     0.7 21189
+beta  0.046318 0.79919  1.5288 0.79989 0.39328 0.79952 0.0028322     0.7 19283
+sigma  0.31105 0.82308   2.155  1.0107 0.73651 0.68375 0.0094755     1.3  6042
+
+            AC.10   psrf
+alpha  -0.0029037      1
+beta   -0.0044582 1.0004
+sigma -0.00090713      1
+
+Model fit assessment:
+DIC = 21.16815
+[PED not available from the stored object]
+Estimated effective number of parameters:  pD = 8.24059
+
+Total time taken: 0.9 seconds
 \end{verbatim}
 The print method also shows some convergence diagnostics for each
 parameter: \texttt{SSeff} is the effective sample size, controlling
@@ -952,10 +956,24 @@ model. The \texttt{autorun.jags} is an alternative to
 \texttt{run.jags} that takes control of the run-length of the MCMC
 process and runs the chain until convergence.
 
-The plot method for ``runjags'' objects shows: a traceplot, the
+The default plot method for ``runjags'' objects shows a traceplot, the
 cumulative distribution function, the density function and the
 autocorrelation function for each variable. A cross-correlation plot
-for all variables is also generated.
+for all variables is also generated.  There are a number of other 
+methods available for ``runjags'' objects, including \texttt{as.mcmc.list} 
+for extraction of the MCMC objects, and \texttt{as.jags} for conversion 
+to an object that can be used with the rjags package.  The reverse 
+operation is also possible by using \texttt{as.runjags} on an rjags model.  
+
+One of the motivations for the runjags package is to allow comments
+embedded directly within the the \JAGS\ model code to specify 
+variables to be monitored, and to indicate any variables for which data 
+or initial values should be extracted automatically from the \R\ session.  
+The \texttt{template.jags} function uses these features to create 
+complete model, data and initial value definitions based on a data
+frame and formula-based representation of a generalised linear mixed 
+model as provided by the user.
+
 
 \section{R2jags}
 
@@ -1696,9 +1714,9 @@ theta ~ dnorm(0,1.0E-3) T(0,)
 gives a diffuse-half normal prior to \texttt{theta} on positive values
 only.
 
-{\bf Important note}. The \texttt{T(,)} construct must not be used for
+{\bf Important note}: The \texttt{T(,)} construct must not be used for
 censoring. Censoring and truncation are two closely related issues
-that frequently cause confusion in the \BUGS language. If you have a
+that frequently cause confusion in the \BUGS\ language. If you have a
 variable $X$ in your model such that $X > C$ but you are not sure
 whether $X$ is censored or truncated then ask yourself: What should
 happen if you generate a new data set by sampling from the prior
@@ -1748,7 +1766,7 @@ equivalent to
 Y <- x1 + x2
 \end{verbatim}
 
-{\bf Important note} Observable functions can cause problems when you
+{\bf Important note}: Observable functions can cause problems when you
 want to use deviance-based statistics to assess model fit (See the
 \texttt{dic} module in chapter~\ref{chapter:dic}). The likelihood
 generated by an observable function is trivial: it is 1 if the
@@ -3048,7 +3066,7 @@ y ~ dround(t, d)
 equal to 1 if $y$ is equal to $t$ rounded to $d$ decimal places, and 0
 otherwise. A small amount of tolerance for ``near equality'' is
 allowed in this comparison to allow for the fact that, in general,
-decimal fractions cannot represented exactly.
+decimal fractions cannot be represented exactly.
 
 \subsubsection{Summing: \texttt{sum}}
 \label{bugs:sum}
@@ -3119,7 +3137,7 @@ distribution of the node belongs to the same family as the prior.
 
 The \texttt{bugs::Dirichlet} factory creates samplers for nodes with a
 Dirichlet prior distribution when the posterior distribution is {\em
-  not} conjugate It does this by modelling the Dirichlet distribution
+  not} conjugate. It does this by modelling the Dirichlet distribution
 as a set of normalized gamma distributions. (See page~\pageref{bugs:ddirch})
 
 \subsubsection{\texttt{bugs::MNormal}}
@@ -3194,9 +3212,9 @@ defined by
 y ~ dordered.probit(mu, c[1:M])
 \end{verbatim}
 where $c$ is an ordered vector of cutpoints of length $M$. The
-\texttt{dordered.logit} distribution is a discrete distribution taking
-values in the range $1, \ldots M+1$, It is similar to the ordered
-logistic distribution (\texttt{dordered.logit}) except that
+\texttt{dordered.probit} distribution is a discrete distribution taking
+values in the range $1, \ldots M+1$, and is therefore similar to the ordered
+logistic distribution (\texttt{dordered.logit}), except that
 the probabilities $P(Y=y)$ are determined by the cumulative
 distribution function of the normal distribution
 \[
@@ -3209,7 +3227,7 @@ distribution represents the ordered probit regression model.
 \subsection{Distributions for precision parameters}
 
 One of the difficulties with the normal distribution in the BUGS
-language that it is parameterized in terms of the precision, and not
+language is that it is parameterized in terms of the precision, and not
 in terms of the variance or standard deviation. The same is true of
 other location-scale distributions ({\em e.g.} Student t, logistic,
 double exponential). The reasons for this are historical. When BUGS
@@ -3480,11 +3498,16 @@ switching, then you can disable the tempered transition sampler with
 \begin{verbatim}
 set factory "mix::TemperedMix" off, type(sampler)
 \end{verbatim}
-on the command line or
+on the command line, or
 \begin{verbatim}
 set.factory("mix::TemperedMix", FALSE, type="sampler")
 \end{verbatim}
-using the \texttt{rjags} interface.
+using the \texttt{rjags} interface, or
+\begin{verbatim}
+run.jags(..., modules="mix", factories="mix::TemperedMix sampler off")
+\end{verbatim}
+using the \texttt{runjags} interface.
+
 
 \chapter{The msm module}
 
