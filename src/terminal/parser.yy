@@ -71,7 +71,7 @@
     static void errordump();
     static void updatestar(long niter, long refresh, int width);
 	// Run adaptation phase until adapted, regardless of iterations:
-    static void autoadaptstar(long maxiter);
+    static void autoadaptstar(long maxiter, long refresh, int width);
     static void adaptstar(long niter, long refresh, int width, bool force);
     static void setParameters(jags::ParseTree *p, jags::ParseTree *param1);
     static void setParameters(jags::ParseTree *p, std::vector<jags::ParseTree*> *parameters);
@@ -368,7 +368,11 @@ initialize: INITIALIZE {
 ;
 
 autoadapt: AUTOADAPT INT {
-	autoadaptstar($2);
+    long refresh = interactive ? $2/50 : 0;
+    autoadaptstar($2, refresh, 50);
+}
+| AUTOADAPT INT ',' BY '(' INT ')' {
+    autoadaptstar($2,$6, 50);
 }
 ;
 
@@ -1174,22 +1178,76 @@ static void updatestar(long niter, long refresh, int width)
     }
 }
 
-static void autoadaptstar(long maxiter)
+static void autoadaptstar(long maxiter, long refresh, int width)
 {
+    if (!console->isAdapting()) {
+        std::cout << "Adaptation skipped: model is not in adaptive mode.\n";
+		return;
+    }
     std::cout << "Autoadapting up to " << maxiter << " iterations" << std::endl;
 	
-	bool status = true;
+    if (width > maxiter / refresh + 1)
+		width = maxiter / refresh + 1;
+	
 	long i = 0;
-    for (i = 0; i < maxiter; i++) {
-		if (!console->checkAdaptation(status)) {
-		    errordump();
-		    return;
-		}
-		if(status)
-			break;
+	bool status = false;
+	
+	if ( refresh == 0 ) {
+		for (i = 0; i < maxiter; i++) {
+			if (!console->checkAdaptation(status)) {
+			    errordump();
+			    return;
+			}
+			if(status)
+				break;
 
-		if( !Jtry_dump(console->update(1)) ) return;
+			if( !Jtry_dump(console->update(1)) ) {
+				std::cout << std::endl;
+				return;
+			}
+		}
 	}
+	else {
+	    for (int j = 0; j < width - 1; ++j) {
+			std::cout << "-";
+	    }
+	    std::cout << "| " << std::min(width * refresh, maxiter) << std::endl 
+		      << std::flush;
+
+		int col = 0;
+	    for (long n = maxiter; n > 0; n -= refresh) {
+		    long nupdate = std::min(n, refresh);
+			for (long j = 0; j < nupdate; j++) {
+				if (!console->checkAdaptation(status)) {
+				    errordump();
+				    return;
+				}
+				if(status)
+					break;
+
+				if( !Jtry_dump(console->update(1)) ) {
+					std::cout << std::endl;
+					return;
+				}
+				i++;
+			}
+			if(status){
+		    	std::cout << std::endl;
+				break;
+			}
+
+	        std::cout << "+" << std::flush;
+	    	col++;
+	    	if (col == width || n <= nupdate) {
+	    	    int percent = 100 - (n-nupdate) * 100/maxiter;
+	    	    std::cout << " " << percent << "%" << std::endl;
+	    	    if (n > nupdate) {
+	        		col = 0;
+		        }
+		    }
+	    }
+	}
+		
 	if (!console->checkAdaptation(status)) {
 	    errordump();
 	    return;
@@ -1199,10 +1257,7 @@ static void autoadaptstar(long maxiter)
 	    std::cerr << "Adaptation incomplete\n";
 	}
 	else {
-		if (i==0)
-			std::cout << "Adaptation skipped: model is not in adaptive mode\n";
-		else
-			std::cout << "Adaptation completed in " << i << " iterations" << std::endl;
+		std::cout << "Adaptation completed in " << i << " iterations" << std::endl;
 		if (!console->adaptOff()) {
 			std::cout << std::endl;
 			errordump();
