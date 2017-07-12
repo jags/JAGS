@@ -72,7 +72,7 @@
     static void updatestar(long niter, long refresh, int width);
 	// Run adaptation phase until adapted, regardless of iterations:
     static void autoadaptstar(long maxiter);
-    static void adaptstar(long niter, long refresh, int width);
+    static void adaptstar(long niter, long refresh, int width, bool force);
     static void setParameters(jags::ParseTree *p, jags::ParseTree *param1);
     static void setParameters(jags::ParseTree *p, std::vector<jags::ParseTree*> *parameters);
     static void setParameters(jags::ParseTree *p, jags::ParseTree *param1, jags::ParseTree *param2);
@@ -123,6 +123,7 @@
 %token <intval> INITIALIZE
 %token <intval> ADAPT
 %token <intval> AUTOADAPT
+%token <intval> FORCEADAPT
 %token <intval> UPDATE
 %token <intval> BY
 %token <intval> MONITORS
@@ -203,6 +204,7 @@ command: model
 | initialize
 | adapt
 | autoadapt
+| forceadapt
 | update
 | monitor
 | monitors_to
@@ -370,12 +372,21 @@ autoadapt: AUTOADAPT INT {
 }
 ;
 
+forceadapt: FORCEADAPT INT {
+    long refresh = interactive ? $2/50 : 0;
+    adaptstar($2, refresh, 50, true);
+}
+| FORCEADAPT INT ',' BY '(' INT ')' {
+    adaptstar($2,$6, 50, true);
+}
+;
+
 adapt: ADAPT INT {
     long refresh = interactive ? $2/50 : 0;
-    adaptstar($2, refresh, 50);
+    adaptstar($2, refresh, 50, false);
 }
 | ADAPT INT ',' BY '(' INT ')' {
-    adaptstar($2,$6, 50);
+    adaptstar($2,$6, 50, false);
 }
 ;
 
@@ -1201,11 +1212,18 @@ static void autoadaptstar(long maxiter)
     return;
 }
 
-static void adaptstar(long niter, long refresh, int width)
+static void adaptstar(long niter, long refresh, int width, bool force)
 {
     if (!console->isAdapting()) {
-	std::cerr << "Adaptation skipped: model is not in adaptive mode.\n";
-	return;
+	    if( force ) {
+			// Missing endl is deliberate - updatestar will write to the same line:
+		    std::cout << "Model not in adaptive mode: ";
+			updatestar(niter, refresh, width);			
+		}
+		else {
+	        std::cerr << "Adaptation skipped: model is not in adaptive mode.\n";
+		}
+		return;
     }
     std::cout << "Adapting " << niter << std::endl;
     
