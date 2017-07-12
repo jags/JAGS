@@ -82,6 +82,7 @@
     static void delete_pvec(std::vector<jags::ParseTree*> *);
     static void print_unused_variables(std::map<std::string, jags::SArray> const &table, bool data);
     static void listFactories(jags::FactoryType type);
+	static void listModules();
     static void setFactory(std::string const &name, jags::FactoryType type,
                            std::string const &status);
     static void setSeed(unsigned int seed);
@@ -144,6 +145,7 @@
 %token <intval> RNGTOK
 %token <intval> FACTORY;
 %token <intval> FACTORIES;
+%token <intval> MODULES;
 %token <intval> SEED;
 
 %token <intval> LIST 
@@ -217,6 +219,7 @@ command: model
 | set_working_dir
 | samplers_to
 | list_factories
+| list_modules
 | set_factory
 | set_seed
 ;
@@ -536,6 +539,12 @@ LIST FACTORIES ',' TYPE '(' RNGTOK ')'
 LIST FACTORIES ',' TYPE '(' MONITOR ')'
 {
     listFactories(jags::MONITOR_FACTORY);
+}
+;
+
+list_modules: LIST MODULES
+{
+    listModules();
 }
 ;
 
@@ -1584,6 +1593,15 @@ void doSystem(std::string const *command)
 {
     std::system(command->c_str());
 }
+
+void listModules(){
+  std::vector<std::string> mods = jags::Console::listModules();
+  std::cout << "Modules:" << std::endl;
+  for (unsigned int i = 0; i < mods.size(); ++i) {
+      std::cout << "  " << mods[i] << std::endl;
+  }
+}
+
 
 void listFactories(jags::FactoryType type)
 {
