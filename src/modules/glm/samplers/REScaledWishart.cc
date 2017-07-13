@@ -117,15 +117,20 @@ namespace jags {
 		}
 	    }
 
-	    //Rescale random effects
-	    rescaleSigma(&_sigma[0], &sigma0[0], m);
-	    
-	    /*
 	    //Rescale tau
-	    double tau = *_tau->node()->value(_chain);
-	    tau /= (sigma_ratio * sigma_ratio);
-	    _tau->setValue(&tau, 1, _chain);
-	    */
+	    double const *tau0 = _tau->node()->value(_chain);
+	    vector<double> scale(m);
+	    for (unsigned int j = 0; j < m; ++j) {
+		scale[j] = sigma0[j]/_sigma[j];
+	    }
+	    
+	    vector<double> tau_scaled(m2);
+	    for (unsigned int j = 0; j < m; ++j) {
+		for (unsigned int k = 0; k < m; ++k) {
+		    tau_scaled[j*m+k] = tau0[j*m+k] * scale[j] * scale[k];
+		}
+	    }
+	    _tau->setValue(tau_scaled, _chain);
 	}
     }
 }

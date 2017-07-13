@@ -107,17 +107,6 @@ namespace glm {
 	 */
 	double logLikelihoodSigma(double const *sigma, double const *sigma0,
 				  unsigned int m) const;
-	/**
-	 * Rescales random effects after sampling sigma
-	 *
-	 * @param sigma proposed value of the standard deviation parameters
-	 *
-	 * @param sigma0 current value of the standard deviation parameters
-	 *
-	 * @param m length of sigma vector
-	 */
-	void rescaleSigma(double const *sigma, double const *sigma0,
-			  unsigned int m);
     };
 
 }}

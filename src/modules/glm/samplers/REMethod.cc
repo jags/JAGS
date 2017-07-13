@@ -189,7 +189,6 @@ namespace jags {
 	    updateEps(rng); //Update random effects
 	    updateTau(rng); //Sufficient parameterization
 	    updateSigma(rng); //Ancillary parameterization
-	    updateTau(rng); //Sufficient parameterization
 	}
 
 	void REMethod::calCoefSigma(double *A, double *b, double const *sigma0,
@@ -283,28 +282,6 @@ namespace jags {
 		}
 	    }
 	    return loglik;
-	}
-
-	void REMethod::rescaleSigma(double const *sigma,
-				    double const *sigma0,
-				    unsigned int m)
-	{
-	    vector<double> sigma_ratio(m);
-	    for (unsigned int i = 0; i < m; ++i) {
-		sigma_ratio[i] = sigma[i]/sigma0[i];
-	    }
-	    
-	    vector<StochasticNode *> const &eps = _eps->nodes();
-	    vector<double> eval(_eps->length());
-	    for (unsigned int i = 0; i < eps.size(); ++i) {
-		double const *e = eps[i]->value(_chain);
-		double const *me = eps[i]->parents()[0]->value(_chain);
-		for (unsigned int j = 0; j < m; ++j) {
-		    eval[m*i + j] = me[j] + (e[j] - me[j]) * sigma_ratio[j];
-		}
-	    }
-	    _eps->setValue(eval, _chain);
-	}
-	
+	}	
     }
 }

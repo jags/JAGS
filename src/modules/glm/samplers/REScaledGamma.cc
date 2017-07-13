@@ -83,14 +83,10 @@ namespace jags {
 	    //Set new value of sigma
 	    _sigma = lnormal(0, rng, _sigma + b/A, 1/sqrt(A));
 
-	    rescaleSigma(&_sigma, &sigma0, 1);
-	    
-	    /*
 	    //Rescale tau
 	    double tau = *_tau->node()->value(_chain);
-	    tau /= (sigma_ratio * sigma_ratio);
+	    tau *= (sigma0 * sigma0)/(_sigma * _sigma);
 	    _tau->setValue(&tau, 1, _chain);
-	    */
 	}
     }
 }
