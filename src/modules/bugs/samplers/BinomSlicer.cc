@@ -10,6 +10,7 @@
 
 using std::vector;
 using std::string;
+using std::log;
 
 namespace jags {
     namespace bugs {
@@ -86,7 +87,16 @@ namespace jags {
 	    double y = schild[i]->value(_chain)[0];
 	    double p = schild[i]->parents()[0]->value(_chain)[0];
 	    double n = schild[i]->parents()[1]->value(_chain)[0];
-	    loglik += y*log(p)+(n-y)*log1p(-p);
+	    if (y==0) {
+		//FIXME: Need C++11 for log1p
+		loglik += n*log(1-p);
+	    }
+	    else if (y==n) {
+		loglik += y*log(p);
+	    }
+	    else {
+		loglik += y*log(p)+(n-y)*log(1-p);
+	    }
 	}
         return loglik;
     }
