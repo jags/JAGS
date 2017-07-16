@@ -1,7 +1,7 @@
 #ifndef GLM_SAMPLER_H_
 #define GLM_SAMPLER_H_
 
-#include <sampler/MutableSampler.h>
+#include <sampler/Sampler.h>
 
 #include <vector>
 
@@ -9,15 +9,23 @@ namespace jags {
 
     class GraphView;
     class SingletonGraphView;
-
+    struct RNG;
+    
 namespace glm {
 
+    class GLMMethod;
+    class REFactory2;
+    
     /**
      * @short Base class for GLM samplers.
      */
-    class GLMSampler : public MutableSampler
+    class GLMSampler : public Sampler
     {
+	GraphView const *_view;
 	std::vector<SingletonGraphView*> _sub_views;
+	std::vector<GLMMethod*> _methods;
+	std::string _name;
+	friend REFactory2;
     public:
 	/**
 	 * Constructor.
@@ -34,14 +42,25 @@ namespace glm {
 	 */
 	GLMSampler(GraphView *view, 
 		   std::vector<SingletonGraphView*> const &sub_views,
-		   std::vector<MutableSampleMethod*> const &methods,
+		   std::vector<GLMMethod*> const &methods,
 		   std::string const &name);
 	/**
 	 * Destructor
 	 * 
-	 * Deletes the sub-views passed to the constructor.
+	 * Deletes the sub-views and the methods passed to the constructor.
 	 */
 	~GLMSampler();
+	void update(std::vector<RNG*> const &rngs);
+	bool isAdaptive() const;
+	void adaptOff();
+	bool checkAdaptation() const;
+	std::string name() const;
+	/*
+	  Gives access to the vector of GLMMethod objects used by the
+	  sampler.
+	 */
+	std::vector<GLMMethod*> const &methods();
+
     }; 
 
 }}

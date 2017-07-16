@@ -1,6 +1,6 @@
 #include <config.h>
 
-#include "REGamma.h"
+#include "REGamma2.h"
 
 #include <JRmath.h>
 #include <sampler/SingletonGraphView.h>
@@ -39,26 +39,22 @@ namespace jags {
 
 	class Outcome;
 	
-	REGamma::REGamma(SingletonGraphView const *tau,
-			 GraphView const *eps,
-			 vector<SingletonGraphView const *> const &sub_eps,
-			 vector<Outcome *> const &outcomes,
-			 unsigned int chain)
-	    : REMethod(tau, eps, sub_eps, outcomes, chain),
-	      _slicer(this, SHAPE(tau, chain), RATE(tau, chain),
-		      SIGMA(tau, chain))
+	REGamma2::REGamma2(SingletonGraphView const *tau,
+			   GLMMethod const *glmmethod)
+	    : REMethod2(tau, glmmethod),
+	      _slicer(this, SHAPE(tau, _chain), RATE(tau, _chain),
+		      SIGMA(tau, _chain))
 	{
 	}
 
-	void REGamma::updateTau(RNG *rng)
+	void REGamma2::updateTau(RNG *rng)
 	{
 	    vector<Node const*> const &par = _tau->node()->parents();
 	    double shape = *par[0]->value(_chain); 
 	    double rate = *par[1]->value(_chain); //(1/scale)
 
 	    // Likelihood
-	    //vector<StochasticNode *> const &sch = _tau->stochasticChildren();
-	    vector<StochasticNode *> const &eps = _eps->nodes();
+	    vector<StochasticNode *> const &eps = _tau->stochasticChildren();
 	    for (unsigned int i = 0; i < eps.size(); ++i) {
 		double Y = *eps[i]->value(_chain);
 		double mu = *eps[i]->parents()[0]->value(_chain);
@@ -70,7 +66,7 @@ namespace jags {
 	    _tau->setValue(&x, 1, _chain);  
 	}
 
-	void REGamma::updateSigma(RNG *rng)
+	void REGamma2::updateSigma(RNG *rng)
 	{
 	    double tau = _tau->node()->value(_chain)[0];
 	    double sigma0 = 1/sqrt(tau);
@@ -86,17 +82,17 @@ namespace jags {
 	    _tau->setValue(&x, 1, _chain);
 	}
 
-	bool REGamma::isAdaptive() const
+	bool REGamma2::isAdaptive() const
 	{
 	    return true;
 	}
 	
-	void REGamma::adaptOff()
+	void REGamma2::adaptOff()
 	{
 	    _slicer.adaptOff();
 	}
 	
-	bool REGamma::checkAdaptation() const
+	bool REGamma2::checkAdaptation() const
 	{
 	    return _slicer.checkAdaptation();
 	}

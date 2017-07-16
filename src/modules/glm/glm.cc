@@ -59,9 +59,12 @@ namespace glm {
 	//insert(new ConjugateFFactory);
 	insert(new ScaledGammaFactory);
 	insert(new ScaledWishartFactory);
+
+	/*
 	insert(new REScaledGammaFactory);
 	insert(new REScaledWishartFactory);
 	insert(new REGammaFactory);
+	*/
 	
 	insert(new DScaledGamma);
 	insert(new DScaledWishart);

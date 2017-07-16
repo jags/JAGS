@@ -2,6 +2,9 @@
 
 #include "GLMFactory.h"
 #include "GLMSampler.h"
+#include "REGammaFactory2.h"
+#include "REScaledGammaFactory2.h"
+#include "REScaledWishartFactory2.h"
 
 #include <graph/GraphMarks.h>
 #include <graph/Graph.h>
@@ -279,7 +282,7 @@ namespace glm {
     GLMFactory::~GLMFactory()
     {}
     
-    Sampler * 
+    GLMSampler * 
     GLMFactory::makeSampler(list<StochasticNode*> const &free_nodes, 
 			    Graph const &graph, bool gibbs) const
     {
@@ -408,7 +411,7 @@ namespace glm {
 	}
 	
 	unsigned int Nch = nchain(view);
-	vector<MutableSampleMethod*> methods(Nch, 0);
+	vector<GLMMethod*> methods(Nch, 0);
 	
 	vector<SingletonGraphView const*> const_sub_views(sub_views.size());
 	copy(sub_views.begin(), sub_views.end(), const_sub_views.begin());
@@ -430,13 +433,15 @@ namespace glm {
     GLMFactory::makeSamplers(list<StochasticNode*> const &nodes, 
 			     Graph const &graph) const
     {
-	if (Sampler *s = makeSampler(nodes, graph, false)) {
-	    return vector<Sampler*>(1, s);
+	vector<Sampler*> ans;
+	if (GLMSampler *s = makeSampler(nodes, graph, false)) {
+	    ans.push_back(s);
+	    makeRESamplers(nodes, s, graph, ans);
 	}
-	if (Sampler *s = makeSampler(nodes, graph, true)) {
-	    return vector<Sampler*>(1, s);
+	else if (GLMSampler *s = makeSampler(nodes, graph, true)) {
+	    ans.push_back(s);
 	}
-	return vector<Sampler*>();
+	return ans;
     }
 
     bool GLMFactory::fixedDesign() const
@@ -448,6 +453,35 @@ namespace glm {
     {
 	return false;
     }
-    
+
+    void GLMFactory::makeRESamplers(list<StochasticNode*> const &free_nodes,
+				    GLMSampler const *s, Graph const &graph,
+				    vector<Sampler*> &samplers) const
+    {
+	set<StochasticNode*> used_nodes;
+	REGammaFactory2 gfac;
+	REScaledGammaFactory2 sgfac;
+	REScaledWishartFactory2 swfac;
+	
+	while (Sampler *resampler = gfac.makeSampler(free_nodes, used_nodes,
+						     s, graph))
+	{
+	    samplers.push_back(resampler);
+	}
+	while (Sampler *resampler = sgfac.makeSampler(free_nodes, used_nodes,
+						      s, graph))
+	{
+	    samplers.push_back(resampler);
+	}
+
+	while (Sampler *resampler = swfac.makeSampler(free_nodes, used_nodes,
+						      s, graph))
+	{
+	    samplers.push_back(resampler);
+	}
+
+
+    }
+
 }}
 
