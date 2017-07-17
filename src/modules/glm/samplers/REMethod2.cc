@@ -167,7 +167,7 @@ namespace jags {
 
 		    // Tx = lambda %*% X (n x m matrix)
 		    vector<double> TX(n*m, 0); 
-		    for (int j = 0; j < m; ++j) {
+		    for (unsigned int j = 0; j < m; ++j) {
 			for (unsigned int p = 0; p < n; ++p) {
 			    b[j] += delta[p] * X[j*n + p];
 			    for (unsigned int q = 0; q < n; ++q) {

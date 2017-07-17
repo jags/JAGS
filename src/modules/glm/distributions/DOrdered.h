@@ -12,7 +12,7 @@ namespace jags {
 	class DOrdered : public VectorDist {
 	private:
 	    double density(double x, double mu, double const *cut,
-			   unsigned int ncut, bool give_log) const;
+			   int ncut, bool give_log) const;
 	public:
 	    DOrdered(std::string const &name);
 	    

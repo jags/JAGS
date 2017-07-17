@@ -145,13 +145,16 @@ void MixDistTest::rscalar_rpq(RScalarDist const *dist,
     //rscalar_trunclik(dist, par);
 }
 
+/*
 static vector<double const *> mkPar(double const &v1)
 {
     vector<double const *> par;
     par.push_back(&v1);
     return par;
 }
+*/
 
+/*
 static vector<double const *> mkPar(double const &v1, double const &v2)
 {
     vector<double const *> par;
@@ -159,6 +162,7 @@ static vector<double const *> mkPar(double const &v1, double const &v2)
     par.push_back(&v2);
     return par;
 }
+*/
 
 static vector<double const *> mkPar(double const &v1, double const &v2,
 				    double const &v3)
@@ -170,6 +174,7 @@ static vector<double const *> mkPar(double const &v1, double const &v2,
     return par;
 }
 
+/*
 static vector<double const *> mkPar(double const &v1, double const &v2,
 				    double const &v3, double const &v4)
 {
@@ -180,6 +185,7 @@ static vector<double const *> mkPar(double const &v1, double const &v2,
     par.push_back(&v4);
     return par;
 }
+*/
 
 void MixDistTest::rscalar()
 {

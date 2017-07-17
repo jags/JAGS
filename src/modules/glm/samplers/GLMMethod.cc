@@ -53,8 +53,6 @@ namespace glm {
 	if (allTrue(_fixed)) return; //Move along, nothing to see here
 	
 	vector<StochasticNode *> const &snodes = _view->nodes();
-	vector<StochasticNode *> const &schildren = 
-	    _view->stochasticChildren();
 
 	int *Xi = static_cast<int*>(_x->i);
 	int *Xp = static_cast<int*>(_x->p);
@@ -371,9 +369,9 @@ namespace glm {
 		}
 
 		/* Sanity checks */
-		unsigned int nzrow = Tp[c+1] - Tp[c];
+		int nzrow = Tp[c+1] - Tp[c];
 		for (r = Tp[c]; r < Tp[c+1]; ++r) {
-		    unsigned int row = Ti[r];
+		    int row = Ti[r];
 		    for (unsigned int j = 0; j < m; ++j) {
 			unsigned int col = c + j;
 			if (Tp[col+1] - Tp[col] != nzrow) {

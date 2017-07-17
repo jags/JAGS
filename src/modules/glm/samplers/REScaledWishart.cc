@@ -87,7 +87,6 @@ namespace jags {
 	    vector<Node const*> const &par = _tau->node()->parents();
 	    double const *S = par[0]->value(_chain);
 
-	    double const *Zx = static_cast<double const *>(_z->x);
 	    unsigned int m  = _z->ncol;
 	    unsigned int m2 = m * m;
 	    
@@ -112,7 +111,7 @@ namespace jags {
 		double sigma_sd = sqrt(1.0/A[j*m+j]);
 		_sigma[j] = lnormal(0, rng, sigma_mean, sigma_sd);
 		double delta = _sigma[j] - sigma0[j];
-		for (int k = 0; k < m; ++k) {
+		for (unsigned int k = 0; k < m; ++k) {
 		    b[k] -= delta * A[m*j + k];
 		}
 	    }

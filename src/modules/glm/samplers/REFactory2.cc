@@ -79,7 +79,6 @@ namespace jags {
 	    GLMSampler const *glmsampler, Graph const &graph) const
 	{
 	    SingletonGraphView *tau = 0;
-	    GraphView *eps = 0;
 	    for (list<StochasticNode*>::const_iterator p = free_nodes.begin();
 		 p != free_nodes.end(); ++p)
 	    {

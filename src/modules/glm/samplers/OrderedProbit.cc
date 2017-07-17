@@ -38,7 +38,7 @@ namespace glm {
     void OrderedProbit::update(RNG *rng)
     {
 	/* Albert Chib update */
-	int x = static_cast<int>(_y) - 1;
+	unsigned int x = static_cast<unsigned int>(_y) - 1;
 	if (x == 0) {
 	    _z = rnormal(_cuts[0], rng, _lp);
 	}
@@ -53,7 +53,7 @@ namespace glm {
     void OrderedProbit::update(double mean, double var, RNG *rng)
     {
 	/* Holmes-Held update */
-	int x = static_cast<int>(_y) - 1;
+	unsigned int x = static_cast<unsigned int>(_y) - 1;
 	if (x == 0) {
 	    _z = rnormal(_cuts[0], rng, mean, sqrt(var + 1));
 	}

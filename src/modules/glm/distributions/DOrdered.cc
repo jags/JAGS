@@ -41,7 +41,7 @@ namespace jags {
 	}
 
 	double DOrdered::density(double x, double mu, double const *cut,
-				 unsigned int ncut, bool give_log) const
+				 int ncut, bool give_log) const
 	{
 	    int y = static_cast<int>(x) - 1;
 

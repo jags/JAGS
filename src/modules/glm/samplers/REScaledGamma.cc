@@ -70,8 +70,6 @@ namespace jags {
 	    vector<Node const*> const &par = _tau->node()->parents();
 	    double S = *par[0]->value(_chain);
 
-	    double const *Zx = static_cast<double const *>(_z->x);
-	    
 	    //Get parameters of posterior distribution for _sigma
 	    //Precision is A and mean is b/A
 	    double priorprec = 1.0/(S*S);
