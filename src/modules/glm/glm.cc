@@ -53,12 +53,12 @@ namespace glm {
 	glm_wk->postorder = 0 ;
 */
 
+	insert(new ScaledGammaFactory);
+	insert(new ScaledWishartFactory);
+
 	//insert(new IWLSFactory);
 	insert(new GLMGenericFactory);
 	insert(new HolmesHeldFactory);
-	//insert(new ConjugateFFactory);
-	insert(new ScaledGammaFactory);
-	insert(new ScaledWishartFactory);
 
 	/*
 	insert(new REScaledGammaFactory);
