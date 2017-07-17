@@ -24,18 +24,19 @@ namespace jags {
 
 	REScaledWishart2::REScaledWishart2(SingletonGraphView const *tau,
 					   GLMMethod const *glmmethod)
-	    : REMethod2(tau, glmmethod),
-	      _sigma(tau->node()->length())
+	    : REMethod2(tau, glmmethod)
 	{
 	    vector<Node const*> const &par = tau->node()->parents();
 	    double const *S = par[0]->value(_chain); //Prior scale
+	    unsigned int nrow = par[0]->length();
 	    double tdf = *par[1]->value(_chain); //Prior degrees of freedom
 	    double const *x = tau->node()->value(_chain);
+
 	    //Initialize hyper-parameter _sigma
-	    unsigned int m = _sigma.size();
-	    for (unsigned int j = 0; j < m; ++j) {
-		double a_shape = (m + tdf)/2.0;
-		double a_rate = tdf * x[j + m*j] + 1.0/(S[j]*S[j]);
+	    _sigma = vector<double>(nrow);
+	    for (unsigned int j = 0; j < nrow; ++j) {
+		double a_shape = (nrow + tdf)/2.0;
+		double a_rate = tdf * x[j + nrow*j] + 1.0/(S[j]*S[j]);
 		double a = a_shape/a_rate; 
 		_sigma[j] = sqrt(2*a);
 	    }
