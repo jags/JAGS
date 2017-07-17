@@ -59,7 +59,7 @@ namespace jags {
 	    }
 
 	    unsigned int nrow = sumLengths(_outcomes);
-	    unsigned int ncol = tau->node()->length();
+	    unsigned int ncol = tau->stochasticChildren()[0]->length();
 	    _z = cholmod_allocate_dense(nrow, ncol, nrow, CHOLMOD_REAL,
 					glm_wk);
 	}
