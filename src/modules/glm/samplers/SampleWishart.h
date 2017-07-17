@@ -3,7 +3,7 @@
 
 namespace jags {
 
-    class RNG;
+    struct RNG;
 
     namespace glm {
 	/** @short Sample from Wishart distribution */

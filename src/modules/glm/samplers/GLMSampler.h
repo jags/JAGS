@@ -14,7 +14,6 @@ namespace jags {
 namespace glm {
 
     class GLMMethod;
-    class REFactory2;
     
     /**
      * @short Base class for GLM samplers.
@@ -25,7 +24,7 @@ namespace glm {
 	std::vector<SingletonGraphView*> _sub_views;
 	std::vector<GLMMethod*> _methods;
 	std::string _name;
-	friend REFactory2;
+	friend class REFactory2;
     public:
 	/**
 	 * Constructor.

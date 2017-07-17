@@ -29,8 +29,6 @@ namespace glm {
 	double const *_cuts;
 	const unsigned int _ncut;
 	double _z;
-	double _tau;
-	double _sigma2;
       public:
 	OrderedProbit(StochasticNode const *snode, unsigned int chain);
 	double value() const;

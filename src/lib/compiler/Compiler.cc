@@ -100,7 +100,8 @@ static void CompileError(ParseTree const *p, string const &msg1,
      * but which are never defined. This is such a fundamental error
      * that it is worth doing this before trying to build the Model.
      */
-    
+
+    /*
     static void getRHSNames(ParseTree const *t,
 			    map<string, int> &rhs,
 			    vector<string> const &cntrs)
@@ -128,6 +129,7 @@ static void CompileError(ParseTree const *p, string const &msg1,
 	    getRHSNames(*p, rhs, cntrs);
 	}
     }
+    */
 
     /* Experimental features to add additional checks prior to compilation
 

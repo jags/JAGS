@@ -15,7 +15,6 @@ namespace jags {
     struct RNG;
     class GraphView;
     class SingletonGraphView;
-    class REMethod2;
     
 namespace glm {
 
@@ -51,7 +50,7 @@ namespace glm {
 	std::vector<bool> _fixed;
 	unsigned int _length_max;
 	unsigned _nz_prior;
-	friend REMethod2;
+	friend class REMethod2;
     public:
 	/**
 	 * Constructor.

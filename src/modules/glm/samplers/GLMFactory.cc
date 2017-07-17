@@ -458,11 +458,13 @@ namespace glm {
 				    GLMSampler const *s, Graph const &graph,
 				    vector<Sampler*> &samplers) const
     {
-	set<StochasticNode*> used_nodes;
 	REGammaFactory2 gfac;
 	REScaledGammaFactory2 sgfac;
 	REScaledWishartFactory2 swfac;
-	
+
+	set<StochasticNode*> used_nodes;
+	used_nodes.insert(s->nodes().begin(), s->nodes().end());
+
 	while (Sampler *resampler = gfac.makeSampler(free_nodes, used_nodes,
 						     s, graph))
 	{
@@ -479,7 +481,6 @@ namespace glm {
 	{
 	    samplers.push_back(resampler);
 	}
-
 
     }
 
