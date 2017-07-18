@@ -10,6 +10,7 @@
 using std::vector;
 using std::string;
 using std::copy;
+using std::fill;
 
 namespace jags {
 
