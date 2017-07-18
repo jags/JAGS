@@ -385,10 +385,10 @@ void BaseFunTest::seq()
 {
     for (int i = -5; i < 6; ++i) {
 	for (int j = -6; j < 5; ++j) {
-	    unsigned int len = (j < i) ? 0 : j - i + 1;
+	    int len = (j < i) ? 0 : j - i + 1;
 	    vector<double> out = veval(_seq, i, j);
-	    CPPUNIT_ASSERT(out.size() == len);
-	    for (unsigned int k = 0; k < len; ++k) {
+	    CPPUNIT_ASSERT(out.size() == static_cast<unsigned int>(len));
+	    for (int k = 0; k < len; ++k) {
 		CPPUNIT_ASSERT_EQUAL(out[k], static_cast<double>(i + k));
 	    }
 	}
