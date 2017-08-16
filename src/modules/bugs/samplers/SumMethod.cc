@@ -177,7 +177,7 @@ namespace jags {
 	SumMethod::SumMethod(GraphView const *gv, unsigned int chain)
 	    : MutableSampleMethod(), _gv(gv), _chain(chain),
 	      _sum(gv->stochasticChildren()[0]->value(chain)[0]),
-	      _discrete(gv->stochasticChildren()[0]->isDiscreteValued()),
+	      _discrete(gv->nodes()[0]->isDiscreteValued()),
 	      _x(gv->length()), _i(0), _j(0), _sumchild(0), _fast(false),
 	      _sumdiff(0), _iter(0), _width(2), _max(10), _adapt(true)
 	{
@@ -266,7 +266,11 @@ namespace jags {
 
 	    double lower = JAGS_NEGINF, upper = JAGS_POSINF;
 	    getLimits(&lower, &upper);
-
+	    if (lower == upper) {
+		// We can't move this pair, so skip them
+		return;
+	    }
+		    
 	    // Stepping out 
 
 	    // Randomly set number of steps in left and right directions,
