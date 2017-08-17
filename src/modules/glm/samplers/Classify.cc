@@ -26,9 +26,25 @@ namespace glm {
 	else if (name == "dnorm") {
 	    return GLM_NORMAL;
 	}
+	else if (name == "dlogis") {
+	    return GLM_LOGISTIC;
+	}
+	else if (name == "dt") {
+	    return GLM_T;
+	}
+	else if (name == "dordered.logit") {
+	    return GLM_ORDLOGIT;
+	}
+	else if (name == "dordered.probit") {
+	    return GLM_ORDPROBIT;
+	}
+	else if (name == "dmnorm") {
+	    return GLM_MNORMAL;
+	}
 	else {
 	    return GLM_UNKNOWN;
 	}
+
     }
 
     GLMLink getLink(StochasticNode const *snode)

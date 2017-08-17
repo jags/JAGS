@@ -12,7 +12,9 @@ GreaterOrEqual.h LessThan.h LessOrEqual.h Seq.h
 
 ### Test library 
 
+if CANCHECK
 check_LTLIBRARIES = libbasefuntest.la
 libbasefuntest_la_SOURCES = testbasefun.cc testbasefun.h
 libbasefuntest_la_CPPFLAGS = -I$(top_srcdir)/src/include
 libbasefuntest_la_CXXFLAGS = $(CPPUNIT_CFLAGS)
+endif

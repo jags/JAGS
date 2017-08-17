@@ -39,15 +39,30 @@ double ScalarStochasticNode::logDensity(unsigned int chain, PDFType type) const
 {
     if(!_dist->checkParameterValue(_parameters[chain]))
 	return JAGS_NEGINF;
+
+    double const *l = lowerLimit(chain);
+    double const *u = upperLimit(chain);
+    if (l && u && *l > *u) return JAGS_NEGINF;
     
-    return _dist->logDensity(_data[chain], type, _parameters[chain], 
-			     lowerLimit(chain), upperLimit(chain));
+    return _dist->logDensity(_data[chain], type, _parameters[chain], l, u);
+}
+
+void ScalarStochasticNode::deterministicSample(unsigned int chain)
+{
+    double const *l = lowerLimit(chain);
+    double const *u = upperLimit(chain);
+    if (l && u && *l > *u) throw NodeError(this, "Inconsistent bounds");
+
+    _data[chain] = _dist->typicalValue(_parameters[chain], l, u);
 }
 
 void ScalarStochasticNode::randomSample(RNG *rng, unsigned int chain)
 {
-    _data[chain] = _dist->randomSample(_parameters[chain], lowerLimit(chain),
-				       upperLimit(chain), rng);
+    double const *l = lowerLimit(chain);
+    double const *u = upperLimit(chain);
+    if (l && u && *l > *u) throw NodeError(this, "Inconsistent bounds");
+
+    _data[chain] = _dist->randomSample(_parameters[chain], l, u, rng);
 }  
 
 void ScalarStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
@@ -63,12 +78,21 @@ void ScalarStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
 	if (u == 0 || (u && (*ub > *u)))
 	    u = ub;
     }
+    if (l && u && *l > *u) throw NodeError(this, "Inconsistent bounds");
+    
     _data[chain] = _dist->randomSample(_parameters[chain], l, u, rng);
 }  
 
 bool ScalarStochasticNode::checkParentValues(unsigned int chain) const
 {
-    return _dist->checkParameterValue(_parameters[chain]);
+    double const *l = lowerLimit(chain);
+    double const *u = upperLimit(chain);
+    if (l && u && *l > *u) {
+	return false; //Inconsistent bounds
+    }
+    else {
+	return _dist->checkParameterValue(_parameters[chain]);
+    }
 }
 
 bool isBounded(ScalarStochasticNode const *node)
@@ -76,6 +100,13 @@ bool isBounded(ScalarStochasticNode const *node)
     return node->lowerBound() || node->upperBound();
 }
 
+void ScalarStochasticNode::sp(double *lower, double *upper, unsigned int length,
+			      unsigned int chain) const
+{
+    *lower = _dist->l(_parameters[chain]);
+    *upper = _dist->u(_parameters[chain]);
+}
+    
     /*
 StochasticNode * 
 ScalarStochasticNode::clone(vector<Node const *> const &parameters,
@@ -88,13 +119,6 @@ ScalarStochasticNode::clone(vector<Node const *> const &parameters,
 unsigned int ScalarStochasticNode::df() const
 {
     return _dist->df();
-}
-
-void ScalarStochasticNode::sp(double *lower, double *upper, unsigned int length,
-			      unsigned int chain) const
-{
-    *lower = _dist->l(_parameters[chain]);
-    *upper = _dist->u(_parameters[chain]);
 }
 
     double ScalarStochasticNode::KL(unsigned int ch1, unsigned int ch2,

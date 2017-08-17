@@ -47,7 +47,7 @@ namespace glm {
 	       vector<SingletonGraphView const *> const &sub_views,
 	       vector<Outcome *> const &outcomes,
 	       unsigned int chain)
-	: GLMBlock(view, sub_views, outcomes, chain), _init(true)
+	: GLMBlock(view, sub_views, outcomes, chain)
     {
     }
     

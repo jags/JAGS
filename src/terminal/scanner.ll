@@ -39,8 +39,9 @@ chain                   zzlval.intval=CHAIN; return CHAIN;
 
 update			zzlval.intval=UPDATE; return UPDATE;
 adapt			zzlval.intval=ADAPT; return ADAPT;
-by                      zzlval.intval=BY; return BY;
+forceadapt			zzlval.intval=FORCEADAPT; return FORCEADAPT;
 autoadapt			zzlval.intval=AUTOADAPT; return AUTOADAPT;
+by                      zzlval.intval=BY; return BY;
 
 monitor			zzlval.intval=MONITOR; return MONITOR;
 monitors		zzlval.intval=MONITORS; return MONITORS;
@@ -53,6 +54,7 @@ samplers                zzlval.intval=SAMPLERS; return SAMPLERS;
 rng                     zzlval.intval=RNGTOK; return RNGTOK;
 factory                 zzlval.intval=FACTORY; return FACTORY;
 factories               zzlval.intval=FACTORIES; return FACTORIES;
+modules                 zzlval.intval=MODULES; return MODULES;
 seed                    zzlval.intval=SEED; return SEED;
 
 coda			zzlval.intval=CODA; return CODA;
@@ -126,6 +128,7 @@ run                     zzlval.intval=RUN; return RUN;
 }
 
 <RDATA>".Dim"                   return DIM;
+<RDATA>".Data"                  return DOTDATA;
 <RDATA>"NA"		        return NA;
 <RDATA>"NULL"		        return R_NULL;
 <RDATA>"structure"/{BRACKET}	return STRUCTURE;

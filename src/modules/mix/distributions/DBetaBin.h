@@ -9,8 +9,8 @@ namespace mix {
 /**
  * @short Beta-Binomial distribution
  * <pre>
- * Y ~ dbin(a, b, n)
- * f(y|a,b,n) = choose(a+y-1, y) * choose(b+n-y-1, n-y) / choose(a+b+n-1, n)
+ * Y ~ dbetabin(a, b, n)
+ * f(y|a,b,n) = choose(n, x) * beta(x + a, n - x + b) / beta(a, b);
  * </pre>
  */
 class DBetaBin : public RScalarDist {
@@ -32,7 +32,7 @@ class DBetaBin : public RScalarDist {
    */
   bool checkParameterDiscrete (std::vector<bool> const &mask) const;
   /**
-   * Checks that p lies in (0,1),  n >= 1, phi > -1
+   * Checks that p lies in (0,1),  n >= 1, a > 0, b > 0
    */
   bool checkParameterValue(std::vector<double const *> const &parameters) const;
   bool isSupportFixed(std::vector<bool> const &fixmask) const;

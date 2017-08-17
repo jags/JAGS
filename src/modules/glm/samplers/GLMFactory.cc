@@ -2,6 +2,9 @@
 
 #include "GLMFactory.h"
 #include "GLMSampler.h"
+#include "REGammaFactory2.h"
+#include "REScaledGammaFactory2.h"
+#include "REScaledWishartFactory2.h"
 
 #include <graph/GraphMarks.h>
 #include <graph/Graph.h>
@@ -25,6 +28,7 @@ using std::stable_sort;
 using std::string;
 using std::list;
 using std::pair;
+using std::copy;
 
 namespace jags {
 
@@ -213,7 +217,7 @@ namespace glm {
 	: _name(name)
     {}
 
-    bool GLMFactory::checkDescendants(SingletonGraphView const *view) const
+    bool GLMFactory::checkDescendants(GraphView const *view) const
     {
 	// Check stochastic children
 	vector<StochasticNode *> const &stoch_nodes = 
@@ -278,7 +282,7 @@ namespace glm {
     GLMFactory::~GLMFactory()
     {}
     
-    Sampler * 
+    GLMSampler * 
     GLMFactory::makeSampler(list<StochasticNode*> const &free_nodes, 
 			    Graph const &graph, bool gibbs) const
     {
@@ -353,6 +357,7 @@ namespace glm {
 	    }
 	    else {
 		delete candidates[j];
+		candidates[j] = 0;
 	    }
 	}
 
@@ -364,7 +369,8 @@ namespace glm {
 	if (!checkLinear(view, fixedDesign(), true)) {
 
 	    // Candidates are not jointly linear
-	    
+
+	    candidates = sub_views;
 	    sample_nodes.clear();
 	    sub_views.clear();
 	    delete view; 
@@ -386,15 +392,26 @@ namespace glm {
 	    }
 	    view = new GraphView(sample_nodes, graph);
 	}
-
-	if (sub_views.size() == 1 && view->length() == 1 && !gibbs) {
+	
+	/* FIXME
+	 * 
+	 * The overhead of a GLM sampling method for a univariate
+	 * sampler is too large So we skip univariate nodes. However,
+	 * by returning a null pointer at this point we terminate the
+	 * factory and so will miss a block of nodes that could be
+	 * sampled together later.
+	 *
+	 * What we need to do here is to mark this node to be skipped in any
+	 * later call.
+	 */
+	if (sub_views.size() == 1 && view->length() == 1) {
 	    delete view;
 	    delete sub_views.back();
 	    return 0;
 	}
 	
 	unsigned int Nch = nchain(view);
-	vector<MutableSampleMethod*> methods(Nch, 0);
+	vector<GLMMethod*> methods(Nch, 0);
 	
 	vector<SingletonGraphView const*> const_sub_views(sub_views.size());
 	copy(sub_views.begin(), sub_views.end(), const_sub_views.begin());
@@ -402,7 +419,6 @@ namespace glm {
 	    methods[ch] = newMethod(view, const_sub_views, ch, gibbs);
 	}
 
-	//FIXME: Append "gibbs" to name if true
 	string nm = _name;
 	if (gibbs) nm.append("-Gibbs");
 	return new GLMSampler(view, sub_views, methods, nm);
@@ -417,13 +433,15 @@ namespace glm {
     GLMFactory::makeSamplers(list<StochasticNode*> const &nodes, 
 			     Graph const &graph) const
     {
-	if (Sampler *s = makeSampler(nodes, graph, false)) {
-	    return vector<Sampler*>(1, s);
+	vector<Sampler*> ans;
+	if (GLMSampler *s = makeSampler(nodes, graph, false)) {
+	    ans.push_back(s);
+	    makeRESamplers(nodes, s, graph, ans);
 	}
-	if (Sampler *s = makeSampler(nodes, graph, true)) {
-	    return vector<Sampler*>(1, s);
+	else if (GLMSampler *s = makeSampler(nodes, graph, true)) {
+	    ans.push_back(s);
 	}
-	return vector<Sampler*>();
+	return ans;
     }
 
     bool GLMFactory::fixedDesign() const
@@ -435,6 +453,36 @@ namespace glm {
     {
 	return false;
     }
-    
+
+    void GLMFactory::makeRESamplers(list<StochasticNode*> const &free_nodes,
+				    GLMSampler const *s, Graph const &graph,
+				    vector<Sampler*> &samplers) const
+    {
+	REGammaFactory2 gfac;
+	REScaledGammaFactory2 sgfac;
+	REScaledWishartFactory2 swfac;
+
+	set<StochasticNode*> used_nodes;
+	used_nodes.insert(s->nodes().begin(), s->nodes().end());
+
+	while (Sampler *resampler = gfac.makeSampler(free_nodes, used_nodes,
+						     s, graph))
+	{
+	    samplers.push_back(resampler);
+	}
+	while (Sampler *resampler = sgfac.makeSampler(free_nodes, used_nodes,
+						      s, graph))
+	{
+	    samplers.push_back(resampler);
+	}
+
+	while (Sampler *resampler = swfac.makeSampler(free_nodes, used_nodes,
+						      s, graph))
+	{
+	    samplers.push_back(resampler);
+	}
+
+    }
+
 }}
 

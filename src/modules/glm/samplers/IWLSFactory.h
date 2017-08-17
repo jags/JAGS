@@ -28,7 +28,7 @@ namespace glm {
 	 */
 	GLMMethod *newMethod(GraphView const *view, 
 			     std::vector<SingletonGraphView const *> const &sub_views,
-			     unsigned int chain) const;
+			     unsigned int chain, bool gibbs) const;
 	/**
 	 * Returns false if any parents of the candidate node are
 	 * unobserved.  The IWLS method relies on an asymptotic

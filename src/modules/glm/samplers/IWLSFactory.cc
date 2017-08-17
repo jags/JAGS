@@ -27,7 +27,7 @@ namespace glm {
     GLMMethod *
     IWLSFactory::newMethod(GraphView const *view,
 			   vector<SingletonGraphView const *> const &sub_views,
-			   unsigned int chain) const
+			   unsigned int chain, bool gibbs) const
     {
         bool linear = true;
         vector<Outcome*> outcomes;

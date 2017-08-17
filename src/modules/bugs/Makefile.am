@@ -22,6 +22,7 @@ endif
 
 ### Test library 
 
+if CANCHECK
 check_LTLIBRARIES = libbugstest.la
 libbugstest_la_SOURCES = testbugs.cc testbugs.h
 libbugstest_la_CPPFLAGS = -I$(top_srcdir)/src/include
@@ -42,4 +43,6 @@ if WINDOWS
 libbugstest_la_LDFLAGS += -no-undefined
 else
 libbugstest_la_LIBADD += @FLIBS@
+endif
+
 endif

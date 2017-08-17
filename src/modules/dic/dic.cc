@@ -3,6 +3,7 @@
 #include "DevianceMonitorFactory.h"
 #include "PDMonitorFactory.h"
 #include "PDTraceFactory.h"
+#include "WAICMonitorFactory.h"
 
 using std::vector;
 
@@ -22,6 +23,7 @@ namespace dic {
 	insert(new DevianceMonitorFactory);
 	insert(new PDMonitorFactory);
 	insert(new PDTraceFactory);
+	insert(new WAICMonitorFactory);
     }
     
     DICModule::~DICModule() {

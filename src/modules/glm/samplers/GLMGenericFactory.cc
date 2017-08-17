@@ -7,9 +7,13 @@
 #include "AuxMixPoisson.h"
 #include "AuxMixBinomial.h"
 #include "NormalLinear.h"
+#include "LogisticLinear.h"
 //#include "BinaryLogit.h"
 #include "BinaryProbit.h"
 #include "PolyaGamma.h"
+#include "OrderedLogit.h"
+#include "OrderedProbit.h"
+#include "MNormalLinear.h"
 
 #include "GLMBlock.h"
 #include "GLMGibbs.h"
@@ -32,11 +36,15 @@ namespace glm {
     bool GLMGenericFactory::checkOutcome(StochasticNode const *snode) const
     {
 	return NormalLinear::canRepresent(snode) ||
+	    LogisticLinear::canRepresent(snode) || 
 	    //BinaryLogit::canRepresent(snode) ||
 	    PolyaGamma::canRepresent(snode) ||
 	    BinaryProbit::canRepresent(snode) ||
 	    AuxMixPoisson::canRepresent(snode) ||
-	    AuxMixBinomial::canRepresent(snode);
+	    AuxMixBinomial::canRepresent(snode) ||
+	    OrderedLogit::canRepresent(snode) ||
+	    OrderedProbit::canRepresent(snode) ||
+	    MNormalLinear::canRepresent(snode);
     }
     
     GLMMethod *
@@ -54,6 +62,9 @@ namespace glm {
 	    if (NormalLinear::canRepresent(*p)) {
 		outcome = new NormalLinear(*p, chain);
 	    }
+	    else if (LogisticLinear::canRepresent(*p)) {
+		outcome = new LogisticLinear(*p, chain);
+	    }
 	    else if (PolyaGamma::canRepresent(*p)) {
 		outcome = new PolyaGamma(*p, chain);
 	    }
@@ -65,6 +76,15 @@ namespace glm {
 	    }
 	    else if (AuxMixPoisson::canRepresent(*p)) {
 		outcome = new AuxMixPoisson(*p, chain);
+	    }
+	    else if (OrderedLogit::canRepresent(*p)) {
+		outcome = new OrderedLogit(*p, chain);
+	    }
+	    else if (OrderedProbit::canRepresent(*p)) {
+		outcome = new OrderedProbit(*p, chain);
+	    }
+	    else if (MNormalLinear::canRepresent(*p)) {
+		outcome = new MNormalLinear(*p, chain);
 	    }
 	    else {
 		throwLogicError("Invalid outcome in GLMGenericFactory");

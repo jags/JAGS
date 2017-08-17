@@ -10,7 +10,7 @@ namespace bugs {
  * @short First order random walk
  *
  * <pre>
- * p[] ~ ddirch(tau, x[])
+ * y[] ~ drw1(tau, x[])
  * </pre>
  */
 class DRW1 : public VectorDist {

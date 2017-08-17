@@ -20,7 +20,7 @@
 
    There are limited circumstances under which we can calculate the
    possible values of the index node. Currently, this is restricted to
-   the case where all the direct Stochastic ancestors of Y are discrete
+   the case where all the Stochastic parents of Y are discrete
    and univariate. In this case, the function getMixtureNode1 is used
    to create an efficient Mixture Node. If this fails, we fall back on
    the default getMixtureNode2 function.
@@ -45,6 +45,7 @@
 #include <climits>
 #include <algorithm>
 #include <list>
+#include <map>
 
 using std::vector;
 using std::pair;
@@ -58,6 +59,32 @@ using std::reverse;
 using std::list;
 
 namespace jags {
+
+    //Saves the values of the nodes in chain 0 to the values vector
+    //(presumed empty when the function is called)
+    template<class T>
+    void save(vector<T*> const &nodes, vector<vector<double> > &values)
+    {
+	for (typename vector<T*>::const_iterator p = nodes.begin();
+	     p != nodes.end(); ++p)
+	{
+	    double const *pv = (*p)->value(0);
+	    unsigned int n = (*p)->length();
+	    vector<double> v(n);
+	    copy(pv, pv + n, v.begin());
+	    values.push_back(v);
+	}
+    }
+
+    //Restores saved values to the nodes in chain 0
+    template<class T>
+    void restore(vector<T*> const &nodes, vector<vector<double> > const &values)
+    {
+	for (unsigned int j = 0; j < nodes.size(); ++j) {
+	    vector<double> const &pv = values[j];
+	    nodes[j]->setValue(&pv[0], pv.size(), 0);
+	}
+    }
 
 //Structure to hold subset indices
 struct SSI {
@@ -105,95 +132,93 @@ static void getSubsetRanges(vector<pair<vector<int>, Range> > &subsets,
     }
 }
 
-//  Returns true if node, or one of its deterministic descendants, is
-//  in the set target_nodes
+/*  Recursive function that returns true if node, or one of its
+    deterministic descendants, is in target_set */
 static bool hasDescendant(DeterministicNode *node, 
-			  set<Node const*> const &target_nodes,
+			  set<Node const*> const &target_set,
 			  vector<DeterministicNode*> &dnodes,
-			  set<DeterministicNode*> &known_dnodes)
+			  map<DeterministicNode*, bool> &known_dnodes)
 {
-    if (known_dnodes.count(node))
-	return true;
-
-    if (target_nodes.count(node)) {
-	known_dnodes.insert(node);
-	dnodes.push_back(node);
-	return true;
+    //Skip previously visited nodes
+    map<DeterministicNode*,bool>::iterator i = known_dnodes.find(node);
+    if (i != known_dnodes.end()) {
+	return i->second;
     }
-    
-    bool ans = false;
+
+    //The current node might be in the target set.
+    bool ans = target_set.count(node);
+
+    //Search all deterministic descendants. Even if node is in
+    //target_set we still need to visit the descendants to ensure that
+    //nodes are pushed onto the vector dnodes *after* their deterministic
+    //descendants (i.e. in reverse topological order).
     list<DeterministicNode*> const *dc = node->deterministicChildren();
     for(list<DeterministicNode*>::const_iterator p = dc->begin();
 	p != dc->end(); ++p)
     {
-	if (hasDescendant(*p, target_nodes, dnodes, known_dnodes)) {
+	if (hasDescendant(*p, target_set, dnodes, known_dnodes)) {
 	    ans = true;
 	}
     }
 
+    //At this point we have visited all deterministic descendants and can
+    //classify the current node.
+    known_dnodes[node] = ans;
     if (ans) {
-	known_dnodes.insert(node);
 	dnodes.push_back(node);
     }
     return ans;
 }
 
-//  Find stochastic parents of given set of nodes within the model,
-//  and their intermediate deterministic nodes in forward-sampling order
-//  We are looking for discrete, univariate parents.
-static bool findStochasticIndices(vector<Node const *> const &tgt_nodes, 
+
+/* hasDescendant for stochastic nodes */
+static bool hasDescendant(StochasticNode *node, 
+			  set<Node const*> const &target_set,
+			  vector<DeterministicNode*> &dnodes,
+			  map<DeterministicNode*, bool> &known_dnodes)
+{
+    //This is a stripped-down version of hasDescendant for deterministic
+    //nodes. We do not keep track of known stochastic nodes
+    bool ans = target_set.count(node);
+
+    list<DeterministicNode*> const *dc = node->deterministicChildren();
+    for(list<DeterministicNode*>::const_iterator p = dc->begin();
+	p != dc->end(); ++p)
+    {
+	if (hasDescendant(*p, target_set, dnodes, known_dnodes)) {
+	    ans = true;
+	}
+    }
+
+    return ans;
+}
+
+/*  Find stochastic parents of given set of nodes within the model,
+    and their intermediate deterministic descendants in topological
+    order */
+static void findStochasticParents(vector<Node const *> const &tgt_nodes, 
 				  Model const &model,
 				  vector<StochasticNode *> &stoch_parents,
 				  vector<DeterministicNode *> &dtrm_parents)
 {
+    //Copy input vector tgt_nodes to a set
     set<Node const *> tgt_set;
     for (unsigned int i = 0; i < tgt_nodes.size(); ++i) {
 	tgt_set.insert(tgt_nodes[i]);
     }
-    
-    set<DeterministicNode*> known_dnodes;
+
+    //Set up auxliary variables required for hasDescendant and call
+    map<DeterministicNode*, bool> known_dnodes;
     vector<StochasticNode*> const &snodes = model.stochasticNodes();
     for (unsigned int i = 0; i < snodes.size(); ++i) {
-
-	if (tgt_set.count(snodes[i])) {
+	if (hasDescendant(snodes[i], tgt_set, dtrm_parents, known_dnodes)) {
 	    stoch_parents.push_back(snodes[i]);
-	}
-	else {
-	    if (snodes[i]->length() != 1 || !snodes[i]->isDiscreteValued() ||
-		!isSupportFixed(snodes[i]))
-	    {
-		//We are only interested if all the stochastic parents
-		//are discrete, univariate, unbounded.
-		return false;
-	    }
-
-	    bool ans = false;
-	    list<DeterministicNode*> const *dc = 
-		snodes[i]->deterministicChildren();
-	    for(list<DeterministicNode*>::const_iterator p = dc->begin();
-		p != dc->end(); ++p)
-	    {
-		if (hasDescendant(*p, tgt_set, dtrm_parents, known_dnodes)) {
-		    ans = true;
-		}
-	    }
-	    if (ans) {
-		stoch_parents.push_back(snodes[i]);
-		if (stoch_parents.size() > 10) {
-		    //This algorithm grinds to a halt with too many
-		    //stochastic parents. So bail out after 10
-		    return 0;
-		}
-	    }
 	}
     }
     
-    /* 
-       Deterministic nodes have been pushed back onto the vector 
-       dtrm_parents in reverse sampling order.
-    */
+    // Nodes are pushed onto dtrm_parents in reverse topological order.
+    // Reverse the vector to get them in topological (forward sampling) order
     reverse(dtrm_parents.begin(), dtrm_parents.end());
-    return true;
 }
 
     /*
@@ -247,13 +272,24 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 
     vector<StochasticNode *> sparents;
     vector<DeterministicNode *> dparents;
-    if (!findStochasticIndices(indices, compiler->model(), sparents, dparents))
-	return 0;
+    findStochasticParents(indices, compiler->model(), sparents, dparents);
 
-    unsigned int nparents = sparents.size();  
+    unsigned int nparents = sparents.size();
+    if (nparents > 10) {
+	//This algorithm grinds to a halt with too many stochastic
+	//parents. So bail out after 10
+	return 0;
+    }
     vector<int> lower(nparents), upper(nparents);
     for (unsigned int i = 0; i < nparents; ++i) {
 	StochasticNode const *snode = sparents[i];
+
+	if (snode->length() != 1 || !snode->isDiscreteValued() ||
+	    !isSupportFixed(snode))
+	{
+	    //Must have discrete, scalar parents with fixed support
+	    return 0;
+	}
 	
 	// Get lower and upper limits of support
 	double l = JAGS_NEGINF, u = JAGS_POSINF;
@@ -268,18 +304,13 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	upper[i] = static_cast<int>(u);
     }
 
-    //Store current value of all stochastic parents
-    vector<vector<double> > stored_parent_values;
-    for (unsigned int j = 0; j < sparents.size(); ++j) {
-	double const *pv = sparents[j]->value(0);
-	vector<double> value(sparents[j]->length());
-	copy(pv, pv + sparents[j]->length(), value.begin());
-	stored_parent_values.push_back(value);
-    }
-    
+    //Store current value of all stochastic parents and deterministic nodes
+    vector<vector<double> > stored_parent_values, stored_dtrm_values;
+    save(sparents, stored_parent_values);
+    save(dparents, stored_dtrm_values);
+
     // Create a set containing all possible values that the stochastic
     // indices can take
-
     set<vector<int> > index_values;
     vector<int>  this_index(indices.size(),1);
     SimpleRange stoch_node_range(lower, upper);
@@ -302,15 +333,11 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	index_values.insert(this_index);
     }
 
-    //Restore value of all stochastic parents
-    vector<vector<double> > parent_values;
-    for (unsigned int j = 0; j < sparents.size(); ++j) {
-	vector<double> const &pv = stored_parent_values[j];
-	sparents[j]->setValue(&pv[0], pv.size(), 0);
-    }
-
+    //Restore value of all stochastic parents and deterministic nodes
+    restore(sparents, stored_parent_values);
+    restore(dparents, stored_dtrm_values);
+    
     // Now set up the possible subsets defined by the stochastic indices
-
     vector<int> variable_offset;
     vector<vector<int> > scope(ndim);
     for (unsigned int j = 0; j < ndim; ++j) {
@@ -341,11 +368,13 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     for (unsigned int i = 0; i < ranges.size(); ++i) {
 	Node *subset_node = array->getSubset(ranges[i].second, 
 					     compiler->model());
-	if (!subset_node)
+	if (!subset_node) {
 	    return 0;
+	}
 	subsets[ranges[i].first] = subset_node;
-	if (subset_node != subset_node0)
+	if (subset_node != subset_node0) {
 	    trivial = false;
+	}
     }
 
     if (trivial) {
@@ -364,21 +393,18 @@ getMixtureNode2(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     vector<pair<vector<int>, Range> > ranges;  
     getSubsetRanges(ranges, limits, array->range());
 
-    map<vector<int>, Node const *> subsets;
-    bool resolved = true;
+    map<vector<int>, Node const *> mixmap;
     for (unsigned int i = 0; i < ranges.size(); ++i) {
 	Node *subset_node =
 	    array->getSubset(ranges[i].second, compiler->model());
 	if (subset_node) {
-	    subsets[ranges[i].first] = subset_node;
+	    mixmap[ranges[i].first] = subset_node;
 	}
 	else {
-	    resolved = false;
+	    return 0;
 	}
 
     }
-    
-    if (!resolved) return 0;
 
     vector<Node const *> indices;
     for (unsigned int i = 0; i < limits.size(); ++i) {
@@ -386,8 +412,8 @@ getMixtureNode2(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	    indices.push_back(limits[i].node);
 	}
     }
-
-    return compiler->mixtureFactory2().getMixtureNode(indices, subsets, 
+    
+    return compiler->mixtureFactory2().getMixtureNode(indices, mixmap, 
 						      compiler->model());
 }
 

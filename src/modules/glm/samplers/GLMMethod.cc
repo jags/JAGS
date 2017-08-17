@@ -1,5 +1,4 @@
 #include <config.h>
-#include <rng/RNG.h>
 
 #include <set>
 #include <vector>
@@ -18,6 +17,8 @@
 #include <distribution/Distribution.h>
 #include <rng/TruncatedNormal.h>
 #include <module/ModuleError.h>
+#include <util/logical.h>
+#include <rng/RNG.h>
 
 using std::string;
 using std::vector;
@@ -30,19 +31,18 @@ extern cholmod_common *glm_wk;
 namespace jags {
 
 static void getIndices(set<StochasticNode *> const &schildren,
-		       vector<StochasticNode *> const &rows,
+		       vector<StochasticNode *> const &allchildren,
+		       vector<unsigned int > const &allrows,
 		       vector<int> &indices)
 {
     indices.clear();
     
-    for (unsigned int i = 0; i < rows.size(); ++i) {
-	if (schildren.count(rows[i])) {
-	    indices.push_back(i);
+    for (unsigned int i = 0; i < allchildren.size(); ++i) {
+	if (schildren.count(allchildren[i])) {
+	    for (unsigned int j = allrows[i]; j < allrows[i+1]; ++j) {
+		indices.push_back(j);
+	    }
 	}
-    }
-    
-    if (indices.size() != schildren.size()) {
-	throwLogicError("Size mismatch in getIndices");
     }
 }
 
@@ -50,22 +50,36 @@ namespace glm {
 
     void GLMMethod::calDesign() const
     {
+	if (allTrue(_fixed)) return; //Move along, nothing to see here
+	
 	vector<StochasticNode *> const &snodes = _view->nodes();
-	vector<StochasticNode *> const &schildren = 
-	    _view->stochasticChildren();
 
 	int *Xi = static_cast<int*>(_x->i);
 	int *Xp = static_cast<int*>(_x->p);
 	double *Xx = static_cast<double*>(_x->x);
 	
-	unsigned int nrow = schildren.size();
+	unsigned int nrow = _x->nrow;
 	unsigned int ncol = _view->length();
-	if (nrow != _x->nrow || ncol != _x->ncol) {
+	if (ncol != _x->ncol) {
 	    throwLogicError("Dimension mismatch in GLMMethod::calDesign");
 	}
 
 	int c = 0; //column counter
-	double *xnew = new double[_length_max];
+	vector<double> xnew(_length_max);
+
+	//Need to set up these vectors so we can map back from a row of
+	//the design matrix to the corresponding outcome. Note that this
+	//is only need when we have multivariate outcomes; with only
+	//scalar outcomes the mapping is trivial
+	vector<Outcome*> outcome_ptr(nrow);
+	vector<unsigned int> outcome_idx(nrow);
+	unsigned int r = 0; //row counter
+	for (unsigned int i = 0; i < _outcomes.size(); ++i) {
+	    for (unsigned int j = 0; j < _outcomes[i]->length(); ++j, ++r) {
+		outcome_ptr[r] = _outcomes[i];
+		outcome_idx[r] = j;
+	    }
+	}
 	
 	for (unsigned int i = 0; i < snodes.size(); ++i) {
 
@@ -75,29 +89,28 @@ namespace glm {
 
 		for (unsigned int j = 0; j < length; ++j) {
 		    for (int r = Xp[c+j]; r < Xp[c+j+1]; ++r) {
-			Xx[r] = -_outcomes[Xi[r]]->mean();
+			unsigned int row = Xi[r];
+			Xx[r] = - outcome_ptr[row]->vmean()[outcome_idx[row]];
 		    }
 		}
 		
 		double const *xold = snodes[i]->value(_chain);	    
-		copy(xold, xold + length, xnew);
+		copy(xold, xold + length, xnew.begin());
 		
 		for (unsigned int j = 0; j < length; ++j) {
-		    
 		    xnew[j] += 1;
-		    _sub_views[i]->setValue(xnew, length, _chain);
+		    _sub_views[i]->setValue(&xnew[0], length, _chain);
 		    for (int r = Xp[c+j]; r < Xp[c+j+1]; ++r) {
-			Xx[r] += _outcomes[Xi[r]]->mean();
+			unsigned int row = Xi[r];
+			Xx[r] += outcome_ptr[row]->vmean()[outcome_idx[row]];
 		    }
 		    xnew[j] -= 1;
 		}
-		_sub_views[i]->setValue(xnew, length, _chain);
+		_sub_views[i]->setValue(&xnew[0], length, _chain);
 	    }
 	    
 	    c += length;
 	}
-
-	delete [] xnew;
     }
     
     GLMMethod::GLMMethod(GraphView const *view, 
@@ -114,9 +127,14 @@ namespace glm {
 	vector<StochasticNode *> const &schildren = 
 	    view->stochasticChildren();
 
-	int nrow = schildren.size();
+	vector<unsigned int> rows(schildren.size() + 1);
+	rows[0] = 0;
+	for (unsigned int i = 0; i < schildren.size(); ++i) {
+	    rows[i+1] = rows[i] + schildren[i]->length();
+	}
 	int ncol = view->length();
-
+	int nrow = rows[schildren.size()];
+	
 	vector<int> Xp(ncol + 1);
 	vector<int> Xi;
     
@@ -129,7 +147,7 @@ namespace glm {
 	    children_p.insert(sub_views[p]->stochasticChildren().begin(),
 			      sub_views[p]->stochasticChildren().end());
 	    vector<int> indices;
-	    getIndices(children_p, schildren, indices);
+	    getIndices(children_p, schildren, rows, indices);
 
 	    unsigned int length = _sub_views[p]->length();
 	    for (unsigned int i = 0; i < length; ++i, ++c) {
@@ -222,6 +240,7 @@ namespace glm {
 	// Likelihood contribution
     
 	cholmod_sparse *t_x = cholmod_transpose(_x, 0, glm_wk);
+	cholmod_sort(t_x, glm_wk);
 	cholmod_sparse *Alik = cholmod_aat(t_x, 0, 0, 0, glm_wk);
 	cholmod_sparse *A = cholmod_add(Aprior, Alik, 0, 0, 0, 0, glm_wk);
 
@@ -297,23 +316,98 @@ namespace glm {
 	//   - mu is the mean of the stochastic children
 	//   - Y is the value of the stochastic children
 
+	/* FIXME: We can also transpose _x into a pre-defined sparse
+	   matrix. Try this with the lsat example to see what speed-up
+	   it gives.
+	*/
 	cholmod_sparse *t_x = cholmod_transpose(_x, 1, glm_wk);
+	cholmod_sort(t_x, glm_wk); //Needed for multivariate outcomes
+	
 	int *Tp = static_cast<int*>(t_x->p);
 	int *Ti = static_cast<int*>(t_x->i);
 	double *Tx = static_cast<double*>(t_x->x);
 
+	/*
 	//FIXME: reusing previously defined c,r here
 	for (c = 0; c < t_x->ncol; ++c) {
 	    double tau = _outcomes[c]->precision();
 	    double delta = tau * (_outcomes[c]->value() - _outcomes[c]->mean());
-	    double sigma = sqrt(tau);
+	    //double sigma = sqrt(tau);
 	    for (r = Tp[c]; r < Tp[c+1]; ++r) {
 		b[Ti[r]] += Tx[r] * delta;
-		Tx[r] *= sigma;
+		//Tx[r] *= sigma;
+		Tx[r] *= tau;
 	    }
 	}
+	*/
+	
+	//FIXME: reusing previously defined c,r here
+	c = 0;
+	for (unsigned int i = 0; i < _outcomes.size(); ++i) {
+	    unsigned int m = _outcomes[i]->length();
+	    if (m == 1) {
+		//Scalar outcome
+		double tau = _outcomes[i]->precision();
+		double delta = tau * (_outcomes[i]->value() -
+				      _outcomes[i]->mean());
+		for (r = Tp[c]; r < Tp[c+1]; ++r) {
+		    b[Ti[r]] += Tx[r] * delta;
+		    Tx[r] *= tau;
+		}
+	    }
+	    else {
+		//Multivariate outcome
+		double const *tau = _outcomes[i]->vprecision();
+		double const *Y = _outcomes[i]->vvalue();
+		double const *mu = _outcomes[i]->vmean();
 
-	cholmod_sparse *Alik = cholmod_aat(t_x, 0, 0, 1, glm_wk);
+		vector<double> delta(m,0);
+		for (unsigned int j = 0; j < m; ++j) {
+		    for (unsigned int k = 0; k < m; ++k) {
+			delta[j] += tau[m*j+k] * (Y[k] - mu[k]);
+		    }
+		}
+
+		/* Sanity checks */
+		int nzrow = Tp[c+1] - Tp[c];
+		for (r = Tp[c]; r < Tp[c+1]; ++r) {
+		    int row = Ti[r];
+		    for (unsigned int j = 0; j < m; ++j) {
+			unsigned int col = c + j;
+			if (Tp[col+1] - Tp[col] != nzrow) {
+			    string ms("non-zero pattern mismatch in GLMMethod");
+			    throwLogicError(ms);
+			}
+			if (Ti[r+j*nzrow] != row) {
+			    string ms("row order mismatch in GLMMethod");
+			    throwLogicError(ms);
+			}
+		    }
+		}
+
+		/* We assume that all columns of t_x corresponding to
+		   the same outcome have the same non-zero pattern
+		   and the columns are sorted.
+		*/
+		vector<double> TxTau(m); // t_x %*% tau
+		for (r = Tp[c]; r < Tp[c+1]; ++r) {
+		    for (unsigned int j = 0; j < m; ++j) {
+			b[Ti[r]] += Tx[r + j*nzrow] * delta[j];
+			TxTau[j] = 0.0;
+			for (unsigned int k = 0; k < m; ++k) {
+			    TxTau[j] += Tx[r + k*nzrow] * tau[m*j+k];
+			}
+		    }
+		    for (unsigned int j = 0; j < m; ++j) {
+			Tx[r + j*nzrow] = TxTau[j];
+		    }
+		}
+	    }
+	    c += m;
+	}
+	
+	cholmod_sparse *Alik = cholmod_ssmult(t_x, _x, CHOLMOD_REAL, 1, 0,
+					      glm_wk);
 	cholmod_free_sparse(&t_x, glm_wk);
 	double one[2] = {1, 0};
 	A = cholmod_add(Aprior, Alik, one, one, 1, 0, glm_wk);

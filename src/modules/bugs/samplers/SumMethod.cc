@@ -13,6 +13,8 @@
 #include <numeric>
 #include <cfloat>
 #include <stdexcept>
+#include <set>
+#include <algorithm>
 
 using std::vector;
 using std::accumulate;
@@ -22,6 +24,8 @@ using std::ceil;
 using std::logic_error;
 using std::floor;
 using std::fabs;
+using std::list;
+using std::find;
 
 namespace jags {
     
@@ -40,6 +44,29 @@ namespace jags {
 	    }
 	    return y;
 	}
+
+	/*
+	//Test to see of two sets intersect
+	template <typename T, typename U>
+	bool intersects(set<T*> const &st, set<U*> const &su)
+        {
+	    typename set<T*>::const_iterator t = st.begin();
+	    typename set<U*>::const_iterator u = su.begin();
+
+	    while (t != st.end() && u != su.end()) {
+		if (*t < *u) {
+		    if (t != st.end()) ++t;
+		}
+		else if (*t > *u) {
+		    if (u != su.end()) ++u;
+		}
+		else {
+		    return true;
+		}
+	    }
+	    return false;
+	}
+	*/
 	    
 	StochasticNode *
 	SumMethod::isCandidate(StochasticNode *snode, Graph const &graph)
@@ -97,7 +124,7 @@ namespace jags {
 				  Graph const &graph)
 	{
 	    //Are individual nodes candidates?
-	    Node *sumchild = isCandidate(snodes[0], graph);
+	    StochasticNode *sumchild = isCandidate(snodes[0], graph);
 	    if (sumchild == 0) return false;
 	    for (unsigned int i = 1; i < snodes.size(); ++i) {
 		if (isCandidate(snodes[i], graph) != sumchild) return false;
@@ -110,34 +137,47 @@ namespace jags {
 	    }
 
 	    //Together are the nodes additive with a fixed intercept?
-	    GraphView gv(snodes, graph);
-	    if (gv.stochasticChildren().size() == 1) {
-		//sumchild is the only stochastic child
-		if (!checkAdditive(snodes, graph, true)) return false;
+
+	    GraphView gv(snodes, graph, true);
+	    
+	    /* Only deterministic nodes with a path to sumnode need to
+	       be additive. Constract a local graph that strips out
+	       the rest.
+	    */
+	    Graph lgraph; //local graph
+	    vector<DeterministicNode*> const &dc = gv.deterministicChildren();
+	    for (vector<DeterministicNode*>::const_reverse_iterator p =
+		     dc.rbegin(); p != dc.rend(); ++p)
+	    {
+		list<StochasticNode*> const *psc = (*p)->stochasticChildren();
+		if (find(psc->begin(), psc->end(), sumchild) != psc->end()) {
+		    lgraph.insert(*p);
+		}
+		else {
+		    list<DeterministicNode*> const *pdc =
+			(*p)->deterministicChildren();
+		    for(list<DeterministicNode*>::const_iterator q =
+			    pdc->begin(); q != pdc->end(); ++q)
+		    {
+			if (lgraph.contains(*q)) {
+			    lgraph.insert(*p);
+			    break;
+			}
+		    }
+		}
 	    }
-	    else {
-		//Construct local graph lgraph excluding stochastic
-		//children that are not sumchild
-		Graph lgraph;
-		for (unsigned int i = 0; i < snodes.size(); ++i) {
-		    lgraph.insert(snodes[i]);
-		}
-		lgraph.insert(sumchild);
-		vector<DeterministicNode*> const &dchildren =
-		    gv.deterministicChildren();
-		for (unsigned int j = 0; j < dchildren.size(); ++j) {
-		    lgraph.insert(dchildren[j]);
-		}
-		if (!checkAdditive(snodes, lgraph, true)) return false;
+	    lgraph.insert(sumchild);
+	    for (unsigned int i = 0; i < snodes.size(); ++i) {
+		lgraph.insert(snodes[i]);
 	    }
 
-	    return true;
+	    return checkAdditive(snodes, lgraph, true);
 	}
 
 	SumMethod::SumMethod(GraphView const *gv, unsigned int chain)
 	    : MutableSampleMethod(), _gv(gv), _chain(chain),
 	      _sum(gv->stochasticChildren()[0]->value(chain)[0]),
-	      _discrete(gv->stochasticChildren()[0]->isDiscreteValued()),
+	      _discrete(gv->nodes()[0]->isDiscreteValued()),
 	      _x(gv->length()), _i(0), _j(0), _sumchild(0), _fast(false),
 	      _sumdiff(0), _iter(0), _width(2), _max(10), _adapt(true)
 	{
@@ -226,7 +266,11 @@ namespace jags {
 
 	    double lower = JAGS_NEGINF, upper = JAGS_POSINF;
 	    getLimits(&lower, &upper);
-
+	    if (lower == upper) {
+		// We can't move this pair, so skip them
+		return;
+	    }
+		    
 	    // Stepping out 
 
 	    // Randomly set number of steps in left and right directions,

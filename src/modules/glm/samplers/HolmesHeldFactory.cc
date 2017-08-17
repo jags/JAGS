@@ -1,14 +1,13 @@
 #include <config.h>
 
-#include "NormalLinear.h"
 #include "BinaryProbit.h"
 #include "BinaryLogit.h"
+#include "OrderedLogit.h"
+#include "OrderedProbit.h"
 
 #include "HolmesHeldFactory.h"
 #include "HolmesHeld.h"
 #include "HolmesHeldGibbs.h"
-#include "GLMBlock.h"
-#include "GLMGibbs.h"
 
 #include <module/ModuleError.h>
 #include <sampler/SingletonGraphView.h>
@@ -26,7 +25,8 @@ namespace glm {
     {
 	return (BinaryProbit::canRepresent(snode) ||
 		BinaryLogit::canRepresent(snode) ||
-		NormalLinear::canRepresent(snode));
+		OrderedLogit::canRepresent(snode) ||
+		OrderedProbit::canRepresent(snode));
     }
 
     
@@ -35,7 +35,6 @@ namespace glm {
 			     vector<SingletonGraphView const *> const &subviews,
 			     unsigned int chain, bool gibbs) const
     {
-	bool linear = true;
 	vector<Outcome*> outcomes;
 
 	vector<StochasticNode *>::const_iterator p;
@@ -43,39 +42,32 @@ namespace glm {
 	     p != view->stochasticChildren().end(); ++p)
 	{
 	    Outcome *outcome = 0;
-	    if (NormalLinear::canRepresent(*p)) {
-		outcome = new NormalLinear(*p, chain);
-	    }
-	    else if (BinaryProbit::canRepresent(*p)) {
+	    if (BinaryProbit::canRepresent(*p)) {
 		outcome = new BinaryProbit(*p, chain);
-		linear = false;
 	    }
 	    else if (BinaryLogit::canRepresent(*p)) {
 		outcome = new BinaryLogit(*p, chain);
-		linear = false;
 	    }
+	    else if (OrderedLogit::canRepresent(*p)) {
+		outcome = new OrderedLogit(*p, chain);
+	    }
+	    else if (OrderedProbit::canRepresent(*p)) {
+		outcome = new OrderedProbit(*p, chain);
+	    }
+
 	    else {
 		throwLogicError("Invalid outcome in HolmesHeldFactory");
 	    }
 	    outcomes.push_back(outcome);
 	}
 
-	if (linear) {
-	    if (gibbs) {
-		return new GLMGibbs(view, subviews, outcomes, chain);
-	    }
-	    else {
-		return new GLMBlock(view, subviews, outcomes, chain);
-	    }
+	if (gibbs) {
+	    return new HolmesHeldGibbs(view, subviews, outcomes, chain);
 	}
 	else {
-	    if (gibbs) {
-		return new HolmesHeldGibbs(view, subviews, outcomes, chain);
-	    }
-	    else {
-		return new HolmesHeld(view, subviews, outcomes, chain);
-	    }
+	    return new HolmesHeld(view, subviews, outcomes, chain);
 	}
+	
     }
 
 }}

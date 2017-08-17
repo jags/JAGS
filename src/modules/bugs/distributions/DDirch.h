@@ -11,9 +11,7 @@ namespace bugs {
  *
  * Zero shape parameters are allowed.  These represent structural
  * zeros: when x ~ ddirch(alpha) is forward sampled, x[i] = 0 when
- * alpha[i] = 0. To avoid trapping states in the model, structural
- * zeros are only allowed when the array of shape parameters is
- * fixed.
+ * alpha[i] = 0. 
  *
  * <pre>
  * p[] ~ ddirch(alpha[])

@@ -12,11 +12,13 @@
 #include <cfloat>
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 #include <JRmath.h>
 
 using std::vector;
 using std::log;
+using std::reverse;
 
 #define SCALE(par) (par[0])
 #define DF(par)    (*par[1])
@@ -60,9 +62,9 @@ double DWish::logDensity(double const *x, unsigned int length, PDFType type,
     return loglik/2;
 }
 
-void DWish::randomSample(double *x, int length,
+void DWish::randomSample(double *X, int length,
 			 double const *R, double k, int nrow,
-                         RNG *rng)
+			 RNG *rng)
 {
     /* 
        Generate random Wishart variable, using an algorithm proposed
@@ -70,39 +72,35 @@ void DWish::randomSample(double *x, int length,
     */
 
     if (length != nrow*nrow) {
-	throwLogicError("invalid length in DWish::randomSample");
+	jags::throwLogicError("invalid length in DWish::randomSample");
     }
 
     /* 
-       Get inverse of R. Venables' algorithm was implemented in
-       terms of the inverse of R, but we use a different parameterization
-       to preserve conjugacy.
+       Get Cholesky decomposition of the inverse of R. First we
+       factorize R (dpotrf) and then we invert the triangular factor
+       (dtrtri). At the end, C contains the upper triangular Cholesky
+       factor. NB We must reverse the elements of the matrix at start
+       and end of the calculations.
     */
-    double * C = new double[length];
-    if(!inverse_spd(C, R, nrow)) {
-	throwRuntimeError("Inverse failed in DWish::randomSample");
-    }
-    /* Get Choleskly decomposition of C */
+    vector<double> C(length);
+    copy(R, R + length, C.rbegin());
     int info = 0;
-    F77_DPOTRF("U", &nrow, C, &nrow, &info);
+    F77_DPOTRF("L", &nrow, &C[0], &nrow, &info);
     if (info != 0) {
-	throwRuntimeError("Failed to get Cholesky decomposition of R");
+	jags::throwRuntimeError("Failed to get Cholesky decomposition of R");
     }
+    F77_DTRTRI("L", "N", &nrow, &C[0], &nrow, &info);
+    if (info != 0) {
+	jags::throwRuntimeError("Failed to invert Cholesky decomposition of R");
+    }
+    reverse(C.begin(), C.end());
     
-    /* Set lower triangle of C to zero */
-    for (int j = 0; j < nrow; j++) {
-	double * C_j = &C[j*nrow]; //column j of matrix C
-	for (int i = j + 1; i < nrow; i++) {
-	    C_j[i] = 0;
-	}
-    }
-
     /* Generate square root of Wishart random variable:
        - diagonal elements are square root of Chi square
        - upper off-diagonal elements are normal
        - lower off-diagonal elements are zero
     */
-    double *Z = new double[length];
+    vector<double> Z(length);
     for (int j = 0; j < nrow; j++) {
 	double *Z_j = &Z[j*nrow]; //jth column of Z
 	for (int i = 0; i < j; i++) {
@@ -113,34 +111,22 @@ void DWish::randomSample(double *x, int length,
 	    Z_j[i] = 0;
 	}
     }
-  
-    /* Transform Z with Cholesky decomposition */
-    double *Ztrans = new double[length];
-    for (int i = 0; i < nrow; i++) {
-	for (int j = 0; j < nrow; j++) {
-	    double zz = 0;
-	    for (int l = 0; l < nrow; l++) {
-		zz += Z[nrow * l + i] * C[nrow * j + l];
-	    }
-	    Ztrans[nrow * j + i] = zz;
-	}
-    }
-    delete [] C;
-    delete [] Z;
 
-    /* Now put cross-product into x */
-    for (int i = 0; i < nrow; i++) {
-	double const *Ztrans_i = &Ztrans[nrow * i];
-	for (int j = 0; j <= i; j++) {
-	    double const *Ztrans_j = &Ztrans[nrow * j];
-	    double xx = 0;
-	    for (int l = 0; l < nrow; l++) {
-		xx += Ztrans_i[l] * Ztrans_j[l];
-	    }
-	    x[nrow * j + i] = x[nrow * i + j] = xx;
+    // Z = Z %*% C 
+    double one = 1;
+    F77_DTRMM("R", "U", "N", "N", &nrow, &nrow, &one, &C[0], &nrow, &Z[0],
+	      &nrow);
+
+    // X = t(Z) %*% Z
+    double zero = 0;
+    F77_DSYRK("U", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, X, &nrow);
+
+    // Copy lower triangle of X from upper triangle
+    for (int i = 0; i < nrow; ++i) {
+	for (int j = 0; j < i; ++j) {
+	    X[j * nrow + i] = X[i * nrow + j];
 	}
     }
-    delete [] Ztrans;
 }
 
 void DWish::randomSample(double *x, unsigned int length,

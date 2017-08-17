@@ -47,6 +47,8 @@ namespace jags {
     
     Node const * MixTab::getNode(vector<int> const &index) const
     {
+	//FIXME: This needs an API change. See src/lib/SimpleRange.cc
+	//if (!_range.contains(index)) return 0;
 	unsigned int offset = _range.leftOffset(index);
 	return _nodes[offset];
     }

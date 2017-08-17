@@ -39,43 +39,6 @@ namespace jags {
 	    return phi(b) + exp(2 * z) * phi(a);
 	}
 
-	static double rigauss(double mu, RNG *rng)
-	{
-	    // Samples from the inverse Gaussian distribution
-	    // IG(mu, 1) truncated to the interval (0, TRUNC)
-	    
-	    double X;
-	    if (mu > TRUNC) {
-		double alpha;
-		double z = 1/mu;
-		do {
-		    double E1, E2;
-		    do {
-			E1 = rng->exponential();
-			E2 = rng->exponential();
-		    } while (E1 * E1 > 2 * E2 / TRUNC);
-		    X = 1 + E1 * TRUNC;
-		    X = TRUNC / (X * X);
-		    alpha = exp(-z * z * X / 2);
-		}
-		while (rng->uniform() > alpha);
-	    }
-	    else {
-		do {
-		    double Y = rng->normal();
-		    Y *= Y;
-		    double muY = mu * Y;
-		    X = mu +
-			mu * mu * Y / 2 -
-			mu * sqrt(4 * muY + muY * muY) / 2;
-		    if (rng->uniform() > mu / (mu + X)) {
-			X = mu * mu / X;
-		    }
-		} while (X > TRUNC);
-	    }
-	    return X;
-	}
-
 	static double a(double n, double x)
 	{
 	    // Alternating series expansion of the Jacobi density
@@ -143,6 +106,7 @@ namespace jags {
 		}
 	    }
 	    throwLogicError("Failed to sample Polya-Gamma");
+	    return 0; //-Wall
 	} 
 
 	static double const & getSize(StochasticNode const *snode,
@@ -163,14 +127,14 @@ namespace jags {
 	
 	PolyaGamma::PolyaGamma(StochasticNode const *snode, unsigned int chain)
 	    : Outcome(snode, chain), _y(snode->value(chain)[0]),
-	      _N(getSize(snode, chain)), _tau(1)
+	      _n(getSize(snode, chain)), _tau(1)
 	{
 	    //fixme: sanity checks on snode
 	}
 	
 	double PolyaGamma::value() const 
 	{
-	    return (_y - _N/2)/_tau;
+	    return (_y - _n/2)/_tau;
 	}
 	
 	double PolyaGamma::precision() const 
@@ -180,7 +144,7 @@ namespace jags {
 	
 	void PolyaGamma::update(RNG *rng)
 	{
-	    unsigned int N = static_cast<unsigned int>(_N);
+	    unsigned int N = static_cast<unsigned int>(_n);
 
 	    _tau = 0.0;
 	    for (unsigned int i = 0; i < N; ++i) {
@@ -194,6 +158,25 @@ namespace jags {
 	    case GLM_BERNOULLI:
 		break;
 	    case GLM_BINOMIAL:
+		if (!snode->parents()[1]->isFixed() ||
+		    snode->parents()[1]->value(0)[0] > 19) {
+		    /* 
+		       PolyaGamma competes with AuxMixBinomial for
+		       representing binomial outcomes with logit
+		       link. PolyaGamma is more efficient for small N,
+		       but its complexity is O(N), so it is much
+		       slower for large N.
+
+		       Where is the cutoff? For N = 20, the number of
+		       mixture components used by AuxMixBinomial drops
+		       from 9 to 4 (See LGMix.cc), so this may be a
+		       good choice.
+
+		       FIXME: This means we only use PolyaGamma for
+		       small *fixed* N.
+		    */
+		    return false;
+		}
 		break;
 	    default:
 		return false;		

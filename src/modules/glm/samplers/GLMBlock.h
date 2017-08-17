@@ -16,20 +16,7 @@ namespace glm {
     class Outcome;
 
     /**
-     * @short Abstract class for sampling generalized linear models.
-     *
-     * GLMMethod provides a base class for sampling methods that work
-     * on generalized linear models (GLMs).  Most of the update
-     * machinery is provided by GLMMethod itself. 
-     *
-     * GLMMethod uses sparse matrix algebra provided by the 
-     * CHOLMOD library. In the context of a hierarchical model,
-     * mixed models appear identical to fixed-effect models except
-     * that mixed models have a design matrix that is sparse.  The use
-     * of CHOLMOD, along with auxiliary variable sampling,
-     * allows us to handle both fixed and random effects in a
-     * consistent way without needing to distinguish between them or
-     * relying on asymptotic approximations.
+     * @short Block sampler for generalized linear models.
      */
     class GLMBlock : public GLMMethod {
     public:
@@ -49,12 +36,6 @@ namespace glm {
 	 * 
 	 * @param chain Number of the chain (starting from 0) to which
 	 * the sampling method will be applied.
-	 *
-	 * @param link Boolean flag that is passed to the utility
-	 * function checkLinear when checking to see if we have a
-	 * valid GLM. If link is true then the last deterministic
-	 * descendents in view (i.e. those with no deterministic
-	 * descendants) may be link nodes.
 	 */
 	GLMBlock(GraphView const *view, 
 		 std::vector<SingletonGraphView const *> const &sub_views,

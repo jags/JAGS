@@ -10,8 +10,9 @@ namespace glm {
     /**
      * Enumerates distribution families for generalized linear models
      */
-    enum GLMFamily {GLM_NORMAL, GLM_BERNOULLI, GLM_BINOMIAL, GLM_POISSON, 
-		    GLM_UNKNOWN};
+    enum GLMFamily {GLM_NORMAL, GLM_BERNOULLI, GLM_BINOMIAL, GLM_POISSON,
+		    GLM_LOGISTIC, GLM_T, GLM_ORDLOGIT, GLM_ORDPROBIT,
+		    GLM_MNORMAL, GLM_UNKNOWN};
     
     /**
      * Enumerates link functions for generalized linear models

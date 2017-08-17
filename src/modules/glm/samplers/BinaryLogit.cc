@@ -36,7 +36,7 @@ namespace jags {
 namespace glm {
 
     BinaryLogit::BinaryLogit(StochasticNode const *snode, unsigned int chain)
-	: Outcome(snode, chain), _y(snode->value(chain)[0]), _z(0), _sigma2(1), _tau(1)
+	: Outcome(snode, chain), _y(snode->value(chain)[0]), _z(0), _tau(1), _sigma2(1)
     {
 	//fixme: sanity checks on snode
     }

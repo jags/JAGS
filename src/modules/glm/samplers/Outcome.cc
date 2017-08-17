@@ -10,16 +10,10 @@ namespace glm {
 
     static Node const *getLinearPredictor(StochasticNode const *snode)
     {
-	Node const *lp = 0;
-	
-	switch(getFamily(snode)) {
-	case GLM_NORMAL: case GLM_BERNOULLI: case GLM_BINOMIAL: case GLM_POISSON:
-	    lp = snode->parents()[0];
-	    break;
-	case GLM_UNKNOWN:
-	    throwLogicError("Invalid distribution in GLMOutcome");
-	    break;
+	if (getFamily(snode) == GLM_UNKNOWN) {
+	    throwLogicError("Invalid distribution in glm::Outcome");
 	}
+	Node const *lp = snode->parents()[0];
 	
 	LinkNode const *ln = dynamic_cast<LinkNode const*>(lp);
 	if (ln) {
@@ -30,7 +24,9 @@ namespace glm {
     }
 
     Outcome::Outcome(StochasticNode const *snode, unsigned int chain)
-	: _lp(getLinearPredictor(snode)->value(chain)[0])
+	: _lp(getLinearPredictor(snode)->value(chain)[0]),
+	  _length(snode->length()),
+	  _vmean(getLinearPredictor(snode)->value(chain))
     {
     }
 
@@ -65,6 +61,30 @@ namespace glm {
     {
 	return false;
     }
+
+    unsigned int Outcome::length() const
+    {
+	return _length;
+    }
+
+    
+    double const *Outcome::vmean() const
+    {
+	return _vmean;
+    }
+    
+    double const *Outcome::vprecision() const
+    {
+	//FIXME: Bit of a hack 
+	return 0;
+    }
+
+    double const *Outcome::vvalue() const
+    {
+	//FIXME: Bit of a hack 
+	return 0;
+    }
+
 }}
     
 

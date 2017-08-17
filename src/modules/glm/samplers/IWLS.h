@@ -24,7 +24,6 @@ namespace glm {
      * effects models.
      */
     class IWLS : public GLMBlock {
-	bool _init;
         double logPTransition(std::vector<double> const &xorig,
                               std::vector<double> const &x,
                               double *b, cholmod_sparse *A);

@@ -11,6 +11,8 @@ namespace jags {
 
 namespace glm {
 
+    class GLMSampler;
+    
     /**
      * @short Abstract factory for GLM samplers 
      * 
@@ -25,7 +27,7 @@ namespace glm {
 	std::string _name;
 	SingletonGraphView * makeView(StochasticNode *snode, 
 				      Graph const &graph, bool gibbs) const;
-	bool checkDescendants(SingletonGraphView const *view) const;
+	bool checkDescendants(GraphView const *view) const;
     public:
 	GLMFactory(std::string const &name);
 	virtual ~GLMFactory();
@@ -34,8 +36,8 @@ namespace glm {
 	 * or a NULL pointer. Sub-classes of GLMFactory only have to
 	 * implement the abstract member function newMethod.
 	 */
-	Sampler * makeSampler(std::list<StochasticNode*> const &free_nodes, 
-			      Graph const &graph, bool gibbs) const;
+	GLMSampler * makeSampler(std::list<StochasticNode*> const &free_nodes, 
+				 Graph const &graph, bool gibbs) const;
 	/**
 	 * Wraps GLMFactory#makeSampler and returns a single
 	 * newly-allocated sampler in a vector.
@@ -105,6 +107,15 @@ namespace glm {
 	 * function apply for auxiliary variables.
 	 */
 	virtual bool fixedDesign() const;
+	/**
+	 * Makes random effects variance samplers.
+	 *
+	 * Samplers for the variances of random effects in a GLM may
+	 * exploit the same data augmentation used by the GLMSampler.
+	 */
+	void makeRESamplers(std::list<StochasticNode*> const &free_nodes,
+			    GLMSampler const *s, Graph const &graph,
+			    std::vector<Sampler*> &samplers) const;
     };
 
 }}

@@ -90,6 +90,12 @@ installed, then you may also test the rjags package with
 make Rcheck
 \end{verbatim}
 
+On Windows, you should ensure that both R and JAGS are on the PATH and
+set the environment variable \texttt{JAGS} to be \texttt{jags.bat}.
+You may get an error message that the \texttt{coda} package is not
+found. In this case, set the environment variable \verb+R_LIBS+ to
+the library that contains coda.
+
 \chapter{Directory structure}
 
 The \JAGS\ source is divided into three main directories:

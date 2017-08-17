@@ -1,5 +1,5 @@
 /**
- * Test code in base module
+ * Test code in bugs module
  */
 
 #include <cppunit/CompilerOutputter.h>

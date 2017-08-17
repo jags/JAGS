@@ -4,6 +4,16 @@
 #include "samplers/HolmesHeldFactory.h"
 //#include "samplers/ConjugateFFactory.h"
 #include "samplers/GLMGenericFactory.h"
+#include "samplers/ScaledGammaFactory.h"
+#include "samplers/ScaledWishartFactory.h"
+#include "samplers/REScaledGammaFactory.h"
+#include "samplers/REScaledWishartFactory.h"
+#include "samplers/REGammaFactory.h"
+
+#include "distributions/DScaledGamma.h"
+#include "distributions/DScaledWishart.h"
+#include "distributions/DOrderedLogit.h"
+#include "distributions/DOrderedProbit.h"
 
 #include <cholmod.h>
 
@@ -43,10 +53,23 @@ namespace glm {
 	glm_wk->postorder = 0 ;
 */
 
+	insert(new ScaledGammaFactory);
+	insert(new ScaledWishartFactory);
+
 	//insert(new IWLSFactory);
 	insert(new GLMGenericFactory);
 	insert(new HolmesHeldFactory);
-	//insert(new ConjugateFFactory);
+
+	/*
+	insert(new REScaledGammaFactory);
+	insert(new REScaledWishartFactory);
+	insert(new REGammaFactory);
+	*/
+	
+	insert(new DScaledGamma);
+	insert(new DScaledWishart);
+	insert(new DOrderedLogit);
+	insert(new DOrderedProbit);
     }
     
     GLMModule::~GLMModule() {

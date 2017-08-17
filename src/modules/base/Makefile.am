@@ -23,6 +23,7 @@ endif
 
 ### Test library 
 
+if CANCHECK
 check_LTLIBRARIES = libbasetest.la
 libbasetest_la_SOURCES = testbase.cc testbase.h
 libbasetest_la_CPPFLAGS = -I$(top_srcdir)/src/include
@@ -33,5 +34,5 @@ libbasetest_la_LIBADD = functions/libbasefuntest.la	\
 	$(top_builddir)/src/lib/libtest.la		\
 	$(top_builddir)/src/lib/libjags.la
 	$(top_builddir)/src/jrmath/libjrmath.la
-
+endif
 

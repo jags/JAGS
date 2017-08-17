@@ -28,7 +28,6 @@ using std::vector;
 using std::string;
 
 #include <climits>
-static double tol = 16 * DBL_EPSILON;
 
 void BaseFunTest::setUp()
 {
@@ -388,7 +387,7 @@ void BaseFunTest::seq()
 	for (int j = -6; j < 5; ++j) {
 	    int len = (j < i) ? 0 : j - i + 1;
 	    vector<double> out = veval(_seq, i, j);
-	    CPPUNIT_ASSERT(out.size() == len);
+	    CPPUNIT_ASSERT(out.size() == static_cast<unsigned int>(len));
 	    for (int k = 0; k < len; ++k) {
 		CPPUNIT_ASSERT_EQUAL(out[k], static_cast<double>(i + k));
 	    }

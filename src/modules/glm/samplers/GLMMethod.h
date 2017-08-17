@@ -15,7 +15,7 @@ namespace jags {
     struct RNG;
     class GraphView;
     class SingletonGraphView;
-
+    
 namespace glm {
 
     class Outcome;
@@ -46,11 +46,11 @@ namespace glm {
 	cholmod_factor *_factor; //???
 	void symbolic();
 	void calDesign() const;
-
     private:
 	std::vector<bool> _fixed;
 	unsigned int _length_max;
 	unsigned _nz_prior;
+	friend class REMethod2;
     public:
 	/**
 	 * Constructor.
@@ -103,6 +103,10 @@ namespace glm {
 	 * Returns true, as GLMMethod is not adaptive
 	 */
 	bool checkAdaptation() const;
+	/**
+	 * Returns the name of the sampler
+	 */
+	std::string name() const;
     };
 
 }}

@@ -94,7 +94,9 @@ double DMulti::logDensity(double const *x, unsigned int length, PDFType type,
 	for (unsigned int i = 0; i < length; ++i) {
 	    sump += PROB(par)[i];
 	}
-	loglik -= SIZE(par) * log(sump);
+	if (SIZE(par) != 0) {
+	    loglik -= SIZE(par) * log(sump);
+	}
     }
 
     if (type != PDF_LIKELIHOOD) {
@@ -195,11 +197,13 @@ double DMulti::KL(vector<double const *> const &par1,
 	    S1 += p1;
 	    S2 += p2;
 	}
-	y /= S1;
-	y += log(S2) - log(S1);
-	y *= SIZE(par1);
     }
+    y /= S1;
+    y += log(S2) - log(S1);
+    y *= SIZE(par1);
+
     return y;
 }
+
 
 }}
