@@ -61,12 +61,12 @@ void ScalarStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
 {
     double const *l = lowerLimit(chain);
     if (lb) {
-	if (l == 0 || (l && (*lb < *l)))
+	if (l == 0 || *lb < *l)
 	    l = lb;
     }
     double const *u = upperLimit(chain);
     if (ub) {
-	if (u == 0 || (u && (*ub > *u)))
+	if (u == 0 || *ub > *u)
 	    u = ub;
     }
     if (l && u && *l > *u) throw NodeError(this, "Inconsistent bounds");
