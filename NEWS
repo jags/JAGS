@@ -1,3 +1,11 @@
+Changes in JAGS 5.0.0
+
+Bug Fixes
+=========
+* LogicalNodes with fixed values now correctly report whether or not they
+  are discrete valued via the isDiscreteValued() member function.
+
+
 Changes in JAGS 4.3.0
 
 Bug fixes

@@ -9,12 +9,13 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
-#include <math.h>
+#include <cmath>
 
 using std::vector;
 using std::string;
 using std::set;
 using std::logic_error;
+using std::floor;
 
 namespace jags {
 
@@ -108,7 +109,17 @@ bool LogicalNode::isClosed(set<Node const *> const &ancestors,
 
 bool LogicalNode::isDiscreteValued() const
 {
-    return _discrete;
+    if (isFixed()) {
+	double const *val = value(0);
+	for (unsigned int i = 0; i < _length; ++i) {
+	    if (val[i] != floor(val[i]))
+		return false;
+	}
+	return true;
+    }
+    else {
+	return _discrete;
+    }
 }
 
 } //namespace jags

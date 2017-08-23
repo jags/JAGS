@@ -7,7 +7,7 @@ using std::string;
 namespace jags {
 
 FuncError::FuncError(Function const *efunc, string const &emsg)
-    : runtime_error(emsg + " in function " + efunc->name())
+    : runtime_error(emsg + " in function '" + efunc->name() + "'")
 {
 }
 
