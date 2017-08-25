@@ -65,11 +65,7 @@ ArrayLogicalNode::ArrayLogicalNode(ArrayFunction const *function,
     : LogicalNode(mkDim(function,parameters), nchain, parameters, function),
       _func(function), _dims(mkParameterDims(parameters))
 {
-    if (isFixed()) {
-	for (unsigned int ch = 0; ch < _nchain; ++ch) {
-	    deterministicSample(ch);
-	}
-    }
+    initializeFixed();
 }
 
 void ArrayLogicalNode::deterministicSample(unsigned int chain)

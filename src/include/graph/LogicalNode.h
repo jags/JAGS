@@ -20,6 +20,7 @@ class LogicalNode : public DeterministicNode {
     bool _discrete;
 protected:
     const std::vector<std::vector<double const*> > _parameters;
+    void initializeFixed();
 public:
     /**
      * A logical node is defined by a function (which may be an inline

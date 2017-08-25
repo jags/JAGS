@@ -33,6 +33,35 @@ mkParams(vector<Node const*> const &parents, unsigned int nchain)
     return ans;
 }
 
+    void LogicalNode::initializeFixed()
+    {
+	if (!isFixed()) return;
+
+	/* Code for initializing fixed value LogicalNodes. It cannot
+	   be included in the constructor as it uses the virtual
+	   function deterministicSample. So we call this utility
+	   function from the constructor of each child class
+	   (ScalarLogicalNode, VectorLogicalNode, ArrayLogicalNode) */
+	
+	for (unsigned int ch = 0; ch < _nchain; ++ch) {
+	    deterministicSample(ch);
+	}
+	
+	/* Reset the _discrete flag based on the *value* of the
+	   node. This is more accurate than Function#isDiscreteValued
+	   which may give false negatives for fixed nodes (e.g.  2^N
+	   is discrete for integer N >= 0, but not for N < 0). */
+
+	_discrete = true;
+	double const *val = value(0);
+	for (unsigned int i = 0; i < _length; ++i) {
+	    if (val[i] != floor(val[i])) {
+		_discrete = false;
+		break;
+	    }
+	}
+	
+    }
 
 LogicalNode::LogicalNode(vector<unsigned int> const &dim,
 			 unsigned int nchain,
@@ -107,19 +136,11 @@ bool LogicalNode::isClosed(set<Node const *> const &ancestors,
     return false; //Wall
 }
 
-bool LogicalNode::isDiscreteValued() const
-{
-    if (isFixed()) {
-	double const *val = value(0);
-	for (unsigned int i = 0; i < _length; ++i) {
-	    if (val[i] != floor(val[i]))
-		return false;
-	}
-	return true;
-    }
-    else {
+
+    
+    bool LogicalNode::isDiscreteValued() const
+    {
 	return _discrete;
     }
-}
 
 } //namespace jags
