@@ -33,7 +33,7 @@ DeterministicNode::DeterministicNode(vector<unsigned int> const &dim,
 
     /* 
        Fixed deterministic nodes should be immediately initialized by
-       calling deterministicSample. We can't do this here because this
+       calling deterministicSample. We can't do it here because that
        is a virtual function. So we have to do it in whatever
        sub-class defines the deterministicSample member function.
     */
