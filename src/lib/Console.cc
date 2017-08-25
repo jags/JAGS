@@ -6,7 +6,6 @@
 #include <model/BUGSModel.h>
 #include <model/Monitor.h>
 #include <graph/NodeError.h>
-#include <graph/ParentError.h>
 #include <sampler/SamplerFactory.h>
 #include <model/MonitorFactory.h>
 #include <rng/RNGFactory.h>
@@ -39,10 +38,6 @@ using std::FILE;
 // and errors that don't delete the model (in update)
 // so that we can then dump parameter values from parser.cc
 #define CATCH_ERRORS_DUMP						\
-    catch (ParentError const &except) {					\
-        except.printMessage(_err, _model->symtab());			\
-	return false;							\
-    }									\
     catch (NodeError const &except) {					\
         except.printMessage(_err, _model->symtab());			\
 	return false;							\
@@ -60,11 +55,6 @@ using std::FILE;
     }
 
 #define CATCH_ERRORS							\
-    catch (ParentError const &except) {					\
-        except.printMessage(_err, _model->symtab());			\
-	clearModel();							\
-	return false;							\
-    }									\
     catch (NodeError const &except) {					\
         except.printMessage(_err, _model->symtab());			\
 	clearModel();							\

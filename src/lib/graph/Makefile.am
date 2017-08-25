@@ -7,4 +7,4 @@ libgraph_la_SOURCES = Node.cc DeterministicNode.cc AggNode.cc	\
  StochasticNode.cc Graph.cc GraphMarks.cc NodeError.cc		\
  ScalarLogicalNode.cc LinkNode.cc VectorLogicalNode.cc		\
  ArrayLogicalNode.cc VSLogicalNode.cc ScalarStochasticNode.cc	\
- VectorStochasticNode.cc ArrayStochasticNode.cc ParentError.cc
+ VectorStochasticNode.cc ArrayStochasticNode.cc 
