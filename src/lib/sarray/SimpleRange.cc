@@ -74,8 +74,6 @@ namespace jags {
     {
     }
 
-    /*
-    FIXME: API change than can only be introduced in JAGS 5.0.0
     bool SimpleRange::contains(vector<int> const &index) const
     {
 	unsigned int N = ndim(false);
@@ -90,7 +88,6 @@ namespace jags {
 	}
 	return true;
     }
-    */
     
     bool SimpleRange::contains(SimpleRange const &other) const
     {

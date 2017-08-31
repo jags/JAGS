@@ -64,13 +64,13 @@ namespace jags {
 	 * Inequality operator 
 	 */
 	bool operator!=(SimpleRange const &range) const;
-	/*
+	/**
 	 * Indicates whether the supplied index is contained
 	 * inside this SimpleRange.
-	 bool contains(std::vector<int> const &test_index) const;
-	*/
+	 */
+	bool contains(std::vector<int> const &test_index) const;
 	/**
-	 * Indicates whether the test SimpleRange is completely
+	 * Indicates whether the supplied SimpleRange is completely
 	 * contained inside this SimpleRange.
 	 *
 	 * @param test_range Test SimpleRange
