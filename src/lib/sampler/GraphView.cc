@@ -392,7 +392,7 @@ unsigned int nchain(GraphView const *gv)
 		throw NodeError(*p, "Error calculating log density");
 	    }
 	    else if (ld == JAGS_NEGINF || (!jags_finite(ld) && ld < 0)) {
-		throw NodeError(*p, "Node inconsistent with parents");
+		throw NodeError(*p, "The value of this node is inconsistent with its prior distribution.");
 	    }
 	}
 
