@@ -197,7 +197,7 @@ void Model::initializeNodes()
 	Node *node = *i;
 	for (unsigned int n = 0; n < _nchain; ++n) {
 	    if (!node->checkParentValues(n)) {
-		throw NodeError(node, "Invalid parent values");
+		throw NodeError(node, "Invalid parent values at initialization");
 	    }
 	    if (!node->initialize(_rng[n], n)) {
 		throw NodeError(node, "Initialization failure");
