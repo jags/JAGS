@@ -271,7 +271,7 @@ The sequence operator \verb+:+ can only produce increasing
 sequences. If $n < m$ then \verb+m:n+ produces a vector of length zero
 and when this is used in a for loop index expression the contents of
 loop inside the curly brackets are skipped. Note that this behaviour
-is different from the sequence operator in R, where \verb+m:n+ will
+is different from the sequence operator in \R, where \verb+m:n+ will
 produce a {\em decreasing} sequence if $n < m$.
 
 \section{Data transformations}
@@ -466,7 +466,7 @@ using other packages more suited to this task. There are several
 output. See chapter~\ref{chapter:R} for details.
 
 \section{Modules}
-\label{section:modules}
+\label{section:running:modules}
 
 The \JAGS\ library is distributed along with dynamically loadable
 modules that extend its functionality.  A module can define new
@@ -486,6 +486,8 @@ MCMC algorithm and {\bf RNG factories} that create them.
 The \texttt{base} module and the \texttt{bugs} module are loaded
 automatically at start time.  Others may be loaded by the user. It is
 important to load the modules you need {\rm before} running the model.
+Details on loading modules can be found in section \ref{section:R:modules}
+when using \R\ and section \ref{load} using the command line.
 
 The two most useful optional modules are the \texttt{glm} module
 (chapter~\ref{chapter:glm}), which provides efficient samplers for
@@ -593,7 +595,8 @@ values must be all present or all missing.
 Compilation may fail for a number of reasons. The three most common are:
 \begin{enumerate}
 \item The model uses a function or distribution that has not been
-  defined in any of the loaded modules. %crossref
+  defined in any of the loaded modules (See section
+  \ref{section:running:modules}). 
 \item The graph contains a directed cycle.  These are forbidden
   in \JAGS.
 \item A node is used in an expression but never defined by a relation
@@ -625,7 +628,7 @@ containing initial values for the model parameters. Initial values may
 not be supplied for logical or constant nodes.
 
 The format for initial values is the same as the one used for data
-(i.e. a list using the R interface or a separate file when using the
+(i.e. a list using the \R\ interface or a separate file when using the
 command line interface). As with the data, initial values are supplied
 for whole node arrays and may include missing values for elements of
 the array that are not to be initialized.  This need typically arises
@@ -813,22 +816,22 @@ are created automatically by the program \texttt{bison}. They
 generally take the form ``syntax error, unexpected FOO, expecting BAR''
 and are not always abundantly clear, but this is out of my control.
 
-\chapter{Running JAGS from R}
+\chapter{Running JAGS from \R}
 \label{chapter:R} 
 
-The native interface from R to \JAGS\ is the \texttt{rjags} package
+The native interface from \R\ to \JAGS\ is the \texttt{rjags} package
 \citep{Plummer2016}. This provides an object-based functional
 interface to \JAGS, in which most of the steps of running a model are
 separated into different function calls. Several alternative packages
 have been developed that offer a unified interface to \JAGS. The
-main ones are detailed below, but there are many other R packages that
+main ones are detailed below, but there are many other \R\ packages that
 interface to \JAGS. See the list of reverse depends, imports, suggests
 and enhances at \url{https://cran.r-project.org/package=rjags}
 
 To illustrate each package, we consider the linear regression
 model from chapter~\ref{chapter:bugslang} with a trivial data set
 of 5 observations. The data and initial values for this model
-are given below and are used by all R interfaces:
+are given below and are used by all \R\ interfaces:
 \begin{verbatim}
 line_data <- list("x" = c(1, 2, 3, 4, 5), "Y" = c(1, 3, 3, 3, 5), "N"=5)
 line_inits <- list(list("alpha" = 3, "beta"= 0, "tau" = 1.5),
@@ -836,7 +839,7 @@ line_inits <- list(list("alpha" = 3, "beta"= 0, "tau" = 1.5),
 \end{verbatim}
 
 \section{rjags}
-\label{section:rjags}
+\label{section:R:rjags}
 
 To run a model with the \texttt{rjags} package, we first create a model
 object with the \texttt{jags.model()} function.
@@ -849,8 +852,8 @@ adaptive phase for 1000 iterations (see chapter~\ref{chapter:running}
 for an explanation of these steps). If adaptation is required then a
 progress bar made of \texttt{'+'} signs will be printed.
 
-The object created by \texttt{jags.model} is of class ``jags''. It is
-an R interface to the virtual graphical model created by \JAGS\ and does
+The object created by \texttt{jags.model} is of class \texttt{"jags"}. It is
+an \R\ interface to the virtual graphical model created by \JAGS\ and does
 not contain any samples.
 
 To get samples from the posterior distribution of the parameters, we
@@ -862,7 +865,7 @@ update(model, n.iter=1000)
 samples <- coda.samples(model, variable.names=c("alpha", "beta", "sigma"), 
                         n.iter=1000)
 \end{verbatim}
-The \texttt{samples} object is of class \texttt{mcmc.list} defined by
+The \texttt{samples} object is of class \texttt{"mcmc.list"} defined by
 the \texttt{coda} package \citep{PlummerEtal2005}. It contains
 monitored samples of the variables \texttt{alpha}, \texttt{beta}, and
 \texttt{sigma} for the two parallel chains.
@@ -892,13 +895,14 @@ alpha 1.95654 2.7452 2.9916 3.2488 4.158
 beta  0.01763 0.6178 0.8037 0.9877 1.559
 sigma 0.41828 0.6376 0.8276 1.1838 2.804
 \end{verbatim}
-The \texttt{mcmc.list} class also has a plot method. Hence
+The \texttt{"mcmc.list"} class also has a plot method. Hence
 \begin{verbatim}
 plot(samples)
 \end{verbatim}
 will produce trace plots and density plots for the sampled values.
 
 \section{runjags}
+\label{section:R:runjags}
 
 The \texttt{runjags} package \citep{Denwood2016} includes many
 enhancements to \JAGS, including a custom \JAGS\ module that contains
@@ -912,7 +916,7 @@ out <- run.jags(model="line.bug", monitor=c("alpha","beta","sigma","dic"),
 \end{verbatim}
 The optional \texttt{method} argument to \texttt{run.jags} allows the
 user to choose whether the model is run through the \texttt{rjags}
-interface (section~\ref{section:rjags}) or through the command line
+interface (section~\ref{section:R:rjags}) or through the command line
 interface of \JAGS\ (chapter~\ref{chapter:cmdline}). In addition, the
 \texttt{method} argument controls how parallel chains are run. Running
 parallel chains in different processes can offer considerable speed
@@ -952,18 +956,19 @@ at lag 10; and \texttt{psrf} is the Gelman-Rubin convergence diagnostic
 
 If the chain is showing signs of poor mixing then the
 \texttt{extend.jags} function can be used to continue running the
-model. The \texttt{autorun.jags} is an alternative to
+model. The \texttt{autorun.jags} function is an alternative to
 \texttt{run.jags} that takes control of the run-length of the MCMC
 process and runs the chain until convergence.
 
-The default plot method for ``runjags'' objects shows a traceplot, the
-cumulative distribution function, the density function and the
-autocorrelation function for each variable. A cross-correlation plot
-for all variables is also generated.  There are a number of other 
-methods available for ``runjags'' objects, including \texttt{as.mcmc.list} 
-for extraction of the MCMC objects, and \texttt{as.jags} for conversion 
-to an object that can be used with the rjags package.  The reverse 
-operation is also possible by using \texttt{as.runjags} on an rjags model.  
+The default plot method for \texttt{"runjags"} objects shows a
+traceplot, the cumulative distribution function, the density function
+and the autocorrelation function for each variable. A
+cross-correlation plot for all variables is also generated.  There are
+a number of other methods available for \texttt{"runjags"} objects,
+including \texttt{as.mcmc.list} for extraction of the MCMC objects,
+and \texttt{as.jags} for conversion to an object that can be used with
+the rjags package.  The reverse operation is also possible by using
+\texttt{as.runjags} on an rjags model.
 
 One of the motivations for the runjags package is to allow comments
 embedded directly within the the \JAGS\ model code to specify 
@@ -974,14 +979,13 @@ complete model, data and initial value definitions based on a data
 frame and formula-based representation of a generalised linear mixed 
 model as provided by the user.
 
-
 \section{R2jags}
 
 The R2jags package \citep{SuYajima2015} was modelled on the
 pre-existing R2WinBUGS package \citep{SturtzEtal2005} which provided
-the first interface from WinBUGS to R. With R2jags and R2WinBUGS the
+the first interface from WinBUGS to \R. With R2jags and R2WinBUGS the
 user may switch between the two BUGS engines while keeping a
-consistent R interface. The R2OpenBUGS package is an updated version
+consistent \R\ interface. The R2OpenBUGS package is an updated version
 of R2WinBUGS that works with OpenBUGS.
 
 Like the \texttt{runjags} package, the \texttt{R2jags} package offers
@@ -1015,16 +1019,17 @@ DIC info (using the rule, pD = var(deviance)/2)
 pD = 6.5 and DIC = 19.4
 DIC is an estimate of expected predictive error (lower deviance is better).
 \end{verbatim}
-In addition to summaries of the posterior distribution, the print method
-for ``rjags'' objects includes \texttt{Rhat}, the Gelman-Rubin convergence
-diagnostic \citep{GelmanRubin1992} and \texttt{n.eff} the effective
-sample size.
+In addition to summaries of the posterior distribution, the print
+method for \texttt{"rjags"} objects includes \texttt{Rhat}, the
+Gelman-Rubin convergence diagnostic \citep{GelmanRubin1992} and
+\texttt{n.eff} the effective sample size.
 
-If an ``rjags'' object shows signs of lack of convergence, then it
-can be passed to the \texttt{autojags} function which will update it
-until convergence.
+If an \texttt{"rjags"} object shows signs of lack of convergence,
+then it can be passed to the \texttt{autojags} function which will
+update it until convergence.
 
 \section{jagsUI}
+\label{section:R:jagsUI}
 
 The \texttt{jagsUI} package offers similar facilities to the
 \texttt{runjags} and \texttt{R2jags} package. In fact \texttt{jagsUI}
@@ -1035,7 +1040,7 @@ packages in the same \R\ session.
 
 Compared with the other packages, the output from \texttt{jagsUI}
 tends to be more verbose and didactic. It may therefore be suitable
-for users who are not familiar with MCMC.
+for users who are less familiar with MCMC.
 
 The \texttt{jags} function is illustrated below.
 \begin{verbatim}
@@ -1050,9 +1055,9 @@ Note that you must supply arguments \texttt{n.iter} and
 \texttt{autojags()} function that controls the run length for you.
 
 The output of the \texttt{jags} function is an object of class
-``jagsUI''.  The print method for ``jagsUI'' objects gives summary
-statistics and diagnostics similar to the \texttt{R2jags} package, but
-with more explanation.
+\texttt{"jagsUI"}.  The print method for \texttt{"jagsUI"} objects
+gives summary statistics and diagnostics similar to the
+\texttt{R2jags} package, but with more explanation.
 \begin{verbatim}
 JAGS output for model 'line.bug', generated by jagsUI.
 Estimates based on 2 chains of 1000 iterations,
@@ -1078,6 +1083,46 @@ DIC info: (pD = var(deviance)/2)
 pD = 7.5 and DIC = 20.51 
 DIC is an estimate of expected predictive error (lower is better).
 \end{verbatim}
+
+\section{Loading and unloading modules}
+\label{section:R:modules}
+
+Modules are dynamically loadable extensions to \JAGS\ that may provide
+additional functions and distributions as well as specialized
+samplers (See section \ref{section:running:modules}).
+
+\begin{table}
+\begin{tabular}{llll}
+  \hline
+  Package & function & argument & default \\
+  \hline
+  runjags & \texttt{run.jags} & \texttt{modules} & \texttt{runjags.getOption("modules")} \\
+  R2jags  & \texttt{jags} & \texttt{jags.module} & \texttt{c("glm","dic")} \\
+  & \texttt{jags.parallel} & \texttt{jags.module} & \texttt{c("glm","dic")} \\
+  jagsUI  & \texttt{jags} & \texttt{modules} & \texttt{"glm"} \\
+  \hline
+\end{tabular}
+\caption{Function arguments for loading \JAGS\ modules. \label{table:modules}}
+\end{table}
+
+The \texttt{rjags} package provides the \texttt{load.module} and
+\texttt{unload.module} functions for loading and unloading
+modules. The other \R\ packages that provide a single-function
+interface to \JAGS\ have an argument to determine which modules should
+be loaded when running the model. These are summarized in table
+\ref{table:modules}.
+
+Modules loaded with the \texttt{load.module} function from the
+\texttt{rjags} package will not be available when running parallel
+chains with the \texttt{runjags}, \texttt{R2jags}, or \texttt{jagsUI}
+packages. These packages run parallel chains in separate \R\ processes
+-- one for each chain -- using the facilities provided by the base \R\ 
+package \texttt{parallel}. The child \R\ processes will not inherit any
+modules already loaded in the primary \R\ session. It is therefore
+important to use the appropriate function argument shown in table
+\ref{table:modules} if you wish to exploit any of the features of a
+\JAGS\ module.
+
 
 \chapter{Running \JAGS\ on the command line}
 \label{chapter:cmdline}
@@ -1348,7 +1393,7 @@ Exits \JAGS. \JAGS\ will also exit when it reads an end-of-file character.
 . data to <filename>
 \end{verbatim}
 Writes the data ({\em i.e.} the values of the observed nodes) to a
-file in the R \texttt{dump} format. The same file can be used in a
+file in the \R\ \texttt{dump} format. The same file can be used in a
 DATA IN statement for a subsequent model.
 
 See also: DATA IN (page \pageref{data:in})
@@ -1359,7 +1404,7 @@ See also: DATA IN (page \pageref{data:in})
 . parameters to <file> [, chain(<n>)]
 \end{verbatim}
 Writes the current parameter values ({\em i.e.} the values of the
-unobserved stochastic nodes) in chain \texttt{<n>} to a file in R dump
+unobserved stochastic nodes) in chain \texttt{<n>} to a file in \R\ dump
 format. The name and current state of the RNG for chain \texttt{<n>}
 is also dumped to the file.  The same file can be used as input in a
 PARAMETERS IN statement in a subsequent run.
@@ -1391,7 +1436,7 @@ the prior are not listed.
 \begin{verbatim}
 . load <module>
 \end{verbatim}
-Loads a module into \JAGS\ (see section \ref{section:modules}). Loading
+Loads a module into \JAGS\ (see section \ref{section:running:modules}). Loading
 a module does not affect any previously initialized models, but will
 affect the future behaviour of the compiler and model initialization.
 
@@ -1469,8 +1514,8 @@ statement, then the \JAGS\ session will terminate.
 \label{section:cmdline:data}
 
 The file format used by JAGS for representing data and initial values
-is the \verb+dump()+ format used by R.  This format is valid R code,
-so a JAGS data file can be read into R using the \verb+source()+ function.
+is the \verb+dump()+ format used by \R.  This format is valid \R\ code,
+so a JAGS data file can be read into \R\ using the \verb+source()+ function.
 The \JAGS\ parser ignores all white space.  Long expressions can
 therefore be split over several lines.
 
@@ -1491,8 +1536,8 @@ x <- c(2, 3.5, 1.3e-2, 88)
 \end{verbatim}
 There is no distinction between row and column-vectors. 
 
-Matrices and higher-dimensional arrays in R are created by adding a
-dimension attribute (\verb+.Dim+) to a vector. In the R dump format
+Matrices and higher-dimensional arrays in \R\ are created by adding a
+dimension attribute (\verb+.Dim+) to a vector. In the \R\ dump format
 this is done using the ``structure'' function.  The first argument to
 the structure function is a vector of numeric values of the matrix,
 given in column major order (i.e. filling the left index first). The
@@ -1623,7 +1668,8 @@ quantile90.x <- qnorm(0.9, mu, tau) # 90th percentile
 \begin{center}
 \begin{tabular}{llll}
 \hline
-Distribution & Distribution & Quantile \\
+Distribution & Density  & Probability & Quantile \\
+             & function & function    & function \\
 \hline
 Bernoulli          & dbern     & pbern     & qbern \\
 Beta               & dbeta     & pbeta     & qbeta \\
@@ -1801,9 +1847,23 @@ model definition in place of the canonical name. Aliases are used to
 avoid confusion with other statistical software in which distributions
 may have slightly different names. Note however that the alias does
 not change the parameterization. For example, the Weibull distribution
-is parameterized differently in BUGS and R, and using the alias
+is parameterized differently in BUGS and \R, and using the alias
 \texttt{dweibull} instead of the \BUGS\ name \texttt{dweib} does not
 change this.
+
+\chapter{Topics in modelling}
+
+%Build models from simpler components
+
+%Avoid redundant hierarchy
+%A good heuristic is that you need replication
+%https://sourceforge.net/p/mcmc-jags/discussion/610037/thread/f371d9a0/?limit=25
+
+%Scaling and centering of covariates
+%See this example where unscaled covariate leads to numerical overflow
+%https://sourceforge.net/p/mcmc-jags/discussion/610037/thread/ba83a135/?limit=25
+
+%Choice of priors
 
 \chapter{The base module}
 
@@ -1811,7 +1871,7 @@ The base module supplies the base functionality for the \JAGS\ library
 to function correctly. It is loaded first and should never be
 unloaded.
 
-In order to avoid a name clash with the \texttt{base} package of R,
+In order to avoid a name clash with the \texttt{base} package of \R,
 the file name of the base module is \texttt{basemod.so} on Unix/Linux
 or \texttt{basemod.dll} on Windows.
 
@@ -2195,7 +2255,7 @@ The chi-squared distribution on $k > 0$ degrees of freedom is defined by
 \begin{verbatim}
 y ~ dchisqr(k)
 \end{verbatim}
-The alias \texttt{dchisq} may also be used for compatibility with R.
+The alias \texttt{dchisq} may also be used for compatibility with \R.
 
 The density of the chi-squared distribution is
 \[
@@ -2401,7 +2461,7 @@ The non-central t distribution is usually only defined for $\tau = 1$,
 in which case $\mu$ is the non-centrality parameter. The 3-parameter
 form here is a scaled version of a standard non-central t with
 non-centrality parameter $\delta = \mu \, \tau^{1/2}$. Due to a built-in
-limitation in the R math library, the absolute value of $\delta$ must
+limitation in the \R\ math library, the absolute value of $\delta$ must
 be less than 37.62.
 
 \subsubsection{Normal}
@@ -2500,10 +2560,10 @@ $\lambda$ (lambda) is defined by
 \begin{verbatim}
 y ~ dweib(v, lambda)
 \end{verbatim}
-for $v > 0, \lambda > 0$. For compatibility with R, the alias
+for $v > 0, \lambda > 0$. For compatibility with \R, the alias
 \texttt{dweibull} may also be used. Note, however, that the
 parameterization of the Weibull distribution in JAGS is different from
-the one in R, which uses a similar parameterization to the
+the one in \R, which uses a similar parameterization to the
 generalized gamma. See below.
 
 Its probability density function is
@@ -2570,7 +2630,7 @@ size parameter $n$ is defined by
 \begin{verbatim}
 y ~ dbin(p,n)
 \end{verbatim}
-for $0 < p < 1$ and $n \geq 1$. For compatibility with R, the alias
+for $0 < p < 1$ and $n \geq 1$. For compatibility with \R, the alias
 \texttt{dbinom} may also be used. The probability mass function is
 \[
 P(Y=y) = {n \choose x}  p^y (1-p)^{n-y}
@@ -2664,7 +2724,7 @@ and size parameter $r$ is defined by
 \begin{verbatim}
 y ~ dnegbin(p, r)
 \end{verbatim}
-for $0 < p \leq 1$ and $r \geq 0$. For compatibility with R, the
+for $0 < p \leq 1$ and $r \geq 0$. For compatibility with \R, the
 alias \texttt{dnbinom} may also be used. The probability mass function is
 \[
 P(Y=y) = {y + r -1 \choose y} p^r (1-p)^y
@@ -2878,6 +2938,16 @@ number of samples to draw. The outcome $y$, is a vector of binary
 indicators of length $N$, so that $y_i = 1$ if element $i$ has been
 sampled and $y_i = 0$ otherwise.
 
+There are currently no samplers in JAGS that can handle unobserved
+nodes with a \texttt{dsample} prior distribution. Hence this
+distribution can only be used for observed stochastic nodes.
+%FIXME: Add a sampler?
+
+There are currently no samplers in JAGS that can handle unobserved
+nodes with a \texttt{dsample} prior distribution. Hence this
+distribution can only be used for observed stochastic nodes.
+%FIXME: Add a sampler?
+
 For sampling with replacement, see the multinomial distribution.
 
 \subsubsection{Wishart}
@@ -2938,7 +3008,7 @@ a function and as a distribution.
 
 When \texttt{dinterval} is used as a function it divides up a
 continuous variable into categories according to a given set of
-cut-points, similar to the \texttt{cut} function in R:
+cut-points, similar to the \texttt{cut} function in \R:
 \begin{verbatim}
 y <- dinterval(t, c[1:M])
 \end{verbatim}
@@ -3560,7 +3630,7 @@ p_i \rightarrow \frac{p_i}{\sum_j p_j}
 \]
 
 The non-central hypergeometric distribution (\verb+dhyper+) uses the
-same parameterization as R, which is different from the
+same parameterization as \R, which is different from the
 parameterization used in OpenBUGS 3.2.2. OpenBUGS is parameterized as
 \begin{verbatim}
 X ~ dhyper(n, m, N, psi)     #OpenBUGS
