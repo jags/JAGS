@@ -15,6 +15,7 @@ libglmsampler_la_SOURCES = GLMFactory.cc GLMSampler.cc GLMMethod.cc	\
  ScaledWishart.cc ScaledWishartFactory.cc SampleWishart.cc \
  ScaledGamma.cc ScaledGammaFactory.cc \
  LogisticLinear.cc TLinear.cc OrderedLogit.cc OrderedProbit.cc \
+ LogNormalLinear.cc \
  RESampler.cc REMethod.cc REFactory.cc \
  REGamma.cc REGammaSlicer.cc REGammaFactory.cc \
  REScaledGamma.cc REScaledGammaFactory.cc \
@@ -35,6 +36,7 @@ noinst_HEADERS = GLMFactory.h GLMSampler.h GLMMethod.h			\
   ScaledWishart.h ScaledWishartFactory.h SampleWishart.h \
   ScaledGamma.h ScaledGammaFactory.h \
   LogisticLinear.h TLinear.h OrderedLogit.h OrderedProbit.h \
+  LogNormalLinear.h \
   RESampler.h REMethod.h REFactory.h \
   REGamma.h REGammaSlicer.h REGammaFactory.h \
   REScaledGamma.h REScaledGammaFactory.h \

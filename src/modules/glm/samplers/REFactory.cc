@@ -13,6 +13,7 @@
 #include "OrderedLogit.h"
 #include "OrderedProbit.h"
 #include "MNormalLinear.h"
+#include "LogNormalLinear.h"
 
 #include <graph/Graph.h>
 #include <graph/StochasticNode.h>
@@ -47,7 +48,8 @@ namespace jags {
 		AuxMixBinomial::canRepresent(snode) ||
 		OrderedLogit::canRepresent(snode) ||
 		OrderedProbit::canRepresent(snode) ||
-		MNormalLinear::canRepresent(snode);
+		MNormalLinear::canRepresent(snode) ||
+		LogNormalLinear::canRepresent(snode);
 	}
 
 	bool REFactory::checkTau(SingletonGraphView const *tau) const
@@ -182,6 +184,9 @@ namespace jags {
 		    }
 		    else if (MNormalLinear::canRepresent(*p)) {
 			outcome = new MNormalLinear(*p, ch);
+		    }
+		    else if (LogNormalLinear::canRepresent(*p)) {
+			outcome = new LogNormalLinear(*p, ch);
 		    }
 		    else {
 			throwLogicError("Invalid outcome in REFactory");

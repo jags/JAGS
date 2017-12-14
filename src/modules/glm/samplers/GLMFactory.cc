@@ -404,11 +404,13 @@ namespace glm {
 	 * What we need to do here is to mark this node to be skipped in any
 	 * later call.
 	 */
+	/*
 	if (sub_views.size() == 1 && view->length() == 1) {
 	    delete view;
 	    delete sub_views.back();
 	    return 0;
 	}
+	*/
 	
 	unsigned int Nch = nchain(view);
 	vector<GLMMethod*> methods(Nch, 0);
