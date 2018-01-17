@@ -1,0 +1,2 @@
+\newcommand{\jagsversion}{@JAGS_MAJOR@.@JAGS_MINOR@.@JAGS_PATCH@}
+

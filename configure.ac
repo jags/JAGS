@@ -14,6 +14,7 @@ AC_DEFINE_UNQUOTED([JAGS_MAJOR], [$JAGS_MAJOR], [Major version of JAGS library])
 AC_SUBST(JAGS_MINOR)
 AC_DEFINE_UNQUOTED([JAGS_MINOR], [$JAGS_MINOR], [Minor version of JAGS library])
 
+AC_SUBST(JAGS_PATCH)
 AC_DEFINE_UNQUOTED([JAGS_PATCH], [$JAGS_PATCH], [Patch level of JAGS])
 
 define([hgversion],
@@ -155,6 +156,7 @@ AC_CONFIG_FILES([
   win/runtime64/Makefile
   doc/Makefile
   doc/manual/Makefile
+  doc/manual/version
   test/Makefile
 ])
 AC_OUTPUT
