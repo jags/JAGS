@@ -10,7 +10,7 @@ namespace jags {
     namespace bugs {
 
 	BesselK::BesselK ()
-	    : ScalarFunction ("BesselK", 3)
+	    : ScalarFunction ("besselK", 3)
 	{
 	}
 

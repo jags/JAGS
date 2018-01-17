@@ -2082,6 +2082,10 @@ Usage  & Description & Value & Restrictions on arguments \\
 \verb+arcsinh(x)+   & Hyperbolic arc-sine   & Real &\\
 \verb+arctan(x)+    & Arc-tangent           & Real &\\
 \verb+arctanh(x)+   & Hyperbolic arc-tangent & Real & $-1 < x < 1$\\
+\verb+besselI(x,nu,scaled)+ &Modified Bessel function of 1st kind & Real & $x \geq 0$ \\
+\verb+besselJ(x,nu)+ &Bessel function of 1st kind & Real & $x \geq 0$ \\
+\verb+besselK(x,nu,scaled)+ &Modified Bessel function of 3rd kind & Real & $x \geq 0$ \\
+\verb+besselY(x,nu)+ &Bessel function of 2nd kind & Real & $x \geq 0$ \\
 \verb+cos(x)+       & Cosine              & Real & \\
 \verb+cosh(x)+      & Hyperbolic Cosine   & Real & \\
 \verb+cloglog(x)+    & Complementary log log & Real & $0 < x < 1$ \\
@@ -2114,7 +2118,14 @@ Usage  & Description & Value & Restrictions on arguments \\
 \end{center}
 \end{table}
 
-
+The modified Bessel functions \texttt{besselI} and \texttt{besselK}
+take three arguments: \texttt{x}, the value at which the Bessel
+function should be evaluated; \texttt{nu}, the order of the Bessel
+function (may be negative); \text{scaled}, a logical flag indicating
+whether the result should be exponentially scaled to avoid numeric
+overflow. Following the convention for logical arguments in JAGS, zero
+is considered FALSE and any non-zero value is true. The Bessel functions
+\texttt{BesselJ} and \texttt{BesselY} take only two arguments.
 
 \subsection{Scalar-valued functions with array arguments}
 

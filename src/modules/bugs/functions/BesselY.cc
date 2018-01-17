@@ -10,7 +10,7 @@ namespace jags {
     namespace bugs {
 
 	BesselY::BesselY ()
-	    : ScalarFunction ("BesselY", 2)
+	    : ScalarFunction ("besselY", 2)
 	{
 	}
 
