@@ -2215,7 +2215,7 @@ The degrees of freedom parameter $k$ does not need to be an integer.
 \label{bugs:ddexp}
 
 The double exponential (or Laplace) distribution with mean $\mu$ (mu) and
-precision $\tau$ (tau) is defined by
+scale $\tau$ (tau) is defined by
 \begin{verbatim}
 y ~ ddexp(mu, tau)
 \end{verbatim}
@@ -2223,7 +2223,7 @@ for $\tau > 0$. It has probability density function
 \[
 \tau \exp(-\tau | y - \mu |)/2
 \]
-The variance of the double exponential distribution is $1/\tau$.
+The variance of the double exponential distribution is $2/\tau^2$.
 
 \subsubsection{Exponential}
 \label{bugs:dexp}
