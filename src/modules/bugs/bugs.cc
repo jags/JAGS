@@ -211,13 +211,13 @@ namespace bugs {
 	//Load sampler factories
 	insert(new MNormalFactory);
 	insert(new DirichletFactory);
+	insert(new BinomSliceFactory);
 	insert(new ConjugateFactory);
 	//insert(new REFactory);
 	insert(new DSumFactory);
 	insert(new SumFactory);
 	insert(new CensoredFactory);
 	insert(new RW1Factory);
-	insert(new BinomSliceFactory);
     }
 
     BUGSModule::~BUGSModule() {
