@@ -61,6 +61,26 @@ namespace jags {
 	return ans;
     }
     
+    vector<double> NodeArraySubset::logDensity(unsigned int chain, PDFType type) const
+    {
+	vector<double> ans;
+	Node const *node = 0;
+	double value = 0.0;
+	for (unsigned int i = 0; i < _node_pointers.size(); ++i) {
+	    if (_node_pointers[i]) {
+		if (node != _node_pointers[i]) {
+		    node = _node_pointers[i];
+		    value = node->logDensity(chain, type);
+		}
+		ans.push_back(value);
+	    }
+	    else {
+		ans.push_back(JAGS_NA);
+	    }
+	}
+	return ans;
+    }
+    
     vector<unsigned int> const &NodeArraySubset::dim() const
     {
 	return _dim;

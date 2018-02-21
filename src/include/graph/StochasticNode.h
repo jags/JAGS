@@ -86,8 +86,10 @@ public:
      * function is required (PDF_FULL) or whether partial calculations
      * are permitted (PDF_PRIOR, PDF_LIKELIHOOD). See PDFType for
      * details.
+     *
+	 * NOTE: This is now done in Node.h so can be removed from here
      */
-    virtual double logDensity(unsigned int chain, PDFType type) const = 0;
+    // virtual double logDensity(unsigned int chain, PDFType type) const = 0;
     /**
      * Draws a random sample from the prior distribution of the node
      * given the current values of it's parents, and sets the Node

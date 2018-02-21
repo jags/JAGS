@@ -108,6 +108,21 @@ public:
 	const = 0;
      */
     void unlinkParents();
+
+   /**
+    * Returns the log of the density of a StochasticNode
+    * given the current parameter values. For a ConstantNode
+    * or a DeterministicNode this will simply return 0.
+    *
+    * @param chain Number of chain (starting from zero) for which
+    * to evaluate log density.
+    *
+    * @param type Indicates whether the full probability density
+    * function is required (PDF_FULL) or whether partial calculations
+    * are permitted (PDF_PRIOR, PDF_LIKELIHOOD). See PDFType for
+    * details.
+    */
+    inline double logDensity(unsigned int chain, PDFType type) const { return 0.0; }
 };
 
 } /* namespace jags */

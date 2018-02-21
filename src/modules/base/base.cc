@@ -26,6 +26,7 @@
 #include <monitors/TraceMonitorFactory.h>
 #include <monitors/MeanMonitorFactory.h>
 #include <monitors/VarianceMonitorFactory.h>
+#include <monitors/LogDensityMonitorFactory.h>
 
 using std::vector;
 
@@ -68,6 +69,7 @@ namespace base {
 	insert(new TraceMonitorFactory);
 	insert(new MeanMonitorFactory);
 	insert(new VarianceMonitorFactory);
+	insert(new LogDensityMonitorFactory);
     }
 
     BaseModule::~BaseModule() {

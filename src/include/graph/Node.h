@@ -5,6 +5,9 @@
 #include <vector>
 #include <string>
 
+#include <distribution/Distribution.h>
+// Required for PDFtype enum
+
 namespace jags {
 
 struct RNG;
@@ -164,6 +167,22 @@ public:
     void addChild(DeterministicNode *node) const;
     void removeChild(DeterministicNode *node) const;
     virtual void unlinkParents() = 0;
+	
+    /**
+     * Returns the log of the density of a StochasticNode
+     * given the current parameter values. For a ConstantNode
+     * or a DeterministicNode this will simply return 0.
+     *
+     * @param chain Number of chain (starting from zero) for which
+     * to evaluate log density.
+     *
+     * @param type Indicates whether the full probability density
+     * function is required (PDF_FULL) or whether partial calculations
+     * are permitted (PDF_PRIOR, PDF_LIKELIHOOD). See PDFType for
+     * details.
+     */
+    virtual double logDensity(unsigned int chain, PDFType type) const = 0;
+	
 };
 
 /**
