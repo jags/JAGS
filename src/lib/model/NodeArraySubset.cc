@@ -7,7 +7,7 @@
 
 #include <set>
 #include <stdexcept>
-
+#include <cmath>
 
 using std::set;
 using std::vector;
@@ -61,7 +61,7 @@ namespace jags {
 	return ans;
     }
     
-    vector<double> NodeArraySubset::logDensity(unsigned int chain, PDFType type) const
+    vector<double> NodeArraySubset::logDensity(unsigned int chain, PDFType pdf_type, DensityType density_type) const
     {
 	vector<double> ans;
 	Node const *node = 0;
@@ -70,7 +70,13 @@ namespace jags {
 	    if (_node_pointers[i]) {
 		if (node != _node_pointers[i]) {
 		    node = _node_pointers[i];
-		    value = node->logDensity(chain, type);
+		    value = node->logDensity(chain, pdf_type);
+			if ( density_type == DENSITY ) {
+				value = std::exp(value);
+			}
+			else if ( density_type == DEVIANCE ) {
+				value = -2.0 * value;
+			}			
 		}
 		ans.push_back(value);
 	    }

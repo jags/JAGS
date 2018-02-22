@@ -14,6 +14,8 @@ namespace jags {
     class NodeArray;
     class Range;
     
+	enum DensityType {DENSITY, LOGDENSITY, DEVIANCE};
+	
     /**
      * @short Subset of a NodeArray
      * 
@@ -43,7 +45,7 @@ namespace jags {
 	 *
 	 * @param chain Index number of chain to read.
 	 */
-	std::vector<double> logDensity(unsigned int chain, PDFType type) const;
+	std::vector<double> logDensity(unsigned int chain, PDFType pdf_type, DensityType density_type = LOGDENSITY) const;
 	/**
 	 * Returns the dimension of the subset
 	 */

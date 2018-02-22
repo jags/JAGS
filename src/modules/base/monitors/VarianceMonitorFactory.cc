@@ -19,7 +19,7 @@ namespace base {
 					     string const &type,
 					     string &msg)
     {
-	if (type != "variance")
+	if (type != "variance" && type != "var")
 	    return 0;
 
 	NodeArray *array = model->symtab().getVariable(name);
