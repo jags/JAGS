@@ -13,11 +13,13 @@ dic_la_SOURCES = dic.cc DevianceMean.cc DevianceTrace.cc		\
 DevianceMonitorFactory.cc PDMonitor.cc PoptMonitor.cc			\
 PDMonitorFactory.cc PDTrace.cc PDTraceFactory.cc			\
 WAICMonitorFactory.cc WAICMonitor.cc						\
-NodeDensityMonitorFactory.cc DensityTrace.cc
+NodeDensityMonitorFactory.cc ObsStochDensMonitorFactory.cc   \
+DensityTrace.cc
 
 noinst_HEADERS = DevianceMean.h DevianceTrace.h				\
 DevianceMonitorFactory.h PDMonitor.h PoptMonitor.h PDMonitorFactory.h	\
 PDTrace.h PDTraceFactory.h						\
 WAICMonitorFactory.h WAICMonitor.h				\
-NodeDensityMonitorFactory.h DensityTrace.h
+NodeDensityMonitorFactory.h ObsStochDensMonitorFactory.h   \
+DensityTrace.h
 

@@ -5,6 +5,7 @@
 #include "PDTraceFactory.h"
 #include "WAICMonitorFactory.h"
 #include "NodeDensityMonitorFactory.h"
+#include "ObsStochDensMonitorFactory.h"
 
 using std::vector;
 
@@ -26,6 +27,7 @@ namespace dic {
 	insert(new PDTraceFactory);
 	insert(new WAICMonitorFactory);
 	insert(new NodeDensityMonitorFactory);
+	insert(new ObsStochDensMonitorFactory);
     }
     
     DICModule::~DICModule() {

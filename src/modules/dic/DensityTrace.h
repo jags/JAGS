@@ -2,23 +2,28 @@
 #define DENSITY_TRACE_H_
 
 #include <model/Monitor.h>
-#include <model/NodeArraySubset.h>
+#include <graph/Node.h>
 
 #include <vector>
 
 namespace jags {
     namespace dic {
-
+	
+	enum DensityType {DENSITY, LOGDENSITY, DEVIANCE};
+	
    	/**
    	 * @short Stores values of density/log density/deviance corresponding to sampled values of a given Node
+	 *
+	 * Note that this class is used by both NodeDensityMonitorFactory and ObsStochDensMonitorFactory
    	 */
    	class DensityTrace : public Monitor {
  	  protected:
-   	    NodeArraySubset _subset;
+   	    std::vector<Node const *> _nodes;
    	    std::vector<std::vector<double> > _values; // density/log density/deviance corresponding to sampled values
 		DensityType const _density_type;
+		unsigned int const _nchain;
    	  public:
-   	    DensityTrace(NodeArraySubset const &subset, DensityType const density_type, std::string const &monitor_name);
+   	    DensityTrace(std::vector<Node const *> const &nodes, DensityType const density_type, std::string const &monitor_name);
    	    void update();
    	    std::vector<double> const &value(unsigned int chain) const;
    	    std::vector<unsigned int> dim() const;

@@ -2,11 +2,8 @@
 #define NODE_ARRAY_SUBSET_H_
 
 #include <sarray/Range.h>
-#include <distribution/Distribution.h>
-// Required for PDFtype enum
 
 #include <vector>
-
 
 namespace jags {
 
@@ -14,8 +11,6 @@ namespace jags {
     class NodeArray;
     class Range;
     
-	enum DensityType {DENSITY, LOGDENSITY, DEVIANCE};
-	
     /**
      * @short Subset of a NodeArray
      * 
@@ -38,14 +33,6 @@ namespace jags {
 	 * @param chain Index number of chain to read.
 	 */
 	std::vector<double> value(unsigned int chain) const;
-	/**
-	 * Returns the log densities corresponding to the values of 
-	 * the nodes in the range covered by the NodeArraySubset in 
-	 * column major order.
-	 *
-	 * @param chain Index number of chain to read.
-	 */
-	std::vector<double> logDensity(unsigned int chain, PDFType pdf_type, DensityType density_type = LOGDENSITY) const;
 	/**
 	 * Returns the dimension of the subset
 	 */

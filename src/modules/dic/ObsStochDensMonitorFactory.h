@@ -1,5 +1,5 @@
-#ifndef NODE_DENSITY_MONITOR_FACTORY_H_
-#define NODE_DENSITY_MONITOR_FACTORY_H_
+#ifndef OBS_STOCH_DENS_MONITOR_FACTORY_H_
+#define OBS_STOCH_DENS_MONITOR_FACTORY_H_
 
 #include <model/MonitorFactory.h>
 #include <model/Monitor.h>
@@ -7,12 +7,10 @@
 namespace jags {
 namespace dic {
 
-// Required for DensityType enum:
-
     /**
-     * @short Factory for creating density-related monitors for a given node
-     */
-    class NodeDensityMonitorFactory : public MonitorFactory
+     * @short Factory for creating density-related monitors for observed stochastic nodes
+    */
+    class ObsStochDensMonitorFactory : public MonitorFactory
     {
       public:
 	Monitor *getMonitor(std::string const &name, Range const &range,
@@ -23,4 +21,4 @@ namespace dic {
     
 }}
 
-#endif /* NODE_DENSITY_MONITOR_FACTORY_H_ */
+#endif /* OBS_STOCH_DENS_MONITOR_FACTORY_H_ */
