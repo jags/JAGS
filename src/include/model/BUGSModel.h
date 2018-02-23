@@ -24,6 +24,12 @@ class BUGSModel : public Model
     SymTab _symtab;
     //std::map<Node const*, std::pair<std::string, Range> > _node_map;
     std::list<MonitorInfo> _bugs_monitors;
+
+    // Only to be used by observedStochasticNodes():
+    std::vector<Node const *> _observed_stochastic_nodes;
+    // Only to be used by observedStochasticNodeNames():
+    std::vector<std::string> _observed_stochastic_node_names;
+
 public:
     BUGSModel(unsigned int nchain);
     ~BUGSModel();
@@ -132,6 +138,15 @@ public:
     void samplerNames(std::vector<std::vector<std::string> > &sampler_names) 
 	const;
 
+    /**
+     * Returns a vector of all observed stochastic nodes in the model
+     */ 
+    std::vector<Node const *> const &observedStochasticNodes();
+    /**
+     * Returns a vector of the names corresponding to the observed
+     * stochastic nodes in the model
+     */ 
+    std::vector<std::string> const &observedStochasticNodeNames();
 };
 
 } /* namespace jags */

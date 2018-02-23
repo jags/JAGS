@@ -662,6 +662,11 @@ vector<string> const &Console::variableNames() const
     return _array_names;
 }
 
+vector<string> const &Console::observedStochasticNodeNames() const
+{
+	return _model->observedStochasticNodeNames();
+}
+
 bool Console::dumpSamplers(vector<vector<string> > &sampler_names)
 {
     if (_model == 0) {

@@ -149,14 +149,8 @@ namespace dic {
 			return 0;
 		}
 		
-		vector<StochasticNode *> const &snodes = model->stochasticNodes();
-		vector<Node const *> observed_snodes;
-		for (unsigned int i = 0; i < snodes.size(); ++i) {
-		    if (snodes[i]->isFixed()) {
-				// Implicit up-cast to Node from StochasticNode:
-				observed_snodes.push_back(snodes[i]);
-		    }
-		}
+		vector<Node const *> const &observed_snodes = model->observedStochasticNodes();
+		
 		if (observed_snodes.empty()) {
 		    msg = "There are no observed stochastic nodes";
 		    return 0;

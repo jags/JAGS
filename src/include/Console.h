@@ -175,6 +175,13 @@
     */
    std::vector<std::string> const &variableNames() const;
    /**
+    * Retrieves the names of observed stochastic nodes
+    *
+    * These names are guaranteed to correspond to the values given by 
+    * deviance monitors in the DIC module
+    */
+   std::vector<std::string> const &observedStochasticNodeNames() const;
+   /**
     * Dump the contants of monitored node in CODA format
     *
     * @param node Vector of monitored nodes to be dumped, each node

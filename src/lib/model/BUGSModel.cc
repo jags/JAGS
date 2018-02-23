@@ -232,4 +232,41 @@ void BUGSModel::samplerNames(vector<vector<string> > &sampler_names) const
     }    
 }
 
+vector<Node const *> const &BUGSModel::observedStochasticNodes()
+{
+	/* Note: this could be implemented by conditionally including 
+	_observed_stochastic_nodes.push_back(node) in a derived
+	Model::addNode(StochasticNode) method - which would then 
+	mean that observedStochasticNodes() could be const
+	BUT this would add compilation time for all models and
+	observedStochasticNodes are only needed by deviance monitors
+	and to get the names of the observedStochasticNodes */
+	
+	vector<StochasticNode*> const &snodes = stochasticNodes();
+
+	_observed_stochastic_nodes.clear();
+	for (unsigned int i = 0; i < snodes.size(); ++i) {
+	    if (snodes[i]->isFixed()) {
+			// Implicit up-cast to Node from StochasticNode:
+			_observed_stochastic_nodes.push_back(snodes[i]);
+	    }
+	}
+	
+	return _observed_stochastic_nodes;
+}
+
+vector<string> const &BUGSModel::observedStochasticNodeNames()
+{
+	/* Note: See observedStochasticNodes for possible alternative 
+	implementation that would avoid this: */
+	vector<Node const *> obsnodes = observedStochasticNodes();
+	
+	_observed_stochastic_node_names.clear();
+	for (unsigned int i = 0; i < obsnodes.size(); ++i) {
+		_observed_stochastic_node_names.push_back(symtab().getName(obsnodes[i]));
+	}
+	
+	return _observed_stochastic_node_names;
+}
+
 } //namespace jags

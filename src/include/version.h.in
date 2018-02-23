@@ -1,7 +1,7 @@
 #ifndef JAGS_VERSION_H_
 #define JAGS_VERSION_H_
 
-#define JAGS_MAJOR 4
+#define JAGS_MAJOR @JAGS_MAJOR@
 
 extern "C" {
    char const * jags_version();
