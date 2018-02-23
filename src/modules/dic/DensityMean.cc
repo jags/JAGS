@@ -14,10 +14,11 @@ using std::string;
 namespace jags {
 namespace dic {
 
-    DensityMean::DensityMean(vector<Node const *> const &nodes,
+    DensityMean::DensityMean(vector<Node const *> const &nodes, vector<unsigned int> dim,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
-		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain(), vector<double>(nodes.size(), 0.0)), _n(0)
+		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain(), vector<double>(nodes.size(), 0.0)),
+		_n(0), _dim(dim)
     {
 		if( _density_type != DENSITY && _density_type != LOGDENSITY && _density_type != DEVIANCE ) {
 			throw std::logic_error("Unimplemented DensityType in DensityMean");
@@ -54,7 +55,7 @@ namespace dic {
 
     vector<unsigned int> DensityMean::dim() const
     {
-	return vector<unsigned int>(1, _nodes.size());
+	return _dim;
     }
 
     bool DensityMean::poolChains() const

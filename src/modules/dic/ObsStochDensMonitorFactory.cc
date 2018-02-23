@@ -160,21 +160,25 @@ namespace dic {
 		/* Create the correct subtype of monitor */
 
 		Monitor *m = 0;
+		
+		// There is only ever a single dimension of variables to worry about:
+		vector<unsigned int> dim;
+		dim.push_back(observed_snodes.size());
 
 		if (monitor_type == TRACE) {
-			m = new DensityTrace(observed_snodes, density_type, monitor_name);
+			m = new DensityTrace(observed_snodes, dim, density_type, monitor_name);
 		}
 		else if (monitor_type == MEAN) {
-			m = new DensityMean(observed_snodes, density_type, monitor_name);
+			m = new DensityMean(observed_snodes, dim, density_type, monitor_name);
 		}
 		else if (monitor_type == VARIANCE) {
-			m = new DensityVariance(observed_snodes, density_type, monitor_name);
+			m = new DensityVariance(observed_snodes, dim, density_type, monitor_name);
 		}
 		else if (monitor_type == TOTAL) {
-			m = new DensityTotal(observed_snodes, density_type, monitor_name);
+			m = new DensityTotal(observed_snodes, dim, density_type, monitor_name);
 		}
 		else if (monitor_type == POOLMEAN) {
-			m = new DensityPoolMean(observed_snodes, density_type, monitor_name);
+			m = new DensityPoolMean(observed_snodes, dim, density_type, monitor_name);
 		}
 		else {
 			throw std::logic_error("Unimplemented MonitorType in ObsStochDensMonitorFactory");

@@ -21,10 +21,12 @@ namespace jags {
 		std::vector<std::vector<double> > _mms;
 		std::vector<std::vector<double> > _variances;
 		DensityType const _density_type;  // enum is defined in model/Monitor.h
+		std::vector<unsigned int> _dim;
 		unsigned int const _nchain;
 		unsigned int _n;
    	  public:
-   	    DensityVariance(std::vector<Node const *> const &nodes, DensityType const density_type, std::string const &monitor_name);
+   	    DensityVariance(std::vector<Node const *> const &nodes, std::vector<unsigned int> dim, 
+				DensityType const density_type, std::string const &monitor_name);
    	    void update();
    	    std::vector<double> const &value(unsigned int chain) const;
    	    std::vector<unsigned int> dim() const;

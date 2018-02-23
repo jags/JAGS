@@ -139,21 +139,23 @@ namespace dic {
 		/* Create the correct subtype of monitor */
 
 		Monitor *m = 0;
-
+		
+		NodeArraySubset nodearray = NodeArraySubset(array, range);		
+		
 		if (monitor_type == TRACE) {
-			m = new DensityTrace(NodeArraySubset(array, range).nodes(), density_type, monitor_name);
+			m = new DensityTrace(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else if (monitor_type == MEAN) {
-			m = new DensityMean(NodeArraySubset(array, range).nodes(), density_type, monitor_name);
+			m = new DensityMean(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else if (monitor_type == VARIANCE) {
-			m = new DensityVariance(NodeArraySubset(array, range).nodes(), density_type, monitor_name);
+			m = new DensityVariance(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else if (monitor_type == TOTAL) {
-			m = new DensityTotal(NodeArraySubset(array, range).nodes(), density_type, monitor_name);
+			m = new DensityTotal(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else if (monitor_type == POOLMEAN) {
-			m = new DensityPoolMean(NodeArraySubset(array, range).nodes(), density_type, monitor_name);
+			m = new DensityPoolMean(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else {
 			throw std::logic_error("Unimplemented MonitorType in NodeDensityMonitorFactory");

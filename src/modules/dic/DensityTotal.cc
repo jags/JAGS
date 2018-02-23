@@ -14,7 +14,7 @@ using std::string;
 namespace jags {
 namespace dic {
 
-    DensityTotal::DensityTotal(vector<Node const *> const &nodes,
+    DensityTotal::DensityTotal(vector<Node const *> const &nodes, vector<unsigned int> dim,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
 		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain())
@@ -22,6 +22,8 @@ namespace dic {
 		if( _density_type != DENSITY && _density_type != LOGDENSITY && _density_type != DEVIANCE ) {
 			throw std::logic_error("Unimplemented DensityType in DensityTotal");
 		}
+		// This monitor pools between variables so ignores the dim it is passed:
+		_dim.push_back(1);
     }
 
     void DensityTotal::update()
@@ -50,7 +52,7 @@ namespace dic {
 
     vector<unsigned int> DensityTotal::dim() const
     {
-	return vector<unsigned int>(1, 1);
+	return _dim;
     }
 
     bool DensityTotal::poolChains() const

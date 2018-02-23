@@ -14,13 +14,13 @@ using std::string;
 namespace jags {
 namespace dic {
 
-    DensityVariance::DensityVariance(vector<Node const *> const &nodes,
+    DensityVariance::DensityVariance(vector<Node const *> const &nodes, vector<unsigned int> dim,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
 		_nchain(nodes[0]->nchain()), 
 		_means(nodes[0]->nchain(), vector<double>(nodes.size(), 0.0)),
 		_mms(nodes[0]->nchain(), vector<double>(nodes.size(), 0.0)),
-		_variances(nodes[0]->nchain(), vector<double>(nodes.size(), 0.0)), _n(0)
+		_variances(nodes[0]->nchain(), vector<double>(nodes.size(), 0.0)), _n(0), _dim(dim)
     {
 		if( _density_type != DENSITY && _density_type != LOGDENSITY && _density_type != DEVIANCE ) {
 			throw std::logic_error("Unimplemented DensityType in DensityVariance");
@@ -65,7 +65,7 @@ namespace dic {
 
     vector<unsigned int> DensityVariance::dim() const
     {
-	return vector<unsigned int>(1, _nodes.size());
+	return _dim;
     }
 
     bool DensityVariance::poolChains() const
