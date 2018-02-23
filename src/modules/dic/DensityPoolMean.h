@@ -1,5 +1,5 @@
-#ifndef DENSITY_TRACE_H_
-#define DENSITY_TRACE_H_
+#ifndef DENSITY_POOL_MEAN_H_
+#define DENSITY_POOL_MEAN_H_
 
 #include <model/Monitor.h>
 #include <graph/Node.h>
@@ -10,18 +10,19 @@ namespace jags {
     namespace dic {
 	
    	/**
-   	 * @short Stores values of density/log density/deviance corresponding to sampled values of a given Node
+   	 * @short Stores running mean values (pooled between chains) of density/log density/deviance for a given Node
 	 *
 	 * Note that this class is used by both NodeDensityMonitorFactory and ObsStochDensMonitorFactory
    	 */
-   	class DensityTrace : public Monitor {
+   	class DensityPoolMean : public Monitor {
  	  protected:
    	    std::vector<Node const *> _nodes;
-   	    std::vector<std::vector<double> > _values; // density/log density/deviance corresponding to sampled values
+   	    std::vector<double> _values; // density/log density/deviance corresponding to sampled values
 		DensityType const _density_type;  // enum is defined in model/Monitor.h
 		unsigned int const _nchain;
+		unsigned int _n;
    	  public:
-   	    DensityTrace(std::vector<Node const *> const &nodes, DensityType const density_type, std::string const &monitor_name);
+   	    DensityPoolMean(std::vector<Node const *> const &nodes, DensityType const density_type, std::string const &monitor_name);
    	    void update();
    	    std::vector<double> const &value(unsigned int chain) const;
    	    std::vector<unsigned int> dim() const;
@@ -32,4 +33,4 @@ namespace jags {
 }
 }
 
-#endif /* DENSITY_TRACE_H_ */
+#endif /* DENSITY_POOL_MEAN_H_ */

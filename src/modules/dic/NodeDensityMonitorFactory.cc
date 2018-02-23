@@ -1,13 +1,14 @@
 #include "NodeDensityMonitorFactory.h"
 #include "DensityTrace.h"
-//#include "DensityMean.h"
-//#include "DensityVariance.h"
-//#include "DensityTotal.h"
+#include "DensityMean.h"
+#include "DensityVariance.h"
+#include "DensityTotal.h"
+#include "DensityPoolMean.h"
 
 #include <model/BUGSModel.h>
-#include <model/NodeArraySubset.h>
 #include <graph/Graph.h>
 #include <graph/Node.h>
+#include <model/NodeArraySubset.h>
 #include <sarray/RangeIterator.h>
 
 #include <set>
@@ -27,13 +28,12 @@ namespace dic {
     {
 	
 		/* Work out the precise type of monitor */
-		
+				
+		// enums declared in model/Monitor.h:
+		MonitorType monitor_type; 
+		DensityType density_type; 
 		// Used to help resolve aliases:
 		string monitor_name = "";
-
-		MonitorType monitor_type; 
-		// enum declared in model/NodeArraySubset.h:
-		DensityType density_type; 
 		
 		if (type == "density_trace") {
 			monitor_type = TRACE;
@@ -60,6 +60,11 @@ namespace dic {
 			density_type = DENSITY;
 			monitor_name.assign("density_total");
 		}
+		else if (type == "density_poolmean") {
+			monitor_type = POOLMEAN;
+			density_type = DENSITY;
+			monitor_name.assign("density_poolmean");
+		}
 		else if (type == "logdensity_trace") {
 			monitor_type = TRACE;
 			density_type = LOGDENSITY;
@@ -84,6 +89,11 @@ namespace dic {
 			monitor_type = TOTAL;
 			density_type = LOGDENSITY;
 			monitor_name.assign("logdensity_total");
+		}
+		else if (type == "logdensity_poolmean") {
+			monitor_type = POOLMEAN;
+			density_type = LOGDENSITY;
+			monitor_name.assign("logdensity_poolmean");
 		}
 		else if (type == "deviance_trace") {
 			monitor_type = TRACE;
@@ -110,51 +120,16 @@ namespace dic {
 			density_type = DEVIANCE;
 			monitor_name.assign("deviance_total");
 		}
+		else if (type == "deviance_poolmean") {
+			monitor_type = POOLMEAN;
+			density_type = DEVIANCE;
+			monitor_name.assign("deviance_poolmean");
+		}
 		else {
 			// If not listed above:
 			return 0;
 		}
 		
-		/*
-		if (name != "deviance")
-		    return 0;
-		if (!isNULL(range)) {
-		    msg = "cannot monitor a subset of deviance";
-		    return 0;
-	
-		vector<StochasticNode *> const &snodes = model->stochasticNodes();
-		vector<StochasticNode const *> observed_snodes;
-		for (unsigned int i = 0; i < snodes.size(); ++i) {
-		    if (snodes[i]->isFixed()) {
-			observed_snodes.push_back(snodes[i]);
-		    }
-		}
-		if (observed_snodes.empty()) {
-		    msg = "There are no observed stochastic nodes";
-		    return 0;
-		}
-
-		Monitor *m = 0;
-
-		if (type == "mean") {
-		    m = new DevianceMean(observed_snodes);
-		    m->setName(name);
-		    vector<string> onames(observed_snodes.size());
-		    for (unsigned int i = 0; i < observed_snodes.size(); ++i) {
-			onames[i] = model->symtab().getName(observed_snodes[i]);
-		    }
-		    m->setElementNames(onames);
-		}
-		else if (type == "trace") {
-		    m = new DevianceTrace(observed_snodes);
-		    m->setName("deviance");
-		    m->setElementNames(vector<string>(1,"deviance"));
-		}
-		return m;
-
-		}*/
-
-
 		NodeArray *array = model->symtab().getVariable(name);
 		if (!array) {
 		    msg = string("Variable ") + name + " not found";
@@ -168,7 +143,7 @@ namespace dic {
 		if (monitor_type == TRACE) {
 			m = new DensityTrace(NodeArraySubset(array, range).nodes(), density_type, monitor_name);
 		}
-/*		else if (monitor_type == MEAN) {
+		else if (monitor_type == MEAN) {
 			m = new DensityMean(NodeArraySubset(array, range).nodes(), density_type, monitor_name);
 		}
 		else if (monitor_type == VARIANCE) {
@@ -177,7 +152,10 @@ namespace dic {
 		else if (monitor_type == TOTAL) {
 			m = new DensityTotal(NodeArraySubset(array, range).nodes(), density_type, monitor_name);
 		}
-*/		else {
+		else if (monitor_type == POOLMEAN) {
+			m = new DensityPoolMean(NodeArraySubset(array, range).nodes(), density_type, monitor_name);
+		}
+		else {
 			throw std::logic_error("Unimplemented MonitorType in NodeDensityMonitorFactory");
 		}
 		

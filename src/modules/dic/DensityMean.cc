@@ -4,7 +4,7 @@
 // Required for PDFtype enum
 #include <util/nainf.h>
 
-#include "DensityTrace.h"
+#include "DensityMean.h"
 
 #include <cmath>
 
@@ -14,52 +14,57 @@ using std::string;
 namespace jags {
 namespace dic {
 
-    DensityTrace::DensityTrace(vector<Node const *> const &nodes,
+    DensityMean::DensityMean(vector<Node const *> const &nodes,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
-		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain())
+		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain(), vector<double>(nodes.size(), 0.0)), _n(0)
     {
 		if( _density_type != DENSITY && _density_type != LOGDENSITY && _density_type != DEVIANCE ) {
-			throw std::logic_error("Unimplemented DensityType in DensityTrace");
+			throw std::logic_error("Unimplemented DensityType in DensityMean");
 		}
     }
 
-    void DensityTrace::update()
+    void DensityMean::update()
     {
+		_n++;
 		for (unsigned int ch = 0; ch < _nchain; ++ch) {
+		    vector<double> &rmean  = _values[ch];			
 		    for (unsigned int i = 0; i < _nodes.size(); ++i) {
 				double newval = _nodes[i]->logDensity(ch, PDF_FULL);
 				if (newval == JAGS_NA) {
-				    // Don't try and convert NA to density or deviance
-				}else if( _density_type == DENSITY ) {
-					newval = std::exp(newval);
+				    rmean[i] = JAGS_NA;
 				}
-				else if ( _density_type == DEVIANCE ) {
-					newval = -2.0 * newval;
+				else {
+					if( _density_type == DENSITY ) {
+						newval = std::exp(newval);
+					}
+					else if ( _density_type == DEVIANCE ) {
+						newval = -2.0 * newval;
+					}
+				    rmean[i] -= (rmean[i] - newval)/_n;
 				}
-			    _values[ch].push_back(newval);
 		    }
 		}
     }
 	
-    vector<double> const &DensityTrace::value(unsigned int chain) const
+    vector<double> const &DensityMean::value(unsigned int chain) const
     {
 	return _values[chain];
     }
 
-    vector<unsigned int> DensityTrace::dim() const
+    vector<unsigned int> DensityMean::dim() const
     {
 	return vector<unsigned int>(1, _nodes.size());
     }
 
-    bool DensityTrace::poolChains() const
+    bool DensityMean::poolChains() const
     {
 	return false;
     }
 
-    bool DensityTrace::poolIterations() const
+    bool DensityMean::poolIterations() const
     {
-	return false;
+	return true;
     }
 
 }}

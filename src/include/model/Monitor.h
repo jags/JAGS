@@ -28,7 +28,7 @@ enum DensityType {DENSITY, LOGDENSITY, DEVIANCE};
 * Note that it is NOT used by Monitor but this is seemed like a
 * sensible central location to set the enum
 */
-enum MonitorType {TRACE, MEAN, VARIANCE, TOTAL};
+enum MonitorType {TRACE, MEAN, VARIANCE, TOTAL, POOLMEAN};
 
 class Node;
 

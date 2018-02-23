@@ -1,8 +1,9 @@
 #include "ObsStochDensMonitorFactory.h"
 #include "DensityTrace.h"
-//#include "DensityMean.h"
-//#include "DensityVariance.h"
-//#include "DensityTotal.h"
+#include "DensityMean.h"
+#include "DensityVariance.h"
+#include "DensityTotal.h"
+#include "DensityPoolMean.h"
 
 #include <model/BUGSModel.h>
 #include <graph/Graph.h>
@@ -35,12 +36,11 @@ namespace dic {
 		
 		/* Work out the precise type of monitor */
 		
+		// enums declared in model/Monitor.h:
+		MonitorType monitor_type; 
+		DensityType density_type; 
 		// Used to help resolve aliases:
 		string monitor_name = "";
-
-		MonitorType monitor_type; 
-		// enum declared in model/NodeArraySubset.h:
-		DensityType density_type; 
 		
 		if (type == "density_trace") {
 			monitor_type = TRACE;
@@ -67,6 +67,11 @@ namespace dic {
 			density_type = DENSITY;
 			monitor_name.assign("density_total");
 		}
+		else if (type == "density_poolmean") {
+			monitor_type = POOLMEAN;
+			density_type = DENSITY;
+			monitor_name.assign("density_poolmean");
+		}
 		else if (type == "logdensity_trace") {
 			monitor_type = TRACE;
 			density_type = LOGDENSITY;
@@ -92,6 +97,11 @@ namespace dic {
 			density_type = LOGDENSITY;
 			monitor_name.assign("logdensity_total");
 		}
+		else if (type == "logdensity_poolmean") {
+			monitor_type = POOLMEAN;
+			density_type = LOGDENSITY;
+			monitor_name.assign("logdensity_poolmean");
+		}
 		else if (type == "deviance_trace") {
 			monitor_type = TRACE;
 			density_type = DEVIANCE;
@@ -116,6 +126,23 @@ namespace dic {
 			monitor_type = TOTAL;
 			density_type = DEVIANCE;
 			monitor_name.assign("deviance_total");
+		}
+		else if (type == "deviance_poolmean") {
+			monitor_type = POOLMEAN;
+			density_type = DEVIANCE;
+			monitor_name.assign("deviance_poolmean");
+		}
+		else if (type == "trace") {
+			// The equivalent of monitor('deviance', type='trace') in DevianceMonitorFactory:
+			monitor_type = TOTAL;
+			density_type = DEVIANCE;
+			monitor_name.assign("trace");  // Note: name is for backwards-compatibility with DevianceMonitorFactory
+		}
+		else if (type == "mean") {
+			// The equivalent of monitor('deviance', type='mean') in DevianceMonitorFactory:
+			monitor_type = POOLMEAN;
+			density_type = DEVIANCE;
+			monitor_name.assign("mean");  // Note: name is for backwards-compatibility with DevianceMonitorFactory
 		}
 		else {
 			// If not listed above:
@@ -143,7 +170,7 @@ namespace dic {
 		if (monitor_type == TRACE) {
 			m = new DensityTrace(observed_snodes, density_type, monitor_name);
 		}
-/*		else if (monitor_type == MEAN) {
+		else if (monitor_type == MEAN) {
 			m = new DensityMean(observed_snodes, density_type, monitor_name);
 		}
 		else if (monitor_type == VARIANCE) {
@@ -152,7 +179,10 @@ namespace dic {
 		else if (monitor_type == TOTAL) {
 			m = new DensityTotal(observed_snodes, density_type, monitor_name);
 		}
-*/		else {
+		else if (monitor_type == POOLMEAN) {
+			m = new DensityPoolMean(observed_snodes, density_type, monitor_name);
+		}
+		else {
 			throw std::logic_error("Unimplemented MonitorType in ObsStochDensMonitorFactory");
 		}
 		

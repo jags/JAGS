@@ -1,5 +1,5 @@
-#ifndef DENSITY_TRACE_H_
-#define DENSITY_TRACE_H_
+#ifndef DENSITY_VARIANCE_H_
+#define DENSITY_VARIANCE_H_
 
 #include <model/Monitor.h>
 #include <graph/Node.h>
@@ -10,18 +10,21 @@ namespace jags {
     namespace dic {
 	
    	/**
-   	 * @short Stores values of density/log density/deviance corresponding to sampled values of a given Node
+   	 * @short Stores running variance values of density/log density/deviance for a given Node
 	 *
 	 * Note that this class is used by both NodeDensityMonitorFactory and ObsStochDensMonitorFactory
    	 */
-   	class DensityTrace : public Monitor {
+   	class DensityVariance : public Monitor {
  	  protected:
    	    std::vector<Node const *> _nodes;
-   	    std::vector<std::vector<double> > _values; // density/log density/deviance corresponding to sampled values
+		std::vector<std::vector<double> > _means;
+		std::vector<std::vector<double> > _mms;
+		std::vector<std::vector<double> > _variances;
 		DensityType const _density_type;  // enum is defined in model/Monitor.h
 		unsigned int const _nchain;
+		unsigned int _n;
    	  public:
-   	    DensityTrace(std::vector<Node const *> const &nodes, DensityType const density_type, std::string const &monitor_name);
+   	    DensityVariance(std::vector<Node const *> const &nodes, DensityType const density_type, std::string const &monitor_name);
    	    void update();
    	    std::vector<double> const &value(unsigned int chain) const;
    	    std::vector<unsigned int> dim() const;
@@ -32,4 +35,4 @@ namespace jags {
 }
 }
 
-#endif /* DENSITY_TRACE_H_ */
+#endif /* DENSITY_VARIANCE_H_ */

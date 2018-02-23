@@ -1,9 +1,9 @@
 #include <module/Module.h>
 
-#include "DevianceMonitorFactory.h"
+//#include "DevianceMonitorFactory.h"
 #include "PDMonitorFactory.h"
 #include "PDTraceFactory.h"
-#include "WAICMonitorFactory.h"
+//#include "WAICMonitorFactory.h"
 #include "NodeDensityMonitorFactory.h"
 #include "ObsStochDensMonitorFactory.h"
 
@@ -22,12 +22,23 @@ namespace dic {
 	: Module("dic")
     {
 	
-	insert(new DevianceMonitorFactory);
-	insert(new PDMonitorFactory);
-	insert(new PDTraceFactory);
-	insert(new WAICMonitorFactory);
-	insert(new NodeDensityMonitorFactory);
-	insert(new ObsStochDensMonitorFactory);
+		/*  DevianceMonitorFactory (and DevianceTrace/DevianceMean) from JAGS 4.3.0 could now be retired?
+			The same quantities are provided by ObsStochDensMonitorFactory and are named for backwards-compatibility
+		*/
+	//	insert(new DevianceMonitorFactory);
+
+		// Handles density-related monitors for a given node:
+		insert(new NodeDensityMonitorFactory);
+		// Handles density-related monitors for all observed stochastic nodes:
+		insert(new ObsStochDensMonitorFactory);
+
+		// Unchanged from JAGS 4.3.0
+		insert(new PDMonitorFactory);
+		// Unchanged from JAGS 4.3.0
+		insert(new PDTraceFactory);
+
+		// Now retired:
+	//	insert(new WAICMonitorFactory);
     }
     
     DICModule::~DICModule() {
