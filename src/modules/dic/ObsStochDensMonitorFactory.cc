@@ -1,9 +1,11 @@
+#include "DensityEnums.h"
 #include "ObsStochDensMonitorFactory.h"
 #include "DensityTrace.h"
 #include "DensityMean.h"
 #include "DensityVariance.h"
 #include "DensityTotal.h"
 #include "DensityPoolMean.h"
+#include "DensityPoolVariance.h"
 
 #include <model/BUGSModel.h>
 #include <graph/Graph.h>
@@ -52,12 +54,7 @@ namespace dic {
 			density_type = DENSITY;
 			monitor_name.assign("density_mean");
 		}
-		else if (type == "density_variance") {
-			monitor_type = VARIANCE;
-			density_type = DENSITY;
-			monitor_name.assign("density_variance");
-		}
-		else if (type == "density_var") {
+		else if (type == "density_variance" || type == "density_var") {
 			monitor_type = VARIANCE;
 			density_type = DENSITY;
 			monitor_name.assign("density_variance");
@@ -72,6 +69,11 @@ namespace dic {
 			density_type = DENSITY;
 			monitor_name.assign("density_poolmean");
 		}
+		else if (type == "density_poolvariance" || type == "density_poolvar") {
+			monitor_type = POOLVARIANCE;
+			density_type = DENSITY;
+			monitor_name.assign("density_poolvariance");
+		}
 		else if (type == "logdensity_trace") {
 			monitor_type = TRACE;
 			density_type = LOGDENSITY;
@@ -82,12 +84,7 @@ namespace dic {
 			density_type = LOGDENSITY;
 			monitor_name.assign("logdensity_mean");
 		}
-		else if (type == "logdensity_variance") {
-			monitor_type = VARIANCE;
-			density_type = LOGDENSITY;
-			monitor_name.assign("logdensity_variance");
-		}
-		else if (type == "logdensity_var") {
+		else if (type == "logdensity_variance" || type == "logdensity_var") {
 			monitor_type = VARIANCE;
 			density_type = LOGDENSITY;
 			monitor_name.assign("logdensity_variance");
@@ -102,6 +99,11 @@ namespace dic {
 			density_type = LOGDENSITY;
 			monitor_name.assign("logdensity_poolmean");
 		}
+		else if (type == "logdensity_poolvariance" || type == "logdensity_poolvar") {
+			monitor_type = POOLVARIANCE;
+			density_type = LOGDENSITY;
+			monitor_name.assign("logdensity_poolvariance");
+		}
 		else if (type == "deviance_trace") {
 			monitor_type = TRACE;
 			density_type = DEVIANCE;
@@ -112,12 +114,7 @@ namespace dic {
 			density_type = DEVIANCE;
 			monitor_name.assign("deviance_mean");
 		}
-		else if (type == "deviance_variance") {
-			monitor_type = VARIANCE;
-			density_type = DEVIANCE;
-			monitor_name.assign("deviance_variance");
-		}
-		else if (type == "deviance_var") {
+		else if (type == "deviance_variance" || type == "deviance_var") {
 			monitor_type = VARIANCE;
 			density_type = DEVIANCE;
 			monitor_name.assign("deviance_variance");
@@ -132,6 +129,12 @@ namespace dic {
 			density_type = DEVIANCE;
 			monitor_name.assign("deviance_poolmean");
 		}
+		else if (type == "deviance_poolvariance" || type == "deviance_poolvar") {
+			monitor_type = POOLVARIANCE;
+			density_type = DEVIANCE;
+			monitor_name.assign("deviance_poolvariance");
+		}
+		/* Currently disabled to avoid clashes with DevianceMonitorFactory:
 		else if (type == "trace") {
 			// The equivalent of monitor('deviance', type='trace') in DevianceMonitorFactory:
 			monitor_type = TOTAL;
@@ -143,8 +146,8 @@ namespace dic {
 			monitor_type = POOLMEAN;
 			density_type = DEVIANCE;
 			monitor_name.assign("mean");  // Note: name is for backwards-compatibility with DevianceMonitorFactory
-		}
-		else {
+		}		
+		*/else {
 			// If not listed above:
 			return 0;
 		}
@@ -180,6 +183,9 @@ namespace dic {
 		else if (monitor_type == POOLMEAN) {
 			m = new DensityPoolMean(observed_snodes, dim, density_type, monitor_name);
 		}
+		else if (monitor_type == POOLVARIANCE) {
+			m = new DensityPoolVariance(observed_snodes, dim, density_type, monitor_name);
+		}
 		else {
 			throw std::logic_error("Unimplemented MonitorType in ObsStochDensMonitorFactory");
 		}
@@ -193,10 +199,13 @@ namespace dic {
 		    m->setElementNames(vector<string>(1, monitor_name));
 		}
 		else {
+			/*
 		    vector<string> onames(observed_snodes.size());
 		    for (unsigned int i = 0; i < observed_snodes.size(); ++i) {
 				onames[i] = model->symtab().getName(observed_snodes[i]);
 		    }
+			*/
+			vector<string> const &onames = model->observedStochasticNodeNames();
 		    m->setElementNames(onames);
 		}
 		

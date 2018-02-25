@@ -60,8 +60,8 @@
     void return_to_main_buffer();
     void setMonitor(jags::ParseTree const *var, int thin, std::string const &type);
     void clearMonitor(jags::ParseTree const *var, std::string const &type);
-    void doCoda (jags::ParseTree const *var, std::string const &stem);
-    void doAllCoda (std::string const &stem);
+    void doCoda (jags::ParseTree const *var, std::string const &stem, std::string const &type);
+    void doAllCoda (std::string const &stem, std::string const &type);
     void doDump (std::string const &file, jags::DumpType type, unsigned int chain);
     void dumpMonitors(std::string const &file, std::string const &type);
     void doSystem(std::string const *command);
@@ -500,16 +500,22 @@ file_name: NAME { $$ = $1;}
 ;
 
 coda: CODA var {
-  doCoda ($2, "CODA"); delete $2;
+  doCoda ($2, "CODA", "*"); delete $2;
 }
 | CODA var ',' STEM '(' file_name ')' {
-  doCoda ($2, *$6); delete $2; delete $6;
+  doCoda ($2, *$6, "*"); delete $2; delete $6;
+}
+| CODA var ',' STEM '(' file_name ')' TYPE '(' NAME ')' {
+  doCoda ($2, *$6, *$10); delete $2; delete $6; delete $10;
 }
 | CODA '*' {
-  doAllCoda ("CODA"); 
+  doAllCoda ("CODA", "*"); 
 }
 | CODA '*' ',' STEM '(' file_name ')' {
-  doAllCoda (*$6); delete $6; 
+  doAllCoda (*$6, "*"); delete $6; 
+}
+| CODA '*' ',' STEM '(' file_name ')' TYPE '(' NAME ')' {
+  doAllCoda (*$6, *$10); delete $6; delete $10;
 }
 ;
 
@@ -827,12 +833,12 @@ void clearMonitor(jags::ParseTree const *var, std::string const &type)
     }
 }
 
-void doAllCoda (std::string const &stem)
+void doAllCoda (std::string const &stem, std::string const &type)
 {
-    console->coda(stem);
+    console->coda(stem, type);
 }
 
-void doCoda (jags::ParseTree const *var, std::string const &stem)
+void doCoda (jags::ParseTree const *var, std::string const &stem, std::string const &type)
 {
     //FIXME: Allow list of several nodes
 
@@ -845,7 +851,7 @@ void doCoda (jags::ParseTree const *var, std::string const &stem)
 	/* Requesting subset of a multivariate node */
 	dmp.push_back(std::pair<std::string,jags::Range>(var->name(), getRange(var)));
     }
-    console->coda(dmp, stem);
+    console->coda(dmp, stem, type);
 }
 
 /* Helper function for doDump that handles all the special cases

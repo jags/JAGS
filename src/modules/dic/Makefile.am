@@ -15,7 +15,7 @@ PDMonitorFactory.cc PDTrace.cc PDTraceFactory.cc			\
 WAICMonitorFactory.cc WAICMonitor.cc						\
 NodeDensityMonitorFactory.cc ObsStochDensMonitorFactory.cc   \
 DensityTrace.cc DensityMean.cc DensityVariance.cc			\
-DensityTotal.cc DensityPoolMean.cc
+DensityTotal.cc DensityPoolMean.cc DensityPoolVariance.cc
 
 noinst_HEADERS = DevianceMean.h DevianceTrace.h				\
 DevianceMonitorFactory.h PDMonitor.h PoptMonitor.h PDMonitorFactory.h	\
@@ -23,5 +23,5 @@ PDTrace.h PDTraceFactory.h						\
 WAICMonitorFactory.h WAICMonitor.h				\
 NodeDensityMonitorFactory.h ObsStochDensMonitorFactory.h   \
 DensityTrace.h DensityMean.h DensityVariance.h			\
-DensityTotal.h DensityPoolMean.h
+DensityTotal.h DensityPoolMean.h DensityPoolVariance.h
 

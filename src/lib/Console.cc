@@ -559,7 +559,7 @@ bool Console::dumpMonitors(map<string,SArray> &data_table,
 }
 
 
-bool Console::coda(string const &prefix)
+bool Console::coda(string const &prefix, string const &type)
 {
     if (!_model) {
 	_err << "Can't dump CODA output. No model!" << endl;
@@ -568,7 +568,7 @@ bool Console::coda(string const &prefix)
 
     try {
         string warn;
-	_model->coda(prefix, warn);
+	_model->coda(prefix, warn, type);
         if (!warn.empty()) {
             _err << "WARNING:\n" << warn;
         }
@@ -579,7 +579,7 @@ bool Console::coda(string const &prefix)
 }
 
 bool Console::coda(vector<pair<string, Range> > const &nodes,
-		   string const &prefix)
+		   string const &prefix, string const &type)
 {
     if (!_model) {
 	_err << "Can't dump CODA output. No model!" << endl;
@@ -589,7 +589,7 @@ bool Console::coda(vector<pair<string, Range> > const &nodes,
 
     try {
         string warn;
-	_model->coda(nodes, prefix, warn);
+	_model->coda(nodes, prefix, warn, type);
         if (!warn.empty()) {
             _err << "WARNINGS:\n" << warn;
         }

@@ -1,6 +1,6 @@
 #include <module/Module.h>
 
-//#include "DevianceMonitorFactory.h"
+#include "DevianceMonitorFactory.h"
 #include "PDMonitorFactory.h"
 #include "PDTraceFactory.h"
 //#include "WAICMonitorFactory.h"
@@ -22,10 +22,13 @@ namespace dic {
 	: Module("dic")
     {
 	
-		/*  DevianceMonitorFactory (and DevianceTrace/DevianceMean) from JAGS 4.3.0 could now be retired?
-			The same quantities are provided by ObsStochDensMonitorFactory and are named for backwards-compatibility
+		/*  DevianceMonitorFactory (and DevianceTrace/DevianceMean) from 
+			JAGS 4.3.0 could now be retired?
+			The same quantities are provided by ObsStochDensMonitorFactory 
+			and are named for backwards-compatibility (althouh currently
+			disabled to avoid clashes)
 		*/
-	//	insert(new DevianceMonitorFactory);
+		insert(new DevianceMonitorFactory);
 
 		// Handles density-related monitors for a given node:
 		insert(new NodeDensityMonitorFactory);

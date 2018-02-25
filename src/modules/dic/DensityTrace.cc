@@ -19,8 +19,27 @@ namespace dic {
 	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
 		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain()), _dim(dim)
     {
-		if( _density_type != DENSITY && _density_type != LOGDENSITY && _density_type != DEVIANCE ) {
+		// Sanity check that input arguments match to this function:
+		
+		string cdt("nomatch");
+		if ( _density_type == DENSITY ) {
+			cdt.assign("density");			
+		}
+		else if ( _density_type == LOGDENSITY ) {
+			cdt.assign("logdensity");			
+		}
+		else if ( _density_type == DEVIANCE ) {
+			cdt.assign("deviance");			
+		}
+		else {
 			throw std::logic_error("Unimplemented DensityType in DensityTrace");
+		}
+		if ( monitor_name.compare(0, cdt.length(), cdt) != 0 ) {
+			throw std::logic_error("Incorrect density type reported in monitor_name for DensityTrace");
+		}
+		
+		if ( monitor_name.find("_trace") == string::npos) {
+			throw std::logic_error("Incorrect monitor type reported in monitor_name for DensityTrace");
 		}
     }
 

@@ -19,8 +19,38 @@ namespace dic {
 	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
 		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain())
     {
-		if( _density_type != DENSITY && _density_type != LOGDENSITY && _density_type != DEVIANCE ) {
+		// Sanity check that input arguments match to this function:
+		
+		string cdt("nomatch");
+		if ( _density_type == DENSITY ) {
+			cdt.assign("density");			
+		}
+		else if ( _density_type == LOGDENSITY ) {
+			cdt.assign("logdensity");			
+		}
+		else if ( _density_type == DEVIANCE ) {
+			cdt.assign("deviance");			
+		}
+		else {
 			throw std::logic_error("Unimplemented DensityType in DensityTotal");
+		}
+
+		// Required for back-compatibility (only from ObsStochDensMonitorFactory):
+		if ( monitor_name == "trace" ) {
+			if ( _density_type != DEVIANCE ) {
+				throw std::logic_error("DensityTotal is reporting a non-DEVIANCE type with monitor_name trace");
+			}
+		}
+		else {
+
+			if ( monitor_name.compare(0, cdt.length(), cdt) != 0 ) {
+				throw std::logic_error("Incorrect density type reported in monitor_name for DensityTotal");
+			}
+		
+			if ( monitor_name.find("_total") == string::npos) {
+				throw std::logic_error("Incorrect monitor type reported in monitor_name for DensityTotal");
+			}
+		
 		}
 		// This monitor pools between variables so ignores the dim it is passed:
 		_dim.push_back(1);

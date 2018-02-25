@@ -57,7 +57,7 @@ SymTab &BUGSModel::symtab()
 }
 
 void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
-		     string &warn)
+		     string &warn, string const &type)
 {
     warn.clear();
 
@@ -95,14 +95,21 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
 	warn.append("There are no matching monitors\n");
 	return;
     }
-
-    CODA0(dump_nodes, stem, warn);    
-    CODA(dump_nodes, stem, nchain(), warn);
-    TABLE0(dump_nodes, stem, warn);    
-    TABLE(dump_nodes, stem, nchain(), warn);
+	
+	unsigned int nwritten = 0;
+    nwritten += CODA0(dump_nodes, stem, warn, type);    
+    nwritten += CODA(dump_nodes, stem, nchain(), warn, type);
+    nwritten += TABLE0(dump_nodes, stem, warn, type);    
+    nwritten += TABLE(dump_nodes, stem, nchain(), warn, type);
+	
+	if ( nwritten == 0 ) {
+		string msg = string("No matching Monitor with Type ") + type + " found.\n";
+		warn.append(msg);
+	}
+	
 }
 
-void BUGSModel::coda(string const &stem, string &warn)
+void BUGSModel::coda(string const &stem, string &warn, string const &type)
 {
     warn.clear();
     
@@ -111,10 +118,16 @@ void BUGSModel::coda(string const &stem, string &warn)
 	return;
     }
     
-    CODA0(monitors(), stem, warn);    
-    CODA(monitors(), stem, nchain(), warn);
-    TABLE0(monitors(), stem, warn);    
-    TABLE(monitors(), stem, nchain(), warn);
+	unsigned int nwritten = 0;
+    nwritten += CODA0(monitors(), stem, warn, type);    
+    nwritten += CODA(monitors(), stem, nchain(), warn, type);
+    nwritten += TABLE0(monitors(), stem, warn, type);    
+    nwritten += TABLE(monitors(), stem, nchain(), warn, type);
+
+	if ( nwritten == 0 ) {
+		string msg = string("No Monitor with Type ") + type + " found.\n";
+		warn.append(msg);
+	}
 }
 
 

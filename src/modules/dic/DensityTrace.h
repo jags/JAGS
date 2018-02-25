@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#include "DensityEnums.h"
+
 namespace jags {
     namespace dic {
 	

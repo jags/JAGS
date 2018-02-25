@@ -79,6 +79,16 @@ namespace jags {
 	return ans;
     }
 
+    vector<Node const *> NodeArraySubset::allnodes() const
+    {
+	vector<Node const *> ans;
+	for (unsigned int i = 0; i < _node_pointers.size(); ++i) {
+	    Node const * node = _node_pointers[i];
+		ans.push_back(node);
+	}
+	return ans;
+    }
+
     unsigned int NodeArraySubset::nchain() const
     {
 	return _nchain;

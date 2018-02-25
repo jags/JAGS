@@ -8,28 +8,6 @@
 
 namespace jags {
 
-/**
-* @short Type of density/log density/deviance calculation
-*
-* This enum is used by some monitors/factories in the DIC module
-* to generalise calculation of values related to the deviance
-*
-* Note that it is NOT used by Monitor but this is seemed like a
-* sensible central location to set the enum
-*/
-enum DensityType {DENSITY, LOGDENSITY, DEVIANCE};
-
-/**
-* @short Type of summarisation for deviance monitors
-*
-* This enum is used by some monitors/factories in the DIC module
-* to generalise calculation of values related to the deviance
-*
-* Note that it is NOT used by Monitor but this is seemed like a
-* sensible central location to set the enum
-*/
-enum MonitorType {TRACE, MEAN, VARIANCE, TOTAL, POOLMEAN};
-
 class Node;
 
 /**

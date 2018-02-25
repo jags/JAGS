@@ -1,9 +1,11 @@
+#include "DensityEnums.h"
 #include "NodeDensityMonitorFactory.h"
 #include "DensityTrace.h"
 #include "DensityMean.h"
 #include "DensityVariance.h"
 #include "DensityTotal.h"
 #include "DensityPoolMean.h"
+#include "DensityPoolVariance.h"
 
 #include <model/BUGSModel.h>
 #include <graph/Graph.h>
@@ -45,12 +47,7 @@ namespace dic {
 			density_type = DENSITY;
 			monitor_name.assign("density_mean");
 		}
-		else if (type == "density_variance") {
-			monitor_type = VARIANCE;
-			density_type = DENSITY;
-			monitor_name.assign("density_variance");
-		}
-		else if (type == "density_var") {
+		else if (type == "density_variance" || type == "density_var") {
 			monitor_type = VARIANCE;
 			density_type = DENSITY;
 			monitor_name.assign("density_variance");
@@ -65,6 +62,11 @@ namespace dic {
 			density_type = DENSITY;
 			monitor_name.assign("density_poolmean");
 		}
+		else if (type == "density_poolvariance" || type == "density_poolvar") {
+			monitor_type = POOLVARIANCE;
+			density_type = DENSITY;
+			monitor_name.assign("density_poolvariance");
+		}
 		else if (type == "logdensity_trace") {
 			monitor_type = TRACE;
 			density_type = LOGDENSITY;
@@ -75,12 +77,7 @@ namespace dic {
 			density_type = LOGDENSITY;
 			monitor_name.assign("logdensity_mean");
 		}
-		else if (type == "logdensity_variance") {
-			monitor_type = VARIANCE;
-			density_type = LOGDENSITY;
-			monitor_name.assign("logdensity_variance");
-		}
-		else if (type == "logdensity_var") {
+		else if (type == "logdensity_variance" || type == "logdensity_var") {
 			monitor_type = VARIANCE;
 			density_type = LOGDENSITY;
 			monitor_name.assign("logdensity_variance");
@@ -95,6 +92,11 @@ namespace dic {
 			density_type = LOGDENSITY;
 			monitor_name.assign("logdensity_poolmean");
 		}
+		else if (type == "logdensity_poolvariance" || type == "logdensity_poolvar") {
+			monitor_type = POOLVARIANCE;
+			density_type = LOGDENSITY;
+			monitor_name.assign("logdensity_poolvariance");
+		}
 		else if (type == "deviance_trace") {
 			monitor_type = TRACE;
 			density_type = DEVIANCE;
@@ -105,12 +107,7 @@ namespace dic {
 			density_type = DEVIANCE;
 			monitor_name.assign("deviance_mean");
 		}
-		else if (type == "deviance_variance") {
-			monitor_type = VARIANCE;
-			density_type = DEVIANCE;
-			monitor_name.assign("deviance_variance");
-		}
-		else if (type == "deviance_var") {
+		else if (type == "deviance_variance" || type == "deviance_var") {
 			monitor_type = VARIANCE;
 			density_type = DEVIANCE;
 			monitor_name.assign("deviance_variance");
@@ -124,6 +121,11 @@ namespace dic {
 			monitor_type = POOLMEAN;
 			density_type = DEVIANCE;
 			monitor_name.assign("deviance_poolmean");
+		}
+		else if (type == "deviance_poolvariance" || type == "deviance_poolvar") {
+			monitor_type = POOLVARIANCE;
+			density_type = DEVIANCE;
+			monitor_name.assign("deviance_poolvariance");
 		}
 		else {
 			// If not listed above:
@@ -140,22 +142,25 @@ namespace dic {
 
 		Monitor *m = 0;
 		
-		NodeArraySubset nodearray = NodeArraySubset(array, range);		
+		NodeArraySubset nodearray = NodeArraySubset(array, range);	
 		
 		if (monitor_type == TRACE) {
-			m = new DensityTrace(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityTrace(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else if (monitor_type == MEAN) {
-			m = new DensityMean(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityMean(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else if (monitor_type == VARIANCE) {
-			m = new DensityVariance(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityVariance(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else if (monitor_type == TOTAL) {
-			m = new DensityTotal(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityTotal(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else if (monitor_type == POOLMEAN) {
-			m = new DensityPoolMean(nodearray.nodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityPoolMean(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
+		}
+		else if (monitor_type == POOLVARIANCE) {
+			m = new DensityPoolVariance(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
 		}
 		else {
 			throw std::logic_error("Unimplemented MonitorType in NodeDensityMonitorFactory");

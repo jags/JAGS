@@ -49,15 +49,17 @@ public:
      *
      * @param warn String that will contain any warning messages on
      * exit. It is cleared on entry.
+     * 
+     * @param type Name of the monitor type or "*" for all types
      *
      * @exception logic_error
      */
     void coda(std::vector<std::pair<std::string,Range> > const &nodes, 
-	      std::string const &prefix, std::string &warn);
+	      std::string const &prefix, std::string &warn, std::string const &type);
     /**
      * Write out all monitors in CODA format
      */
-    void coda(std::string const &prefix, std::string &warn);
+    void coda(std::string const &prefix, std::string &warn, std::string const &type);
     /**
      * Sets the state of the RNG, and the values of the unobserved
      * stochastic nodes in the model, for a given chain.

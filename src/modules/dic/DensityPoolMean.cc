@@ -19,8 +19,37 @@ namespace dic {
 	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
 		_nchain(nodes[0]->nchain()), _values(nodes.size(), 0.0), _n(0), _dim(dim)
     {
-		if( _density_type != DENSITY && _density_type != LOGDENSITY && _density_type != DEVIANCE ) {
+		// Sanity check that input arguments match to this function:
+		
+		string cdt("nomatch");
+		if ( _density_type == DENSITY ) {
+			cdt.assign("density");			
+		}
+		else if ( _density_type == LOGDENSITY ) {
+			cdt.assign("logdensity");			
+		}
+		else if ( _density_type == DEVIANCE ) {
+			cdt.assign("deviance");			
+		}
+		else {
 			throw std::logic_error("Unimplemented DensityType in DensityPoolMean");
+		}
+		
+		// Required for back-compatibility (only from ObsStochDensMonitorFactory):
+		if ( monitor_name == "mean" ) {
+			if ( _density_type != DEVIANCE ) {
+				throw std::logic_error("DensityPoolMean is reporting a non-DEVIANCE type with monitor_name mean");
+			}
+		}
+		else {
+				
+			if ( monitor_name.compare(0, cdt.length(), cdt) != 0 ) {
+				throw std::logic_error("Incorrect density type reported in monitor_name for DensityPoolMean");
+			}		
+			if ( monitor_name.find("_poolmean") == string::npos) {
+				throw std::logic_error("Incorrect monitor type reported in monitor_name for DensityPoolMean");
+			}
+			
 		}
     }
 
