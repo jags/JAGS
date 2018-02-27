@@ -1,3 +1,22 @@
+Changes in JAGS 4.4.0
+
+Bug fixes
+=========
+* The terminal interface will now dump the current values of all nodes
+  when a sampler gets stuck (as advertised in the manual).
+
+New features
+============
+* New monitor types based on trace and summary statistics of deviance
+  related monitors to facilitate calculation of WAIC.
+* Console class now has observedStochasticNodeNames() for use by rjags.
+* Other minor modifications to the JAGS library to facilitate new monitor
+  types including logDensity() for all (including fixed) nodes.
+* New distribution dgampois as an alias for dnegbin with reformulated
+  parameters as often used to describe over-dispersed count data.
+* The coda terminal command now has an optional type argument to
+  facilitate use of the new monitor types.
+  
 Changes in JAGS 4.3.0
 
 Bug fixes

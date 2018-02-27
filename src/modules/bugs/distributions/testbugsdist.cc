@@ -21,6 +21,7 @@
 #include "DMulti.h"
 #include "DNChisqr.h"
 #include "DNegBin.h"
+#include "DGamPois.h"
 #include "DNorm.h"
 #include "DNT.h"
 #include "DPar.h"
@@ -81,6 +82,7 @@ void BugsDistTest::setUp() {
     _dmulti = new jags::bugs::DMulti();
     _dnchisqr = new jags::bugs::DNChisqr();
     _dnegbin = new jags::bugs::DNegBin();
+    _dgampois = new jags::bugs::DGamPois();
     _dnorm = new jags::bugs::DNorm();
     _dnt = new jags::bugs::DNT();
     _dpar = new jags::bugs::DPar();
@@ -120,6 +122,7 @@ void BugsDistTest::tearDown() {
     delete _dmulti;
     delete _dnchisqr;
     delete _dnegbin;
+    delete _dgampois;
     delete _dnorm;
     delete _dnt;
     delete _dpar;
@@ -158,6 +161,7 @@ void BugsDistTest::npar()
     CPPUNIT_ASSERT_EQUAL(_dmulti->npar(), 2U);
     CPPUNIT_ASSERT_EQUAL(_dchisqr->npar(), 1U);
     CPPUNIT_ASSERT_EQUAL(_dnegbin->npar(), 2U);
+    CPPUNIT_ASSERT_EQUAL(_dgampois->npar(), 2U);
     CPPUNIT_ASSERT_EQUAL(_dnorm->npar(), 2U);
     CPPUNIT_ASSERT_EQUAL(_dnt->npar(), 3U);
     CPPUNIT_ASSERT_EQUAL(_dpar->npar(), 2U);
@@ -195,6 +199,7 @@ void BugsDistTest::name()
     CPPUNIT_ASSERT_EQUAL(string("dmulti"), _dmulti->name());
     CPPUNIT_ASSERT_EQUAL(string("dnchisqr"), _dnchisqr->name());
     CPPUNIT_ASSERT_EQUAL(string("dnegbin"), _dnegbin->name());
+    CPPUNIT_ASSERT_EQUAL(string("dgampois"), _dgampois->name());
     CPPUNIT_ASSERT_EQUAL(string("dnorm"), _dnorm->name());
     CPPUNIT_ASSERT_EQUAL(string("dnt"), _dnt->name());
     CPPUNIT_ASSERT_EQUAL(string("dpar"), _dpar->name());
@@ -232,6 +237,7 @@ void BugsDistTest::alias()
     CPPUNIT_ASSERT_EQUAL(string("dmultinom"), _dmulti->alias());
     CPPUNIT_ASSERT_EQUAL(string("dnchisq"), _dnchisqr->alias());
     CPPUNIT_ASSERT_EQUAL(string("dnbinom"), _dnegbin->alias());
+    CPPUNIT_ASSERT_EQUAL(string(""), _dgampois->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _dnorm->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _dnt->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _dpar->alias());

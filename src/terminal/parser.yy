@@ -1374,8 +1374,14 @@ static void unloadModule(std::string const &name)
     jags::Console::unloadModule(name);
 }
 
+void exiting() {
+	std::cout << "Exiting JAGS" << std::endl;
+}
+
 int main (int argc, char **argv)
 {
+  std::atexit(exiting);
+
   extern std::FILE *zzin;
 
   std::FILE *cmdfile = 0;
@@ -1450,6 +1456,7 @@ int main (int argc, char **argv)
   for (unsigned int i = 0; i < _dyn_lib.size(); ++i) {
       lt_dlclose(_dyn_lib[i]);
   }
+  
   lt_dlexit();
 }
 

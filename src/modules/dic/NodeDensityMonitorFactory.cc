@@ -28,7 +28,11 @@ namespace dic {
 						string const &type,
 						string &msg)
     {
-	
+		
+		if (name == "_observed_stochastic_" ) {
+			return 0;
+		}
+		
 		/* Work out the precise type of monitor */
 				
 		// enums declared in model/Monitor.h:

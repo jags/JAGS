@@ -21,7 +21,13 @@ namespace dic {
     DICModule::DICModule() 
 	: Module("dic")
     {
-	
+		
+		// Last monitor factories to be used are given first:
+		// density-related monitors for a given node:
+		insert(new NodeDensityMonitorFactory);
+		// density-related monitors for all observed stochastic nodes:
+		insert(new ObsStochDensMonitorFactory);
+
 		/*  DevianceMonitorFactory (and DevianceTrace/DevianceMean) from 
 			JAGS 4.3.0 could now be retired?
 			The same quantities are provided by ObsStochDensMonitorFactory 
@@ -30,11 +36,6 @@ namespace dic {
 		*/
 		insert(new DevianceMonitorFactory);
 
-		// Handles density-related monitors for a given node:
-		insert(new NodeDensityMonitorFactory);
-		// Handles density-related monitors for all observed stochastic nodes:
-		insert(new ObsStochDensMonitorFactory);
-
 		// Unchanged from JAGS 4.3.0
 		insert(new PDMonitorFactory);
 		// Unchanged from JAGS 4.3.0
@@ -42,6 +43,7 @@ namespace dic {
 
 		// Now retired:
 	//	insert(new WAICMonitorFactory);
+	
     }
     
     DICModule::~DICModule() {

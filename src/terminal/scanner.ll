@@ -141,6 +141,12 @@ run                     zzlval.intval=RUN; return RUN;
   return NAME;
 }
 
+_observed_stochastic_ { 
+  // Exception to the name rule for monitoring observed stochastic nodes:
+  zzlval.stringptr = new std::string(zztext);
+  return NAME;
+}
+
 [a-zA-Z0-9\._\-\\\/]+ {
   // More general than NAME which is limited to syntactically valid BUGS names
   zzlval.stringptr = new std::string(zztext);

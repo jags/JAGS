@@ -60,14 +60,16 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
 		     string &warn, string const &type)
 {
     warn.clear();
-
+	
     list<MonitorControl> dump_nodes;
     for (unsigned int i = 0; i < node_ids.size(); ++i) {
 	string const &name = node_ids[i].first;
 	Range const &range = node_ids[i].second;
 	list<MonitorInfo>::const_iterator p;
 	for (p = _bugs_monitors.begin(); p != _bugs_monitors.end(); ++p) {
-	    if (p->name() == name && p->range() == range) {
+	    if (p->name() == name && p->range() == range
+			&& (type=="*" || p->type() == type)) {
+				// Wildcard * means all types
 		break;
 	    }
 	}
@@ -103,8 +105,14 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
     nwritten += TABLE(dump_nodes, stem, nchain(), warn, type);
 	
 	if ( nwritten == 0 ) {
-		string msg = string("No matching Monitor with Type ") + type + " found.\n";
-		warn.append(msg);
+		if ( type == "*" ) {
+			string msg = string("No matching Monitor found.\n");
+			warn.append(msg);
+		}
+		else {
+			string msg = string("No matching Monitor with Type ") + type + " found.\n";
+			warn.append(msg);
+		}
 	}
 	
 }
@@ -125,8 +133,13 @@ void BUGSModel::coda(string const &stem, string &warn, string const &type)
     nwritten += TABLE(monitors(), stem, nchain(), warn, type);
 
 	if ( nwritten == 0 ) {
-		string msg = string("No Monitor with Type ") + type + " found.\n";
-		warn.append(msg);
+		if ( type == "*" ) {
+			throw logic_error("No Monitors written");
+		}
+		else {
+			string msg = string("No Monitor with Type ") + type + " found.\n";
+			warn.append(msg);
+		}
 	}
 }
 
