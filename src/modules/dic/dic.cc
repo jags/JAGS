@@ -28,21 +28,30 @@ namespace dic {
 		// density-related monitors for all observed stochastic nodes:
 		insert(new ObsStochDensMonitorFactory);
 
-		/*  DevianceMonitorFactory (and DevianceTrace/DevianceMean) from 
-			JAGS 4.3.0 could now be retired?
+		/*  The below factories from JAGS 4.3.0 could now be retired
 			The same quantities are provided by ObsStochDensMonitorFactory 
-			and are named for backwards-compatibility (althouh currently
+			and are named for backwards-compatibility (although currently
 			disabled to avoid clashes)
 		*/
-		insert(new DevianceMonitorFactory);
+		
+		// To compile the new equivalents use the flag -D NEW_DIC
+		#ifndef NEW_DIC
+			insert(new DevianceMonitorFactory);
 
-		// Unchanged from JAGS 4.3.0
-		insert(new PDMonitorFactory);
-		// Unchanged from JAGS 4.3.0
-		insert(new PDTraceFactory);
+			// Unchanged from JAGS 4.3.0
+			insert(new PDMonitorFactory);
+			// Unchanged from JAGS 4.3.0
+			insert(new PDTraceFactory);
+		#else
+			printf("  [Using new penalty monitors]  \n");
+							
+		#endif
+		// Otherwise the old versions remain and take precedence
+		// TODO: remove this macro and printf
+				
 
 		// Now retired:
-	//	insert(new WAICMonitorFactory);
+		// insert(new WAICMonitorFactory);
 	
     }
     

@@ -42,7 +42,7 @@ namespace dic {
 			throw std::logic_error("Incorrect density type reported in monitor_name for DensityPoolVariance");
 		}
 		
-		if ( monitor_name.find("_poolvariance") == string::npos) {
+		if ( monitor_name.find("_poolvariance") == string::npos ) {
 			throw std::logic_error("Incorrect monitor type reported in monitor_name for DensityPoolVariance");
 		}
     }

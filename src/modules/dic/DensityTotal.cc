@@ -17,8 +17,11 @@ namespace dic {
     DensityTotal::DensityTotal(vector<Node const *> const &nodes, vector<unsigned int> dim,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
-		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain())
+		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain()), 
+		_dim(vector<unsigned int> (1,1))
     {
+		// This monitor pools between variables so ignores the dim it is passed
+
 		// Sanity check that input arguments match to this function:
 		
 		string cdt("nomatch");
@@ -52,8 +55,7 @@ namespace dic {
 			}
 		
 		}
-		// This monitor pools between variables so ignores the dim it is passed:
-		_dim.push_back(1);
+
     }
 
     void DensityTotal::update()

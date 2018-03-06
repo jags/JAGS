@@ -74,9 +74,16 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
 	    }
 	}
 	if (p == _bugs_monitors.end()) {
-	    string msg = string("No Monitor ") + name + 
-		print(range) + " found.\n";
-	    warn.append(msg);
+		if ( type == "*" ) {
+		    string msg = string("No Monitor ") + name + 
+			print(range) + " found.\n";
+		    warn.append(msg);
+		}
+		else {
+		    string msg = string("No Monitor ") + name + 
+			print(range) + " with Type " + type + " found.\n";
+			warn.append(msg);
+		}
 	}
 	else {
 	    list<MonitorControl>::const_iterator q; 
@@ -88,7 +95,7 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
 	    }
 	    if (q == monitors().end()) {
 		throw logic_error(string("Monitor ") + name + print(range) +
-				  "not found");
+				  " with type " + type + " not found");
 	    }
 	}
     }
@@ -104,15 +111,9 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
     nwritten += TABLE0(dump_nodes, stem, warn, type);    
     nwritten += TABLE(dump_nodes, stem, nchain(), warn, type);
 	
-	if ( nwritten == 0 ) {
-		if ( type == "*" ) {
-			string msg = string("No matching Monitor found.\n");
-			warn.append(msg);
-		}
-		else {
-			string msg = string("No matching Monitor with Type ") + type + " found.\n";
-			warn.append(msg);
-		}
+	if (nwritten==0) {
+		throw logic_error(string("A Monitor with type ") + 
+			type + " was found but could not be written out");
 	}
 	
 }
@@ -266,7 +267,8 @@ vector<Node const *> const &BUGSModel::observedStochasticNodes()
 	mean that observedStochasticNodes() could be const
 	BUT this would add compilation time for all models and
 	observedStochasticNodes are only needed by deviance monitors
-	and to get the names of the observedStochasticNodes */
+	and to get the names of the observedStochasticNodes 
+	Note sure what the best strategy is so will leave this for now */
 	
 	vector<StochasticNode*> const &snodes = stochasticNodes();
 
@@ -281,18 +283,63 @@ vector<Node const *> const &BUGSModel::observedStochasticNodes()
 	return _observed_stochastic_nodes;
 }
 
-vector<string> const &BUGSModel::observedStochasticNodeNames()
+void BUGSModel::dumpNodeNames(vector<string> &node_names,
+	     string const &type, bool flat, string &warn) const
 {
-	/* Note: See observedStochasticNodes for possible alternative 
-	implementation that would avoid this: */
-	vector<Node const *> obsnodes = observedStochasticNodes();
 	
-	_observed_stochastic_node_names.clear();
-	for (unsigned int i = 0; i < obsnodes.size(); ++i) {
-		_observed_stochastic_node_names.push_back(symtab().getName(obsnodes[i]));
+	// The flat argument isn't implemented:
+	if (!flat) {
+		throw logic_error("Attempt to request dump of non-flat Node Names");
 	}
 	
-	return _observed_stochastic_node_names;
+    warn.clear();
+	node_names.clear();
+	
+	if( type == "constant" ) {
+		vector<Node *> const allnodes = nodes();
+		for (unsigned int i = 0; i < allnodes.size(); ++i) {
+		    if (allnodes[i]->isConstant()) {
+				node_names.push_back(_symtab.getName(allnodes[i]));
+			}
+		}
+	}
+	else if( type == "deterministic" ) {
+		vector<Node *> const allnodes = nodes();
+		for (unsigned int i = 0; i < allnodes.size(); ++i) {
+		    if (allnodes[i]->isDeterministic()) {
+				node_names.push_back(_symtab.getName(allnodes[i]));
+			}
+		}
+	}
+	else if( type == "stochastic" ) {
+		vector<StochasticNode *> const snodes = stochasticNodes();
+		for (unsigned int i = 0; i < snodes.size(); ++i) {
+			// Implicit up-cast to Node from StochasticNode:
+			node_names.push_back(_symtab.getName(snodes[i]));
+		}
+	}
+	else if( type == "fixed" ) {
+		vector<Node *> const allnodes = nodes();
+		for (unsigned int i = 0; i < allnodes.size(); ++i) {
+		    if (allnodes[i]->isFixed()) {
+				node_names.push_back(_symtab.getName(allnodes[i]));
+			}
+		}
+	}
+	else if( type == "observations" ) {
+		vector<StochasticNode *> const snodes = stochasticNodes();
+		for (unsigned int i = 0; i < snodes.size(); ++i) {
+		    if (snodes[i]->isFixed()) {
+				// Implicit up-cast to Node from StochasticNode:
+				node_names.push_back(_symtab.getName(snodes[i]));
+			}
+		}
+	}
+	else {
+		warn.assign("retrieving node names for requested node type '");
+		warn.append(type);
+		warn.append("' is not implemented\n");
+	}
 }
 
 } //namespace jags

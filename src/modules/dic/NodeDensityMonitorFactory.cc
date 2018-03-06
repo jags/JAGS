@@ -6,6 +6,12 @@
 #include "DensityTotal.h"
 #include "DensityPoolMean.h"
 #include "DensityPoolVariance.h"
+#include "PenaltyPD.h"
+#include "PenaltyPOPT.h"
+#include "PenaltyPV.h"
+#include "PenaltyPDTotal.h"
+#include "PenaltyPOPTTotal.h"
+#include "PenaltyPOPTTotalRep.h"
 
 #include <model/BUGSModel.h>
 #include <graph/Graph.h>
@@ -29,145 +35,115 @@ namespace dic {
 						string &msg)
     {
 		
-		if (name == "_observed_stochastic_" ) {
+		// Should never be true but just in case:
+		if (name == "_observations_" ) {
 			return 0;
 		}
 		
 		/* Work out the precise type of monitor */
 				
 		// enums declared in model/Monitor.h:
-		MonitorType monitor_type; 
-		DensityType density_type; 
-		// Used to help resolve aliases:
-		string monitor_name = "";
-		
-		if (type == "density_trace") {
-			monitor_type = TRACE;
-			density_type = DENSITY;
-			monitor_name.assign("density_trace");
-		}
-		else if (type == "density_mean") {
-			monitor_type = MEAN;
-			density_type = DENSITY;
-			monitor_name.assign("density_mean");
-		}
-		else if (type == "density_variance" || type == "density_var") {
-			monitor_type = VARIANCE;
-			density_type = DENSITY;
-			monitor_name.assign("density_variance");
-		}
-		else if (type == "density_total") {
-			monitor_type = TOTAL;
-			density_type = DENSITY;
-			monitor_name.assign("density_total");
-		}
-		else if (type == "density_poolmean") {
-			monitor_type = POOLMEAN;
-			density_type = DENSITY;
-			monitor_name.assign("density_poolmean");
-		}
-		else if (type == "density_poolvariance" || type == "density_poolvar") {
-			monitor_type = POOLVARIANCE;
-			density_type = DENSITY;
-			monitor_name.assign("density_poolvariance");
-		}
-		else if (type == "logdensity_trace") {
-			monitor_type = TRACE;
-			density_type = LOGDENSITY;
-			monitor_name.assign("logdensity_trace");
-		}
-		else if (type == "logdensity_mean") {
-			monitor_type = MEAN;
-			density_type = LOGDENSITY;
-			monitor_name.assign("logdensity_mean");
-		}
-		else if (type == "logdensity_variance" || type == "logdensity_var") {
-			monitor_type = VARIANCE;
-			density_type = LOGDENSITY;
-			monitor_name.assign("logdensity_variance");
-		}
-		else if (type == "logdensity_total") {
-			monitor_type = TOTAL;
-			density_type = LOGDENSITY;
-			monitor_name.assign("logdensity_total");
-		}
-		else if (type == "logdensity_poolmean") {
-			monitor_type = POOLMEAN;
-			density_type = LOGDENSITY;
-			monitor_name.assign("logdensity_poolmean");
-		}
-		else if (type == "logdensity_poolvariance" || type == "logdensity_poolvar") {
-			monitor_type = POOLVARIANCE;
-			density_type = LOGDENSITY;
-			monitor_name.assign("logdensity_poolvariance");
-		}
-		else if (type == "deviance_trace") {
-			monitor_type = TRACE;
-			density_type = DEVIANCE;
-			monitor_name.assign("deviance_trace");
-		}
-		else if (type == "deviance_mean") {
-			monitor_type = MEAN;
-			density_type = DEVIANCE;
-			monitor_name.assign("deviance_mean");
-		}
-		else if (type == "deviance_variance" || type == "deviance_var") {
-			monitor_type = VARIANCE;
-			density_type = DEVIANCE;
-			monitor_name.assign("deviance_variance");
-		}
-		else if (type == "deviance_total") {
-			monitor_type = TOTAL;
-			density_type = DEVIANCE;
-			monitor_name.assign("deviance_total");
-		}
-		else if (type == "deviance_poolmean") {
-			monitor_type = POOLMEAN;
-			density_type = DEVIANCE;
-			monitor_name.assign("deviance_poolmean");
-		}
-		else if (type == "deviance_poolvariance" || type == "deviance_poolvar") {
-			monitor_type = POOLVARIANCE;
-			density_type = DEVIANCE;
-			monitor_name.assign("deviance_poolvariance");
-		}
-		else {
-			// If not listed above:
+		MonitorType monitor_type = MTUNSET; 
+		DensityType density_type = DTUNSET; 
+		// Resolve the provided type:
+		bool matched = getMonitorDensityTypes(type, monitor_type, density_type);
+		if (!matched) {
 			return 0;
 		}
+		
+		/* Retrieve the node array  */
 		
 		NodeArray *array = model->symtab().getVariable(name);
 		if (!array) {
 		    msg = string("Variable ") + name + " not found";
 		    return 0;
 		}
+		NodeArraySubset nodearray = NodeArraySubset(array, range);
 		
+		/* Do some checks and create the RNG vector for pd and popt monitors */
+
+		vector<RNG*> rngs;
+		if (monitor_type == PD || monitor_type == POPT
+			|| monitor_type == PDTOTAL || monitor_type == POPTTOTAL ||
+			monitor_type == POPTTOTALREP ) {
+
+			if (model->nchain() < 2) {
+			    msg = "at least two chains are required for a pD or popt monitor";
+			    return 0;
+			}
+			
+			/* 
+			We could limit pD/popt monitors to observed stochastic nodes only
+			But it does (maybe?) make sense as long as the parents of a node are unfixed
+			Otherwise it comes out as 0 anyway - which makes sense (no parents are estimated)
+			Note that pv can be calculated for any node with a density - which doesn't make sense
+			if the parents are fixed
+			TODO: create a node->areParentsFixed method to give an error for pv (and pD/popt??)
+			
+			// To limit pD / popt to observed stochastic nodes only (and pv if included above):
+			vector<Node const *> const &reqnodes = nodearray.allnodes();
+			for(unsigned int i = 0; i < reqnodes.size(); i++){
+				if ( !reqnodes[i]->isStochastic() ) {
+				    msg = "non-stochastic nodes cannot be included in an array subset for a pD or popt monitor";
+				    return 0;
+				}
+				if ( !reqnodes[i]->isFixed() ) {
+				    msg = "unobserved nodes cannot be included in an array subset for a pD or popt monitor";
+				    return 0;
+				}
+			}*/
+			
+			for (unsigned int i = 0; i < model->nchain(); ++i) {
+			    rngs.push_back(model->rng(i));
+			}
+		}
+
 		/* Create the correct subtype of monitor */
 
 		Monitor *m = 0;
 		
-		NodeArraySubset nodearray = NodeArraySubset(array, range);	
-		
 		if (monitor_type == TRACE) {
-			m = new DensityTrace(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityTrace(nodearray.allnodes(), nodearray.dim(), density_type, type);
 		}
 		else if (monitor_type == MEAN) {
-			m = new DensityMean(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityMean(nodearray.allnodes(), nodearray.dim(), density_type, type);
 		}
 		else if (monitor_type == VARIANCE) {
-			m = new DensityVariance(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityVariance(nodearray.allnodes(), nodearray.dim(), density_type, type);
 		}
 		else if (monitor_type == TOTAL) {
-			m = new DensityTotal(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityTotal(nodearray.allnodes(), nodearray.dim(), density_type, type);
 		}
 		else if (monitor_type == POOLMEAN) {
-			m = new DensityPoolMean(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityPoolMean(nodearray.allnodes(), nodearray.dim(), density_type, type);
 		}
 		else if (monitor_type == POOLVARIANCE) {
-			m = new DensityPoolVariance(nodearray.allnodes(), nodearray.dim(), density_type, monitor_name);
+			m = new DensityPoolVariance(nodearray.allnodes(), nodearray.dim(), density_type, type);
+		}
+		else if (monitor_type == PD) {
+			m = new PenaltyPD(nodearray.allnodes(), nodearray.dim(), type, rngs, 10);
+		}
+		else if (monitor_type == POPT) {
+			m = new PenaltyPOPT(nodearray.allnodes(), nodearray.dim(), type, rngs, 10);
+		}
+		else if (monitor_type == PDTOTAL) {
+			m = new PenaltyPDTotal(nodearray.allnodes(), nodearray.dim(), type, rngs, 10);
+		}
+		else if (monitor_type == POPTTOTAL) {
+			m = new PenaltyPOPTTotal(nodearray.allnodes(), nodearray.dim(), type, rngs, 10);
+		}
+		else if (monitor_type == POPTTOTALREP) {
+			m = new PenaltyPOPTTotalRep(nodearray.allnodes(), nodearray.dim(), type, rngs, 10);
+		}
+		else if (monitor_type == PV) {
+			m = new PenaltyPV(nodearray.allnodes(), nodearray.dim(), type);
 		}
 		else {
 			throw std::logic_error("Unimplemented MonitorType in NodeDensityMonitorFactory");
+		}
+		
+		if (!m ) {
+			return m;
 		}
 		
 		/* Set name attributes */
@@ -180,9 +156,10 @@ namespace dic {
 		    node_range = array->range();
 		}
 
-		// TOTAL is the only one summarised between variables
-		if (monitor_type == TOTAL) {
-		    m->setElementNames(vector<string>(1,type));
+		// These types are summarised between variables:
+		if (monitor_type == TOTAL || monitor_type == PDTOTAL
+			|| monitor_type == POPTTOTAL || monitor_type == PV) {
+		    m->setElementNames(vector<string>(1, type));
 		}
 		else {
 			vector<string> elt_names;

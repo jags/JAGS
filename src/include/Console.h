@@ -175,12 +175,14 @@
     */
    std::vector<std::string> const &variableNames() const;
    /**
-    * Retrieves the names of observed stochastic nodes
+    * Retrieves the names of nodes in the graph matching a given type
     *
-    * These names are guaranteed to correspond to the values given by 
-    * deviance monitors in the DIC module
+    * If type="observed_stochastic" then these names are guaranteed to
+    * correspond to the values given by deviance monitors in the DIC module
+    * The flat argument isn't yet implemented: must be true
     */
-   std::vector<std::string> const &observedStochasticNodeNames() const;
+   void dumpNodeNames(std::vector<std::string> &node_names,
+  		     std::string const &type, bool flat) const;
    /**
     * Dump the contants of monitored node in CODA format
     *

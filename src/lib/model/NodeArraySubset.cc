@@ -7,6 +7,7 @@
 
 #include <set>
 #include <stdexcept>
+#include <sstream>
 
 
 using std::set;
@@ -26,6 +27,18 @@ namespace jags {
 	    _offsets = array->_offsets;
 	}
 	else {
+		// Check that the implied number of dimensions is correct:
+		unsigned int arraydim = array->_range.scope().size();
+		unsigned int reqdim = range.scope().size();
+		if ( arraydim != reqdim ) {
+			std::ostringstream msgstr;
+			msgstr << "Cannot get subset " << array->_name << 
+				print(range) << ": implied number of dimensions (" <<
+					reqdim << ") does not match the node dimensions (" <<
+					arraydim << ")";
+			throw runtime_error(msgstr.str());
+		}
+		
 	    //Check validity of target range
 	    if (!array->_range.contains(range)) {
 		throw runtime_error(string("Cannot get subset ") +

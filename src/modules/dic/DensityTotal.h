@@ -18,10 +18,10 @@ namespace jags {
    	 */
    	class DensityTotal : public Monitor {
  	  protected:
-   	    std::vector<Node const *> _nodes;
+   	    std::vector<Node const *> const _nodes;
    	    std::vector<std::vector<double> > _values; // total density/log density/deviance corresponding to sampled values
 		DensityType const _density_type;  // enum is defined in model/Monitor.h
-		std::vector<unsigned int> _dim;
+		std::vector<unsigned int> const _dim;
 		unsigned int const _nchain;
    	  public:
    	    DensityTotal(std::vector<Node const *> const &nodes, std::vector<unsigned int> dim, 

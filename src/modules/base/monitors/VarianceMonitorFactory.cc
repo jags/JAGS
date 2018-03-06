@@ -20,7 +20,7 @@ namespace base {
 					     string const &type,
 					     string &msg)
     {
-	if (type != "variance" && type != "var" && type != "poolvariance" && type != "poolvar")
+	if (type != "variance" && type != "poolvariance")
 	    return 0;
 
 	NodeArray *array = model->symtab().getVariable(name);
@@ -31,10 +31,10 @@ namespace base {
 	
 	Monitor *m = 0;
 	
-	if ( type == "variance" || type == "var" ) {
+	if ( type == "variance" ) {
 		m = new VarianceMonitor(NodeArraySubset(array, range));
 	}
-	else if ( type == "poolvariance" || type == "poolvar" ) {
+	else if ( type == "poolvariance" ) {
 		m = new PoolVarianceMonitor(NodeArraySubset(array, range));
 	}
 	else {

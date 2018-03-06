@@ -182,6 +182,16 @@ public:
      * details.
      */
     virtual double logDensity(unsigned int chain, PDFType type) const = 0;
+    virtual unsigned int df() const = 0;
+    virtual double KL(unsigned int chain1, unsigned int chain2, RNG *rng,
+		      unsigned int nrep) const = 0;
+	
+    /**
+     * Used by dumpNodeNames to gather a specific subset of node types:
+     */
+    virtual bool isConstant() const = 0;
+    virtual bool isDeterministic() const = 0;
+    virtual bool isStochastic() const = 0;
 	
 };
 

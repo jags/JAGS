@@ -62,6 +62,7 @@
     void clearMonitor(jags::ParseTree const *var, std::string const &type);
     void doCoda (jags::ParseTree const *var, std::string const &stem, std::string const &type);
     void doAllCoda (std::string const &stem, std::string const &type);
+    void dumpNodeNames (std::string const &file, std::string const &type);
     void doDump (std::string const &file, jags::DumpType type, unsigned int chain);
     void dumpMonitors(std::string const &file, std::string const &type);
     void doSystem(std::string const *command);
@@ -128,6 +129,7 @@
 %token <intval> UPDATE
 %token <intval> BY
 %token <intval> MONITORS
+%token <intval> NODENAMES
 %token <intval> MONITOR
 %token <intval> TYPE
 %token <intval> SET
@@ -210,6 +212,7 @@ command: model
 | update
 | monitor
 | monitors_to
+| node_names_to
 | coda
 | load
 | unload
@@ -485,6 +488,19 @@ monitors_to:  MONITORS TO file_name
 |
 MONITORS TO file_name ',' TYPE '(' NAME ')' {
     dumpMonitors(*$3, *$7);
+    delete $3;
+    delete $7; 
+}
+;
+
+node_names_to:  NODENAMES TO file_name 
+{
+    dumpNodeNames(*$3, "all");
+    delete $3;
+}
+|
+NODENAMES TO file_name ',' TYPE '(' NAME ')' {
+    dumpNodeNames(*$3, *$7);
     delete $3;
     delete $7; 
 }
@@ -1046,6 +1062,64 @@ void dumpMonitors(std::string const &file, std::string const &type)
     }
     out << "))";
     out.close();
+}
+
+void dumpNodeNames(std::string const &file, std::string const &type)
+{
+    std::vector<std::string> node_names;
+
+    /* Open output file */
+    std::ofstream out(file.c_str());
+    if (!out) {
+	std::cerr << "Failed to open file " << file << std::endl;
+	return;
+    }
+
+	std::vector<std::string> alltypes;
+	
+	// Special rule for "all" types:
+	if ( type == "all" ) {
+		alltypes.push_back("constant");
+		alltypes.push_back("deterministic");
+		alltypes.push_back("stochastic");
+		alltypes.push_back("fixed");
+		alltypes.push_back("observations");
+	}
+	else {
+		alltypes.push_back(type);
+	}
+	
+	for ( unsigned int i=0; i < alltypes.size(); i++ ){
+	
+	    out << "`" << alltypes[i] << "` <-\n";
+	
+		console->dumpNodeNames(node_names, alltypes[i], true);
+
+		// If no matching names just write an empty character vector:
+	    if ( node_names.size() == 0 ) {
+			out << "character(0)\n" << std::endl;
+			out.close();
+			return;
+	    }
+	
+		out << "c(";
+		unsigned int r = 0;
+	    for (unsigned int i = 0;  i < node_names.size(); i++) {
+			out << "\"" << node_names[i] << "\"";
+			if( (i+1) < node_names.size() ) {
+				out << ", ";
+			}
+			r++;
+			if( r == 5 ) {
+				out << "\n";
+				r = 0;
+			}
+		}
+		out << ")\n\n";
+	
+	}
+	
+	out.close();
 }
 
 void setParameters(jags::ParseTree *p, std::vector<jags::ParseTree*> *parameters)

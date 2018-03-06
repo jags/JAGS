@@ -558,7 +558,22 @@ bool Console::dumpMonitors(map<string,SArray> &data_table,
     return true;
 }
 
-
+void Console::dumpNodeNames(vector<string> &node_names,
+	     string const &type, bool flat) const
+{
+    if (_model == 0) {
+		_err << "Cannot dump node names.  No model!" << endl;
+		return;
+	}
+	
+    string warn;
+	_model->dumpNodeNames(node_names, type, flat, warn);
+    if (!warn.empty()) {
+        _err << "WARNING:\n" << warn;
+    }	
+	
+}
+		 
 bool Console::coda(string const &prefix, string const &type)
 {
     if (!_model) {
@@ -660,11 +675,6 @@ bool Console::isAdapting() const
 vector<string> const &Console::variableNames() const
 {
     return _array_names;
-}
-
-vector<string> const &Console::observedStochasticNodeNames() const
-{
-	return _model->observedStochasticNodeNames();
 }
 
 bool Console::dumpSamplers(vector<vector<string> > &sampler_names)

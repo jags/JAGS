@@ -27,8 +27,6 @@ class BUGSModel : public Model
 
     // Only to be used by observedStochasticNodes():
     std::vector<Node const *> _observed_stochastic_nodes;
-    // Only to be used by observedStochasticNodeNames():
-    std::vector<std::string> _observed_stochastic_node_names;
 
 public:
     BUGSModel(unsigned int nchain);
@@ -145,10 +143,14 @@ public:
      */ 
     std::vector<Node const *> const &observedStochasticNodes();
     /**
-     * Returns a vector of the names corresponding to the observed
-     * stochastic nodes in the model
-     */ 
-    std::vector<std::string> const &observedStochasticNodeNames();
+     * Retrieves the names of nodes in the graph matching a given type
+     *
+     * If type="observed_stochastic" then these names are guaranteed to
+     * correspond to the values given by deviance monitors in the DIC module
+     * The flat argument isn't yet implemented: must be true
+     */
+    void dumpNodeNames(std::vector<std::string> &node_names,
+  		     std::string const &type, bool flat, std::string &warn) const;
 };
 
 } /* namespace jags */
