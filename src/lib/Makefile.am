@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libjags.la
 
 libjags_la_SOURCES = version.cc Console.cc
 
-libjags_la_CPPFLAGS = -I$(top_srcdir)/src/include
+libjags_la_CPPFLAGS = -I$(top_srcdir)/src/include -I$(top_builddir)/src/include
 
 libjags_la_LIBADD = model/libmodel.la		\
         util/libutil.la				\
