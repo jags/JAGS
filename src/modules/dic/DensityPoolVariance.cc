@@ -7,20 +7,21 @@
 #include "DensityPoolVariance.h"
 
 #include <cmath>
+#include <stdexcept>
 
 using std::vector;
 using std::string;
+using std::exp;
+using std::logic_error;
 
 namespace jags {
 namespace dic {
 
     DensityPoolVariance::DensityPoolVariance(vector<Node const *> const &nodes, vector<unsigned int> dim,
 		DensityType const density_type, string const &monitor_name)
-	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
-		_nchain(nodes[0]->nchain()), 
-		_means(nodes.size(), 0.0),
-		_mms(nodes.size(), 0.0),
-		_variances(nodes.size(), 0.0), _n(0), _dim(dim)
+	: Monitor(monitor_name, nodes), _nodes(nodes), 
+	  _means(nodes.size(), 0.0), _mms(nodes.size(), 0.0), _variances(nodes.size(), 0.0),
+	  _density_type(density_type), _dim(dim), _nchain(nodes[0]->nchain()), _n(0)
     {
 		
 		// Sanity check that input arguments match to this function:
@@ -36,14 +37,14 @@ namespace dic {
 			cdt.assign("deviance");			
 		}
 		else {
-			throw std::logic_error("Unimplemented DensityType in DensityPoolVariance");
+			throw logic_error("Unimplemented DensityType in DensityPoolVariance");
 		}
 		if ( monitor_name.compare(0, cdt.length(), cdt) != 0 ) {
-			throw std::logic_error("Incorrect density type reported in monitor_name for DensityPoolVariance");
+			throw logic_error("Incorrect density type reported in monitor_name for DensityPoolVariance");
 		}
 		
 		if ( monitor_name.find("_poolvariance") == string::npos ) {
-			throw std::logic_error("Incorrect monitor type reported in monitor_name for DensityPoolVariance");
+			throw logic_error("Incorrect monitor type reported in monitor_name for DensityPoolVariance");
 		}
     }
 
@@ -60,7 +61,7 @@ namespace dic {
 				}
 				else {
 					if( _density_type == DENSITY ) {
-						newval = std::exp(newval);
+						newval = exp(newval);
 					}
 					else if ( _density_type == DEVIANCE ) {
 						newval = -2.0 * newval;

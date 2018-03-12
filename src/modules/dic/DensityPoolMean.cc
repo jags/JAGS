@@ -7,17 +7,20 @@
 #include "DensityPoolMean.h"
 
 #include <cmath>
+#include <stdexcept>
 
 using std::vector;
 using std::string;
+using std::exp;
+using std::logic_error;
 
 namespace jags {
 namespace dic {
 
     DensityPoolMean::DensityPoolMean(vector<Node const *> const &nodes, vector<unsigned int> dim,
 		DensityType const density_type, string const &monitor_name)
-	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
-		_nchain(nodes[0]->nchain()), _values(nodes.size(), 0.0), _n(0), _dim(dim)
+	: Monitor(monitor_name, nodes), _nodes(nodes), _values(nodes.size(), 0.0),
+	  _density_type(density_type), _dim(dim), _nchain(nodes[0]->nchain()), _n(0) 
     {
 		// Sanity check that input arguments match to this function:
 		
@@ -32,22 +35,22 @@ namespace dic {
 			cdt.assign("deviance");			
 		}
 		else {
-			throw std::logic_error("Unimplemented DensityType in DensityPoolMean");
+			throw logic_error("Unimplemented DensityType in DensityPoolMean");
 		}
 		
 		// Required for back-compatibility (only from ObsStochDensMonitorFactory):
 		if ( monitor_name == "mean" ) {
 			if ( _density_type != DEVIANCE ) {
-				throw std::logic_error("DensityPoolMean is reporting a non-DEVIANCE type with monitor_name mean");
+				throw logic_error("DensityPoolMean is reporting a non-DEVIANCE type with monitor_name mean");
 			}
 		}
 		else {
 				
 			if ( monitor_name.compare(0, cdt.length(), cdt) != 0 ) {
-				throw std::logic_error("Incorrect density type reported in monitor_name for DensityPoolMean");
+				throw logic_error("Incorrect density type reported in monitor_name for DensityPoolMean");
 			}		
 			if ( monitor_name.find("_poolmean") == string::npos) {
-				throw std::logic_error("Incorrect monitor type reported in monitor_name for DensityPoolMean");
+				throw logic_error("Incorrect monitor type reported in monitor_name for DensityPoolMean");
 			}
 			
 		}
@@ -66,7 +69,7 @@ namespace dic {
 			}
 			else {
 				if( _density_type == DENSITY ) {
-					newval = std::exp(newval);
+					newval = exp(newval);
 				}
 				else if ( _density_type == DEVIANCE ) {
 					newval = -2.0 * newval;

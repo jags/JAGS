@@ -14,9 +14,9 @@ namespace dic {
 			 vector<unsigned int> dim, 
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs, unsigned int nrep)
-	: Monitor(monitor_name, nodes), _nodes(nodes),
-	  _nchain(rngs.size()), _values(),
-	  _dim(vector<unsigned int> (1,1)), _rngs(rngs), _nrep(nrep), 
+	: Monitor(monitor_name, nodes), _nodes(nodes), _rngs(rngs),
+	  _nrep(nrep), _nchain(rngs.size()), _values(),
+	  _dim(vector<unsigned int> (1,1)), 
 	  _scale_cst(1.0/2.0)
     {
 		// This monitor pools between variables so ignores the dim it is passed
@@ -31,10 +31,9 @@ namespace dic {
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs,
 			 unsigned int nrep, double scale)
-	: Monitor(monitor_name, nodes), _nodes(nodes),
-	  _nchain(rngs.size()), _values(),
-	  _dim(vector<unsigned int> (1,1)), _rngs(rngs), _nrep(nrep), 
-	  _scale_cst(scale/2.0)
+	: Monitor(monitor_name, nodes), _nodes(nodes), _rngs(rngs),
+	  _nrep(nrep), _nchain(rngs.size()), _values(),
+	  _dim(vector<unsigned int> (1,1)), _scale_cst(scale/2.0)
     {
 		// This monitor pools between variables so ignores the dim it is passed
 		if (_nchain < 2) {

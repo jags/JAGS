@@ -7,17 +7,21 @@
 #include "DensityTrace.h"
 
 #include <cmath>
+#include <stdexcept>
 
 using std::vector;
 using std::string;
+using std::exp;
+using std::logic_error;
 
 namespace jags {
 namespace dic {
 
     DensityTrace::DensityTrace(vector<Node const *> const &nodes, vector<unsigned int> dim,
 		DensityType const density_type, string const &monitor_name)
-	: Monitor(monitor_name, nodes), _nodes(nodes), _density_type(density_type), 
-		_nchain(nodes[0]->nchain()), _values(nodes[0]->nchain()), _dim(dim)
+	: Monitor(monitor_name, nodes), _nodes(nodes), _values(nodes[0]->nchain()),
+	  _density_type(density_type), _dim(dim), _nchain(nodes[0]->nchain())
+
     {
 		// Sanity check that input arguments match to this function:
 		
@@ -32,14 +36,14 @@ namespace dic {
 			cdt.assign("deviance");			
 		}
 		else {
-			throw std::logic_error("Unimplemented DensityType in DensityTrace");
+			throw logic_error("Unimplemented DensityType in DensityTrace");
 		}
 		if ( monitor_name.compare(0, cdt.length(), cdt) != 0 ) {
-			throw std::logic_error("Incorrect density type reported in monitor_name for DensityTrace");
+			throw logic_error("Incorrect density type reported in monitor_name for DensityTrace");
 		}
 		
 		if ( monitor_name.find("_trace") == string::npos) {
-			throw std::logic_error("Incorrect monitor type reported in monitor_name for DensityTrace");
+			throw logic_error("Incorrect monitor type reported in monitor_name for DensityTrace");
 		}
     }
 
@@ -51,7 +55,7 @@ namespace dic {
 				if (newval == JAGS_NA) {
 				    // Don't try and convert NA to density or deviance
 				}else if( _density_type == DENSITY ) {
-					newval = std::exp(newval);
+					newval = exp(newval);
 				}
 				else if ( _density_type == DEVIANCE ) {
 					newval = -2.0 * newval;

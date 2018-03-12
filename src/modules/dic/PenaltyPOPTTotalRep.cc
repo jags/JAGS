@@ -19,8 +19,7 @@ namespace dic {
 			 vector<RNG *> const &rngs,
 			 unsigned int nrep)
 	: PenaltyPDTotal(nodes, dim, monitor_name, rngs, nrep, 2.0),
-			 _weights(nodes.size(), 0.0), _nodetrace(nodes.size()) ,
-			 _n(0)
+	  _n(0), _weights(nodes.size(), 0.0), _nodetrace(nodes.size())
     {
 		/* This is a hack to allow the total popt to be adjusted by
 		the running mean weight when requested by const value() */

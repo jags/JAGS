@@ -16,12 +16,11 @@ namespace dic {
     PenaltyPV::PenaltyPV(vector<Node const *> const &nodes, 
 		vector<unsigned int> dim, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes),
-		_nchain(nodes[0]->nchain()), 
-		_n(0), _pv(1,0.0), _mm(0.0), _mean(0.0), 
-		_dim(vector<unsigned int> (1,1))
+	  _mean(0.0), _mm(0.0),	_pv(1,0.0), _dim(vector<unsigned int> (1,1)),
+	  _nchain(nodes[0]->nchain()), _n(0)
     {
 		// This monitor pools between variables so ignores the dim it is passed
-	}
+    }
 
     void PenaltyPV::update()
     {

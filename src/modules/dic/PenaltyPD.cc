@@ -15,10 +15,10 @@ namespace dic {
 			 vector<unsigned int> dim, 
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs, unsigned int nrep)
-	: Monitor(monitor_name, nodes), _nodes(nodes),
-	  _nchain(rngs.size()), _values(nodes.size(), 0.0),
-	  _dim(dim), _rngs(rngs), _nrep(nrep), _n(0),
-	  _scale_cst(0.5)
+	: Monitor(monitor_name, nodes), _nodes(nodes), _rngs(rngs),
+	  _nrep(nrep), _values(nodes.size(), 0.0), _dim(dim), _scale_cst(0.5),
+	  _nchain(rngs.size()), _n(0)
+
     {
 		if (_nchain < 2) {
 		    throwLogicError("The pD monitor needs at least 2 chains");
@@ -31,10 +31,10 @@ namespace dic {
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs,
 			 unsigned int nrep, double scale)
-	: Monitor(monitor_name, nodes), _nodes(nodes),
-	  _nchain(rngs.size()), _values(nodes.size(), 0.0),
-	  _dim(dim), _rngs(rngs), _nrep(nrep), _n(0),
-	  _scale_cst(1.0)
+	: Monitor(monitor_name, nodes), _nodes(nodes), _rngs(rngs),
+	  _nrep(nrep),_values(nodes.size(), 0.0), _dim(dim), _scale_cst(1.0),
+	  _nchain(rngs.size()), _n(0)
+
     {
 		if (_nchain < 2) {
 		    throwLogicError("The popt monitor needs at least 2 chains");
