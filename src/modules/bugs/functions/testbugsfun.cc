@@ -664,14 +664,14 @@ void BugsFunTest::summary()
 
     //All summary functions should fail when given an empty vector
     vector<double> x0(0);
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_max, x0));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_min, x0));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_mean, x0));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_sd, x0));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_sum, x0));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_prod, x0));
+    CPPUNIT_ASSERT(!checkargs(_max, x0));
+    CPPUNIT_ASSERT(!checkargs(_min, x0));
+    CPPUNIT_ASSERT(!checkargs(_mean, x0));
+    CPPUNIT_ASSERT(!checkargs(_sd, x0));
+    CPPUNIT_ASSERT(!checkargs(_sum, x0));
+    CPPUNIT_ASSERT(!checkargs(_prod, x0));
     //Standard deviation requires at least two elements
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_sd, v0));
+    CPPUNIT_ASSERT(!checkargs(_sd, v0));
 
     //Solaris Studio 12.3 requires some additional hinting for templates
     //otherwise could have summary(v0) etc.
@@ -700,11 +700,11 @@ void BugsFunTest::summary()
 void BugsFunTest::math()
 {
     //Check that bad arguments are caught
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_logfact, -1));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_logfact, -1));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_loggam, -1));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_sqrt, -1));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_loggam, 0));
+    CPPUNIT_ASSERT(!checkargs(_logfact, -1));
+    CPPUNIT_ASSERT(!checkargs(_logfact, -1));
+    CPPUNIT_ASSERT(!checkargs(_loggam, -1));
+    CPPUNIT_ASSERT(!checkargs(_sqrt, -1));
+    CPPUNIT_ASSERT(!checkargs(_loggam, 0));
 
     CPPUNIT_ASSERT_EQUAL(0.0, eval(_logfact, 0));
     CPPUNIT_ASSERT_EQUAL(0.0, eval(_sqrt, 0));
@@ -995,9 +995,9 @@ void BugsFunTest::sort()
     }
 
     vector<double> x0(0);
-    CPPUNIT_ASSERT_ASSERTION_FAIL(veval(_order, x0));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(veval(_rank, x0));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(veval(_sort, x0));
+    CPPUNIT_ASSERT(!checkargs(_order, x0));
+    CPPUNIT_ASSERT(!checkargs(_rank, x0));
+    CPPUNIT_ASSERT(!checkargs(_sort, x0));
     
     //CPPUNIT_FAIL("sort");
 }
@@ -1058,8 +1058,8 @@ void BugsFunTest::inprod()
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.3, eval(_inprod, x4, y4), tol);
 
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_inprod, x3, y4));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_inprod, x4, y3));
+    CPPUNIT_ASSERT(!checkargs(_inprod, x3, y4));
+    CPPUNIT_ASSERT(!checkargs(_inprod, x4, y3));
 }
 
 void BugsFunTest::interplin()
@@ -1251,15 +1251,16 @@ void BugsFunTest::rep() {
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), out8.size());
 
     //Check that argument length mismatches are caught
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_rep, x3, l0));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_rep, x3, l6));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_rep, x6, l0));
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_rep, x6, l3));
+
+    CPPUNIT_ASSERT(!checkargs(_rep, x3, l0));
+    CPPUNIT_ASSERT(!checkargs(_rep, x3, l6));
+    CPPUNIT_ASSERT(!checkargs(_rep, x6, l0));
+    CPPUNIT_ASSERT(!checkargs(_rep, x6, l3));
 
     //Forbid negative values in second argument
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_rep, x3, -1));
+    CPPUNIT_ASSERT(!checkargs(_rep, x3, -1));
     double badl3[3] = {1,2,-2};
-    CPPUNIT_ASSERT_ASSERTION_FAIL(eval(_rep, x3, badl3));
+    CPPUNIT_ASSERT(!checkargs(_rep, x3, badl3));
     
     //CPPUNIT_FAIL("rep");
 }
