@@ -11,7 +11,6 @@ namespace dic {
 
 	// Public constructor:
     PenaltyPDTotal::PenaltyPDTotal(vector<Node const *> const &nodes,
-			 vector<unsigned int> dim, 
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs, unsigned int nrep)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _rngs(rngs),
@@ -27,7 +26,6 @@ namespace dic {
 
 	// Protected constructor which PenaltyPOPTTotal uses:
     PenaltyPDTotal::PenaltyPDTotal(vector<Node const *> const &nodes,
-			 vector<unsigned int> dim, 
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs,
 			 unsigned int nrep, double scale)

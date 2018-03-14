@@ -17,7 +17,7 @@ using std::logic_error;
 namespace jags {
 namespace dic {
 
-    DensityPoolMean::DensityPoolMean(vector<Node const *> const &nodes, vector<unsigned int> dim,
+    DensityPoolMean::DensityPoolMean(vector<Node const *> const &nodes, vector<unsigned int> const &dim,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _values(nodes.size(), 0.0),
 	  _density_type(density_type), _dim(dim), _nchain(nodes[0]->nchain()), _n(0) 

@@ -17,7 +17,7 @@ using std::exp;
 namespace jags {
 namespace dic {
 
-    DensityTotal::DensityTotal(vector<Node const *> const &nodes, vector<unsigned int> dim,
+    DensityTotal::DensityTotal(vector<Node const *> const &nodes, vector<unsigned int> const &dim,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _values(nodes[0]->nchain()),
 	  _density_type(density_type), _dim(vector<unsigned int> (1,1)), _nchain(nodes[0]->nchain())

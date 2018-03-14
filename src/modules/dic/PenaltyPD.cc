@@ -12,7 +12,7 @@ namespace dic {
 
 	// Public constructor:
     PenaltyPD::PenaltyPD(vector<Node const *> const &nodes,
-			 vector<unsigned int> dim, 
+			 vector<unsigned int> const &dim, 
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs, unsigned int nrep)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _rngs(rngs),
@@ -27,7 +27,7 @@ namespace dic {
 
 	// Protected constructor which PenaltyPOPT uses:
     PenaltyPD::PenaltyPD(vector<Node const *> const &nodes,
-			 vector<unsigned int> dim, 
+			 vector<unsigned int> const &dim, 
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs,
 			 unsigned int nrep, double scale)

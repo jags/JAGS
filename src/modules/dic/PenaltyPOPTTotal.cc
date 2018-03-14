@@ -15,11 +15,10 @@ namespace dic {
 
 	// Public constructor:
     PenaltyPOPTTotal::PenaltyPOPTTotal(vector<Node const *> const &nodes,
-			 vector<unsigned int> dim, 
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs,
 			 unsigned int nrep)
-	: PenaltyPDTotal(nodes, dim, monitor_name, rngs, nrep, 2.0),
+	: PenaltyPDTotal(nodes, monitor_name, rngs, nrep, 2.0),
 	  _n(0), _weights(nodes.size(), 0.0)
     {
     }

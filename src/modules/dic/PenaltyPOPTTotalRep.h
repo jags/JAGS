@@ -28,7 +28,6 @@ namespace dic {
 		std::vector< std::vector<double> > _nodetrace;
     public:
 	PenaltyPOPTTotalRep(std::vector<Node const *> const &nodes,
-		  std::vector<unsigned int> dim, 
 		  std::string const &monitor_name,
 		  std::vector<RNG *> const &rngs,
 		  unsigned int nrep);

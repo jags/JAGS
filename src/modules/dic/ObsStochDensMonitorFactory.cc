@@ -152,16 +152,16 @@ namespace dic {
 			m = new PenaltyPOPT(observed_snodes, dim, type, rngs, 10);
 		}
 		else if (monitor_type == PDTOTAL) {
-			m = new PenaltyPDTotal(observed_snodes, dim, type, rngs, 10);
+			m = new PenaltyPDTotal(observed_snodes, type, rngs, 10);
 		}
 		else if (monitor_type == POPTTOTAL) {
-			m = new PenaltyPOPTTotal(observed_snodes, dim, type, rngs, 10);
+			m = new PenaltyPOPTTotal(observed_snodes, type, rngs, 10);
 		}
 		else if (monitor_type == POPTTOTALREP) {
-			m = new PenaltyPOPTTotalRep(observed_snodes, dim, type, rngs, 10);
+			m = new PenaltyPOPTTotalRep(observed_snodes, type, rngs, 10);
 		}
 		else if (monitor_type == PV) {
-			m = new PenaltyPV(observed_snodes, dim, type);
+			m = new PenaltyPV(observed_snodes, type);
 		}
 		else {
 			throw std::logic_error("Unimplemented MonitorType in ObsStochDensMonitorFactory");

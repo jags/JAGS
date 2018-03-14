@@ -18,8 +18,8 @@ namespace dic {
 		unsigned int const _nchain;
 		unsigned int _n;
    	  public:
-   	    PenaltyPV(std::vector<Node const *> const &nodes, std::vector<unsigned int> dim, 
-				std::string const &monitor_name);
+   	    PenaltyPV(std::vector<Node const *> const &nodes,
+		      std::string const &monitor_name);
    	    void update();
    	    std::vector<double> const &value(unsigned int chain) const;
    	    std::vector<unsigned int> dim() const;

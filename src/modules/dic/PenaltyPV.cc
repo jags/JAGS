@@ -14,7 +14,7 @@ namespace dic {
 
 	// Public constructor:
     PenaltyPV::PenaltyPV(vector<Node const *> const &nodes, 
-		vector<unsigned int> dim, string const &monitor_name)
+		         string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes),
 	  _mean(0.0), _mm(0.0),	_pv(1,0.0), _dim(vector<unsigned int> (1,1)),
 	  _nchain(nodes[0]->nchain()), _n(0)

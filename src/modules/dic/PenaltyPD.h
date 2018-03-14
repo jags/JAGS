@@ -24,14 +24,14 @@ namespace dic {
 
 	// Protected constructor for use by PenaltyPOPT:
 	PenaltyPD(std::vector<Node const *> const &nodes,
-		  std::vector<unsigned int> dim, 
+		  std::vector<unsigned int> const &dim, 
 		  std::string const &monitor_name,
 		  std::vector<RNG *> const &rngs,
 		  unsigned int nrep, double scale);
 	
     public:
 	PenaltyPD(std::vector<Node const *> const &nodes,
-		  std::vector<unsigned int> dim, 
+		  std::vector<unsigned int> const &dim, 
 		  std::string const &monitor_name,
 		  std::vector<RNG *> const &rngs,
 		  unsigned int nrep);

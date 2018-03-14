@@ -25,7 +25,7 @@ namespace jags {
 		unsigned int const _nchain;
 		unsigned int _n;
    	  public:
-   	    DensityPoolMean(std::vector<Node const *> const &nodes, std::vector<unsigned int> dim, 
+   	    DensityPoolMean(std::vector<Node const *> const &nodes, std::vector<unsigned int> const &dim, 
 				DensityType const density_type, std::string const &monitor_name);
    	    void update();
    	    std::vector<double> const &value(unsigned int chain) const;
