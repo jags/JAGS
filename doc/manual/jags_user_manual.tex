@@ -2355,11 +2355,11 @@ for $\tau > 0$. Its probability density is
 \]
 for $y > 0$.
 
-As the name suggests, the log-normal distribution is the log transformation
-of a normal distribution with mean $\mu$ and precision $\tau$. It is
-equivalent to
+If $X$ has a normal distribution then $Y = \exp(X)$ has a log-normal
+distribution. In the BUGS language, the log-normal distribution is
+equivalent to:
 \begin{verbatim}
-y <- log(x)
+y <- exp(x)
 x ~ dnorm(mu, tau)
 \end{verbatim}
 
@@ -2529,7 +2529,7 @@ parameter (relative to the baseline hazard $h_0(t) = v t^{v-1}$ with
 $\lambda=1$).
 
 The Weibull distribution has an alternate parameterization for the
-accelerated life model. This is implemented \texttt{dgen.gamma}
+accelerated life model. This is implemented by the \texttt{dgen.gamma}
 distribution when the first shape parameter set to 1.
 \begin{verbatim}
 y ~ dgen.gamma(1, lambda, b)
@@ -2750,7 +2750,7 @@ pi[1:N] ~ ddirch(alpha[1:N])
 Note however, that these distributions also accept a vector of
 unnormalized probability weights. In this context, it is worth noting
 that the Dirichlet distribution can be constructed by generating
-independent gamma random and then normalizing them.
+independent gamma random variables and then normalizing them.
 \begin{verbatim}
 for (i in 1:n) {
    pi[i] <- w[i]/sum(w[1:N])
@@ -2787,7 +2787,7 @@ The probability density function is
 The mean of the multivariate normal distribution is $\mu$ and its
 variance-covariance matrix is $\Omega^{-1}$.
 
-Sometimes is more convenient to express the multivariate normal
+Sometimes it is more convenient to express the multivariate normal
 distribution in terms of its variance-covariance matrix $\Sigma$ (Sigma),
 which is the inverse of the precision matrix ($\Sigma = \Omega^{-1}$).
 While the following construction should work in theory
@@ -2831,7 +2831,7 @@ for (i in 1:N) {
 z[1:N] ~ dnorm(mu[1:N], Omega[1:N, 1:N])
 \end{verbatim}
 
-When $Omega$ is a diagonal matrix then the elements of $y$ are independent
+When $\Omega$ is a diagonal matrix then the elements of $y$ are independent
 and the distribution is equivalent to 
 \begin{verbatim}
 for (i in 1:N) {
@@ -2865,7 +2865,7 @@ distribution below.
       
 %\subsubsection{Random walk}
 
-\subsubsection{Sampling with replacement}
+\subsubsection{Sampling without replacement}
 \label{bugs:dsample}
 
 The \texttt{dsample} distribution represents sampling without replacement
@@ -3163,8 +3163,7 @@ may require an extremely long adaptation period.
 \subsubsection{Ordered logistic}
 
 The ordered logistic distribution with location parameter $\mu$ (mu)
-and $c$ is defined by
-defined by
+and cutpoints $c$ is defined by
 \begin{verbatim}
 y ~ dordered.logit(mu, c[1:M])
 \end{verbatim}
