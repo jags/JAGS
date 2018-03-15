@@ -43,6 +43,11 @@ namespace jags {
 	 */
 	std::vector<Node const *> nodes() const;
 	/**
+	 * Returns a vector containing all the nodes that contribute
+	 * values to the NodeArraySubset, including repeated values.
+	 */
+	std::vector<Node const *> allnodes() const;
+	/**
 	 * Returns the number of chains
 	 */
 	unsigned int nchain() const;

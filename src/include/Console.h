@@ -175,6 +175,15 @@
     */
    std::vector<std::string> const &variableNames() const;
    /**
+    * Retrieves the names of nodes in the graph matching a given type
+    *
+    * If type="observed_stochastic" then these names are guaranteed to
+    * correspond to the values given by deviance monitors in the DIC module
+    * The flat argument isn't yet implemented: must be true
+    */
+   void dumpNodeNames(std::vector<std::string> &node_names,
+  		     std::string const &type, bool flat) const;
+   /**
     * Dump the contants of monitored node in CODA format
     *
     * @param node Vector of monitored nodes to be dumped, each node
@@ -182,10 +191,12 @@
     * is empty then ALL monitored nodes will be dumped.
     * 
     * @param prefix Prefix to be prepended to the output file names
+    * 
+    * @param type Name of the monitor type or "*" for all types
     */
    bool coda(std::vector<std::pair<std::string, Range> > const &nodes,
-	     std::string const &prefix);
-   bool coda(std::string const &prefix);
+	     std::string const &prefix, std::string const &type);
+   bool coda(std::string const &prefix, std::string const &type);
    BUGSModel const *model();
    unsigned int nchain() const;
    bool dumpMonitors(std::map<std::string,SArray> &data_table,

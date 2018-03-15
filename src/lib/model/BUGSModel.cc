@@ -57,24 +57,33 @@ SymTab &BUGSModel::symtab()
 }
 
 void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
-		     string &warn)
+		     string &warn, string const &type)
 {
     warn.clear();
-
+	
     list<MonitorControl> dump_nodes;
     for (unsigned int i = 0; i < node_ids.size(); ++i) {
 	string const &name = node_ids[i].first;
 	Range const &range = node_ids[i].second;
 	list<MonitorInfo>::const_iterator p;
 	for (p = _bugs_monitors.begin(); p != _bugs_monitors.end(); ++p) {
-	    if (p->name() == name && p->range() == range) {
+	    if (p->name() == name && p->range() == range
+			&& (type=="*" || p->type() == type)) {
+				// Wildcard * means all types
 		break;
 	    }
 	}
 	if (p == _bugs_monitors.end()) {
-	    string msg = string("No Monitor ") + name + 
-		print(range) + " found.\n";
-	    warn.append(msg);
+		if ( type == "*" ) {
+		    string msg = string("No Monitor ") + name + 
+			print(range) + " found.\n";
+		    warn.append(msg);
+		}
+		else {
+		    string msg = string("No Monitor ") + name + 
+			print(range) + " with Type " + type + " found.\n";
+			warn.append(msg);
+		}
 	}
 	else {
 	    list<MonitorControl>::const_iterator q; 
@@ -86,7 +95,7 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
 	    }
 	    if (q == monitors().end()) {
 		throw logic_error(string("Monitor ") + name + print(range) +
-				  "not found");
+				  " with type " + type + " not found");
 	    }
 	}
     }
@@ -95,14 +104,21 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
 	warn.append("There are no matching monitors\n");
 	return;
     }
-
-    CODA0(dump_nodes, stem, warn);    
-    CODA(dump_nodes, stem, nchain(), warn);
-    TABLE0(dump_nodes, stem, warn);    
-    TABLE(dump_nodes, stem, nchain(), warn);
+	
+	unsigned int nwritten = 0;
+    nwritten += CODA0(dump_nodes, stem, warn, type);    
+    nwritten += CODA(dump_nodes, stem, nchain(), warn, type);
+    nwritten += TABLE0(dump_nodes, stem, warn, type);    
+    nwritten += TABLE(dump_nodes, stem, nchain(), warn, type);
+	
+	if (nwritten==0) {
+		throw logic_error(string("A Monitor with type ") + 
+			type + " was found but could not be written out");
+	}
+	
 }
 
-void BUGSModel::coda(string const &stem, string &warn)
+void BUGSModel::coda(string const &stem, string &warn, string const &type)
 {
     warn.clear();
     
@@ -111,10 +127,21 @@ void BUGSModel::coda(string const &stem, string &warn)
 	return;
     }
     
-    CODA0(monitors(), stem, warn);    
-    CODA(monitors(), stem, nchain(), warn);
-    TABLE0(monitors(), stem, warn);    
-    TABLE(monitors(), stem, nchain(), warn);
+	unsigned int nwritten = 0;
+    nwritten += CODA0(monitors(), stem, warn, type);    
+    nwritten += CODA(monitors(), stem, nchain(), warn, type);
+    nwritten += TABLE0(monitors(), stem, warn, type);    
+    nwritten += TABLE(monitors(), stem, nchain(), warn, type);
+
+	if ( nwritten == 0 ) {
+		if ( type == "*" ) {
+			throw logic_error("No Monitors written");
+		}
+		else {
+			string msg = string("No Monitor with Type ") + type + " found.\n";
+			warn.append(msg);
+		}
+	}
 }
 
 
@@ -230,6 +257,89 @@ void BUGSModel::samplerNames(vector<vector<string> > &sampler_names) const
 	}
 	sampler_names.push_back(names);
     }    
+}
+
+vector<Node const *> const &BUGSModel::observedStochasticNodes()
+{
+	/* Note: this could be implemented by conditionally including 
+	_observed_stochastic_nodes.push_back(node) in a derived
+	Model::addNode(StochasticNode) method - which would then 
+	mean that observedStochasticNodes() could be const
+	BUT this would add compilation time for all models and
+	observedStochasticNodes are only needed by deviance monitors
+	and to get the names of the observedStochasticNodes 
+	Note sure what the best strategy is so will leave this for now */
+	
+	vector<StochasticNode*> const &snodes = stochasticNodes();
+
+	_observed_stochastic_nodes.clear();
+	for (unsigned int i = 0; i < snodes.size(); ++i) {
+	    if (snodes[i]->isFixed()) {
+			// Implicit up-cast to Node from StochasticNode:
+			_observed_stochastic_nodes.push_back(snodes[i]);
+	    }
+	}
+	
+	return _observed_stochastic_nodes;
+}
+
+void BUGSModel::dumpNodeNames(vector<string> &node_names,
+	     string const &type, bool flat, string &warn) const
+{
+	
+	// The flat argument isn't implemented:
+	if (!flat) {
+		throw logic_error("Attempt to request dump of non-flat Node Names");
+	}
+	
+    warn.clear();
+	node_names.clear();
+	
+	if( type == "constant" ) {
+		vector<Node *> const allnodes = nodes();
+		for (unsigned int i = 0; i < allnodes.size(); ++i) {
+		    if (allnodes[i]->isConstant()) {
+				node_names.push_back(_symtab.getName(allnodes[i]));
+			}
+		}
+	}
+	else if( type == "deterministic" ) {
+		vector<Node *> const allnodes = nodes();
+		for (unsigned int i = 0; i < allnodes.size(); ++i) {
+		    if (allnodes[i]->isDeterministic()) {
+				node_names.push_back(_symtab.getName(allnodes[i]));
+			}
+		}
+	}
+	else if( type == "stochastic" ) {
+		vector<StochasticNode *> const snodes = stochasticNodes();
+		for (unsigned int i = 0; i < snodes.size(); ++i) {
+			// Implicit up-cast to Node from StochasticNode:
+			node_names.push_back(_symtab.getName(snodes[i]));
+		}
+	}
+	else if( type == "fixed" ) {
+		vector<Node *> const allnodes = nodes();
+		for (unsigned int i = 0; i < allnodes.size(); ++i) {
+		    if (allnodes[i]->isFixed()) {
+				node_names.push_back(_symtab.getName(allnodes[i]));
+			}
+		}
+	}
+	else if( type == "observations" ) {
+		vector<StochasticNode *> const snodes = stochasticNodes();
+		for (unsigned int i = 0; i < snodes.size(); ++i) {
+		    if (snodes[i]->isFixed()) {
+				// Implicit up-cast to Node from StochasticNode:
+				node_names.push_back(_symtab.getName(snodes[i]));
+			}
+		}
+	}
+	else {
+		warn.assign("retrieving node names for requested node type '");
+		warn.append(type);
+		warn.append("' is not implemented\n");
+	}
 }
 
 } //namespace jags

@@ -5,7 +5,9 @@
 
 namespace jags {
 namespace dic {
-
+	
+	// DevianceMonitorFactory (and DevianceTrace/DevianceMean) could now be retired?
+	// The same quantities are provided by ObsStochDensMonitorFactory and are named for backwards-compatibility
     class DevianceMonitorFactory : public MonitorFactory
     {
       public:

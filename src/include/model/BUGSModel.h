@@ -24,6 +24,10 @@ class BUGSModel : public Model
     SymTab _symtab;
     //std::map<Node const*, std::pair<std::string, Range> > _node_map;
     std::list<MonitorInfo> _bugs_monitors;
+
+    // Only to be used by observedStochasticNodes():
+    std::vector<Node const *> _observed_stochastic_nodes;
+
 public:
     BUGSModel(unsigned int nchain);
     ~BUGSModel();
@@ -43,15 +47,17 @@ public:
      *
      * @param warn String that will contain any warning messages on
      * exit. It is cleared on entry.
+     * 
+     * @param type Name of the monitor type or "*" for all types
      *
      * @exception logic_error
      */
     void coda(std::vector<std::pair<std::string,Range> > const &nodes, 
-	      std::string const &prefix, std::string &warn);
+	      std::string const &prefix, std::string &warn, std::string const &type);
     /**
      * Write out all monitors in CODA format
      */
-    void coda(std::string const &prefix, std::string &warn);
+    void coda(std::string const &prefix, std::string &warn, std::string const &type);
     /**
      * Sets the state of the RNG, and the values of the unobserved
      * stochastic nodes in the model, for a given chain.
@@ -132,6 +138,19 @@ public:
     void samplerNames(std::vector<std::vector<std::string> > &sampler_names) 
 	const;
 
+    /**
+     * Returns a vector of all observed stochastic nodes in the model
+     */ 
+    std::vector<Node const *> const &observedStochasticNodes();
+    /**
+     * Retrieves the names of nodes in the graph matching a given type
+     *
+     * If type="observed_stochastic" then these names are guaranteed to
+     * correspond to the values given by deviance monitors in the DIC module
+     * The flat argument isn't yet implemented: must be true
+     */
+    void dumpNodeNames(std::vector<std::string> &node_names,
+  		     std::string const &type, bool flat, std::string &warn) const;
 };
 
 } /* namespace jags */

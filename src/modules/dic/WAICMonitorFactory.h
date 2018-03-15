@@ -5,7 +5,8 @@
 
 namespace jags {
     namespace dic {
-
+		
+	// Note:  now retired (along with WAICMonitor) - will be removed before next release
 	class WAICMonitorFactory : public MonitorFactory
 	{
 	public:

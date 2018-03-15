@@ -1,5 +1,6 @@
 #include "VarianceMonitorFactory.h"
 #include "VarianceMonitor.h"
+#include "PoolVarianceMonitor.h"
 
 #include <model/BUGSModel.h>
 #include <graph/Graph.h>
@@ -19,7 +20,7 @@ namespace base {
 					     string const &type,
 					     string &msg)
     {
-	if (type != "variance")
+	if (type != "variance" && type != "poolvariance")
 	    return 0;
 
 	NodeArray *array = model->symtab().getVariable(name);
@@ -27,8 +28,18 @@ namespace base {
 	    msg = string("Variable ") + name + " not found";
 	    return 0;
 	}
-
-	VarianceMonitor *m = new VarianceMonitor(NodeArraySubset(array, range));
+	
+	Monitor *m = 0;
+	
+	if ( type == "variance" ) {
+		m = new VarianceMonitor(NodeArraySubset(array, range));
+	}
+	else if ( type == "poolvariance" ) {
+		m = new PoolVarianceMonitor(NodeArraySubset(array, range));
+	}
+	else {
+		throw std::logic_error("Unimplemented MonitorType in VarianceMonitorFactory");
+	}
 	
 	//Set name attributes 
 	m->setName(name + print(range));

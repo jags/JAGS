@@ -86,8 +86,10 @@ public:
      * function is required (PDF_FULL) or whether partial calculations
      * are permitted (PDF_PRIOR, PDF_LIKELIHOOD). See PDFType for
      * details.
+     *
+	 * NOTE: This is now done in Node.h so can be removed from here
      */
-    virtual double logDensity(unsigned int chain, PDFType type) const = 0;
+    // virtual double logDensity(unsigned int chain, PDFType type) const = 0;
     /**
      * Draws a random sample from the prior distribution of the node
      * given the current values of it's parents, and sets the Node
@@ -170,10 +172,15 @@ public:
 	clone(std::vector<Node const *> const &parameters,
 	      Node const *lower, Node const *upper) const = 0;
     */
-    virtual unsigned int df() const = 0;
-    virtual double KL(unsigned int chain1, unsigned int chain2, RNG *rng,
-		      unsigned int nrep) const = 0;
     void unlinkParents();
+	
+    /**
+     * Used by dumpNodeNames to gather a specific subset of node types:
+     */
+    inline bool isConstant() const { return false; }
+    inline bool isDeterministic() const { return false; }
+    inline bool isStochastic() const { return true; }
+	
 };
 
 /**

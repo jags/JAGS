@@ -45,6 +45,7 @@ by                      zzlval.intval=BY; return BY;
 
 monitor			zzlval.intval=MONITOR; return MONITOR;
 monitors		zzlval.intval=MONITORS; return MONITORS;
+nodenames		zzlval.intval=NODENAMES; return NODENAMES;
 type			zzlval.intval=TYPE; return TYPE;
 set			zzlval.intval=SET; return SET;
 clear			zzlval.intval=CLEAR; return CLEAR;
@@ -137,6 +138,12 @@ run                     zzlval.intval=RUN; return RUN;
 <RDATA>"as.integer"/{BRACKET}   return ASINTEGER;
 
 [a-zA-Z\.]+[a-zA-Z0-9\._\-\\\/]* { 
+  zzlval.stringptr = new std::string(zztext);
+  return NAME;
+}
+
+_observations_ { 
+  // Exception to the name rule for monitoring observed stochastic nodes:
   zzlval.stringptr = new std::string(zztext);
   return NAME;
 }

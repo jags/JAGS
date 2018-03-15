@@ -20,9 +20,11 @@ namespace jags {
  * @param nchain Number of chains.
  * @param warn String that will contain warning messages on exit. It is
  *        cleared on entry.
+ * @param type Name of the monitor type or "*" for all types
+ * @return The number of monitors written
  */
-void CODA(std::list<MonitorControl> const &mvec, std::string const &prefix,
-	  unsigned int nchain, std::string &warn);
+unsigned int CODA(std::list<MonitorControl> const &mvec, std::string const &prefix,
+	  unsigned int nchain, std::string &warn, std::string const &type);
 
 /**
  * CODA output for monitors that pool values over chains.
@@ -34,9 +36,11 @@ void CODA(std::list<MonitorControl> const &mvec, std::string const &prefix,
  * @param Prefix to be prepended to index and output file names
  * @param warn String that will contain warning messages on exit. It is
  *        cleared on entry.
+ * @param type Name of the monitor type or "*" for all types
+ * @return The number of monitors written
  */
-void CODA0(std::list<MonitorControl> const &mvec, std::string const &prefix,
-	   std::string &warn);
+unsigned int CODA0(std::list<MonitorControl> const &mvec, std::string const &prefix,
+	   std::string &warn, std::string const &type);
 
 /**
  * CODA output for monitors that have a separate value for each chain
@@ -49,9 +53,11 @@ void CODA0(std::list<MonitorControl> const &mvec, std::string const &prefix,
  * @param nchain Number of chains.
  * @param warn String that will contain warning messages on exit. It is
  *        cleared on entry.
+ * @param type Name of the monitor type or "*" for all types
+ * @return The number of monitors written
  */
-void TABLE(std::list<MonitorControl> const &mvec, std::string const &prefix,
-	   unsigned int nchain, std::string &warn);
+unsigned int TABLE(std::list<MonitorControl> const &mvec, std::string const &prefix,
+	   unsigned int nchain, std::string &warn, std::string const &type);
 
 /**
  * CODA output for monitors that pool values over chains and iterations.
@@ -62,9 +68,11 @@ void TABLE(std::list<MonitorControl> const &mvec, std::string const &prefix,
  * @param Prefix to be prepended to index and output file names
  * @param warn String that will contain warning messages on exit. It is
  *        cleared on entry.
+ * @param type Name of the monitor type or "*" for all types
+ * @return The number of monitors written
  */
-void TABLE0(std::list<MonitorControl> const &mvec, std::string const &prefix,
-	    std::string &warn);
+unsigned int TABLE0(std::list<MonitorControl> const &mvec, std::string const &prefix,
+	    std::string &warn, std::string const &type);
 
 } //namespace jags
 

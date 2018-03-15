@@ -14,6 +14,7 @@
 #include "OrderedLogit.h"
 #include "OrderedProbit.h"
 #include "MNormalLinear.h"
+#include "LogNormalLinear.h"
 
 #include "GLMBlock.h"
 #include "GLMGibbs.h"
@@ -44,7 +45,8 @@ namespace glm {
 	    AuxMixBinomial::canRepresent(snode) ||
 	    OrderedLogit::canRepresent(snode) ||
 	    OrderedProbit::canRepresent(snode) ||
-	    MNormalLinear::canRepresent(snode);
+	    MNormalLinear::canRepresent(snode) ||
+	    LogNormalLinear::canRepresent(snode);
     }
     
     GLMMethod *
@@ -85,6 +87,9 @@ namespace glm {
 	    }
 	    else if (MNormalLinear::canRepresent(*p)) {
 		outcome = new MNormalLinear(*p, chain);
+	    }
+	    else if (LogNormalLinear::canRepresent(*p)) {
+		outcome = new LogNormalLinear(*p, chain);
 	    }
 	    else {
 		throwLogicError("Invalid outcome in GLMGenericFactory");

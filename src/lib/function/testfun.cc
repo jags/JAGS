@@ -200,51 +200,84 @@ static vector<bool> discreteMask(vector<double const *> const &args)
     return out;
 }
 
+static bool checkArgs(ScalarFunction const *f,
+		      vector<double const *> const &args)
+{
+    //Check that arguments are valid
+    return checkNPar(f, args.size()) &&
+	f->checkParameterDiscrete(discreteMask(args)) &&
+	f->checkParameterValue(args);
+}
+
 static double checkEval(ScalarFunction const *f,
 			vector<double const *> const &args)
 {
     //Evaluate scalar function with checks
-    CPPUNIT_ASSERT_MESSAGE(f->name(), checkNPar(f, args.size()));
-    vector<bool> mask = discreteMask(args);
-    CPPUNIT_ASSERT_MESSAGE(f->name(), f->checkParameterDiscrete(mask));
-    CPPUNIT_ASSERT_MESSAGE(f->name(), f->checkParameterValue(args));
+    CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args));
     return f->evaluate(args);
 }
-
+			   
 /* 
    Evaluate a scalar function that takes a single argument
 */
+
+static vector<double const *> mkArgs(double const *x)
+{
+    return vector<double const *>(1, x);
+}
+
 double eval(ScalarFunction const *f, const double x)
 {
-    vector<double const *> arg(1, &x);
-    return checkEval(f, arg);
+    return checkEval(f, mkArgs(&x));
+}
+
+bool checkargs(ScalarFunction const *f, const double x)
+{
+    return checkArgs(f, mkArgs(&x));
 }
 
 /* 
    Evaluate a scalar function that takes two arguments
 */
+vector<double const *> mkArgs(double const *x, double const *y)
+{
+    vector<double const *> args(2);
+    args[0] = x;
+    args[1] = y;
+    return args;
+}
+
 double eval(ScalarFunction const *f, double x, double y)
 {
-    CPPUNIT_ASSERT_MESSAGE(f->name(), checkNPar(f, 2));
-    vector<double const *> args(2);
-    args[0] = &x;
-    args[1] = &y;
-    CPPUNIT_ASSERT_MESSAGE(f->name(), f->checkParameterValue(args));
-    return checkEval(f, args);
+    return checkEval(f, mkArgs(&x, &y));
+}
+
+bool checkargs(ScalarFunction const *f, double x, double y)
+{
+    return checkArgs(f, mkArgs(&x, &y));
 }
 
 /* 
    Evaluate a scalar function that takes three arguments
 */
+
+vector<double const *> mkArgs(double const *x, double const *y, double const *z)
+{
+    vector<double const *> args(3);
+    args[0] = x;
+    args[1] = y;
+    args[2] = z;
+    return args;
+}
+
 double eval(ScalarFunction const *f, double x, double y, double z)
 {
-    CPPUNIT_ASSERT_MESSAGE(f->name(), checkNPar(f, 3));
-    vector<double const *> args(3);
-    args[0] = &x;
-    args[1] = &y;
-    args[2] = &z;
-    CPPUNIT_ASSERT_MESSAGE(f->name(), f->checkParameterValue(args));
-    return checkEval(f, args);
+    return checkEval(f, mkArgs(&x, &y, &z));
+}
+
+bool checkargs(ScalarFunction const *f, double x, double y, double z)
+{
+    return checkArgs(f, mkArgs(&x, &y, &z));
 }
 
 static vector<bool> discreteMask(vector<double const *> const &args,
@@ -264,78 +297,159 @@ static vector<bool> discreteMask(vector<double const *> const &args,
 
     return out;
 }
+			   
+static bool checkVArgs(VectorFunction const *f,
+		       vector<double const *> const &args,
+		       vector<unsigned int> const &arglen)
+{
+    return args.size() == arglen.size() &&
+	checkNPar(f, args.size()) &&
+	f->checkParameterLength(arglen) &&
+	f->checkParameterDiscrete(discreteMask(args, arglen)) &&
+	f->checkParameterValue(args, arglen);
+}
 
 static vector<double> checkVEval(VectorFunction const *f,
 				 vector<double const *> const &args,
 				 vector<unsigned int> const &arglen)
 {
-    // Evaluate vector function with checks 
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(f->name(), args.size(), arglen.size());
-    CPPUNIT_ASSERT_MESSAGE(f->name(), checkNPar(f, args.size()));
-    CPPUNIT_ASSERT_MESSAGE(f->name(), f->checkParameterLength(arglen));
-    vector<bool> mask = discreteMask(args, arglen);
-    CPPUNIT_ASSERT_MESSAGE(f->name(), f->checkParameterDiscrete(mask));
-    CPPUNIT_ASSERT_MESSAGE(f->name(), f->checkParameterValue(args, arglen));
+    // Evaluate vector function with checks
+    CPPUNIT_ASSERT_MESSAGE(string("Valid arguments for ") + f->name(),
+			   checkVArgs(f, args, arglen));
     vector<double> ans(f->length(arglen, args));
     f->evaluate(&ans[0], args, arglen);
     return ans;
 }
 
+
 /* Evaluate a VectorFunction that takes a single argument */
-vector<double>
-veval(VectorFunction const *f, vector<double> const &x)
+static vector<double const *> mkArgs(vector<double> const &x)
 {
-    vector<double const *> arg(1, &x[0]);
-    vector<unsigned int> arglen(1, x.size());
-    return checkVEval(f, arg, arglen);
+    return vector<double const *>(1, &x[0]);
 }
 
-//Evaluate a VectorFunction that takes two arguments
-vector<double>
-veval(VectorFunction const *f, vector<double> const &x, vector<double> const &y)
+static vector<unsigned int> mkLens(vector<double> const &x)
+{
+    return vector<unsigned int>(1, x.size());
+}
+
+vector<double> veval(VectorFunction const *f, vector<double> const &x)
+{
+    return checkVEval(f, mkArgs(x), mkLens(x));
+}
+
+bool checkargs(VectorFunction const *f, vector<double> const &x)
+{
+    return checkVArgs(f, mkArgs(x), mkLens(x));
+}
+
+
+/* Evaluate a VectorFunction that takes two arguments */
+
+static vector<double const *>
+mkArgs(vector<double> const &x, vector<double> const &y)
 {
     vector<double const *> arg(2);
     arg[0] = &x[0];
     arg[1] = &y[0];
+    return arg;
+}
+
+static vector<unsigned int>
+mkLens(vector<double> const &x, vector<double> const &y)
+{
     vector<unsigned int> arglen(2);
     arglen[0] = x.size();
     arglen[1] = y.size();
-    return checkVEval(f, arg, arglen);
+    return arglen;
 }
 
-//Evaluate a VectorFunction that takes three arguments
 vector<double>
-veval(VectorFunction const *f, vector<double> const &x,
-      vector<double> const &y, vector<double> const &z)
+veval(VectorFunction const *f, vector<double> const &x, vector<double> const &y)
+{
+    return checkVEval(f, mkArgs(x,y), mkLens(x,y));
+}
+
+bool checkargs(VectorFunction const *f, vector<double> const &x,
+	       vector<double> const &y)
+{
+    return checkVArgs(f, mkArgs(x,y), mkLens(x,y));
+}
+
+
+static vector<double const *> mkArgs(vector<double> const &x,
+				     vector<double> const &y,
+				     vector<double> const &z)
 {
     vector<double const *> arg(3);
     arg[0] = &x[0];
     arg[1] = &y[0];
     arg[2] = &z[0];
+    return arg;
+}
+
+static vector<unsigned int> mkLens(vector<double> const &x,
+				   vector<double> const &y,
+				   vector<double> const &z)
+{
     vector<unsigned int> arglen(3);
     arglen[0] = x.size();
     arglen[1] = y.size();
     arglen[2] = z.size();
-    return checkVEval(f, arg, arglen);
+    return arglen;
+}
+
+//Evaluate a VectorFunction that takes three arguments
+
+
+vector<double>
+veval(VectorFunction const *f, vector<double> const &x,
+      vector<double> const &y, vector<double> const &z)
+{
+    return checkVEval(f, mkArgs(x,y,z), mkLens(x,y,z));
 }
 
 //Evaluate a VectorFunction that takes four arguments
-vector<double>
-veval(VectorFunction const *f,
-      vector<double> const &x, vector<double> const &y,
-      vector<double> const &z, vector<double> const &w)
+
+static vector<double const *> mkArgs(vector<double> const &x,
+				     vector<double> const &y,
+				     vector<double> const &z,
+				     vector<double> const &w)
 {
     vector<double const *> arg(4);
     arg[0] = &x[0];
     arg[1] = &y[0];
     arg[2] = &z[0];
     arg[3] = &w[0];
+    return arg;
+}
+
+static vector<unsigned int> mkLens(vector<double> const &x,
+				   vector<double> const &y,
+				   vector<double> const &z,
+				   vector<double> const &w)
+{
     vector<unsigned int> arglen(4);
     arglen[0] = x.size();
     arglen[1] = y.size();
     arglen[2] = z.size();
     arglen[3] = w.size();
-    return checkVEval(f, arg, arglen);
+    return arglen;
+}
+
+vector<double>
+veval(VectorFunction const *f,
+      vector<double> const &x, vector<double> const &y,
+      vector<double> const &z, vector<double> const &w)
+{
+    return checkVEval(f, mkArgs(x,y,z,w), mkLens(x,y,z,w));
+}
+
+bool checkargs(VectorFunction const *f,
+	       vector<double> const &x, vector<double> const &y,
+	       vector<double> const &z, vector<double> const &w)
+{
+    return checkVArgs(f, mkArgs(x,y,z,w), mkLens(x,y,z,w));
 }
 
 
@@ -345,9 +459,9 @@ veval(VectorFunction const *f,
 */
 double eval(VectorFunction const *f, vector<double> const &x)
 {
-    vector<double> y = veval(f, x);
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), y.size());
-    return y[0];
+    vector<double> ans = veval(f, x);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.size());
+    return ans[0];
 }
 
 /*
@@ -356,9 +470,9 @@ double eval(VectorFunction const *f, vector<double> const &x)
 double eval(VectorFunction const *f, vector<double> const &x, 
 	    vector<double> const &y)
 {
-    vector<double> z = veval(f, x, y);
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), z.size());
-    return z[0];
+    vector<double> ans = veval(f, x, y);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.size());
+    return ans[0];
 }
 
 /*

@@ -157,6 +157,7 @@ AC_CONFIG_FILES([
   doc/Makefile
   doc/manual/Makefile
   doc/manual/version
+  doc/manual/figures/Makefile
   test/Makefile
 ])
 AC_OUTPUT

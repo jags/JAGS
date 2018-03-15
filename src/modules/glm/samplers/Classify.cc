@@ -41,6 +41,9 @@ namespace glm {
 	else if (name == "dmnorm") {
 	    return GLM_MNORMAL;
 	}
+	else if (name == "dlnorm") {
+	    return GLM_LNORMAL;
+	}
 	else {
 	    return GLM_UNKNOWN;
 	}

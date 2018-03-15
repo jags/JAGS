@@ -68,7 +68,7 @@ namespace base {
 	insert(new TraceMonitorFactory);
 	insert(new MeanMonitorFactory);
 	insert(new VarianceMonitorFactory);
-    }
+}
 
     BaseModule::~BaseModule() {
 
