@@ -3,12 +3,11 @@
 #include <graph/GraphMarks.h>
 #include <graph/Graph.h>
 #include <graph/MixTab.h>
+#include <graph/NodeError.h>
 
 #include <utility>
 #include <vector>
 #include <stdexcept>
-
-#include <graph/NodeError.h>
 
 using std::vector;
 using std::map;
@@ -180,9 +179,10 @@ MixtureNode::~MixtureNode()
 /* Do not delete commented sections: they are useful for debugging
 #include <iostream>
 #include <sarray/Range.h>
-#include <sarray/nainf.h>
+#include <util/nainf.h>
 #include <graph/NodeError.h>
 */
+
 void MixtureNode::updateActive(unsigned int chain)
 {
     vector<int> i(_Nindex);
@@ -194,14 +194,16 @@ void MixtureNode::updateActive(unsigned int chain)
     _active_parents[chain] = _table->getNode(i);
     if (_active_parents[chain] == 0) {
 	/*
-	std::cout << "Got " << print(Range(i)) << "\nOriginally\n";
+	std::cout << "Got " << print(SimpleRange(i)) << "\nOriginally\n";
 	for (unsigned int j = 0; j < _Nindex; ++j) {
 	    std::cout << par[j]->value(chain)[0] << "\n";
 	    if (par[j]->value(chain)[0] == JAGS_NA)
 		std::cout << "(which is  missing)\n";
 	}
 	*/
-	throw NodeError(this, "Invalid index in MixtureNode");
+	string msg = string("Invalid index ") + print(SimpleRange(i)) +
+	    " in mixture node";
+	throw NodeError(this, msg);
     }
 }
 
