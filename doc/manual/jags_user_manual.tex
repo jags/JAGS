@@ -2391,8 +2391,8 @@ page~\ref{bugs:dweib} for more details.
 \subsubsection{Logistic}
 \label{bugs:dlogis}
 
-The logistic distribution with mean $\mu$ (mu) and precision $\tau$ (tau) is
-defined by
+The logistic distribution with mean $\mu$ (mu) and inverse scale
+$\tau$ (tau) is defined by
 \begin{verbatim}
 y ~ dlogis(mu, tau)
 \end{verbatim}
@@ -2401,9 +2401,7 @@ for $\tau > 0$. It has probability density function
 \frac{\textstyle \tau \exp\{(y - \mu) \tau\}}
      {\textstyle  \left[1 + \exp\{(y - \mu) \tau\}\right]^2}
 \]   
-The variance of the logistic distribution is $\pi^2/(3*\tau)$, {\em
-  i.e.} approximately 3.3 times larger than the variance of a normal
-distribution with the same precision parameter.
+The variance of the logistic distribution is $\pi^2/(3*\tau^2)$.
 
 The cumulative distribution function of the logistic distribution is
 \[
