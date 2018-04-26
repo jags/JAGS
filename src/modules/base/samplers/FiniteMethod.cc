@@ -23,24 +23,28 @@ using std::upper_bound;
 
 namespace jags {
 
-    static int mkLower(SingletonGraphView const *gv)
-    {
-	double lower=0, upper=0;
+    double mkLower(SingletonGraphView const *gv) {
+	double lower = 0, upper = 0;
 	gv->node()->support(&lower, &upper, 1, 0);
-	return static_cast<int>(lower);
+	return lower;
     }
-    
-    static int mkUpper(SingletonGraphView const *gv)
-    {
-	double lower=0, upper=0;
+
+    double mkUpper(SingletonGraphView const *gv) {
+	double lower = 0, upper = 0;
 	gv->node()->support(&lower, &upper, 1, 0);
-	return static_cast<int>(upper);
+	return upper;
+    }
+
+    unsigned long mkSize(SingletonGraphView const *gv) {
+	double lower = 0, upper = 0;
+	gv->node()->support(&lower, &upper, 1, 0);
+	return static_cast<unsigned long>(upper - lower + 1);
     }
 
 namespace base {
 
     FiniteMethod::FiniteMethod(SingletonGraphView const *gv)
-	: _gv(gv), _lower(mkLower(gv)), _upper(mkUpper(gv))
+	: _gv(gv), _lower(mkLower(gv)), _upper(mkUpper(gv)), _size(mkSize(gv))
     {
 	if (!canSample(gv->node())) {
 	    throwLogicError("Invalid FiniteMethod");
@@ -49,12 +53,11 @@ namespace base {
     
     void FiniteMethod::update(unsigned int chain, RNG *rng) const
     {
-	int size = _upper - _lower + 1;
-	vector<double> lik(size);
+	vector<double> lik(_size);
 
 	//Calculate log-likelihood
 	double lik_max = JAGS_NEGINF;
-	for (int i = 0; i < size; i++) {
+	for (unsigned long i = 0; i < _size; i++) {
 	    double ivalue = _lower + i;
 	    _gv->setValue(&ivalue, 1, chain);
 	    lik[i] = _gv->logFullConditional(chain);
@@ -64,7 +67,7 @@ namespace base {
 	//Transform log-likelihood to likelihood, avoiding overflow
 	//and calculate partial sums
 	double liksum = 0;
-	for (int i = 0; i < size; ++i) {
+	for (unsigned long i = 0; i < _size; ++i) {
 	    liksum += exp(lik[i] - lik_max);
 	    lik[i] = liksum;
 	}
@@ -75,7 +78,7 @@ namespace base {
 
 	// Sample
 	double urand = rng->uniform() * liksum;
-	int i = upper_bound(lik.begin(), lik.end(), urand) - lik.begin();
+	long i = upper_bound(lik.begin(), lik.end(), urand) - lik.begin();
 	double ivalue = _lower + i;
 	_gv->setValue(&ivalue, 1, chain);
     }

@@ -30,13 +30,13 @@ struct RNG
     /**
      * Returns the internal state of the RNG as a vector of integers
      *
-     * @state Vector of integers that is overwritten with the RNG state.
+     * @param state Vector of integers that is overwritten with the RNG state.
      */
     virtual void getState(std::vector<int> &state) const = 0;
     /**
      * Sets the internal state of the RNG given a vector of integers
      *
-     * @state Vector of integers describing the internal state of the RNG.
+     * @param state Vector of integers describing the internal state of the RNG.
      * Only vectors previously derived from a call to getState should be used
      * as input to setState. Other values are not guaranteed to give a valid
      * state.

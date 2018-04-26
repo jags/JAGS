@@ -37,11 +37,11 @@ class MixDistTest : public CppUnit::TestFixture, public JAGSFixture
 		 unsigned int N=10000, double pthresh=0.001);
 
     void test_mean_normmix(std::vector<double const *> const &par,
-			   std::vector<unsigned int> const &lengths,
+			   std::vector<unsigned long> const &lengths,
 			   unsigned int N);
 
     void test_var_normmix(std::vector<double const *> const &par,
-			  std::vector<unsigned int> const &len,
+			  std::vector<unsigned long> const &len,
 			  unsigned int N);
 
   public:

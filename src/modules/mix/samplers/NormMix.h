@@ -36,7 +36,7 @@ namespace mix {
 	/**
 	 * Constructor for Mix Method with tempered transitions
 	 *
-	 * @param nlevel Number of levels between minimum and maximum
+	 * @param max_level Number of levels between minimum and maximum
 	 * temperature
 	 *
 	 * @param max_temp Maximum temperature

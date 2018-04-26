@@ -23,27 +23,27 @@ namespace mix {
     public:
 	DNormMix();
 	
-	double logDensity(double const *x, unsigned int length, PDFType type,
+	double logDensity(double const *x, unsigned long length, PDFType type,
 			  std::vector<double const *> const &parameters,
-			  std::vector<unsigned int> const &lengths,
+			  std::vector<unsigned long> const &lengths,
 			  double const *lower, double const *upper) const;
-	void randomSample(double *x, unsigned int length,
+	void randomSample(double *x, unsigned long length,
 			  std::vector<double const *> const &parameters,
-			  std::vector<unsigned int> const &lengths,
+			  std::vector<unsigned long> const &lengths,
 			  double const *lower, double const *upper, RNG *rng) 
 	    const;
-	void support(double *lower, double *upper, unsigned int length,
+	void support(double *lower, double *upper, unsigned long length,
 		     std::vector<double const *> const &parameters,
-		     std::vector<unsigned int> const &lengths) const;
+		     std::vector<unsigned long> const &lengths) const;
 	bool isSupportFixed(std::vector<bool> const &fixmask) const;
-	bool checkParameterLength(std::vector<unsigned int> const &lengths)
+	bool checkParameterLength(std::vector<unsigned long> const &lengths)
 	    const;
 	bool checkParameterValue(std::vector<double const *> const &parameters,
-				 std::vector<unsigned int> const &lengths) 
+				 std::vector<unsigned long> const &lengths) 
 	    const;
 	void typicalValue(double *x, std::vector<double const *> const &par,
-			  std::vector<unsigned int> const &lengths)  const;
-	unsigned int length(std::vector<unsigned int> const &parlengths) const;
+			  std::vector<unsigned long> const &lengths)  const;
+	unsigned long length(std::vector<unsigned long> const &parlengths) const;
     };
 
 }}

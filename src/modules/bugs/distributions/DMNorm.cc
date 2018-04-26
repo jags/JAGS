@@ -1,6 +1,8 @@
 #include <config.h>
 #include <util/dim.h>
 #include <util/nainf.h>
+#include <util/integer.h>
+
 #include "DMNorm.h"
 
 #include <lapack.h>
@@ -21,9 +23,9 @@ DMNorm::DMNorm()
   : ArrayDist("dmnorm", 2) 
 {}
 
-double DMNorm::logDensity(double const *x, unsigned int m, PDFType type,
+double DMNorm::logDensity(double const *x, unsigned long m, PDFType type,
 			  vector<double const *> const &parameters,
-			  vector<vector<unsigned int> > const &dims,
+			  vector<vector<unsigned long> > const &dims,
 			  double const *lower, double const *upper) const
 {
     double const * mu = parameters[0];
@@ -31,10 +33,10 @@ double DMNorm::logDensity(double const *x, unsigned int m, PDFType type,
 
     double loglik = 0;
     vector<double> delta(m);
-    for (unsigned int i = 0; i < m; ++i) {
+    for (unsigned long i = 0; i < m; ++i) {
 	delta[i] = x[i] - mu[i];
 	loglik -= (delta[i] * T[i + i * m] * delta[i])/2;
-	for (unsigned int j = 0; j < i; ++j) {
+	for (unsigned long j = 0; j < i; ++j) {
 	    loglik -= (delta[i] * T[i + j * m] * delta[j]);
 	}
     }
@@ -53,9 +55,9 @@ double DMNorm::logDensity(double const *x, unsigned int m, PDFType type,
     return loglik;
 }
 
-void DMNorm::randomSample(double *x, unsigned int m,
+void DMNorm::randomSample(double *x, unsigned long m,
 			  vector<double const *> const &parameters,
-			  vector<vector<unsigned int> > const &dims,
+			  vector<vector<unsigned long> > const &dims,
 			  double const *lower, double const *upper,
 			  RNG *rng) const
 {
@@ -66,37 +68,35 @@ void DMNorm::randomSample(double *x, unsigned int m,
 }
 
 void DMNorm::randomsample(double *x, double const *mu, double const *T,
-			  bool prec, int nrow, RNG *rng)
+			  bool prec, unsigned long nrow, RNG *rng)
 {
   //FIXME: do something with rng
 
-  int N = nrow*nrow;
-  double * Tcopy = new double[N];
-  for (int i = 0; i < N; ++i) {
-    Tcopy[i] = T[i];
-  }
-  double * w = new double[nrow];
+  unsigned long N = nrow*nrow;
+  vector<double> Tcopy(N);
+  copy(T, T + N, Tcopy.begin());
+  vector<double> w(nrow);
 
   int info = 0;
   double worktest;
   int lwork = -1;
+  int nr = asInteger(nrow);
   // Workspace query
-  F77_DSYEV ("V", "L", &nrow, Tcopy, &nrow, w, &worktest, &lwork, &info);
+  F77_DSYEV ("V", "L", &nr, &Tcopy[0], &nr, &w[0], &worktest, &lwork, &info);
   // Now get eigenvalues/vectors with optimal work space
-  lwork = static_cast<int>(worktest + DBL_EPSILON);
-  double * work = new double[lwork];
-  F77_DSYEV ("V", "L", &nrow, Tcopy, &nrow, w, work, &lwork, &info);
-  delete [] work;
+  lwork = static_cast<int>(worktest);
+  vector<double> work(static_cast<unsigned long>(lwork));
+  F77_DSYEV ("V", "L", &nr, &Tcopy[0], &nr, &w[0], &work[0], &lwork, &info);
 
   /* Generate independent random normal variates, scaled by
      the eigen values. We reuse the array w. */
   if (prec) {
-      for (int i = 0; i < nrow; ++i) {
+      for (unsigned long i = 0; i < nrow; ++i) {
 	  w[i] = rnorm(0, 1/sqrt(w[i]), rng);
       }
   }
   else {
-      for (int i = 0; i < nrow; ++i) {
+      for (unsigned long i = 0; i < nrow; ++i) {
 	  w[i] = rnorm(0, sqrt(w[i]), rng);
       }
   }
@@ -104,17 +104,15 @@ void DMNorm::randomsample(double *x, double const *mu, double const *T,
   /* Now transform them to dependant variates 
     (On exit from DSYEV, Tcopy contains the eigenvectors)
   */
-  for (int i = 0; i < nrow; ++i) {
+  for (unsigned long i = 0; i < nrow; ++i) {
       x[i] = mu ? mu[i] : 0;
-      for (int j = 0; j < nrow; ++j) {
+      for (unsigned long j = 0; j < nrow; ++j) {
 	  x[i] += Tcopy[i + j * nrow] * w[j]; 
       }
   }
-  delete [] w;
-  delete [] Tcopy;
 }
 
-bool DMNorm::checkParameterDim(vector<vector<unsigned int> > const &dims) const
+bool DMNorm::checkParameterDim(vector<vector<unsigned long> > const &dims) const
 {
     //Allow scalar mean and precision. 
     if (isScalar(dims[0]) && isScalar(dims[1])) return true;
@@ -127,27 +125,27 @@ bool DMNorm::checkParameterDim(vector<vector<unsigned int> > const &dims) const
     return true;
 }
 
-vector<unsigned int> DMNorm::dim(vector<vector<unsigned int> > const &dims) const
+vector<unsigned long> DMNorm::dim(vector<vector<unsigned long> > const &dims) const
 {
     return dims[0];
 }
 
 bool
 DMNorm::checkParameterValue(vector<double const *> const &parameters,
-			    vector<vector<unsigned int> > const &dims) const
+			    vector<vector<unsigned long> > const &dims) const
 {
     double const *precision = parameters[1];
-    unsigned int n = dims[0][0];
+    unsigned long n = dims[0][0];
 
     return check_symmetry(precision, n) && check_symmetric_ispd(precision, n);
 }
 
 
-void DMNorm::support(double *lower, double *upper, unsigned int length,
+void DMNorm::support(double *lower, double *upper, unsigned long length,
 		     vector<double const *> const &parameters,
-		     vector<vector<unsigned int> > const &dims) const
+		     vector<vector<unsigned long> > const &dims) const
 {
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	lower[i] = JAGS_NEGINF;
 	upper[i] = JAGS_POSINF;
     }

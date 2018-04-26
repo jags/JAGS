@@ -13,8 +13,8 @@ namespace jags {
 	  _dist(dist)
     {}
 
-    unsigned int 
-    VectorLogDensity::length(vector<unsigned int> const &lengths,
+    unsigned long 
+    VectorLogDensity::length(vector<unsigned long> const &lengths,
 			     vector<double const *> const &values) const
     {
 	return 1;
@@ -23,13 +23,13 @@ namespace jags {
     void 
     VectorLogDensity::evaluate(double *value,
 			       vector<double const *> const &args,
-			       vector<unsigned int> const &lengths) const
+			       vector<unsigned long> const &lengths) const
     {
-	unsigned int npar = _dist->npar();
+	unsigned long npar = _dist->npar();
 
 	vector<double const *> dargs(npar);
-	vector<unsigned int > dlengths(npar);
-	for (unsigned int i = 0; i < npar; ++i) {
+	vector<unsigned long > dlengths(npar);
+	for (unsigned long i = 0; i < npar; ++i) {
 	    dargs[i] = args[i+1];
 	    dlengths[i] = lengths[i+1];
 	}
@@ -39,13 +39,13 @@ namespace jags {
     }
 
     bool
-    VectorLogDensity::checkParameterLength(vector<unsigned int> const &lengths)
+    VectorLogDensity::checkParameterLength(vector<unsigned long> const &lengths)
 	const
     {
-	unsigned int npar = _dist->npar();
+	unsigned long npar = _dist->npar();
 
-	vector<unsigned int> dlengths(npar);
-	for (unsigned int i = 0; i < npar; ++i) {
+	vector<unsigned long> dlengths(npar);
+	for (unsigned long i = 0; i < npar; ++i) {
 	    dlengths[i] = lengths[i+1];
 	}
 
@@ -57,16 +57,16 @@ namespace jags {
 
     bool 
     VectorLogDensity::checkParameterValue(vector<double const *> const &args,
-					  vector<unsigned int> const &lengths) 
+					  vector<unsigned long> const &lengths) 
 	const
     {
 	//We have to include discreteness check here as there is
 	//no equivalent of checkParameterDiscrete for Functions.
 
-	unsigned int npar = _dist->npar();
+	unsigned long npar = _dist->npar();
 
 	vector<bool> mask(npar);
-	for (unsigned int i = 0; i < npar; ++i) {
+	for (unsigned long i = 0; i < npar; ++i) {
 	    double p = *args[i + 1];
 	    mask[i] = (p == static_cast<int>(p));
 	}
@@ -79,8 +79,8 @@ namespace jags {
 	}
 
 	vector<double const *> dargs(npar);
-	vector<unsigned int> dlengths(npar);
-	for (unsigned int i = 0; i < npar; ++i) {
+	vector<unsigned long> dlengths(npar);
+	for (unsigned long i = 0; i < npar; ++i) {
 	    dargs[i] = args[i+1];
 	    dlengths[i] = lengths[i+1];
 	}

@@ -16,39 +16,39 @@ class DScaledWishart : public ArrayDist {
 public:
   DScaledWishart();
 
-  double logDensity(double const *x, unsigned int length, PDFType type,
+  double logDensity(double const *x, unsigned long length, PDFType type,
 		    std::vector<double const *> const &parameters,
-		    std::vector<std::vector<unsigned int> > const &dims,
+		    std::vector<std::vector<unsigned long> > const &dims,
 		    double const *lower, double const *upper) const;
-  void randomSample(double *x, unsigned int length,
+  void randomSample(double *x, unsigned long length,
 		    std::vector<double const *> const &parameters,
-		    std::vector<std::vector<unsigned int> > const &dims,
+		    std::vector<std::vector<unsigned long> > const &dims,
 		    double const *lower, double const *upper, RNG *rng) const;
-  void typicalValue(double *x, unsigned int length,
+  void typicalValue(double *x, unsigned long length,
 		    std::vector<double const *> const &parameters,
-		    std::vector<std::vector<unsigned int> > const &dims,
+		    std::vector<std::vector<unsigned long> > const &dims,
 		    double const *lower, double const *upper) const;
-  static void sampleWishart(double *x, unsigned int length,
-			    double const *scale, unsigned int nrow,
+  static void sampleWishart(double *x, unsigned long length,
+			    double const *scale, unsigned long nrow,
 			    double k, RNG *rng);
   /**
    * Checks that S is a vector and k is a scalar
    */
-  bool checkParameterDim(std::vector<std::vector<unsigned int> > const &dims) 
+  bool checkParameterDim(std::vector<std::vector<unsigned long> > const &dims) 
       const;
   /**
    * Checks that S and k are both positive
    */
   bool checkParameterValue(std::vector<double const *> const &parameters,
-			   std::vector<std::vector<unsigned int> > const &dims)
+			   std::vector<std::vector<unsigned long> > const &dims)
       const;
-  std::vector<unsigned int> 
-      dim(std::vector<std::vector<unsigned int> > const &dims) const;
-  void support(double *lower, double *upper, unsigned int length,
+  std::vector<unsigned long> 
+      dim(std::vector<std::vector<unsigned long> > const &dims) const;
+  void support(double *lower, double *upper, unsigned long length,
 	       std::vector<double const *> const &parameters,
-	       std::vector<std::vector<unsigned int> > const &dims) const;
+	       std::vector<std::vector<unsigned long> > const &dims) const;
   bool isSupportFixed(std::vector<bool> const &fixmask) const;
-  unsigned int df(std::vector<std::vector<unsigned int> > const &dims) const;
+  unsigned long df(std::vector<std::vector<unsigned long> > const &dims) const;
 };
 
 }}

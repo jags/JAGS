@@ -32,7 +32,7 @@ namespace base {
 	 * @param ndoubles Maximum number of doublings of slice 
 	 */
 	DiscreteSlicer(SingletonGraphView const *gv, unsigned int chain,
-                       double width=2, long ndoubles = 10);
+                       double width=2, unsigned int ndoubles = 10);
 	void setValue(double x);
 	double value() const;
 	void getLimits(double *lower, double *upper) const;

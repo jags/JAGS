@@ -19,37 +19,37 @@ namespace jags {
 	
 	void Rep::evaluate(double *value, 
 			   vector <double const *> const &args,
-			   vector <unsigned int> const &lengths) const
+			   vector <unsigned long> const &lengths) const
 	{
 	    double const *x = args[0]; //Vector to be replicated
 	    double const *times = args[1]; //Number of times to replicate
 
-	    unsigned int len_x = lengths[0]; //Length of x vector
-	    unsigned int len_times  = lengths[1]; //Length of times vector
+	    unsigned long len_x = lengths[0]; //Length of x vector
+	    unsigned long len_times  = lengths[1]; //Length of times vector
 	    
 	    if (len_times == 1) {
 		//Replicate whole vector
-		unsigned int ntimes = static_cast<unsigned int>(times[0]);
-		for (unsigned int j = 0; j < ntimes; ++j) {
+		unsigned long ntimes = static_cast<unsigned long>(times[0]);
+		for (unsigned long j = 0; j < ntimes; ++j) {
 		    value = copy(x, x + len_x, value);
 		}
 	    }
 	    else {
 		//Replicate vector element-wise
-		for (unsigned int i = 0; i < len_x; ++i) {
-		    unsigned int ntimes = static_cast<unsigned int>(times[i]);
+		for (unsigned long i = 0; i < len_x; ++i) {
+		    unsigned long ntimes = static_cast<unsigned long>(times[i]);
 		    fill(value, value + ntimes, x[i]);
 		    value += ntimes;
 		}
 	    }
 	}
 
-	unsigned int Rep::length(vector <unsigned int> const &lengths,
+	unsigned long Rep::length(vector <unsigned long> const &lengths,
 				 vector <double const *> const &args) const
 	{
 	    double const *times = args[1];
-	    unsigned int len_times  = lengths[1];
-	    unsigned int len_x = lengths[0];
+	    unsigned long len_times  = lengths[1];
+	    unsigned long len_x = lengths[0];
 	    
 	    double y = 0;
 	    if (len_x == 0) {
@@ -62,10 +62,10 @@ namespace jags {
 		y = accumulate(times, times + len_times, 0.0);
 	    }
 	    
-	    return static_cast<unsigned int>(y);
+	    return static_cast<unsigned long>(y);
 	}
 
-	bool Rep::checkParameterLength(vector<unsigned int> const &len) const
+	bool Rep::checkParameterLength(vector<unsigned long> const &len) const
 	{
 	    return (len[0] == 0) || (len[1] == 1) || (len[1] == len[0]);
 	}
@@ -89,10 +89,10 @@ namespace jags {
 	}
 
 	bool Rep::checkParameterValue(vector<double const *> const &args,
-				      vector<unsigned int> const &lens) const
+				      vector<unsigned long> const &lens) const
 	{
 	    //Times vector must be non-negative
-	    for (unsigned int i = 0; i < lens[1]; ++i) {
+	    for (unsigned long i = 0; i < lens[1]; ++i) {
 		if (args[1][i] < 0) return false;
 	    }
 	    return true;

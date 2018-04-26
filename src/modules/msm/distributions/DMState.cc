@@ -16,7 +16,7 @@ using std::min;
 using std::max;
 using std::vector;
 
-#define INITIAL(par)   ((int) *par[0])
+#define INITIAL(par)   static_cast<int>(*par[0])
 #define TIME(par)      (*par[1])
 #define NSTATE(dims)   (dims[2][0])
 #define INTENSITY(par) (par[2])
@@ -29,7 +29,7 @@ DMState::DMState()
 {}
 
 bool 
-DMState::checkParameterDim(vector<vector<unsigned int> > const &dims) const
+DMState::checkParameterDim(vector<vector<unsigned long> > const &dims) const
 {
     return isScalar(dims[0]) && isScalar(dims[1]) && isSquareMatrix(dims[2]);
 }
@@ -41,7 +41,7 @@ bool DMState::checkParameterDiscrete(vector<bool> const &mask) const
 
 bool 
 DMState::checkParameterValue(vector<double const *> const &par,
-			     vector<vector<unsigned int> > const &dims) const
+			     vector<vector<unsigned long> > const &dims) const
 {
     int initial = static_cast<int>(INITIAL(par));
     double time = TIME(par);
@@ -87,9 +87,9 @@ DMState::checkParameterValue(vector<double const *> const &par,
 }
 
 
-double DMState::logDensity(double const *y, unsigned int length, PDFType type,
+double DMState::logDensity(double const *y, unsigned long length, PDFType type,
 		    vector<double const *> const &par,
-		    vector<vector<unsigned int> > const &dims,
+		    vector<vector<unsigned long> > const &dims,
 		    double const *lower, double const *upper) const
 {
     int initial = INITIAL(par);
@@ -150,9 +150,9 @@ static double q(double p, int initial, double time, unsigned int nstate,
     return nstate;
 }
 
-void DMState::randomSample(double *x, unsigned int length,
+void DMState::randomSample(double *x, unsigned long length,
 			   vector<double const *> const &par,
-			   vector<vector<unsigned int> > const &dims,
+			   vector<vector<unsigned long> > const &dims,
 			   double const *lower, double const *upper,
 			   RNG *rng) const
 {
@@ -165,18 +165,18 @@ bool DMState::isSupportFixed(vector<bool> const &fixmask) const
     return true;
 }
 
-void DMState::support(double *lower, double *upper, unsigned int length,
+void DMState::support(double *lower, double *upper, unsigned long length,
 		      vector<double const *> const &par,
-		      vector<vector<unsigned int> > const &dims) const
+		      vector<vector<unsigned long> > const &dims) const
 {
     *lower = 1;
     *upper = NSTATE(dims);
 }
 
-    vector<unsigned int> 
-    DMState::dim(vector<vector<unsigned int> > const &dims) const
+    vector<unsigned long> 
+    DMState::dim(vector<vector<unsigned long> > const &dims) const
     {
-	return vector<unsigned int>(1, 1);
+	return vector<unsigned long>(1, 1);
     }
 
 

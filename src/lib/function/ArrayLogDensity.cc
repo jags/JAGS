@@ -14,23 +14,23 @@ namespace jags {
 	  _dist(dist)
     {}
     
-    vector<unsigned int> ArrayLogDensity::dim(
-	vector<vector<unsigned int> > const &dims,
+    vector<unsigned long> ArrayLogDensity::dim(
+	vector<vector<unsigned long> > const &dims,
 	vector<double const *> const &values) const
     {
-	return vector<unsigned int>(1, 1);
+	return vector<unsigned long>(1, 1);
     }
 
     void ArrayLogDensity::evaluate(
 	double *value,
 	vector<double const *> const &args,
-	vector<vector<unsigned int> > const &dims) const
+	vector<vector<unsigned long> > const &dims) const
     {
-	unsigned int npar = _dist->npar();
+	unsigned long npar = _dist->npar();
 
 	vector<double const *> dargs(npar);
-	vector<vector<unsigned int> > ddims(npar);
-	for (unsigned int i = 0; i < npar; ++i) {
+	vector<vector<unsigned long> > ddims(npar);
+	for (unsigned long i = 0; i < npar; ++i) {
 	    dargs[i] = args[i+1];
 	    ddims[i] = dims[i+1];
 	}
@@ -42,13 +42,13 @@ namespace jags {
     
 
     bool
-    ArrayLogDensity::checkParameterDim(vector<vector<unsigned int> > const &dim)
+    ArrayLogDensity::checkParameterDim(vector<vector<unsigned long> > const &dim)
 	const
     {
-	unsigned int npar = _dist->npar();
+	unsigned long npar = _dist->npar();
 
-	vector<vector<unsigned int> > ddim(npar);
-	for (unsigned int i = 0; i < npar; ++i) {
+	vector<vector<unsigned long> > ddim(npar);
+	for (unsigned long i = 0; i < npar; ++i) {
 	    ddim[i] = dim[i+1];
 	}
 
@@ -60,30 +60,30 @@ namespace jags {
     
     bool 
     ArrayLogDensity::checkParameterValue(vector<double const *> const &args,
-					  vector<vector<unsigned int> > const &dims) 
+					  vector<vector<unsigned long> > const &dims) 
 	const
     {
 	//We have to include discreteness check here as there is
 	//no equivalent of checkParameterDiscrete for Functions.
 
-	unsigned int npar = _dist->npar();
+	unsigned long npar = _dist->npar();
 
 	vector<bool> mask(npar);
-	for (unsigned int i = 0; i < npar; ++i) {
+	for (unsigned long i = 0; i < npar; ++i) {
 	    double p = *args[i + 1];
-	    mask[i] = (p == static_cast<int>(p));
+	    mask[i] = (p == static_cast<long>(p));
 	}
 	if (!_dist->checkParameterDiscrete(mask)) return false;
 
 	if (_dist->isDiscreteValued(mask)) {
-	    if (*args[0] != static_cast<int>(*args[0])) {
+	    if (*args[0] != static_cast<long>(*args[0])) {
 		return false;
 	    }
 	}
 
 	vector<double const *> dargs(npar);
-	vector<vector<unsigned int> > ddims(npar);
-	for (unsigned int i = 0; i < npar; ++i) {
+	vector<vector<unsigned long> > ddims(npar);
+	for (unsigned long i = 0; i < npar; ++i) {
 	    dargs[i] = args[i+1];
 	    ddims[i] = dims[i+1];
 	}

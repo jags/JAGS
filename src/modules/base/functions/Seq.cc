@@ -13,7 +13,7 @@ namespace jags {
 
 	void Seq::evaluate(double *value, 
 			   vector <double const *> const &par_values,
-			   vector <unsigned int> const &par_lengths) const
+			   vector <unsigned long> const &par_lengths) const
 	{
 	    int lhs = static_cast<int>(*par_values[0]);
 	    int rhs = static_cast<int>(*par_values[1]);
@@ -26,21 +26,21 @@ namespace jags {
 	    }
 	}
 
-	unsigned int Seq::length(vector <unsigned int> const &lengths,
-				 vector <double const *> const &values) const
+	unsigned long Seq::length(vector <unsigned long> const &lengths,
+				  vector <double const *> const &values) const
 	{
-	    int lhs = static_cast<int>(*values[0]);
-	    int rhs = static_cast<int>(*values[1]);
+	    long lhs = static_cast<long>(*values[0]);
+	    long rhs = static_cast<long>(*values[1]);
 
 	    if (rhs < lhs) {
 		return 0;
 	    }
 	    else {
-		return rhs - lhs + 1;
+		return static_cast<unsigned long>(rhs - lhs + 1);
 	    }
 	}
 
-	bool Seq::checkParameterLength(vector<unsigned int> const &len) const
+	bool Seq::checkParameterLength(vector<unsigned long> const &len) const
 	{
 	    return (len[0] == 1) && (len[1] == 1);
 	}

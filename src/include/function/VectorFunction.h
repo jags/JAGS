@@ -14,7 +14,7 @@ namespace jags {
 class VectorFunction : public Function
 {
 public:
-    VectorFunction(std::string const &name, unsigned int npar);
+    VectorFunction(std::string const &name, unsigned long npar);
     /**
      * Evaluates the function and writes the result into the given
      * array
@@ -26,7 +26,7 @@ public:
      */
     virtual void evaluate(double *value, 
 			  std::vector <double const *> const &args,
-			  std::vector <unsigned int> const &lengths) const = 0;
+			  std::vector <unsigned long> const &lengths) const = 0;
     /**
      * Calculates the length of the return value based on the arguments.
      *
@@ -36,8 +36,8 @@ public:
      * @param argvalues Vector of pointers to argument values. 
      *
      */
-    virtual unsigned int 
-	length(std::vector <unsigned int> const &arglengths,
+    virtual unsigned long 
+	length(std::vector <unsigned long> const &arglengths,
 	       std::vector <double const *> const &argvalues) const = 0;
     /**
      * Checks that the lengths of all the arguments are consistent. 
@@ -49,7 +49,7 @@ public:
      * allow zero-length arguments.
      */
     virtual bool 
-	checkParameterLength(std::vector<unsigned int> const &args) const;
+	checkParameterLength(std::vector<unsigned long> const &args) const;
     /**
      * Checks that the values of the arguments are in the domain of
      * the function. The default implementation always returns true
@@ -57,7 +57,7 @@ public:
      */
     virtual bool 
 	checkParameterValue(std::vector<double const *> const &args,
-			    std::vector<unsigned int> const &lengths) const;  
+			    std::vector<unsigned long> const &lengths) const;  
 };
 
 } /* namespace jags */

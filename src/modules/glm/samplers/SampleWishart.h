@@ -7,8 +7,8 @@ namespace jags {
 
     namespace glm {
 	/** @short Sample from Wishart distribution */
-	void sampleWishart(double *X, int length, double const *R,
-			   double df, int nrow, RNG *rng);
+	void sampleWishart(double *X, unsigned long length, double const *R,
+			   double df, unsigned long nrow, RNG *rng);
     }
 }
 

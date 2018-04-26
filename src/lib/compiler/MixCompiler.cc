@@ -69,7 +69,7 @@ namespace jags {
 	     p != nodes.end(); ++p)
 	{
 	    double const *pv = (*p)->value(0);
-	    unsigned int n = (*p)->length();
+	    unsigned long n = (*p)->length();
 	    vector<double> v(n);
 	    copy(pv, pv + n, v.begin());
 	    values.push_back(v);
@@ -80,7 +80,7 @@ namespace jags {
     template<class T>
     void restore(vector<T*> const &nodes, vector<vector<double> > const &values)
     {
-	for (unsigned int j = 0; j < nodes.size(); ++j) {
+	for (unsigned long j = 0; j < nodes.size(); ++j) {
 	    vector<double> const &pv = values[j];
 	    nodes[j]->setValue(&pv[0], pv.size(), 0);
 	}
@@ -89,8 +89,8 @@ namespace jags {
 //Structure to hold subset indices
 struct SSI {
   Node const *node;
-  vector<int> indices;
-  SSI() : node(0) {};
+  vector<unsigned long> indices;
+  SSI() : node(0) {}
 };
 
 
@@ -103,15 +103,16 @@ struct SSI {
    All possible values of Index are included in the vector, based on the
    the range of the array we are taking subsets from (default_range).
 */
-static void getSubsetRanges(vector<pair<vector<int>, Range> > &subsets,  
+static void getSubsetRanges(vector<pair<vector<unsigned long>, Range> > &subsets,  
 			    vector<SSI> const &limits,
 			    SimpleRange const &default_range)
 {
-    unsigned int ndim = limits.size();
+    unsigned long ndim = limits.size();
 
     // Create upper and lower bounds
-    vector<int> var_offset, var_lower, var_upper;
-    vector<vector<int> > scope(ndim);
+    vector<unsigned long> var_offset;
+    vector<unsigned long> var_lower, var_upper;
+    vector<vector<unsigned long> > scope(ndim);
     for (unsigned int j = 0; j < ndim; ++j) {
 	if (limits[j].node) {
 	    var_offset.push_back(j);
@@ -126,9 +127,9 @@ static void getSubsetRanges(vector<pair<vector<int>, Range> > &subsets,
     SimpleRange var_range(var_lower, var_upper); //range of variable indices
     for (RangeIterator p(var_range); !p.atEnd(); p.nextLeft()) {
 	for (unsigned int k = 0; k < var_offset.size(); ++k) {
-	    scope[var_offset[k]] = vector<int>(1, p[k]);
+	    scope[var_offset[k]] = vector<unsigned long>(1, p[k]);
 	}
-	subsets.push_back(pair<vector<int>, Range>(p, Range(scope)));
+	subsets.push_back(pair<vector<unsigned long>, Range>(p, Range(scope)));
     }
 }
 
@@ -260,7 +261,7 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 // that the indices can take. This can only be done under certain
 // conditions.
 {
-    unsigned int ndim = limits.size();
+    unsigned long ndim = limits.size();
 
     vector<Node const*> indices;
     for (unsigned int i = 0; i < ndim; ++i) {
@@ -268,19 +269,19 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	    indices.push_back(limits[i].node);
 	}
     }
-    unsigned int nvi = indices.size();
+    unsigned long nvi = indices.size();
 
     vector<StochasticNode *> sparents;
     vector<DeterministicNode *> dparents;
     findStochasticParents(indices, compiler->model(), sparents, dparents);
 
-    unsigned int nparents = sparents.size();
+    unsigned long nparents = sparents.size();
     if (nparents > 10) {
 	//This algorithm grinds to a halt with too many stochastic
 	//parents. So bail out after 10
 	return 0;
     }
-    vector<int> lower(nparents), upper(nparents);
+    vector<unsigned long> lower(nparents), upper(nparents);
     for (unsigned int i = 0; i < nparents; ++i) {
 	StochasticNode const *snode = sparents[i];
 
@@ -297,11 +298,11 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	if (!jags_finite(l) || !jags_finite(u)) {
 	    return 0; //Unbounded parent => serious trouble
 	}
-	if (l < -INT_MAX || u > INT_MAX) {
-	    return 0; //Can't cast to int
+	if (l < 0 || u > ULONG_MAX) {
+	    return 0; //Can't cast to unsigned long
 	}
-	lower[i] = static_cast<int>(l);
-	upper[i] = static_cast<int>(u);
+	lower[i] = static_cast<unsigned long>(l);
+	upper[i] = static_cast<unsigned long>(u);
     }
 
     //Store current value of all stochastic parents and deterministic nodes
@@ -311,8 +312,8 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 
     // Create a set containing all possible values that the stochastic
     // indices can take
-    set<vector<int> > index_values;
-    vector<int>  this_index(indices.size(),1);
+    set<vector<unsigned long> > index_values;
+    vector<unsigned long>  this_index(indices.size(),1);
     SimpleRange stoch_node_range(lower, upper);
 
     for (RangeIterator i(stoch_node_range); !i.atEnd(); i.nextLeft()) {
@@ -327,7 +328,7 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	}
     
 	for (unsigned int l = 0; l < indices.size(); ++l) {
-	    this_index[l] = static_cast<int>(*indices[l]->value(0));
+	    this_index[l] = static_cast<unsigned long>(*indices[l]->value(0));
 	}
     
 	index_values.insert(this_index);
@@ -338,8 +339,8 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     restore(dparents, stored_dtrm_values);
     
     // Now set up the possible subsets defined by the stochastic indices
-    vector<int> variable_offset;
-    vector<vector<int> > scope(ndim);
+    vector<unsigned long> variable_offset;
+    vector<vector<unsigned long> > scope(ndim);
     for (unsigned int j = 0; j < ndim; ++j) {
 	if (limits[j].node) {
 	    variable_offset.push_back(j);
@@ -349,22 +350,22 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	}
     }
 
-    vector<pair<vector<int>, Range> > ranges;  
-    set<vector<int> >::const_iterator p;
+    vector<pair<vector<unsigned long>, Range> > ranges;  
+    set<vector<unsigned long> >::const_iterator p;
     for (p = index_values.begin(); p != index_values.end(); ++p) {
 
-	vector<int> const &i = *p;
+	vector<unsigned long> const &i = *p;
 	for (unsigned int k = 0; k < nvi; ++k) {
-	    scope[variable_offset[k]] = vector<int>(1, i[k]);
+	    scope[variable_offset[k]] = vector<unsigned long>(1, i[k]);
 	}
-	ranges.push_back(pair<vector<int>, Range>(i, Range(scope)));
+	ranges.push_back(pair<vector<unsigned long>, Range>(i, Range(scope)));
     }
 
     //Look out for trivial mixture nodes in which all subsets are the same.
     bool trivial = true;
     Node *subset_node0 = array->getSubset(ranges[0].second, compiler->model());
 
-    map<vector<int>, Node const *> subsets;  
+    map<vector<unsigned long>, Node const *> subsets;  
     for (unsigned int i = 0; i < ranges.size(); ++i) {
 	Node *subset_node = array->getSubset(ranges[i].second, 
 					     compiler->model());
@@ -390,10 +391,10 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 static Node * 
 getMixtureNode2(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 {
-    vector<pair<vector<int>, Range> > ranges;  
+    vector<pair<vector<unsigned long>, Range> > ranges;  
     getSubsetRanges(ranges, limits, array->range());
 
-    map<vector<int>, Node const *> mixmap;
+    map<vector<unsigned long>, Node const *> mixmap;
     for (unsigned int i = 0; i < ranges.size(); ++i) {
 	Node *subset_node =
 	    array->getSubset(ranges[i].second, compiler->model());
@@ -430,7 +431,7 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
 
     vector<ParseTree*> const &range_list = var->parameters();
     vector<SSI> limits;
-    unsigned int ndim = array->range().ndim(false);
+    unsigned long ndim = array->range().ndim(false);
     if (range_list.size() != ndim) {
 	throw runtime_error("Dimension mismatch taking variable subset of " + 
 			    var->name());
@@ -516,7 +517,7 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
 
 	vector<ParseTree*> const &range_list = var->parameters();
 	vector<SSI> limits;
-	unsigned int ndim = array->range().ndim(false);
+	unsigned long ndim = array->range().ndim(false);
 
 	bool resolved = true;
 	for (unsigned int i = 0; i < ndim; ++i) {
@@ -546,7 +547,7 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
 
 	if (!resolved) return;
 
-	vector<pair<vector<int>, Range> > ranges;  
+	vector<pair<vector<unsigned long>, Range> > ranges;  
 	getSubsetRanges(ranges, limits, array->range());
 
 	for (unsigned int i = 0; i < ranges.size(); ++i) {
@@ -567,7 +568,7 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
 		//as missing, e.g. x[1:5]
 		pair<string, Range> upair(var->name(), subset_range);
 		if (umap.find(upair) == umap.end()) {
-		    set<int> lines;
+		    set<unsigned long> lines;
 		    lines.insert(var->line());
 		    umap[upair] = lines;
 		}
@@ -583,7 +584,7 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
 		    if (!array->getSubset(sr, compiler->model())) {
 			pair<string, Range> upair(var->name(), sr);
 			if (umap.find(upair) == umap.end()) {
-			    set<int> lines;
+			    set<unsigned long> lines;
 			    lines.insert(var->line());
 			    umap[upair] = lines;
 			}

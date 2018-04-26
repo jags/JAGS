@@ -124,7 +124,7 @@ namespace dic {
 		Monitor *m = 0;
 		
 		// There is only ever a single dimension of variables to worry about:
-		vector<unsigned int> dim;
+		vector<unsigned long> dim;
 		dim.push_back(observed_snodes.size());
 
 		if (monitor_type == TRACE) {

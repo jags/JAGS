@@ -84,7 +84,7 @@ namespace glm {
 	 *
 	 */
 	void calCoefSigma(double *A, double *b, double const *sigma0,
-			  unsigned int m) const;
+			  unsigned long m) const;
 	/**
 	 * Calculates the likelihood for sigma, the vector of standard
 	 * deviation parameters for the random effects

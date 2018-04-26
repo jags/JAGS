@@ -15,13 +15,13 @@ namespace jags {
      *
      * @see Range
      */
-    class RangeIterator : public std::vector<int> {
-	std::vector<std::vector<int> > _scope;
-	std::vector<unsigned int> _dim;
-	std::vector<unsigned int> _index;
+    class RangeIterator : public std::vector<unsigned long> {
+	std::vector<std::vector<unsigned long> > _scope;
+	std::vector<unsigned long> _dim;
+	std::vector<unsigned long> _index;
 	unsigned int  _atend;
 	//Forbid assignment
-	RangeIterator &operator=(std::vector<int> const &);
+	RangeIterator &operator=(std::vector<unsigned long> const &);
       public:
 	/**
 	 * Constructor. The initial value of a RangeIterator is the
@@ -32,7 +32,7 @@ namespace jags {
 	 * no index value corresponding to a zero dimension. In this
 	 * case a logic_error is thrown.
 	 *
-	 * @param range. Range to traverse
+	 * @param range Range to traverse
 	 */
 	RangeIterator(Range const &range);
 	/**

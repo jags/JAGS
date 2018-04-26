@@ -30,7 +30,7 @@ public:
      * 
      * @param dim Dimension of SArray to be constructed
      */
-    SArray(std::vector<unsigned int> const &dim);
+    SArray(std::vector<unsigned long> const &dim);
     /**
      * Copy constructor.
      *
@@ -51,17 +51,13 @@ public:
      */
     void setValue(std::vector<double> const &value);
     /**
-     * Sets the value of an SArray to an integer vector
-     */
-    void setValue(std::vector<int> const &value);
-    /**
      * Sets the value of a single element of SArray
      *
      * @param value Scalar value to be assigned
      *
      * @param offset Distance along the value array
      */
-    void setValue(double value, unsigned int offset);
+    void setValue(double value, unsigned long offset);
     /**
      * The value of the SArray . 
      *
@@ -99,7 +95,7 @@ public:
      *
      * @param i Requested dimension.
      */
-    std::vector<std::string> const &getSDimNames(unsigned int i) const;
+    std::vector<std::string> const &getSDimNames(unsigned long i) const;
     /**
      * Sets the names of the ith dimension, corresponding to dimnames()[i+1]
      * in the S language.
@@ -108,15 +104,15 @@ public:
      * value vector, or zero.
      * @param i Requested dimension
      */
-    void setSDimNames(std::vector<std::string> const &names, unsigned int i);
+    void setSDimNames(std::vector<std::string> const &names, unsigned long i);
     /**
      * It is convenient to inline these functions so that an SArray
      * can be thought of as having some of the dimension attributes of
      * its associated range.
      */
-    unsigned int length() const { return range().length(); }
-    unsigned int ndim(bool drop) const { return range().ndim(drop); }
-    std::vector<unsigned int> const &
+    unsigned long length() const { return range().length(); }
+    unsigned long ndim(bool drop) const { return range().ndim(drop); }
+    std::vector<unsigned long> const &
 	dim(bool drop) const { return range().dim(drop); }
 };
 

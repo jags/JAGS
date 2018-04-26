@@ -39,9 +39,9 @@ namespace dic {
     {
     }
 
-    vector<unsigned int> PDMonitor::dim() const
+    vector<unsigned long> PDMonitor::dim() const
     {
-	return vector<unsigned int> (1,_values.size());
+	return vector<unsigned long> (1,_values.size());
     }
  
     vector<double> const &PDMonitor::value(unsigned int chain) const

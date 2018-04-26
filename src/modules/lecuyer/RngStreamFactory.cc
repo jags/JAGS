@@ -62,17 +62,17 @@ static double MultModM (double a, double s, double c, double m)
    /* Compute (a*s + c) % m. m must be < 2^35.  Works also for s, c < 0 */
 {
    double v;
-   int a1;
+   long a1;
    v = a * s + c;
    if ((v >= two53) || (v <= -two53)) {
-      a1 = (int) (a / two17);
+      a1 = static_cast<long>(a / two17);
       a -= a1 * two17;
       v = a1 * s;
-      a1 = (int) (v / m);
+      a1 = static_cast<long>(v / m);
       v -= a1 * m;
       v = v * two17 + a * s + c;
    }
-   a1 = (int) (v / m);
+   a1 = static_cast<long>(v / m);
    if ((v -= a1 * m) < 0.0)
       return v += m;
    else
@@ -141,7 +141,7 @@ namespace lecuyer {
 
 	    unsigned int state[6];
 	    for (int j = 0; j < 6; ++j) {
-		state[j] = Bg[j];
+		state[j] = static_cast<unsigned int>(Bg[j]);
 	    }
 	    RNG *rng = new RngStream(state);
 	    nextSubstream();
@@ -159,7 +159,7 @@ namespace lecuyer {
 
 	    unsigned int state[6];
 	    for (int j = 0; j < 6; ++j) {
-		state[j] = Bg[j];
+		state[j] = static_cast<unsigned int>(Bg[j]);
 	    }
 	    RNG *rng = new RngStream(state);
 	    nextStream();

@@ -1,6 +1,7 @@
 #include <module/Module.h>
 #include <RngStreamFactory.h>
 
+
 using std::vector;
 
 namespace jags {

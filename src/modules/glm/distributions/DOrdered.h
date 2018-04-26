@@ -12,38 +12,38 @@ namespace jags {
 	class DOrdered : public VectorDist {
 	private:
 	    double density(double x, double mu, double const *cut,
-			   int ncut, bool give_log) const;
+			   unsigned long ncut, bool give_log) const;
 	public:
 	    DOrdered(std::string const &name);
 	    
-	    double logDensity(double const *x, unsigned int length,
+	    double logDensity(double const *x, unsigned long length,
 			      PDFType type,
 			      std::vector<double const *> const &parameters,
-			      std::vector<unsigned int> const &lengths,
+			      std::vector<unsigned long> const &lengths,
 			      double const *lower, double const *upper) const;
-	    void randomSample(double *x, unsigned int length,
+	    void randomSample(double *x, unsigned long length,
 			      std::vector<double const *> const &parameters,
-			      std::vector<unsigned int> const &lengths,
+			      std::vector<unsigned long> const &lengths,
 			      double const *lbound, double const *ubound,
 			      RNG *rng) const;
-	    void typicalValue(double *x, unsigned int length,
+	    void typicalValue(double *x, unsigned long length,
 			      std::vector<double const *> const &parameters,
-			      std::vector<unsigned int> const &lengths,
+			      std::vector<unsigned long> const &lengths,
 			      double const *lbound, double const *ubound) const;
 	    bool checkParameterValue(std::vector<double const*> const &par,
-				     std::vector<unsigned int> const &lengths)
+				     std::vector<unsigned long> const &lengths)
 		const;
-	    void support(double *lower, double *upper, unsigned int length,
+	    void support(double *lower, double *upper, unsigned long length,
 			 std::vector<double const *> const &parameters,
-			 std::vector<unsigned int> const &lengths) const;
+			 std::vector<unsigned long> const &lengths) const;
 	    bool isSupportFixed(std::vector<bool> const &fixmask) const;
 	    bool isDiscreteValued(std::vector<bool> const &mask) const;
-	    bool checkParameterLength(std::vector<unsigned int> const &lengths)
+	    bool checkParameterLength(std::vector<unsigned long> const &lengths)
 		const;
-	    unsigned int length(std::vector<unsigned int> const &lengths) const;
+	    unsigned long length(std::vector<unsigned long> const &lengths) const;
 	    double KL(std::vector<double const *> const &par0,
 		      std::vector<double const *> const &par1,
-		      std::vector<unsigned int> const &lengths) const;
+		      std::vector<unsigned long> const &lengths) const;
 	    virtual double r(double mu, RNG *rng) const = 0;
 	    virtual double p(double x, double mu, bool lower, bool give_log)
 		const = 0;

@@ -1,5 +1,7 @@
 #include <config.h>
 #include <util/logical.h>
+#include <util/integer.h>
+
 #include "InProd.h"
 
 #include "lapack.h"
@@ -14,14 +16,14 @@ namespace bugs {
     }
 
     double InProd::scalarEval(vector<double const *> const &args,
-			      vector<unsigned int> const &lengths) const
+			      vector<unsigned long> const &lengths) const
     {
-        int one = 1, N = lengths[0];
+        int one = 1, N = asInteger(lengths[0]);
         return F77_DDOT(&N, args[0], &one, args[1], &one);
     }
 
     bool 
-    InProd::checkParameterLength (vector<unsigned int> const &lengths) const
+    InProd::checkParameterLength (vector<unsigned long> const &lengths) const
     {
 	return (lengths[0] > 0) && (lengths[0] == lengths[1]);
     }

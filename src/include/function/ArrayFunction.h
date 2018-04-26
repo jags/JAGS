@@ -22,7 +22,7 @@ public:
     /**
      * Constructor.
      */
-    ArrayFunction(std::string const &name, unsigned int npar);
+    ArrayFunction(std::string const &name, unsigned long npar);
     /**
      * Evaluates the function. 
      *
@@ -34,7 +34,7 @@ public:
     virtual void
 	evaluate(double *value, 
 		 std::vector<double const *> const &args,
-		 std::vector<std::vector<unsigned int> > const &dims) const = 0;
+		 std::vector<std::vector<unsigned long> > const &dims) const = 0;
     /**
      * Checks whether dimensions of the function parameters are correct.  
      *
@@ -42,7 +42,7 @@ public:
      * the parameters, with any redundant dimensions dropped.
      */
     virtual bool
-	checkParameterDim(std::vector<std::vector<unsigned int> > const &dims) 
+	checkParameterDim(std::vector<std::vector<unsigned long> > const &dims) 
 	const = 0;
     /**
      * Checks whether the parameter values lie in the domain of the
@@ -50,7 +50,7 @@ public:
      */
     virtual bool
 	checkParameterValue(std::vector<double const *> const &args,
-                            std::vector<std::vector<unsigned int> > const &dims) 
+                            std::vector<std::vector<unsigned long> > const &dims) 
         const;
     /**
      * Calculates what the dimension of the return value should be,
@@ -62,8 +62,8 @@ public:
      *
      * @param values Vector of pointers to parameter values.
      */
-    virtual std::vector<unsigned int> 
-	dim(std::vector <std::vector<unsigned int> > const &dims,
+    virtual std::vector<unsigned long> 
+	dim(std::vector <std::vector<unsigned long> > const &dims,
 	    std::vector <double const *> const &values) const = 0;
 };
 

@@ -52,8 +52,9 @@ using std::max_element;
 
 namespace jags {
 
-    typedef pair<vector<unsigned int>, vector<double> > CNodeKey;
-    bool lt(CNodeKey const &k1, CNodeKey const &k2) {
+    typedef pair<vector<unsigned long>, vector<double> > CNodeKey;
+
+    static bool lt(CNodeKey const &k1, CNodeKey const &k2) {
 	//Sort first on dimension
 	if (k1.first < k2.first) {
 	    return true;
@@ -297,13 +298,13 @@ Node * Compiler::constFromTable(ParseTree const *p)
     }
     else if (subset_range.length() > 1) {
 	//Multivariate constant
-	RangeIterator i(subset_range);
-	unsigned int n = subset_range.length();
+	RangeIterator r(subset_range);
+	unsigned long n = subset_range.length();
 	//double const *v = sarray.value();
 	vector<double> const &v = sarray.value();
 	vector<double> value(n);
-	for (unsigned int j = 0; j < n; ++j, i.nextLeft()) {
-	    unsigned int offset = sarray.range().leftOffset(i);
+	for (unsigned int j = 0; j < n; ++j, r.nextLeft()) {
+	    unsigned long offset = sarray.range().leftOffset(r);
 	    value[j] = v[offset];
 	    if (value[j] == JAGS_NA) {
 		return 0;
@@ -315,7 +316,7 @@ Node * Compiler::constFromTable(ParseTree const *p)
     }
     else {
 	//Scalar constant
-	unsigned int offset = sarray.range().leftOffset(subset_range.first());  
+	unsigned long offset = sarray.range().leftOffset(subset_range.first());  
 	double value = sarray.value()[offset];
 	if (value == JAGS_NA) {
 	    return 0;
@@ -326,7 +327,7 @@ Node * Compiler::constFromTable(ParseTree const *p)
     }
 }
 
-bool Compiler::indexExpression(ParseTree const *p, vector<int> &value)
+bool Compiler::indexExpression(ParseTree const *p, vector<unsigned long> &value)
 {
     /* 
        Evaluates an index expression.
@@ -362,11 +363,11 @@ bool Compiler::indexExpression(ParseTree const *p, vector<int> &value)
     else {
 	for (unsigned int i = 0; i < node->length(); ++i) {
 	    double v = node->value(0)[i];
-	    if (!checkInteger(v)) {
+	    if (!checkULong(v)) {
 		throw NodeError(node, 
 				"Index expression evaluates to non-integer value");
 	    }
-	    value.push_back(asInteger(v));
+	    value.push_back(asULong(v));
 	}
     }
 
@@ -407,7 +408,7 @@ Range Compiler::getRange(ParseTree const *p,
     }
 
   // Check size and integrity of range expression
-  unsigned int size = range_list.size();
+  unsigned long size = range_list.size();
   if (!isNULL(default_range) && size != default_range.ndim(false)) {
       CompileError(p, "Dimension mismatch taking subset of", name);
   }
@@ -418,7 +419,7 @@ Range Compiler::getRange(ParseTree const *p,
   }
   
   // Now step through and evaluate lower and upper index expressions
-  vector<vector<int> > scope(size);
+  vector<vector<unsigned long> > scope(size);
   for (unsigned int i = 0; i < size; i++) {
     switch (range_list[i]->parameters().size()) {
     case 0:
@@ -491,8 +492,8 @@ SimpleRange Compiler::VariableSubsetRange(ParseTree const *var)
     
     //New in 4.1.0: Enforce use of simple ranges on the LHS of a relation
     for (unsigned int i = 0; i < range.ndim(false); ++i) {
-	vector<int> const &indices = range.scope()[i];
-	for (unsigned int j = 1; j < indices.size(); ++j) {
+	vector<unsigned long> const &indices = range.scope()[i];
+	for (unsigned long j = 1; j < indices.size(); ++j) {
 	    if (indices[j] != indices[j-1] + 1) {
 		string msg = string("Invalid subset expression for ") + name +
 		    "\nIndex expressions on the left hand side of a relation"
@@ -526,12 +527,12 @@ Range Compiler::CounterRange(ParseTree const *var)
     throw logic_error("Expecting range expression");
   }
 
-  unsigned int size = prange->parameters().size();
+  unsigned long size = prange->parameters().size();
   if (size != 1) {
     throw logic_error(string("Invalid range expression for counter ")
 		      + var->name());
   }
-  vector<int> indices;
+  vector<unsigned long> indices;
   if(!indexExpression(prange->parameters()[0], indices)) {
       CompileError(var, "Cannot evaluate range of counter", var->name());
   }
@@ -540,19 +541,19 @@ Range Compiler::CounterRange(ParseTree const *var)
     return Range();
   }
   else {
-      return Range(vector<vector<int> >(1, indices));
+      return Range(vector<vector<unsigned long> >(1, indices));
   }
 }
 
     Node * 
     Compiler::getConstant(double value, unsigned int nchain, bool observed) 
     {
-	return getConstant(vector<unsigned int>(1, 1), vector<double>(1, value),
+	return getConstant(vector<unsigned long>(1, 1), vector<double>(1, value),
 			   nchain, observed);
     }
 
     Node * 
-    Compiler::getConstant(vector<unsigned int> const &dim, 
+    Compiler::getConstant(vector<unsigned long> const &dim, 
 			  vector<double> const &value,
 			  unsigned int nchain, bool observed)
     {
@@ -603,7 +604,7 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 		//A fixed subset
 		if (!array->range().contains(subset_range)) {
 		    CompileError(p, "Subset out of range:", array->name() +
-				 print(subset_range));
+				 printRange(subset_range));
 		}
 		node = array->getSubset(subset_range, _model);
 		if (node == 0 && _resolution_level == 1) {
@@ -628,7 +629,7 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 			//as missing, e.g. x[1:5]
 			pair<string, Range> upair(p->name(), subset_range);
 			if (_umap.find(upair) == _umap.end()) {
-			    set<int> lines;
+			    set<unsigned long> lines;
 			    lines.insert(p->line());
 			    _umap[upair] = lines;
 			}
@@ -646,7 +647,7 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 			    if (!array->getSubset(sr, _model)) {
 				pair<string, Range> upair(p->name(), sr);
 				if (_umap.find(upair) == _umap.end()) {
-				    set<int> lines;
+				    set<unsigned long> lines;
 				    lines.insert(p->line());
 				    _umap[upair] = lines;
 				}
@@ -740,13 +741,13 @@ Node *Compiler::getDim(ParseTree const *p, SymTab const &symtab)
 	    return 0;
 	}
 	else {
-	    vector<unsigned int> idim = subset_range.dim(false);
+	    vector<unsigned long> idim = subset_range.dim(false);
 	    vector<double> ddim(idim.size());
-            for (unsigned int j = 0; j < idim.size(); ++j) {
+            for (unsigned long j = 0; j < idim.size(); ++j) {
                 ddim[j] = idim[j];
 	    }
 
-	    vector<unsigned int> d(1, idim.size());
+	    vector<unsigned long> d(1, idim.size());
 	    return getConstant(d, ddim, _model.nchain(), false);
 	}
     }
@@ -800,9 +801,10 @@ Node * Compiler::getParameter(ParseTree const *t)
 	    }
 	}
 	break;
-    default:
+    case P_RANGE: case P_BOUNDS:  case P_COUNTER: case P_DENSITY:
+    case P_STOCHREL: case P_DETRMREL: case P_FOR: case P_RELATIONS:
+    case P_VECTOR: case P_ARRAY: case P_SUBSET: case P_INTERVAL:
 	throw  logic_error("Malformed parse tree.");
-	break;
     }
 
     if (!node)
@@ -848,7 +850,10 @@ bool Compiler::getParameterVector(ParseTree const *t,
 	    return false;
 	}
 	break;
-    default:
+    case P_VAR: case P_RANGE: case P_BOUNDS:  case P_COUNTER: case P_VALUE:
+    case P_STOCHREL: case P_DETRMREL: case P_FOR: case P_RELATIONS:
+    case P_VECTOR: case P_ARRAY: case P_DIM: case P_LENGTH: case P_SUBSET:
+    case P_INTERVAL:
 	throw logic_error("Invalid Parse Tree.");
     }
     return true;
@@ -869,10 +874,9 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
     if (stoch_relation->parameters().size() == 3) {
 	//Truncated distribution
 	ParseTree const *truncated = stoch_relation->parameters()[2];
-	switch(truncated->treeClass()) {
-	case P_BOUNDS: case P_INTERVAL:
-	    break;
-	default:
+	if (truncated->treeClass() != P_BOUNDS &&
+	    truncated->treeClass() != P_INTERVAL)
+	{
 	    throw logic_error("Invalid parse tree");
 	}
 	ParseTree const *ll = truncated->parameters()[0];
@@ -897,7 +901,7 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
        and set data_length equal to the length of the array
     */
     double *this_data = 0;
-    unsigned int data_length = 0;
+    unsigned long data_length = 0;
 
     ParseTree *var = stoch_relation->parameters()[0];
     map<string,SArray>::const_iterator q = _data_table.find(var->name());
@@ -913,7 +917,7 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
 	unsigned int i = 0;
 	unsigned int nmissing = 0;
 	for (RangeIterator p(target_range); !p.atEnd(); p.nextLeft()) {
-	    unsigned int j = data_range.leftOffset(p);
+	    unsigned long j = data_range.leftOffset(p);
 	    if (data_value[j] == JAGS_NA) {
 		++nmissing;
 	    }
@@ -926,7 +930,7 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
 	}
 	else if (nmissing != 0) {
 	    delete [] this_data;
-	    CompileError(var, var->name() + print(target_range),
+	    CompileError(var, var->name() + printRange(target_range),
 			 "is partly observed and partly missing");
 	}
     }
@@ -1013,7 +1017,9 @@ Node * Compiler::allocateLogical(ParseTree const *rel)
     case P_VAR: case P_FUNCTION: case P_LINK: case P_LENGTH: case P_DIM:
 	node = getParameter(expression);
 	break;
-    default:
+    case P_RANGE: case P_BOUNDS: case P_DENSITY: case P_COUNTER:
+    case P_STOCHREL: case P_DETRMREL: case P_FOR: case P_RELATIONS:
+    case P_VECTOR: case P_ARRAY: case P_SUBSET: case P_INTERVAL:
 	throw logic_error("Malformed parse tree in Compiler::allocateLogical");
     }
 
@@ -1029,9 +1035,9 @@ Node * Compiler::allocateLogical(ParseTree const *rel)
 	SimpleRange target_range = VariableSubsetRange(var);
 
 	for (RangeIterator p(target_range); !p.atEnd(); p.nextLeft()) {
-	    unsigned int j = data_range.leftOffset(p);
+	    unsigned long j = data_range.leftOffset(p);
 	    if (data_value[j] != JAGS_NA) {
-		CompileError(var, var->name() + print(target_range),
+		CompileError(var, var->name() + printRange(target_range),
 			     "is a logical node and cannot be observed");
 	    }
 	}
@@ -1047,16 +1053,14 @@ void Compiler::allocate(ParseTree const *rel)
     
     Node *node = 0;
     
-    switch(rel->treeClass()) {
-    case P_STOCHREL:
+    if (rel->treeClass() == P_STOCHREL) {
 	node = allocateStochastic(rel);
-	break;
-    case P_DETRMREL:
+    }
+    else if (rel->treeClass() == P_DETRMREL) {
 	node = allocateLogical(rel);
-    break;
-    default:
+    }
+    else {
 	throw logic_error("Malformed parse tree in Compiler::allocate");
-	break;
     }
     
     SymTab &symtab = _model.symtab();
@@ -1066,7 +1070,7 @@ void Compiler::allocate(ParseTree const *rel)
 	if (!array) {
 	    //Undeclared array. Its size is inferred from the dimensions of
 	    //the newly created node
-	    vector<unsigned int> const &dim = node->dim();
+	    vector<unsigned long> const &dim = node->dim();
 	    for (unsigned int i = 0; i < dim.size(); ++i) {
 		if (dim[i] == 0) {
 		    CompileError(var, "Zero dimension for variable " +
@@ -1082,7 +1086,7 @@ void Compiler::allocate(ParseTree const *rel)
 	    SimpleRange range = VariableSubsetRange(var);
 	    if (array->getSubset(range, _model)) {
 		CompileError(var, "Attempt to redefine node",
-			     var->name() + print(range));
+			     var->name() + printRange(range));
 	    }
 	    array->insert(node, range);
 	}
@@ -1103,7 +1107,7 @@ void Compiler::allocate(ParseTree const *rel)
 	  In addition, the parameter might be a *subset* of a node
 	  defined on the LHS of a relation.
 	*/
-	map<pair<string, Range>, set<int> >::iterator p = _umap.begin();
+	map<pair<string, Range>, set<unsigned long> >::iterator p = _umap.begin();
 	while (p != _umap.end()) {
 	    pair<string, Range> const &up = p->first;
 	    if (up.first == var->name() && range.contains(up.second)) {
@@ -1160,22 +1164,22 @@ void Compiler::getArrayDim(ParseTree const *p)
     }
 
     SimpleRange new_range = VariableSubsetRange(var);
-    vector<int> const &new_upper = new_range.last();
+    vector<unsigned long> const &new_upper = new_range.last();
 
     string const &name = var->name();
-    map<string, vector<int> >::iterator i = _node_array_bounds.find(name);
+    map<string, vector<unsigned long> >::iterator i = _node_array_bounds.find(name);
     if (i == _node_array_bounds.end()) {
 	//Create a new entry
 	_node_array_bounds[name] = new_upper;
     }
     else {
 	//Check against the existing entry, and modify if necessary
-	vector<int> & ubound = i->second;
+	vector<unsigned long> & ubound = i->second;
 	if (new_upper.size() != ubound.size()) {
 	    CompileError(var, "Inconsistent dimensions for array", name);
 	}
 	else {
-	    for (unsigned int j = 0; j < ubound.size(); ++j) {
+	    for (unsigned long j = 0; j < ubound.size(); ++j) {
 		ubound[j] = max(ubound[j], new_upper[j]);
 	    }
 	}
@@ -1274,7 +1278,7 @@ void Compiler::writeRelations(ParseTree const *relations)
 	    throw runtime_error("Unable to resolve relations");
 	}
 	//Take a back-up copy of unresolved parameters
-	map<pair<string,Range>, set<int> > umap_copy = _umap;
+	map<pair<string,Range>, set<unsigned long> > umap_copy = _umap;
 
 	/*
 	  Step 2: Eliminate parameters that appear on the left of a relation
@@ -1289,13 +1293,13 @@ void Compiler::writeRelations(ParseTree const *relations)
 	if (!_umap.empty()) {
 	    //Undefined parameter message
 	    oss << "Unable to resolve the following parameters:\n";
-	    for (map<pair<string, Range>, set<int> >::iterator p =
+	    for (map<pair<string, Range>, set<unsigned long> >::iterator p =
 		     _umap.begin(); p != _umap.end(); ++p)
 	    {
-		oss << p->first.first << print(p->first.second);
+		oss << p->first.first << printRange(p->first.second);
 		oss << " (line ";
-		set<int> const &lines = p->second;
-		for (set<int>::const_iterator i = lines.begin();
+		set<unsigned long> const &lines = p->second;
+		for (set<unsigned long>::const_iterator i = lines.begin();
 		     i != lines.end(); ++i)
 		{
 		    if (i != lines.begin()) { oss << ", "; }
@@ -1310,10 +1314,10 @@ void Compiler::writeRelations(ParseTree const *relations)
 	    //Directed cycle message
 	    oss << "Possible directed cycle involving some or all\n"
 		<< "of the following nodes:\n";
-	    for (map<pair<string, Range>, set<int> >::const_iterator p =
+	    for (map<pair<string, Range>, set<unsigned long> >::const_iterator p =
 		     umap_copy.begin(); p != umap_copy.end(); ++p)
 	    {
-		oss << p->first.first << print(p->first.second) << "\n";
+		oss << p->first.first << printRange(p->first.second) << "\n";
 	    }
 	}
 	throw runtime_error(oss.str());
@@ -1341,17 +1345,11 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
     vector<ParseTree*> const &relation_list = relations->parameters();
     for (vector<ParseTree*>::const_reverse_iterator p = relation_list.rbegin(); 
 	 p != relation_list.rend(); ++p) 
-    {  
-	switch ((*p)->treeClass()) {
-	case P_FOR:
-	    break;
-	case P_STOCHREL: case P_DETRMREL:
+    {
+	TreeClass tc = (*p)->treeClass();
+	if (tc == P_STOCHREL || tc == P_DETRMREL) {
 	    (this->*fun)(*p);
 	    _n_relations++;
-	    break;
-	default:
-	    throw logic_error("Malformed parse tree in Compiler::traverseTree");
-	    break;
 	}
     }
 
@@ -1363,15 +1361,10 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
 	     p != relation_list.end(); ++p) 
 	{
 	    //Reverse sweep through relations
-	    switch ((*p)->treeClass()) {
-	    case P_FOR:
-		break;
-	    case P_STOCHREL: case P_DETRMREL:
+	    TreeClass tc = (*p)->treeClass();
+	    if (tc == P_STOCHREL || tc == P_DETRMREL) {
 		_n_relations--;
 		(this->*fun)(*p);
-		break;
-	    default:
-		break;
 	    }
 	}
 
@@ -1381,26 +1374,17 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
     for (vector<ParseTree*>::const_reverse_iterator p = relation_list.rbegin(); 
 	 p != relation_list.rend(); ++p) 
     {
-	//Expand for loops
-	
-	Counter *counter;
-	ParseTree *var;
-      
-	switch ((*p)->treeClass()) {
-	case P_FOR:
-	    var = (*p)->parameters()[0];
+	if ((*p)->treeClass() == P_FOR) {
+	    //Expand for loops
+	    ParseTree *var = (*p)->parameters()[0];
 	    if (!isNULL(CounterRange(var))) {
-		counter = _countertab.pushCounter(var->name(), CounterRange(var));
+		Counter *counter = _countertab.pushCounter(var->name(),
+							   CounterRange(var));
 		for (; !counter->atEnd(); counter->next()) {
 		    traverseTree((*p)->parameters()[1], fun, false, reverse);
 		}
 		_countertab.popCounter();
 	    }
-	    break;
-	case P_STOCHREL: case P_DETRMREL:
-	    break;
-	default:
-	    break;
 	}
     }
   
@@ -1434,16 +1418,16 @@ void Compiler::declareVariables(vector<ParseTree*> const &dec_list)
   for (p = dec_list.begin() ; p != dec_list.end(); ++p) {
     ParseTree const *node_dec = *p;
     string const &name = node_dec->name();
-    unsigned int ndim = node_dec->parameters().size();
+    unsigned long ndim = node_dec->parameters().size();
     if (ndim == 0) {
 	// Variable is scalar
-	_model.symtab().addVariable(name, vector<unsigned int>(1,1));
+	_model.symtab().addVariable(name, vector<unsigned long>(1,1));
     }
     else {
       // Variable is an array
-	vector<unsigned int> dim(ndim);
+	vector<unsigned long> dim(ndim);
 	for (unsigned int i = 0; i < ndim; ++i) {
-	    vector<int> dim_i;
+	    vector<unsigned long> dim_i;
 	    if (!indexExpression(node_dec->parameters()[i], dim_i)) {
 		CompileError(node_dec, "Unable to calculate dimensions of",
 			     name);
@@ -1465,14 +1449,14 @@ void Compiler::declareVariables(vector<ParseTree*> const &dec_list)
     }
 
     //Check consistency with data, if supplied
-    map<string, SArray>::const_iterator p = _data_table.find(name);
-    if (p != _data_table.end()) {
+    map<string, SArray>::const_iterator q = _data_table.find(name);
+    if (q != _data_table.end()) {
 	NodeArray const *array = _model.symtab().getVariable(name);
-	if (p->second.range() != array->range()) {
+	if (q->second.range() != array->range()) {
 	    string msg = string("Dimensions of ") + name + 
-		" in declaration (" + print(array->range()) + 
+		" in declaration (" + printRange(array->range()) + 
 		") conflict with dimensions in data (" + 
-		print(p->second.range()) + ")";
+		printRange(q->second.range()) + ")";
 	    CompileError(node_dec, msg);
 	}
     }
@@ -1504,12 +1488,12 @@ void Compiler::undeclaredVariables(ParseTree const *prelations)
     // Infer the dimension of remaining nodes from the relations
     traverseTree(prelations, &Compiler::getArrayDim);
 
-    map<string, vector<int> >::const_iterator i = _node_array_bounds.begin(); 
+    map<string, vector<unsigned long> >::const_iterator i = _node_array_bounds.begin(); 
     for (; i != _node_array_bounds.end(); ++i) {
 	if (_model.symtab().getVariable(i->first)) {
 	    //Node already declared or defined by data. Check consistency 
 	    NodeArray const * array = _model.symtab().getVariable(i->first);
-	    vector<int> const &upper = array->range().upper();
+	    vector<unsigned long> const &upper = array->range().upper();
 	    if (upper.size() != i->second.size()) {
 		string msg = "Dimension mismatch for variable ";
 		msg.append(i->first);
@@ -1525,9 +1509,9 @@ void Compiler::undeclaredVariables(ParseTree const *prelations)
 	}
 	else {
 	    //Variable not declared. Use inferred size
-	    vector<int> const &upper = i->second;
-	    unsigned int ndim = upper.size();
-	    vector<unsigned int> dim(ndim);
+	    vector<unsigned long> const &upper = i->second;
+	    unsigned long ndim = upper.size();
+	    vector<unsigned long> dim(ndim);
 	    for (unsigned int j = 0; j < ndim; ++j) {
 		if (upper[j] <= 0) {
 		    string msg = string("Invalid dimension for ") + i->first;

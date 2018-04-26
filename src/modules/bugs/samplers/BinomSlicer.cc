@@ -16,7 +16,7 @@ namespace jags {
     namespace bugs {
 
     BinomSlicer::BinomSlicer(SingletonGraphView const *gv, unsigned int chain,
-			   double width, long maxwidth)
+			   double width, unsigned int maxwidth)
 	: Slicer(width, maxwidth), _gv(gv), _chain(chain)
     {
 	gv->checkFinite(chain);

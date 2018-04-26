@@ -48,7 +48,7 @@ class StochasticNode : public Node {
     Node const * const _upper;
     bool _observed;
     const bool _discrete;
-    virtual void sp(double *lower, double *upper, unsigned int length,
+    virtual void sp(double *lower, double *upper, unsigned long length,
 		    unsigned int chain) const = 0;
 protected:
     std::vector<std::vector<double const*> > _parameters;
@@ -65,7 +65,7 @@ public:
      * @param upper Pointer to node defining the lower bound. A NULL
      * pointer denotes no upper bound.
      */
-    StochasticNode(std::vector<unsigned int> const &dim,
+    StochasticNode(std::vector<unsigned long> const &dim,
 		   unsigned int nchain,
 		   Distribution const *dist,
                    std::vector<Node const *> const &parameters,
@@ -124,14 +124,14 @@ public:
      * @param lower pointer to start of an array that will hold the lower 
      * limit of the support
      *
-     * @param lower pointer to start of an array that will hold the upper 
+     * @param upper pointer to start of an array that will hold the upper 
      * limit of the support
      *
      * @param length size of the lower and upper arrays.
      *
      * @param chain Index number of chain to query
      */
-    void support(double *lower, double *upper, unsigned int length,
+    void support(double *lower, double *upper, unsigned long length,
 		 unsigned int chain) const;
     double const *lowerLimit(unsigned int chain) const;
     double const *upperLimit(unsigned int chain) const;
@@ -147,13 +147,13 @@ public:
      * After setData is called, the stochastic node is considered
      * observed.
      *
-     * @param data Pointer to an array of data values.  
+     * @param value Pointer to an array of data values.  
      *
      * @param length Length of the array containing the data values.
      *
      * @see Node#setValue
      */
-    void setData(double const *value, unsigned int length);
+    void setData(double const *value, unsigned long length);
     /**
      * A stochastic node is always a random variable, and is observed
      * if its value has been set with setData.
@@ -172,6 +172,9 @@ public:
 	clone(std::vector<Node const *> const &parameters,
 	      Node const *lower, Node const *upper) const = 0;
     */
+    virtual unsigned long df() const = 0;
+    virtual double KL(unsigned int chain1, unsigned int chain2, RNG *rng,
+		      unsigned int nrep) const = 0;
     void unlinkParents();
 	
     /**

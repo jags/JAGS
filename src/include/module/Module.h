@@ -1,5 +1,5 @@
-#ifndef _MODULE_H_
-#define _MODULE_H_
+#ifndef MODULE_H_
+#define MODULE_H_
 
 #include <vector>
 #include <string>
@@ -95,4 +95,4 @@ public:
 
 } /* namespace jags */
 
-#endif /* _MODULE_H_ */
+#endif /* MODULE_H_ */

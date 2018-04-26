@@ -28,9 +28,9 @@ namespace dic {
     {
     }
 
-    vector<unsigned int> DevianceTrace::dim() const
+    vector<unsigned long> DevianceTrace::dim() const
     {
-	return vector<unsigned int>(1,1);
+	return vector<unsigned long>(1,1);
     }
  
     vector<double> const &DevianceTrace::value(unsigned int chain) const
@@ -43,7 +43,7 @@ namespace dic {
 	unsigned int nchain = _snodes[0]->nchain();
 	for (unsigned int ch = 0; ch < nchain; ++ch) {
 	    double loglik = 0;
-	    for (unsigned int i = 0; i < _snodes.size(); ++i) {
+	    for (unsigned long i = 0; i < _snodes.size(); ++i) {
 		loglik += _snodes[i]->logDensity(ch, PDF_FULL);
 	    }
 	    _values[ch].push_back(-2 * loglik);

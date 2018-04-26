@@ -28,11 +28,9 @@ static vector<double> initValue(SingletonGraphView const *gv,
 				unsigned int chain)
 {
     double const *x = gv->node()->value(chain);
-    unsigned int N = gv->node()->length();
+    unsigned long N = gv->node()->length();
     vector<double> ivalue(N);
-    for (unsigned int i = 0; i < N; ++i) {
-	ivalue[i] = x[i];
-    }
+    copy(x, x + N, ivalue.begin());
     return ivalue;
 }
 
@@ -74,15 +72,14 @@ void MNormMetropolis::update(RNG *rng)
     double step = exp(_lstep);
 
     double const *xold = _gv->node()->value(_chain);
-    unsigned int N = _gv->length();
+    unsigned long N = _gv->length();
 
-    double *eps = new double[N];
-    DMNorm::randomsample(eps, 0, _var, false, N, rng);
+    vector<double> eps(N);
+    DMNorm::randomsample(&eps[0], 0, _var, false, N, rng);
     vector<double> xnew(N);
     for (unsigned int i = 0; i < N; ++i) {
 	xnew[i] = xold[i] + eps[i] * step;
     }
-    delete [] eps;
 
     setValue(xnew);
     logdensity += _gv->logFullConditional(_chain);

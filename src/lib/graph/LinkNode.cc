@@ -20,7 +20,7 @@ class GraphMarks;
 
 LinkNode::LinkNode(LinkFunction const *function, unsigned int nchain,
 		   vector<Node const *> const &parents)
-    : LogicalNode(vector<unsigned int>(1,1), nchain, parents, function), 
+    : LogicalNode(vector<unsigned long>(1,1), nchain, parents, function), 
       _func(function)
 {
     if (!isScalar(parents[0]->dim())) {

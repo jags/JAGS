@@ -25,13 +25,13 @@ namespace jags {
 	/**
 	 * Constructs a MixTab from a MixMap
 	 */
-	MixTab(std::map<std::vector<int>, Node const *> const &mixmap);
+	MixTab(std::map<std::vector<unsigned long>, Node const *> const &mixmap);
 	/** 
 	 * Returns a pointer to the node corresponding to the given
 	 * index.  If there is no node matching the index, a NULL
 	 * pointer is returned.
 	 */
-	Node const * getNode(std::vector<int> const &index) const;
+	Node const * getNode(std::vector<unsigned long> const &index) const;
 	/**
 	 * Returns the range covered by the indices
 	 */

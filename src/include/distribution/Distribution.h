@@ -47,14 +47,14 @@ enum PDFType {PDF_FULL, PDF_PRIOR, PDF_LIKELIHOOD};
 class Distribution
 {
     const std::string _name;
-    const unsigned int _npar;
+    const unsigned long _npar;
 public:
     /**
      * Constructor.
      * @param name name of the distribution as used in the BUGS language
      * @param npar number of parameters, excluding upper and lower bounds
      */
-    Distribution(std::string const &name, unsigned int npar);
+    Distribution(std::string const &name, unsigned long npar);
     virtual ~Distribution();
     /**
      * @returns the BUGS language name of the distribution
@@ -77,7 +77,7 @@ public:
     /**
      * Returns the number of parameters of the distribution
      */
-    unsigned int npar() const;
+    unsigned long npar() const;
     /**
      * Some distributions require some of the parameters to be discrete
      * valued. As most distributions do not require discrete valued paremeters,
@@ -144,7 +144,7 @@ public:
 /**
  * Checks that the distribution accepts npar parameters
  */
-inline bool checkNPar(Distribution const *dist, unsigned int npar)
+inline bool checkNPar(Distribution const *dist, unsigned long npar)
 {
     return (dist->npar() == 0 && npar > 0) ||  dist->npar() == npar;
 }

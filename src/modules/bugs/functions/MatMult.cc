@@ -2,6 +2,7 @@
 
 #include "MatMult.h"
 #include <util/dim.h>
+#include <util/integer.h>
 
 #include "lapack.h"
 
@@ -19,23 +20,23 @@ namespace bugs {
 
     void 
     MatMult::evaluate (double *value, vector<double const *> const &args,
-		       vector<vector<unsigned int> > const &dims) const
+		       vector<vector<unsigned long> > const &dims) const
     {
 	int d1, d2, d3;
 
 	if (dims[0].size() == 1) {
 	    d1 = 1;
-	    d2 = dims[0][0];
+	    d2 = asInteger(dims[0][0]);
 	}
 	else {
-	    d1 = dims[0][0];
-	    d2 = dims[0][1];
+	    d1 = asInteger(dims[0][0]);
+	    d2 = asInteger(dims[0][1]);
 	}
 	if (dims[1].size() == 1) {
 	    d3 = 1;
 	}
 	else {
-	    d3 = dims[1][1];
+	    d3 = asInteger(dims[1][1]);
 	}
     
 	double one = 1, zero = 0;
@@ -43,11 +44,11 @@ namespace bugs {
 		   args[0], &d1, args[1], &d2, &zero, value, &d1);
     }
 
-    vector<unsigned int> 
-    MatMult::dim (vector <vector<unsigned int> > const &dims,
+    vector<unsigned long> 
+    MatMult::dim (vector <vector<unsigned long> > const &dims,
 		  vector<double const *> const &values) const
     {
-	vector<unsigned int> ans(2,1);
+	vector<unsigned long> ans(2,1);
 
 	if (dims[0].size() == 2) {
 	    ans[0] = dims[0][0];
@@ -60,7 +61,7 @@ namespace bugs {
     }
 
     bool 
-    MatMult::checkParameterDim (vector<vector<unsigned int> > const &dims) const
+    MatMult::checkParameterDim (vector<vector<unsigned long> > const &dims) const
     {
 	if (dims[0].size() > 2 || dims[1].size() > 2) {
 	    return false;

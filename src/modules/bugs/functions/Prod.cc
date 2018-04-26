@@ -12,11 +12,11 @@ namespace bugs {
     }
 
     double Prod::scalarEval(vector <double const *> const &args,
-			    vector<unsigned int> const &lengths) const
+			    vector<unsigned long> const &lengths) const
     {
 	double value = 1;
-	for (unsigned int j = 0; j < args.size(); ++j) {
-	    for (unsigned int i = 0; i < lengths[j]; ++i) {
+	for (unsigned long j = 0; j < args.size(); ++j) {
+	    for (unsigned long i = 0; i < lengths[j]; ++i) {
 		value *= args[j][i];
 	    }
 	}

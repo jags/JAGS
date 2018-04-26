@@ -49,9 +49,9 @@ public:
      * is undefined.
      */
     virtual double 
-	logDensity(double const *x, unsigned int length, PDFType type,
+	logDensity(double const *x, unsigned long length, PDFType type,
 		   std::vector<double const *> const &parameters,
-		   std::vector<std::vector<unsigned int> > const &dims,
+		   std::vector<std::vector<unsigned long> > const &dims,
 		   double const *lbound, double const *ubound) const = 0;
     /**
      * Draws a random sample from the distribution. 
@@ -71,7 +71,7 @@ public:
      * the distribution. This should be of size length or may be NULL if
      * there is no lower boundary.
      *
-     * @param lbound pointer to array containing the upper boundary of
+     * @param ubound pointer to array containing the upper boundary of
      * the distribution. This should be of size length or may be NULL if
      * there is no upper boundary.
      *
@@ -80,16 +80,16 @@ public:
      * @exception length_error 
      */
     virtual void 
-	randomSample(double *x, unsigned int length,
+	randomSample(double *x, unsigned long length,
 		     std::vector<double const *> const &parameters,
-		     std::vector<std::vector<unsigned int> > const  &dims,
+		     std::vector<std::vector<unsigned long> > const  &dims,
 		     double const *lbound, double const *ubound,
 		     RNG *rng) 	const = 0;
     /**
      * Checks that dimensions of the parameters are correct.
      */
     virtual bool 
-	checkParameterDim (std::vector<std::vector<unsigned int> > const &parameters) 
+	checkParameterDim (std::vector<std::vector<unsigned long> > const &parameters) 
 	const = 0;
     /**
      * Checks that the values of the parameters are consistent with
@@ -100,13 +100,13 @@ public:
      */
     virtual bool 
 	checkParameterValue(std::vector<double const *> const &parameters,
-			    std::vector<std::vector<unsigned int> > const &dims) const = 0;
+			    std::vector<std::vector<unsigned long> > const &dims) const = 0;
     /**
      * Calculates what the dimension of the distribution should be,
      * based on the dimensions of its parameters. 
      */
-    virtual std::vector<unsigned int> 
-	dim (std::vector <std::vector<unsigned int> > const &args) const = 0;
+    virtual std::vector<unsigned long> 
+	dim (std::vector <std::vector<unsigned long> > const &args) const = 0;
     /**
      * Returns the number of degrees of freedom of the distribution
      * given the dimensions of the parameters. By default this is the
@@ -115,15 +115,15 @@ public:
      * the support occupies a lower dimensional subspace. In this
      * case, the df member function must be overrideen.
      */
-    virtual unsigned int df(std::vector<std::vector<unsigned int> > const &dims)
+    virtual unsigned long df(std::vector<std::vector<unsigned long> > const &dims)
 	const;
     /**
      * Returns the support of an unbounded distribution
      */
     virtual void 
-	support(double *lower, double *upper, unsigned int length,
+	support(double *lower, double *upper, unsigned long length,
 		std::vector<double const *> const &support,
-		std::vector<std::vector<unsigned int> > const &dims) const = 0;
+		std::vector<std::vector<unsigned long> > const &dims) const = 0;
     /**
      * Returns a Monte Carlo estimate of the Kullback-Leibler
      * divergence between distributions with two different parameter
@@ -144,7 +144,7 @@ public:
      */
     double KL(std::vector<double const *> const &par1,
 	      std::vector<double const *> const &par2,
-	      std::vector<std::vector<unsigned int> > const &dims,
+	      std::vector<std::vector<unsigned long> > const &dims,
 	      double const *lower, double const *upper,
 	      RNG *rng, unsigned int nrep) const;
     /**
@@ -158,7 +158,7 @@ public:
      */
     virtual double KL(std::vector<double const *> const &par1,
 		      std::vector<double const *> const &par2,
-		      std::vector<std::vector<unsigned int> > const &dims)
+		      std::vector<std::vector<unsigned long> > const &dims)
 	const;
 };
 

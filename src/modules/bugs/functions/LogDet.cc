@@ -4,6 +4,7 @@
 #include "matrix.h"
 
 #include <util/dim.h>
+#include <util/integer.h>
 #include <cmath>
 
 using std::vector;
@@ -17,28 +18,28 @@ namespace bugs {
     }
 
     void LogDet::evaluate (double *x, vector<double const *> const &args,
-			   vector<vector<unsigned int> > const &dims) const
+			   vector<vector<unsigned long> > const &dims) const
     {
-	*x = logdet(args[0], dims[0][0]);
+	*x = logdet(args[0], asInteger(dims[0][0]));
     }
 
     bool 
-    LogDet::checkParameterDim (vector<vector<unsigned int> > const &dims) const
+    LogDet::checkParameterDim (vector<vector<unsigned long> > const &dims) const
     {
 	return isSquareMatrix(dims[0]) || isScalar(dims[0]);
     }
 
-    vector<unsigned int>
-    LogDet::dim(vector<vector<unsigned int> > const &dims,
+    vector<unsigned long>
+    LogDet::dim(vector<vector<unsigned long> > const &dims,
 		vector<double const *> const &values) const
     {
-	return vector<unsigned int>(1,1);
+	return vector<unsigned long>(1,1);
     }
 
 
     bool 
     LogDet::checkParameterValue(vector<double const *> const &args,
-				vector<vector<unsigned int> > const &dims) const
+				vector<vector<unsigned long> > const &dims) const
     {
 	return check_symmetry(args[0], dims[0][0]);
     }

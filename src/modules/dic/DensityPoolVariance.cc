@@ -17,7 +17,7 @@ using std::logic_error;
 namespace jags {
 namespace dic {
 
-    DensityPoolVariance::DensityPoolVariance(vector<Node const *> const &nodes, vector<unsigned int> const &dim,
+    DensityPoolVariance::DensityPoolVariance(vector<Node const *> const &nodes, vector<unsigned long> const &dim,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), 
 	  _means(nodes.size(), 0.0), _mms(nodes.size(), 0.0), _variances(nodes.size(), 0.0),
@@ -91,7 +91,7 @@ namespace dic {
 	return _variances;
     }
 
-    vector<unsigned int> DensityPoolVariance::dim() const
+    vector<unsigned long> DensityPoolVariance::dim() const
     {
 	return _dim;
     }

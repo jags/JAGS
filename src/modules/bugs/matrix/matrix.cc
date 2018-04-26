@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <module/ModuleError.h>
+#include <util/integer.h>
 
 #include "lapack.h"
 #include "matrix.h"
@@ -18,13 +19,13 @@ using std::vector;
 namespace jags {
 namespace bugs {
 
-double logdet(double const *a, int n)
+double logdet(double const *a, unsigned long n)
 {
    // Log determinant of n x n symmetric positive matrix a */
   
-  int N = n*n;
+  unsigned long N = n*n;
   double *acopy = new double[N];
-  for (int i = 0; i < N; i++) {
+  for (unsigned int i = 0; i < N; i++) {
     acopy[i] = a[i];
   }
 
@@ -32,7 +33,8 @@ double logdet(double const *a, int n)
   int lwork = -1;
   double worktest = 0;
   int info = 0;
-  F77_DSYEV("N","U", &n, acopy, &n, w, &worktest, &lwork, &info);
+  int ni = asInteger(n);
+  F77_DSYEV("N","U", &ni, acopy, &ni, w, &worktest, &lwork, &info);
   if (info != 0) {
     delete [] acopy;
     delete [] w;
@@ -40,7 +42,7 @@ double logdet(double const *a, int n)
   }
   lwork = static_cast<int>(worktest);
   double *work = new double[lwork];
-  F77_DSYEV("N","U", &n, acopy, &n, w, work, &lwork, &info);
+  F77_DSYEV("N","U", &ni, acopy, &ni, w, work, &lwork, &info);
   delete [] acopy;
   delete [] work;
   if (info != 0) {
@@ -61,14 +63,14 @@ double logdet(double const *a, int n)
   return logdet;
 }
 
-bool check_symmetric_ispd(double const *a, int n)
+bool check_symmetric_ispd(double const *a, unsigned long n)
 {
     /* Checks that an n x n symmetric matrix is positive definite.
        The code is essentially the same as logdet, but we return
        false if the smallest eigenvalue is less than zero.
     */
   
-    int N = n*n;
+    unsigned long N = n*n;
     vector<double> acopy(N);
     copy(a, a+N, acopy.begin());
 
@@ -77,15 +79,16 @@ bool check_symmetric_ispd(double const *a, int n)
     int lwork = -1;
     double worktest = 0;
     int info = 0;
-    F77_DSYEV("N","U", &n, &acopy[0], &n, &w[0], &worktest, &lwork, &info);
+    int ni = asInteger(n);
+    F77_DSYEV("N","U", &ni, &acopy[0], &ni, &w[0], &worktest, &lwork, &info);
     if (info != 0) {
 	throwRuntimeError("unable to calculate workspace size for dsyev");
     }
     lwork = static_cast<int>(worktest);
-    vector<double> work(lwork);
+    vector<double> work(static_cast<unsigned long>(lwork));
 
     //Calculate eigenvalues
-    F77_DSYEV("N","U", &n, &acopy[0], &n, &w[0], &work[0], &lwork, &info);
+    F77_DSYEV("N","U", &ni, &acopy[0], &ni, &w[0], &work[0], &lwork, &info);
     if (info != 0) {
 	throwRuntimeError("unable to calculate eigenvalues in dsyev");
     }
@@ -145,75 +148,65 @@ double det(double const *a, int n)
 */
 
 
-bool inverse_spd (double *X, double const *A, int n)
+bool inverse_spd (double *X, double const *A, unsigned long n)
 {
     /* invert n x n symmetric positive definite matrix A. Put result in X*/
-
-    int N = n*n;
-    double *Acopy = new double[N];
-    for (int i = 0; i < N; i++) {
-	Acopy[i] = A[i];
-    }
+    //FIXME: This needs testing after being rewritten
+    
+    unsigned long N = n*n;
+    copy(A, A + N, X);
 
     int info = 0;
-    F77_DPOTRF ("L", &n, Acopy, &n, &info);
+    int ni = asInteger(n);
+    F77_DPOTRF ("L", &ni, X, &ni, &info);
     if (info < 0) {
 	throwLogicError("Illegal argument in inverse_spd");
     }
     else if (info > 0) {
-	delete [] Acopy;
 	throwRuntimeError("Cannot invert matrix: not positive definite");
     }
-    F77_DPOTRI ("L", &n, Acopy, &n, &info); 
+    F77_DPOTRI ("L", &ni, X, &ni, &info); 
+    if (info != 0) {
+	throwRuntimeError("Cannot invert symmetric positive definite matrix");
+    }
 
-    for (int i = 0; i < n; ++i) {
-	X[i*n + i] = Acopy[i*n + i];
-	for (int j = 0; j < i; ++j) {
-	    X[i*n + j] = X[j*n + i] = Acopy[j*n + i];
+    for (unsigned long i = 0; i < n; ++i) {
+	for (unsigned long j = 0; j < i; ++j) {
+	    X[i*n + j] = X[j*n + i];
 	}
     }
-    delete [] Acopy;
 
-    if (info != 0) {
-	throwRuntimeError("Unable to invert symmetric positive definite matrix");
-    }
     return true;
 }
 
 
-bool inverse (double *X, double const *A, int n)
+bool inverse (double *X, double const *A, unsigned long n)
 {
     /* invert n x n matrix A. Put result in X */
 
-    int N = n*n;
-    double *Acopy = new double[N];
-    for (int i = 0; i < N; i++) {
-	Acopy[i] = A[i];
+    unsigned long N = n*n;
+    vector<double> Acopy(N);
+    copy(A, A + N, Acopy.begin());
+    for (unsigned long i = 0; i < N; i++) {
 	X[i] = 0;
     }
-    for (int i = 0; i < n; i++) {
+    for (unsigned long i = 0; i < n; i++) {
 	X[i*n + i] = 1;
     }
 
     int info = 0;
-    int *ipiv = new int[n];
-    F77_DGESV (&n, &n, Acopy, &n, ipiv, X, &n, &info);
-
-    delete [] ipiv;    
-    delete [] Acopy;
-
-    if (info != 0) {
-	return false;
-    }
-    return true;
+    int ni = asInteger(n);
+    vector<int> ipiv(n);
+    F77_DGESV (&ni, &ni, &Acopy[0], &ni, &ipiv[0], X, &ni, &info);
+    return info == 0;
 }
 
-bool check_symmetry(double const *x, unsigned int n, double tol)
+bool check_symmetry(double const *x, unsigned long n, double tol)
 {
-    for (unsigned int i = 1; i < n; ++i) {
+    for (unsigned long i = 1; i < n; ++i) {
 	double const *xp = x + i;
 	double const *yp = x + n*i;
-	for (unsigned int j = 0; j < i; ++j) {
+	for (unsigned long j = 0; j < i; ++j) {
 	    if (fabs(*xp - *yp) > tol) return false;
 	    xp += n;
 	    yp++;

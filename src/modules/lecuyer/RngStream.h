@@ -1,5 +1,5 @@
-#ifndef _RNG_STREAM_H_
-#define _RNG_STREAM_H_
+#ifndef RNG_STREAM_H_
+#define RNG_STREAM_H_
 
 #include <rng/RmathRNG.h>
 
@@ -36,6 +36,6 @@ namespace lecuyer {
  
 }}
 
-#endif /* _RNGSTREAM_H_ */
+#endif /* RNGSTREAM_H_ */
  
 

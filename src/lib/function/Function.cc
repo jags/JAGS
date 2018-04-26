@@ -6,7 +6,7 @@ using std::string;
 
 namespace jags {
 
-Function::Function (string const &name, unsigned int npar)
+Function::Function (string const &name, unsigned long npar)
   : _name (name), _npar (npar)
 {
 }
@@ -26,7 +26,7 @@ string Function::alias() const
     return "";
 }
 
-    unsigned int Function::npar() const
+    unsigned long Function::npar() const
     {
 	return _npar;
     }
@@ -65,7 +65,7 @@ string Function::deparse(vector<string> const &par) const
 {
     string name = this->name();
     name.append("(");
-    for (unsigned int i = 0; i < par.size(); ++i) {
+    for (unsigned long i = 0; i < par.size(); ++i) {
 	if (i > 0) {
 	    name.append(",");
 	}

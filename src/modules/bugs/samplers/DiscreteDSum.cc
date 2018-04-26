@@ -20,10 +20,10 @@ namespace jags {
 namespace bugs {
 
 //Pick a random integer between 0 and n - 1
-static int pick(int n, RNG *rng)
+static unsigned int pick(unsigned long n, RNG *rng)
 {
     double u = rng->uniform() * n;
-    int i = 1;
+    unsigned int i = 1;
     while (i < u) ++i;
     return i - 1;
 }
@@ -34,15 +34,15 @@ DiscreteDSum::DiscreteDSum(GraphView const *gv, unsigned int chain)
 }
 
 void DiscreteDSum::step(vector<double> &value, 
-			unsigned int nrow, unsigned int ncol,
+			unsigned long nrow, unsigned long ncol,
 			double s, RNG *rng) const
 {
     //Randomly pick a row
-    int r = pick(nrow, rng);
+    unsigned int r = pick(nrow, rng);
 
     //Randomly pick two columns
-    int c1 = pick(ncol, rng);
-    int c2 = pick(ncol - 1, rng);
+    unsigned int c1 = pick(ncol, rng);
+    unsigned int c2 = pick(ncol - 1, rng);
     if (c2 >= c1) ++c2;
     
     //Modify the chosen elements while keeping the sum constant

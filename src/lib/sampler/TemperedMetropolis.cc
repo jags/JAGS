@@ -14,11 +14,11 @@ using std::fabs;
 //Minimum number of iterations before we can go to the next level
 #define MIN_STEP 50
 
-static vector<double> makePower(int max_level, double max_temp)
+static vector<double> makePower(unsigned int max_level, double max_temp)
 {
     vector<double> pwr(max_level + 1);
     double delta = log(max_temp) / max_level;
-    for (int t = 0; t <= max_level; ++t) {
+    for (unsigned int t = 0; t <= max_level; ++t) {
 	pwr[t] = exp(-t * delta);
     }
     return pwr;
@@ -27,7 +27,7 @@ static vector<double> makePower(int max_level, double max_temp)
 namespace jags {
 
 TemperedMetropolis::TemperedMetropolis(vector<double> const &value,
-				       int max_level, double max_temp, 
+				       unsigned int max_level, double max_temp, 
 				       unsigned int nrep)
     : Metropolis(value),
       _max_level(max_level), 
@@ -91,7 +91,7 @@ void TemperedMetropolis::update(RNG *rng)
     vector<double> current_value = last_value;
 
     double log_global_prob = 0;
-    for (_t = 1; _t <= _tmax; _t++) {
+    for (_t = 1U; _t <= _tmax; _t++) {
 	log_global_prob += (_pwr[_t] - _pwr[_t-1]) * log_lik;
 	temperedUpdate(rng, log_prior, log_lik, current_value);
     }

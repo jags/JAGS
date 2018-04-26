@@ -48,7 +48,7 @@ static void writeDouble(double x, ostream &out)
 	*/
 
 	Monitor const *monitor = control.monitor();
-	unsigned int nvar = product(monitor->dim());
+	unsigned long nvar = product(monitor->dim());
 	
 	vector<bool> ans(nvar, false);
 	for (unsigned int ch = 0; ch < nchain; ++ch) {
@@ -86,7 +86,7 @@ static void WriteIndex(MonitorControl const &control,
 	return;
     }
 
-    unsigned int nvar = product(monitor->dim());
+    unsigned long nvar = product(monitor->dim());
     vector<string> const &enames = monitor->elementNames();
     for (unsigned int v = 0; v < nvar; ++v) {
 	if (missing[v]) continue;
@@ -97,7 +97,7 @@ static void WriteIndex(MonitorControl const &control,
 }
 
 //Write output file
-static void WriteOutput(MonitorControl const &control, int chain,
+static void WriteOutput(MonitorControl const &control, unsigned int chain,
 			vector<bool> const &missing,
 			ofstream &output)
 {
@@ -107,7 +107,7 @@ static void WriteOutput(MonitorControl const &control, int chain,
     }
     
     vector<double> const &y = monitor->value(chain);
-    unsigned int nvar = product(monitor->dim());
+    unsigned long nvar = product(monitor->dim());
     for (unsigned int v = 0; v < nvar; ++v) {
 	if (missing[v]) continue;
 	unsigned int iter = control.start();
@@ -120,7 +120,7 @@ static void WriteOutput(MonitorControl const &control, int chain,
     }
 }
 
-static void WriteTable(MonitorControl const &control, int chain,
+static void WriteTable(MonitorControl const &control, unsigned int chain,
 		       vector<bool> const &missing,
 		       ofstream &index)
 {
@@ -132,7 +132,7 @@ static void WriteTable(MonitorControl const &control, int chain,
     vector<double> const &y = monitor->value(chain);
     vector<string> const &enames = monitor->elementNames();
     
-    unsigned int nvar = product(monitor->dim());
+    unsigned long nvar = product(monitor->dim());
     for (unsigned int v = 0; v < nvar; ++v) {
 	if (missing[v]) continue;
 	index << enames[v] << " ";

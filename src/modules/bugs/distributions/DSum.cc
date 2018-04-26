@@ -26,15 +26,15 @@ bool DSum::isDiscreteValued(vector<bool> const &mask) const
     return allTrue(mask);
 }
 
-double DSum::logDensity(double const *x, unsigned int length, PDFType type,
+double DSum::logDensity(double const *x, unsigned long length, PDFType type,
 			vector<double const *> const &par,
-			vector<vector<unsigned int> > const &dims,
+			vector<vector<unsigned long> > const &dims,
 			double const *lower, double const *upper) const
 {
     const double tol = sqrt(DBL_EPSILON);
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	double s = x[i];
-	for (unsigned int j = 0; j < par.size(); ++j) {
+	for (unsigned long j = 0; j < par.size(); ++j) {
 	    s -= par[j][i];
 	}
 	if (fabs(s) > tol) {
@@ -44,15 +44,15 @@ double DSum::logDensity(double const *x, unsigned int length, PDFType type,
     return 0;
 }
 
-void DSum::randomSample(double *x, unsigned int length,
+void DSum::randomSample(double *x, unsigned long length,
 			  vector<double const *> const &par, 
-			  vector<vector<unsigned int> > const &dims,
+			  vector<vector<unsigned long> > const &dims,
 			  double const *lower, double const *upper,
 			  RNG *rng) const
 {
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	x[i] = 0;
-	for (unsigned int j = 0; j < par.size(); ++j) {
+	for (unsigned long j = 0; j < par.size(); ++j) {
 	    x[i] += par[j][i];
 	}
     }
@@ -63,22 +63,22 @@ bool DSum::isSupportFixed(vector<bool> const &fixmask) const
     return allTrue(fixmask);
 }
 
-unsigned int DSum::df(vector<vector<unsigned int> > const &dims) const
+unsigned long DSum::df(vector<vector<unsigned long> > const &dims) const
 {
     return 0;
 }
 
 bool DSum::checkParameterValue(vector<double const *> const &params,
-			       vector<vector<unsigned int> > const &dims) const
+			       vector<vector<unsigned long> > const &dims) const
 {
     return true;
 }
 
-bool DSum::checkParameterDim (vector<vector<unsigned int> > const &dims) const
+bool DSum::checkParameterDim (vector<vector<unsigned long> > const &dims) const
 {
     if (dims.empty()) return false;
     if (isFlat(dims[0])) return false;
-    for (unsigned int i = 1; i < dims.size(); ++i) {
+    for (unsigned long i = 1; i < dims.size(); ++i) {
 	if (dims[i] != dims[0])
 	    return false;
     }
@@ -87,27 +87,27 @@ bool DSum::checkParameterDim (vector<vector<unsigned int> > const &dims) const
 
 bool DSum::checkParameterDiscrete(vector<bool> const &mask) const
 {
-    for (unsigned int i = 1; i < mask.size(); ++i) {
+    for (unsigned long i = 1; i < mask.size(); ++i) {
 	if (mask[i] != mask[0])
 	    return false;
     }
     return true;
 }
 
-void DSum::support(double *lower, double *upper, unsigned int length,
+void DSum::support(double *lower, double *upper, unsigned long length,
 		   vector<double const *> const &par,
-		   vector<vector<unsigned int> > const &dims) const
+		   vector<vector<unsigned long> > const &dims) const
 {
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	lower[i] = 0;
-	for (unsigned int j = 0; j < par.size(); ++j) {
+	for (unsigned long j = 0; j < par.size(); ++j) {
 	    lower[i] += par[j][i];
 	}
 	upper[i] = lower[i];
     }
 }
 
-vector<unsigned int> DSum::dim(vector<vector<unsigned int> > const &dims) const
+vector<unsigned long> DSum::dim(vector<vector<unsigned long> > const &dims) const
 {
     return dims[0];
 }

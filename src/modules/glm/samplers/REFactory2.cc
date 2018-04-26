@@ -105,9 +105,9 @@ namespace jags {
 	    */
 
 	    if (tau) {
-		unsigned int nchain = glmsampler->_methods.size();
+		unsigned long nchain = glmsampler->_methods.size();
 		vector<MutableSampleMethod*> methods(nchain);
-		for (unsigned int i = 0; i < nchain; ++i) {
+		for (unsigned long i = 0; i < nchain; ++i) {
 		    methods[i] = newMethod(tau, glmsampler->_methods[i]);
 		}
 		used_nodes.insert(tau->node());

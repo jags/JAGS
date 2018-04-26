@@ -23,7 +23,7 @@ namespace base {
 	PoolVarianceMonitor(NodeArraySubset const &subset);
 	void update();
 	std::vector<double> const &value(unsigned int chain) const;
-	std::vector<unsigned int> dim() const;
+	std::vector<unsigned long> dim() const;
 	bool poolChains() const;
 	bool poolIterations() const;
 	};

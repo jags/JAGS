@@ -21,14 +21,14 @@ namespace jags {
 
 	void Combine::evaluate (double *value, 
 				vector <double const *> const &args,
-				vector<unsigned int> const &lengths) const
+				vector<unsigned long> const &lengths) const
 	{
-	    for (unsigned int i = 0; i < args.size(); ++i) {
+	    for (unsigned long i = 0; i < args.size(); ++i) {
 		value = copy(args[i], args[i] + lengths[i], value);
 	    }
 	}
 
-	unsigned int Combine::length (vector<unsigned int> const &lens,
+	unsigned long Combine::length (vector<unsigned long> const &lens,
 				      vector<double const *> const &vals) const
 	{
 	    return accumulate(lens.begin(), lens.end(), 0U);
@@ -46,7 +46,7 @@ namespace jags {
 	    //and so has the same rules for preserving additive functions
 	    //i.e. only one argument may be additive. 
 	    bool found = false;
-	    for (unsigned int i = 0; i < mask.size(); ++i) {
+	    for (unsigned long i = 0; i < mask.size(); ++i) {
 		if (mask[i]) {
 		    if (found) return false;
 		    else found = true;
@@ -74,7 +74,7 @@ namespace jags {
 	    return true;
 	}
 
-	bool Combine::checkParameterLength(vector<unsigned int> const &args)
+	bool Combine::checkParameterLength(vector<unsigned long> const &args)
 	    const
 	{
 	    return true;

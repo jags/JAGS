@@ -20,9 +20,9 @@ namespace jags {
 	    Combine ();
 	    void evaluate(double *value, 
 			  std::vector <double const *> const &args,
-			  std::vector <unsigned int> const &lengths) const;
-	    unsigned int 
-		length(std::vector<unsigned int> const &parlengths,
+			  std::vector <unsigned long> const &lengths) const;
+	    unsigned long 
+		length(std::vector<unsigned long> const &parlengths,
 		       std::vector<double const *> const &parvalues) const;
 	    bool isDiscreteValued(std::vector<bool> const &mask) const;
 	    bool isAdditive(std::vector<bool> const &mask,
@@ -31,7 +31,7 @@ namespace jags {
 			 std::vector<bool> const &isfixed) const;
 	    bool isLinear(std::vector<bool> const &mask,
 			  std::vector<bool> const &isfixed) const;
-	    bool checkParameterLength(std::vector<unsigned int> const &args)
+	    bool checkParameterLength(std::vector<unsigned long> const &args)
 		const;
 	};
 

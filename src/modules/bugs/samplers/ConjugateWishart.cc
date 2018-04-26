@@ -9,6 +9,7 @@
 #include <graph/MixtureNode.h>
 #include <sampler/Linear.h>
 #include <sampler/SingletonGraphView.h>
+#include <util/integer.h>
 
 #include <set>
 #include <vector>
@@ -88,15 +89,15 @@ ConjugateWishart::update(unsigned int chain, RNG *rng) const
 {
     vector<StochasticNode *> const &stoch_children = 
 	_gv->stochasticChildren();
-    unsigned int nchildren = stoch_children.size();
+    unsigned long nchildren = stoch_children.size();
 
     vector<Node const *> const &param = _gv->node()->parents();  
 
     double df = *param[1]->value(chain);
     double const *Rprior = param[0]->value(chain);
-    int nrow = param[0]->dim()[0];
+    unsigned long nrow = param[0]->dim()[0];
 
-    int N = nrow * nrow;
+    unsigned long N = nrow * nrow;
     vector<double> R(N);
     copy(Rprior, Rprior + N, R.begin());
 
@@ -114,26 +115,26 @@ ConjugateWishart::update(unsigned int chain, RNG *rng) const
 	//Double the current value
 	double const *x = _gv->node()->value(chain);
 	vector<double> x2(N);
-	for (int j = 0; j < N; ++j) {
+	for (unsigned long j = 0; j < N; ++j) {
 	    x2[j] = 2 * x[j];
 	}
 	_gv->setValue(x2, chain);
 	//See if precision matrix has changed
-	for (unsigned int i = 0; i < nchildren; ++i) {
+	for (unsigned long i = 0; i < nchildren; ++i) {
 	    if (getPrecision0(stoch_children[i], chain) == precision0[i]) {
 		active[i] = false; //not active
 	    }
 	}
     }
 
-    for (unsigned int i = 0; i < nchildren; ++i) {
+    for (unsigned long i = 0; i < nchildren; ++i) {
 	if (active[i]) {
 	    StochasticNode const *schild = stoch_children[i];
 	    double const *Y = schild->value(chain);
 	    double const *mu = schild->parents()[0]->value(chain);
 	    
-	    for (int j = 0; j < nrow; j++) {
-		for (int k = 0; k < nrow; k++) {
+	    for (unsigned long j = 0; j < nrow; j++) {
+		for (unsigned long k = 0; k < nrow; k++) {
 		    R[j*nrow + k] += (Y[j] - mu[j]) * (Y[k] - mu[k]);
 		}
 	    }
@@ -142,6 +143,7 @@ ConjugateWishart::update(unsigned int chain, RNG *rng) const
     }
 
     vector<double> xnew(N);
+
     DWish::randomSample(&xnew[0], N, &R[0], df, nrow, rng);
     _gv->setValue(xnew, chain);
 }

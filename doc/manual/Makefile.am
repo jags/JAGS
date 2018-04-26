@@ -1,27 +1,29 @@
 SUBDIRS = figures
 
-EXTRA_DIST = jags_user_manual.tex jags_user_manual.bib	\
-jags_installation_manual.tex jags_developer_manual.tex  \
-version.in figures/halft.R figures/halft.pdf
+SOURCES = jags_user_manual.tex jags_user_manual.bib \
+	jags_installation_manual.tex jags_developer_manual.tex \
+	version.in 
 
-docs: jags_user_manual.pdf jags_installation_manual.pdf jags_developer_manual.pdf
+FIGURES = figures/halft.pdf
 
-jags_user_manual.pdf: jags_user_manual.bbl jags_user_manual.tex
-	TEXINPUTS="$(srcdir):$$TEXINPUTS" pdflatex jags_user_manual.tex
+LATEX = pdflatex
+LATEXOPT = --shell-escape
+NONSTOP = --interaction=nonstopmode
 
-jags_user_manual.bbl: jags_user_manual.bib
-	TEXINPUTS="$(srcdir):$$TEXINPUTS" pdflatex jags_user_manual.tex
-	BIBINPUTS="$(srcdir):$$BIBINPUTS" bibtex jags_user_manual
-	TEXINPUTS="$(srcdir):$$TEXINPUTS" pdflatex jags_user_manual.tex
+LATEXMK = latexmk
+LATEXMKOPT = -pdf
 
-jags_developer_manual.pdf: jags_developer_manual.tex
-	TEXINPUTS="$(srcdir):$$TEXINPUTS" pdflatex jags_developer_manual.tex
-	TEXINPUTS="$(srcdir):$$TEXINPUTS" pdflatex jags_developer_manual.tex
+docs: $(SOURCES) $(FIGURES) \
+      jags_user_manual.pdf \
+      jags_installation_manual.pdf \
+      jags_developer_manual.pdf
 
-jags_installation_manual.pdf: jags_installation_manual.tex
-	TEXINPUTS="$(srcdir):$$TEXINPUTS" pdflatex jags_installation_manual.tex
-	TEXINPUTS="$(srcdir):$$TEXINPUTS" pdflatex jags_installation_manual.tex
+.tex.pdf: 
+	TEXINPUTS="$(srcdir):$$TEXINPUTS" \
+	BIBINPUTS="$(srcdir):$$BIBINPUTS" \
+        $(LATEXMK) $(LATEXMKOPT) $<
 
 clean-local:
-	rm -f jags_*_manual.{log,aux,dvi,bbl,blg,toc,pdf}
+	rm -f jags_*_manual.{log,aux,dvi,bbl,blg,toc,pdf,fdb_latexmk,fls}
 
+.PHONY: docs .tex.pdf clean-local distclean-local

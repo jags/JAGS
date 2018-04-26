@@ -46,7 +46,7 @@ namespace jags {
 	}
 
 	bool
-	DSample::checkParameterLength(vector<unsigned int> const &len) const
+	DSample::checkParameterLength(vector<unsigned long> const &len) const
 	{
 	    //Check that PROB is non-empty and SIZE is a scalar
 	    return len[0] >= 1 && len[1] == 1;
@@ -58,14 +58,14 @@ namespace jags {
 	}
 
 	bool DSample::checkParameterValue(vector<double const *> const &par,
-					vector<unsigned int> const &len) const
+					vector<unsigned long> const &len) const
 	{
 	    if (SIZE(par) < 0 || SIZE(par) > len[0]) {
 		//Too few or too many samples requested
 		return false;
 	    }
 	    
-	    for (unsigned int i = 0; i < len[0]; ++i) {
+	    for (unsigned long i = 0; i < len[0]; ++i) {
 		if (par[0][i] <= 0) {
 		    //Zero probablity of being sampled
 		    return false;
@@ -74,23 +74,23 @@ namespace jags {
 	    return true;
 	}
 
-	unsigned int DSample::length(vector<unsigned int> const &len) const
+	unsigned long DSample::length(vector<unsigned long> const &len) const
 	{
 	    //Length of sample is the same as length of probability weights
 	    return len[0];
 	}
 
 	double
-	DSample::logDensity(double const *x, unsigned int length, PDFType type,
+	DSample::logDensity(double const *x, unsigned long length, PDFType type,
 			    vector<double const *> const &par,
-			    vector<unsigned int> const &parlen,
+			    vector<unsigned long> const &parlen,
 			    double const *lower, double const *upper) const
 	{
 	    /* Basic sanity checks: is x consistent with parameters */
 
-	    unsigned int T = length; // Length of x
-	    unsigned int K = 0; // Count number of sampled values
-	    for (unsigned int t = 0; t < T; ++t) {
+	    unsigned long T = length; // Length of x
+	    unsigned long K = 0; // Count number of sampled values
+	    for (unsigned long t = 0; t < T; ++t) {
 		if (x[t] == 1) {
 		    ++K;
 		}
@@ -120,7 +120,7 @@ namespace jags {
 	    vector<double> logp(T); // Log probability weights
 
 	    double lpmax = JAGS_NEGINF;
-	    for (unsigned int t = 0; t < T; ++t) {
+	    for (unsigned long t = 0; t < T; ++t) {
 		logp[t] = sign * log(p[t]);
 		if (logp[t] > lpmax) {
 		    lpmax = logp[t];
@@ -133,7 +133,7 @@ namespace jags {
 
 	    /* Numerator: contribution to log likelihood of all
 	     * sampled values */
-	    for (unsigned int t = 0; t < T; ++t) {
+	    for (unsigned long t = 0; t < T; ++t) {
 		if (x[t] == y) {
 		    loglik += logp[t] - lpmax;
 		}
@@ -152,9 +152,9 @@ namespace jags {
 		sort(logp.begin(), logp.end(), gt_double);
 		vector<double> f(K + 1, 0);
 		f[0] = 1;
-		for (unsigned int t = 0; t < T; ++t) {
+		for (unsigned long t = 0; t < T; ++t) {
 		    double Ct = exp(logp[t] - lpmax);
-		    for (unsigned int k = min<unsigned int>(K, t+1); k > 0; --k)
+		    for (unsigned long k = min<unsigned long>(K, t+1); k > 0; --k)
 		    {
 			f[k] += Ct * f[k-1];
 		    }
@@ -166,14 +166,14 @@ namespace jags {
 	}
 
 
-	void DSample::randomSample(double *x, unsigned int length,
+	void DSample::randomSample(double *x, unsigned long length,
 				   vector<double const *> const &par,
-				   vector<unsigned int> const &parlen,
+				   vector<unsigned long> const &parlen,
 				   double const *lower, double const *upper,
 				   RNG *rng) const
 	{
 	    double const * const probs = par[0];
-	    const int N = parlen[0];
+	    const long N = parlen[0];
 	    
 	    //Create a vector of pointers to the elements of the vector
 	    //of probability weights. Sort them in reverse order.
@@ -190,13 +190,13 @@ namespace jags {
 
 	    double sump = accumulate(probs, probs + N, 0.0);
 
-	    unsigned int K = static_cast<unsigned int>(SIZE(par));
-	    for (unsigned int k = 0; k < K; ++k) {
+	    unsigned long K = static_cast<unsigned long>(SIZE(par));
+	    for (unsigned long k = 0; k < K; ++k) {
 		double prand = sump * rng->uniform();
 		for (q = pptrs.begin(); q != pptrs.end(); ++q) {
 		    prand -= **q;
 		    if (prand <= 0) {
-			unsigned int i = *q - probs;
+			unsigned long i = *q - probs;
 			x[i] = 1;
 			sump -= **q;
 			pptrs.erase(q);
@@ -207,11 +207,11 @@ namespace jags {
 	    }
 	}
 
-	void DSample::support(double *lower, double *upper, unsigned int length,
+	void DSample::support(double *lower, double *upper, unsigned long length,
 			    vector<double const *> const &par,
-			    vector<unsigned int> const &len) const
+			    vector<unsigned long> const &len) const
 	{
-	    for (unsigned int i = 0; i < length; ++i) {
+	    for (unsigned long i = 0; i < length; ++i) {
 		lower[i] = 0;
 		upper[i] = 1;
 	    }
@@ -222,7 +222,7 @@ namespace jags {
 	    return true;
 	}
 	
-	unsigned int DSample::df(vector<unsigned int> const &parlen) const
+	unsigned long DSample::df(vector<unsigned long> const &parlen) const
 	{
 	    return parlen[0];
 	} 

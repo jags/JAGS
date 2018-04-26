@@ -47,8 +47,8 @@ void MixDistTest::npar()
 {
     //CPPUNIT_ASSERT_MESSAGE("npar check", false);
 
-    CPPUNIT_ASSERT_EQUAL(_dbetabin->npar(), 3U);
-    CPPUNIT_ASSERT_EQUAL(_dnormmix->npar(), 3U);
+    CPPUNIT_ASSERT_EQUAL(_dbetabin->npar(), 3UL);
+    CPPUNIT_ASSERT_EQUAL(_dnormmix->npar(), 3UL);
 }
 
 void MixDistTest::name()
@@ -273,7 +273,7 @@ void MixDistTest::dkw()
 }
 
 static double normmix_mean(vector<double const *> const &par,
-			   vector<unsigned int> const &lengths)
+			   vector<unsigned long> const &lengths)
 {
     double const *mu = par[0];
     double const *pi = par[2];
@@ -288,7 +288,7 @@ static double normmix_mean(vector<double const *> const &par,
 
 
 static double normmix_var(vector<double const *> const &par,
-			  vector<unsigned int> const &len)
+			  vector<unsigned long> const &len)
 {
     double const *mu = par[0];
     double const *tau = par[1];
@@ -311,7 +311,7 @@ static double normmix_var(vector<double const *> const &par,
 }
 
 void MixDistTest::test_mean_normmix(vector<double const *> const &par,
-				    vector<unsigned int> const &len,
+				    vector<unsigned long> const &len,
 				    unsigned int N)
 {
     CPPUNIT_ASSERT_MESSAGE(_dnormmix->name(),
@@ -334,7 +334,7 @@ void MixDistTest::test_mean_normmix(vector<double const *> const &par,
 }
 
 void MixDistTest::test_var_normmix(vector<double const *> const &par,
-				   vector<unsigned int> const &len,
+				   vector<unsigned long> const &len,
 				   unsigned int N)
 {
     CPPUNIT_ASSERT_MESSAGE(_dnormmix->name(),
@@ -374,7 +374,7 @@ void MixDistTest::normmix()
     par2.push_back(&pi[0]);
     
     //Construct length vector corresponding to par2
-    vector<unsigned int> len2(3, 2);
+    vector<unsigned long> len2(3, 2);
 
     //Set up example
     mu[0] = -1; mu[1] = 3;

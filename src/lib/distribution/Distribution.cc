@@ -7,7 +7,7 @@ using std::string;
 
 namespace jags {
 
-Distribution::Distribution(string const &name, unsigned int npar)
+Distribution::Distribution(string const &name, unsigned long npar)
     : _name(name), _npar(npar)
 {
 }
@@ -28,7 +28,7 @@ string Distribution::alias() const
 
 
 
-unsigned int Distribution::npar () const
+unsigned long Distribution::npar () const
 {
   return _npar;
 }

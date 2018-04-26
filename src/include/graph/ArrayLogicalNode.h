@@ -13,7 +13,7 @@ class ArrayFunction;
  */
 class ArrayLogicalNode : public LogicalNode {
     ArrayFunction const * const _func;
-    std::vector<std::vector<unsigned int> >  _dims;
+    std::vector<std::vector<unsigned long> >  _dims;
 public:
     /**
      * A logical node is defined by a function (which may be an inline

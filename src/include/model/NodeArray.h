@@ -29,7 +29,7 @@ class NodeArray {
   Graph _member_graph;
   unsigned int _nchain;
   std::vector<Node *> _node_pointers;
-  std::vector<unsigned int> _offsets;
+  std::vector<unsigned long> _offsets;
   std::map<Range, Node *> _mv_nodes;
   std::map<Range, AggNode *> _generated_nodes;
 
@@ -41,7 +41,7 @@ public:
   /**
    * Constructor. Creates a NodeArray with the given name and dimension
    */
-  NodeArray(std::string const &name, std::vector<unsigned int> const &dim, 
+  NodeArray(std::string const &name, std::vector<unsigned long> const &dim, 
 	    unsigned int nchain);
   /**
    * Inserts a node into the subset of the NodeArray defined by range.
@@ -74,9 +74,6 @@ public:
    * either completely missing (in which no action is taken) or
    * contain no missing values.
    *
-   * @param value array with dimensions matching the NodeArray containing
-   * values.
-   *
    * @param chain Index number of chain to which to apply values.
    */
   void setValue(SArray const &value, unsigned int chain);
@@ -88,7 +85,7 @@ public:
    *
    * @param chain Index number of chain to read.
    *
-   * @param condition.  Boolean function that returns true for nodes
+   * @param condition  Boolean function that returns true for nodes
    * whose values are to be read.
    */
   void getValue(SArray &value, unsigned int chain,

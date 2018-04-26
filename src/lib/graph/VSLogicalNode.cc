@@ -11,11 +11,11 @@ using std::logic_error;
 
 namespace jags {
 
-static vector<unsigned int> mkDim(vector<Node const *> const &parameters)
+static vector<unsigned long> mkDim(vector<Node const *> const &parameters)
 {
-    vector<unsigned int> dim(1,1);
+    vector<unsigned long> dim(1,1);
     bool scalar = true;
-    for (unsigned int i = 0; i < parameters.size(); ++i) {
+    for (unsigned long i = 0; i < parameters.size(); ++i) {
 	if (parameters[i]->length() > 1) {
 	    if (scalar) {
 		dim = parameters[i]->dim();
@@ -32,7 +32,7 @@ static vector<unsigned int> mkDim(vector<Node const *> const &parameters)
 static vector<bool> mkIsVector(vector<Node const *> const &parameters)
 {
     vector<bool> ans(parameters.size());
-    for (unsigned int i = 0; i < parameters.size(); ++i) {
+    for (unsigned long i = 0; i < parameters.size(); ++i) {
 	ans[i] = (parameters[i]->length() > 1);
     }
     return ans;
@@ -72,7 +72,7 @@ bool VSLogicalNode::checkParentValues(unsigned int chain) const
     for (unsigned int i = 0; i < _length; ++i) {
 	if (!_func->checkParameterValue(par))
 	    return false;
-	for (unsigned int j = 0; j < par.size(); ++j) {
+	for (unsigned long j = 0; j < par.size(); ++j) {
 	    if (_isvector[j])
 		++par[j];
 	}

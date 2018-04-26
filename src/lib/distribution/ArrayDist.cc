@@ -13,7 +13,7 @@ ArrayDist::ArrayDist(string const &name, unsigned int npar)
 {
 }
 
-unsigned int ArrayDist::df(vector<vector<unsigned int> > const &pdims) const
+unsigned long ArrayDist::df(vector<vector<unsigned long> > const &pdims) const
 {
     return product(dim(pdims));
 }
@@ -21,14 +21,14 @@ unsigned int ArrayDist::df(vector<vector<unsigned int> > const &pdims) const
     
     double ArrayDist::KL(vector<double const *> const &par1,
 			 vector<double const *> const &par2,
-			 vector<vector<unsigned int> > const &dims,
+			 vector<vector<unsigned long> > const &dims,
 			 double const *lower, double const *upper,
 			 RNG *rng, unsigned int nrep) const
     {
 	double div = 0;
 
-	vector<unsigned int> d = dim(dims);
-	unsigned int N = product(d);
+	vector<unsigned long> d = dim(dims);
+	unsigned long N = product(d);
 	vector<double> v(N);
 	for (unsigned int r = 0; r < nrep; ++r) {
 	    randomSample(&v[0], N, par1, dims, lower, upper, rng);
@@ -40,7 +40,7 @@ unsigned int ArrayDist::df(vector<vector<unsigned int> > const &pdims) const
 
     double ArrayDist::KL(vector<double const *> const &par1,
 			 vector<double const *> const &par2,
-			 vector<vector<unsigned int> > const &dims) const
+			 vector<vector<unsigned long> > const &dims) const
     {
 	return JAGS_NA;
     }

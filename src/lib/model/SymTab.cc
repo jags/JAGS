@@ -33,7 +33,7 @@ SymTab::~SymTab() {
     }
 }
 
-void SymTab::addVariable(string const &name, vector<unsigned int> const &dim)
+void SymTab::addVariable(string const &name, vector<unsigned long> const &dim)
 {
     if (_varTable.find(name) != _varTable.end()) {
 	string msg("Name ");
@@ -102,9 +102,9 @@ void SymTab::writeValues(map<string, SArray> const &data_table,
 
 static bool allMissing(SArray const &sarray)
 {
-    unsigned int N=sarray.length();
+    unsigned long N = sarray.length();
     vector<double> const &v = sarray.value();
-    for (unsigned int i = 0; i < N; ++i) {
+    for (unsigned long i = 0; i < N; ++i) {
 	if (v[i] != JAGS_NA)
 	    return false;
     }
@@ -138,7 +138,7 @@ void SymTab::readValues(map<string, SArray> &data_table,
     }
 }
 
-unsigned int SymTab::size() const
+unsigned long SymTab::size() const
 {
   return _varTable.size();
 }
@@ -159,7 +159,7 @@ string SymTab::getName(Node const *node) const
 		return p->first;
 	    }
 	    else {
-		return p->first + print(array->getRange(node));
+		return p->first + printRange(array->getRange(node));
 	    }
 	}
     }

@@ -13,19 +13,19 @@ namespace bugs {
     {}
     
     double InterpLin::scalarEval(vector<double const *> const &args,
-				 vector<unsigned int> const &lengths) const
+				 vector<unsigned long> const &lengths) const
     {
 	double const *x = args[1];
 	double const *y = args[2];
 	double xnew = args[0][0];
-	unsigned int N = lengths[1];
+	unsigned long N = lengths[1];
     
 	if (xnew < x[0])
 	    return y[0];
 	else if (xnew >= x[N-1])
 	    return y[N-1];
 	else {
-	    unsigned int i = 0;
+	    unsigned long i = 0;
 	    for (; i < N-1; ++i) {
 		if (xnew >= x[i] && xnew < x[i+1]) {
 		    break;
@@ -43,7 +43,7 @@ namespace bugs {
 	}
     }
 
-    bool InterpLin::checkParameterLength(vector<unsigned int> const &lengths)
+    bool InterpLin::checkParameterLength(vector<unsigned long> const &lengths)
 	const
     {
 	return lengths[0] == 1 && lengths[1] != 0 && lengths[2] == lengths[1];
@@ -51,10 +51,10 @@ namespace bugs {
 
     bool 
     InterpLin::checkParameterValue(vector <double const *> const &args,
-				   vector <unsigned int> const &lengths) const
+				   vector <unsigned long> const &lengths) const
     {
-        unsigned int N = lengths[1];
-	for (unsigned int i = 1; i < N; ++i) {
+        unsigned long N = lengths[1];
+	for (unsigned long i = 1; i < N; ++i) {
 	    if (args[1][i] <= args[1][i-1])
 		return false;
 	}

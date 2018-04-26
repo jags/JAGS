@@ -47,11 +47,11 @@ class StepAdapter;
  */
 class TemperedMetropolis : public Metropolis
 {
-    const int _max_level;
+    const unsigned int _max_level;
     const unsigned int _nrep;
     const std::vector<double> _pwr;
-    int _t;
-    int _tmax;
+    unsigned int _t;
+    unsigned int _tmax;
     std::vector<StepAdapter*> _step_adapter;
     double _pmean;
     unsigned int _niter;
@@ -69,7 +69,7 @@ public:
      * level
      */
     TemperedMetropolis(std::vector<double> const &value, 
-                       int nlevel, double max_temp, unsigned int nrep);
+                       unsigned int nlevel, double max_temp, unsigned int nrep);
     ~TemperedMetropolis();
     /**
      * Updates the current value using tempered transitions.

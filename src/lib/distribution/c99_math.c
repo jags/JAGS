@@ -1,4 +1,5 @@
 /* Remap some C99 functions for conformance with C++98 */
+/* FIXME: Not needed when we use C++11 */
 
 #include <math.h>
 

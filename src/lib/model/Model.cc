@@ -197,7 +197,7 @@ void Model::initializeNodes()
 	Node *node = *i;
 	for (unsigned int n = 0; n < _nchain; ++n) {
 	    if (!node->checkParentValues(n)) {
-		throw NodeError(node, "Invalid parent values");
+		throw NodeError(node, "Invalid parent values at initialization");
 	    }
 	    if (!node->initialize(_rng[n], n)) {
 		throw NodeError(node, "Initialization failure");
@@ -211,14 +211,14 @@ struct less_sampler {
        Comparison operator for Samplers which sorts them in 
        order according to the supplied sampler map
     */
-    map<Sampler const*, unsigned int>  const & _sampler_map;
+    map<Sampler const*, unsigned long>  const & _sampler_map;
 
-    less_sampler(map<Sampler const*, unsigned int> const &sampler_map) 
-	: _sampler_map(sampler_map) {};
+    less_sampler(map<Sampler const*, unsigned long> const &sampler_map) 
+	: _sampler_map(sampler_map) {}
 
     bool operator()(Sampler const *x, Sampler const *y) const {
 	return _sampler_map.find(x)->second < _sampler_map.find(y)->second;
-    };
+    }
 
 };
 
@@ -299,12 +299,12 @@ void Model::chooseSamplers()
 		for (unsigned int j = 0; j < nodes.size(); ++j) {
 		    /* FIXME: This is a potential bottleneck if slist
 		       is large */
-		    list<StochasticNode*>::iterator p = 
+		    list<StochasticNode*>::iterator r = 
 			find(slist.begin(), slist.end(), nodes[j]);
-		    if (p == slist.end()) {
+		    if (r == slist.end()) {
 			throw logic_error("Unable to find sampled node");
 		    }
-		    slist.erase(p);
+		    slist.erase(r);
 		}
 		_samplers.push_back(svec[i]);
 	    }
@@ -332,18 +332,18 @@ void Model::chooseSamplers()
 
     // Create a map associating each sampler with the minimal index
     // of its sampled nodes.
-    map<Sampler const *, unsigned int> sampler_map;
+    map<Sampler const *, unsigned long> sampler_map;
     for (unsigned int i = 0; i < _samplers.size(); ++i) {
-	unsigned int min_index = _stochastic_nodes.size();
+	unsigned long min_index = _stochastic_nodes.size();
 	vector<StochasticNode*> const &snodes = _samplers[i]->nodes();
 	for (unsigned int j = 0; j < snodes.size(); ++j) {
-	    map<StochasticNode const*, unsigned int>::const_iterator p 
+	    map<StochasticNode const*, unsigned int>::const_iterator q 
 		= snode_map.find(snodes[j]);
-	    if (p == snode_map.end()) {
+	    if (q == snode_map.end()) {
 		throw logic_error("Invalid stochastic node map");
 	    }
-	    if (p->second < min_index) {
-		min_index = p->second;
+	    if (q->second < min_index) {
+		min_index = q->second;
 	    }
 	}
 	sampler_map[_samplers[i]] = min_index;

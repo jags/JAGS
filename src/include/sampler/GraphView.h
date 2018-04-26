@@ -84,7 +84,7 @@ public:
    *
    * @param chain Number of the chain (starting from zero) to be modified.
    */
-  void setValue(double const * value, unsigned int length, unsigned int chain)
+  void setValue(double const * value, unsigned long length, unsigned int chain)
       const;
   void setValue(std::vector<double> const &value, unsigned int chain) const;
   void getValue(std::vector<double> &value, unsigned int chain) const;

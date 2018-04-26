@@ -18,7 +18,7 @@ namespace base {
 
     DiscreteSlicer::DiscreteSlicer(SingletonGraphView const *gv, 
 				   unsigned int chain, 
-				   double width, long ndoubles)
+				   double width, unsigned int ndoubles)
 	: Slicer(width, ndoubles), _gv(gv), _chain(chain), _x(0)
     {
 	if (!canSample(gv->node())) {

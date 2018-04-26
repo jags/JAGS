@@ -11,11 +11,11 @@ using std::logic_error;
 using std::string;
 using std::ostringstream;
 
-static vector<unsigned int> 
-makeDim(vector<vector<int> > const &scope)
+static vector<unsigned long> 
+makeDim(vector<vector<unsigned long> > const &scope)
 {
-    vector<unsigned int> dims;
-    for (unsigned int i = 0; i < scope.size(); i++) {
+    vector<unsigned long> dims;
+    for (unsigned long i = 0; i < scope.size(); i++) {
 	dims.push_back(scope[i].size());
     }
     return dims;
@@ -28,7 +28,7 @@ namespace jags {
     {
     }
 
-    Range::Range(vector<vector<int> > const &scope)
+    Range::Range(vector<vector<unsigned long> > const &scope)
 	: _scope(scope),
 	  _dim(makeDim(_scope)), 
 	  _dim_dropped(drop(_dim)),
@@ -40,7 +40,7 @@ namespace jags {
 	//leftIndex and rightIndex member functions rely on this
 	//assumption, as well as the RangeIterator class.
 
-	for (unsigned int i = 0; i < scope.size(); ++i) {
+	for (unsigned long i = 0; i < scope.size(); ++i) {
 	    if (scope[i].empty()) {
 		throw logic_error("Zero dimension in Range constructor");
 	    }
@@ -54,57 +54,58 @@ namespace jags {
 	//Virtual destructor
     }
 
-    unsigned int Range::length() const
+    unsigned long Range::length() const
     {
 	return _length;
     }
 
-    unsigned int Range::ndim(bool drop) const
+    unsigned long Range::ndim(bool drop) const
     {
 	return drop ? _dim_dropped.size() : _dim.size();
     }
 
-    vector<unsigned int> const &Range::dim(bool drop) const
+    vector<unsigned long> const &Range::dim(bool drop) const
     {
 	return drop ? _dim_dropped : _dim;
     }
     
-    vector<int> Range::leftIndex(unsigned int offset) const
+    vector<unsigned long> Range::leftIndex(unsigned long offset) const
     {
 	if (offset >= _length) {
 	    throw out_of_range("Range::leftIndex. Offset out of bounds");
 	}
 	
-	unsigned int ndim = _scope.size();
-	vector<int> index(ndim);
-	for (unsigned int i = 0; i < ndim; ++i) {
+	unsigned long ndim = _scope.size();
+	vector<unsigned long> index(ndim);
+	for (unsigned long i = 0; i < ndim; ++i) {
 	    index[i] = _scope[i][offset % _dim[i]];
 	    offset /= _dim[i];
 	}
 	return index;
     }
 
-    vector<int> Range::rightIndex(unsigned int offset) const
+    vector<unsigned long> Range::rightIndex(unsigned long offset) const
     {
 	if (offset >= _length) {
 	    throw out_of_range("Range::rightIndex. Offset out of bounds");
 	}
 
-	int ndim = _scope.size();
-	vector<int> index(ndim);
-	for (int i = ndim - 1; i >= 0; --i) {
+	unsigned long ndim = _scope.size();
+	vector<unsigned long> index(ndim);
+	for (unsigned long j = ndim; j > 0; --j) {
+	    unsigned long i = j - 1;
 	    index[i] = _scope[i][offset % _dim[i]];
 	    offset /= _dim[i];
 	}
 	return index;
     }
 
-    vector<int> const &Range::first() const
+    vector<unsigned long> const &Range::first() const
     {
 	return _first;
     }
 
-    vector<int> const &Range::last() const
+    vector<unsigned long> const &Range::last() const
     {
 	return _last;
     }
@@ -139,24 +140,23 @@ namespace jags {
 	return _scope < rhs._scope;
     }
 	
-	
-    string print(Range const &range)
+    string printRange(Range const &range)
     {
 	if (isNULL(range))
 	    return "";
 	
 	ostringstream ostr;
 	ostr << "[";
-	for (unsigned int i = 0; i < range.ndim(false); ++i) {
+	for (unsigned long i = 0; i < range.ndim(false); ++i) {
 	    if (i > 0) {
 		ostr << ",";
 	    }
-	    vector<int> const &indices = range.scope()[i];
+	    vector<unsigned long> const &indices = range.scope()[i];
 	    ostr << indices[0];
 	    if (indices.size() > 1) {
 		bool simple = true;
-		int val = indices[0] + 1;
-		for (unsigned int j = 1; j < indices.size(); ++j) {
+		unsigned long val = indices[0] + 1;
+		for (unsigned long j = 1; j < indices.size(); ++j) {
 		    if (indices[j] != val) {
 			simple = false;
 			break;
@@ -176,7 +176,45 @@ namespace jags {
 	return ostr.str();
     }
 
-    vector<vector<int> > const &Range::scope() const
+    string printRange(vector<unsigned long> const &dim)
+    {
+	if (dim.empty()) return "";
+	
+	ostringstream ostr;
+	ostr << "[";
+	for (unsigned long i = 0; i < dim.size(); ++i) {
+	    if (i > 0) {
+		ostr << ",";
+	    }
+	    if (dim[i] == 1) {
+		ostr << "1";
+	    }
+	    else {
+		ostr << "1:" << dim[i];
+	    }
+	}
+	ostr << "]";
+	return ostr.str();
+    }
+    
+    string printIndex(vector<unsigned long> const &index)
+    {
+	if (index.empty()) return "";
+	
+	ostringstream ostr;
+	ostr << "[";
+	for (unsigned long i = 0; i < index.size(); ++i) {
+	    if (i > 0) {
+		ostr << ",";
+	    }
+	    ostr << index[i];
+	}
+	ostr << "]";
+	return ostr.str();
+    }
+
+    
+    vector<vector<unsigned long> > const &Range::scope() const
     {
 	return _scope;
     }

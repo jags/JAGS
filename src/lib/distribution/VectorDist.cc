@@ -12,20 +12,20 @@ VectorDist::VectorDist(string const &name, unsigned int npar)
 {
 }
 
-unsigned int VectorDist::df(vector<unsigned int> const &par) const
+unsigned long VectorDist::df(vector<unsigned long> const &par) const
 {
     return length(par);
 }
 
     double VectorDist::KL(vector<double const *> const &par1,
 			  vector<double const *> const &par2,
-			  vector<unsigned int> const &lengths,
+			  vector<unsigned long> const &lengths,
 			  double const *lower, double const *upper,
 			  RNG *rng, unsigned int nrep) const
     {
 	double div = 0;
 
-	unsigned int N = length(lengths);
+	unsigned long N = length(lengths);
 	vector<double> v(N);
 	for (unsigned int r = 0; r < nrep; ++r) {
 	    randomSample(&v[0], N, par1, lengths, lower, upper, rng);
@@ -37,7 +37,7 @@ unsigned int VectorDist::df(vector<unsigned int> const &par) const
 
     double VectorDist::KL(std::vector<double const *> const &par1,
 			  std::vector<double const *> const &par2,
-			  std::vector<unsigned int> const &lengths) const
+			  std::vector<unsigned long> const &lengths) const
     {
 	return JAGS_NA;
     }

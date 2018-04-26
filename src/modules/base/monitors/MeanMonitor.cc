@@ -42,7 +42,7 @@ namespace base {
 	return _values[chain];
     }
 
-    vector<unsigned int> MeanMonitor::dim() const
+    vector<unsigned long> MeanMonitor::dim() const
     {
 	return _subset.dim();
     }

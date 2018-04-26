@@ -37,9 +37,9 @@ namespace jags {
 	{
 	}
 
-	vector<unsigned int> WAICMonitor::dim() const
+	vector<unsigned long> WAICMonitor::dim() const
 	{
-	    return vector<unsigned int> (1, _snodes.size());
+	    return vector<unsigned long> (1, _snodes.size());
 	}
  
 	vector<double> const &WAICMonitor::value(unsigned int chain) const

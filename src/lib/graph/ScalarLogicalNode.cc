@@ -21,13 +21,13 @@ namespace jags {
 ScalarLogicalNode::ScalarLogicalNode(ScalarFunction const *function,
 				     unsigned int nchain,
 				     vector<Node const *> const &parameters)
-    : LogicalNode(vector<unsigned int>(1,1), nchain, parameters, function),
+    : LogicalNode(vector<unsigned long>(1,1), nchain, parameters, function),
       _func(function)
 {
     if (!function) {
 	throw logic_error("NULL function in ScalarLogicalNode constructor");
     }
-    for (unsigned int j = 0; j < parameters.size(); ++j) {
+    for (unsigned long j = 0; j < parameters.size(); ++j) {
 	if (isFlat(parameters[j]->dim())) {
 	    string msg("Invalid zero-length parameter to function ");
 	    msg.append(function->name());

@@ -15,14 +15,14 @@ namespace jags {
 
     ConstantNode::ConstantNode(double value, unsigned int nchain,
 			       bool observed)
-	: Node(vector<unsigned int>(1,1), nchain), _observed(observed)
+	: Node(vector<unsigned long>(1,1), nchain), _observed(observed)
     {
 	for (unsigned int n = 0; n < nchain; ++n) {
 	    setValue(&value, 1, n);
 	}
     }
 
-    ConstantNode::ConstantNode(vector<unsigned int> const &dim, 
+    ConstantNode::ConstantNode(vector<unsigned long> const &dim, 
 			       vector<double> const &value,
 			       unsigned int nchain, bool observed)
 	: Node(dim, nchain), _observed(observed)
@@ -39,7 +39,7 @@ namespace jags {
     bool ConstantNode::isDiscreteValued() const
     {
 	double const *val = value(0);
-	for (unsigned int i = 0; i < _length; ++i) {
+	for (unsigned long i = 0; i < _length; ++i) {
 	    if (val[i] != floor(val[i]))
 		return false;
 	}

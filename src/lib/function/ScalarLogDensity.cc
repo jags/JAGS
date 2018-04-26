@@ -16,7 +16,7 @@ namespace jags {
     double ScalarLogDensity::evaluate(vector<double const *> const &args) const
     {
 	vector<double const *> param(_dist->npar());
-	for (unsigned int i = 0; i < param.size(); ++i) {
+	for (unsigned long i = 0; i < param.size(); ++i) {
 	    param[i] = args[i+1];
 	}
 
@@ -31,7 +31,7 @@ namespace jags {
 	//no equivalent of checkParameterDiscrete for Functions.
 
 	vector<bool> mask(_dist->npar());
-	for (unsigned int i = 0; i < mask.size(); ++i) {
+	for (unsigned long i = 0; i < mask.size(); ++i) {
 	    double p = *args[i + 1];
 	    mask[i] = (p == static_cast<int>(p));
 	}
@@ -44,7 +44,7 @@ namespace jags {
 	}
 
 	vector<double const *> param(_dist->npar());
-	for (unsigned int i = 0; i < param.size(); ++i) {
+	for (unsigned long i = 0; i < param.size(); ++i) {
 	    param[i] = args[i+1];
 	}
 	return _dist->checkParameterValue(param);

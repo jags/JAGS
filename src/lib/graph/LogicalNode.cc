@@ -54,7 +54,7 @@ mkParams(vector<Node const*> const &parents, unsigned int nchain)
 
 	_discrete = true;
 	double const *val = value(0);
-	for (unsigned int i = 0; i < _length; ++i) {
+	for (unsigned long i = 0; i < _length; ++i) {
 	    if (val[i] != floor(val[i])) {
 		_discrete = false;
 		break;
@@ -63,7 +63,7 @@ mkParams(vector<Node const*> const &parents, unsigned int nchain)
 	
     }
 
-LogicalNode::LogicalNode(vector<unsigned int> const &dim,
+LogicalNode::LogicalNode(vector<unsigned long> const &dim,
 			 unsigned int nchain,
 			 vector<Node const *> const &parameters,
 			 Function const *function)
@@ -100,8 +100,8 @@ bool LogicalNode::isClosed(set<Node const *> const &ancestors,
 
     vector<bool> mask(par.size());
     vector<bool> fixed_mask;
-    unsigned int nmask = 0;
-    for (unsigned int i = 0; i < par.size(); ++i) {
+    unsigned long nmask = 0;
+    for (unsigned long i = 0; i < par.size(); ++i) {
 	mask[i] = ancestors.count(par[i]);
 	if (mask[i]) {
 	    ++nmask;
@@ -115,25 +115,27 @@ bool LogicalNode::isClosed(set<Node const *> const &ancestors,
         throw logic_error("Invalid mask in LogicalNode::isClosed");
     }
 
+    bool isclosed = false;
+    
     switch(fc) {
     case DNODE_ADDITIVE:
-	return _func->isAdditive(mask, fixed_mask);
+	isclosed = _func->isAdditive(mask, fixed_mask);
 	break;
     case DNODE_LINEAR:
-	return _func->isLinear(mask, fixed_mask);
+	isclosed =  _func->isLinear(mask, fixed_mask);
         break;
     case DNODE_SCALE:
-	return _func->isScale(mask, fixed_mask);
+	isclosed = _func->isScale(mask, fixed_mask);
 	break;
     case DNODE_SCALE_MIX:
-        return (nmask == 1) && _func->isScale(mask, fixed_mask);
+        isclosed = (nmask == 1) && _func->isScale(mask, fixed_mask);
 	break;
     case DNODE_POWER:
-	return _func->isPower(mask, fixed_mask);
+	isclosed =  _func->isPower(mask, fixed_mask);
         break;
     }
 
-    return false; //Wall
+    return isclosed;
 }
 
 

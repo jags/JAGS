@@ -29,23 +29,23 @@ namespace jags {
 	
 	bool
 	DOrdered::checkParameterValue(vector<double const *> const &par,
-				      vector<unsigned int> const &lengths) const
+				      vector<unsigned long> const &lengths) const
 	{
 	    double const * cut = CUT(par);
-	    unsigned int ncut = NCUT(lengths);
+	    unsigned long ncut = NCUT(lengths);
 	    
-	    for (unsigned int i = 1; i < ncut; ++i) {
+	    for (unsigned long i = 1; i < ncut; ++i) {
 		if (cut[i] <= cut[i-1]) return false;
 	    }
 	    return true;
 	}
 
 	double DOrdered::density(double x, double mu, double const *cut,
-				 int ncut, bool give_log) const
+				 unsigned long ncut, bool give_log) const
 	{
-	    int y = static_cast<int>(x) - 1;
+	    unsigned long y = static_cast<unsigned long>(x - 1);
 
-	    if (y < 0 || y > ncut) {
+	    if (y > ncut) {
 		return JAGS_NEGINF;
 	    }
 	    else if (y == 0) {
@@ -62,23 +62,23 @@ namespace jags {
 	}
 	
 	double
-	DOrdered::logDensity(double const *x, unsigned int length,
+	DOrdered::logDensity(double const *x, unsigned long length,
 			     PDFType type,
 			     vector<double const *> const &par,
-			     vector<unsigned int> const &lengths,
+			     vector<unsigned long> const &lengths,
 			     double const *lower, double const *upper) const
 	{
 	    return density(*x, MU(par), CUT(par), NCUT(lengths), true);
 	}
 
-	void DOrdered::randomSample(double *x, unsigned int length,
+	void DOrdered::randomSample(double *x, unsigned long length,
 				    vector<double const *> const &par,
-				    vector<unsigned int> const &lengths,
+				    vector<unsigned long> const &lengths,
 				    double const *lower, double const *upper,
 				    RNG *rng) const
 	{
 	    double y = r(MU(par), rng);
-	    for (unsigned int i = 0; i < NCUT(lengths); ++i) {
+	    for (unsigned long i = 0; i < NCUT(lengths); ++i) {
 		if (y <= CUT(par)[i]) {
 		    *x = i + 1;
 		    return;
@@ -88,18 +88,18 @@ namespace jags {
 	}
 
 	void DOrdered::support(double *lower, double *upper,
-			       unsigned int length,
+			       unsigned long length,
 			       vector<double const *> const &par,
-			       vector<unsigned int> const &lengths) const
+			       vector<unsigned long> const &lengths) const
 	{
 	    *lower = 1;
 	    *upper = NCUT(lengths) + 1;
 	}
 	
 	void
-	DOrdered::typicalValue(double *x, unsigned int length,
+	DOrdered::typicalValue(double *x, unsigned long length,
 			       vector<double const *> const &par,
-			       vector<unsigned int> const &lengths,
+			       vector<unsigned long> const &lengths,
 			       double const *lower, double const *upper) const
 	{
 
@@ -118,20 +118,20 @@ namespace jags {
 	    return true;
 	}
 	
-	bool DOrdered::checkParameterLength(vector<unsigned int> const &lengths)
+	bool DOrdered::checkParameterLength(vector<unsigned long> const &lengths)
 	    const
 	{
 	    return lengths[0] == 1 && NCUT(lengths) > 0;
 	}
 	
-	unsigned int DOrdered::length(vector<unsigned int> const &lengths) const
+	unsigned long DOrdered::length(vector<unsigned long> const &lengths) const
 	{
 	    return 1;
 	}
 	
 	double DOrdered::KL(vector<double const *> const &par0,
 			    vector<double const *> const &par1,
-			    vector<unsigned int> const &lengths) const
+			    vector<unsigned long> const &lengths) const
 	{
 	    double psum0 = 0, psum1 = 0, y = 0;
 	    for (unsigned int i = 0; i <= NCUT(lengths); ++i) {

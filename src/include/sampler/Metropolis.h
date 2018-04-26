@@ -71,7 +71,7 @@ public:
     /**
      * length of the value vector
      */
-    unsigned int length() const;
+    unsigned long length() const;
 };
 
 } /* namespace jags */

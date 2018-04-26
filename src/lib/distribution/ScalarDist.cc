@@ -24,34 +24,39 @@ ScalarDist::ScalarDist(string const &name, unsigned int npar, Support support)
 
 double ScalarDist::l(vector<double const *> const &parameters) const
 {
+    double lb = JAGS_POSINF;
+    
     switch(_support) {
     case DIST_UNBOUNDED:
-	return JAGS_NEGINF;
+	lb = JAGS_NEGINF;
 	break;
     case DIST_POSITIVE: case DIST_PROPORTION:
-	return 0;
+	lb = 0;
 	break;
     case DIST_SPECIAL:
 	//You must overload this function 
 	throw logic_error("Cannot call ScalarDist::l for special distribution");
     }
-    return 0; //Wall
+    
+    return lb;
 }
 
 double ScalarDist::u(vector<double const *> const &parameters) const
 {
+    double ub = JAGS_NEGINF;
+    
     switch(_support) {
     case DIST_UNBOUNDED: case DIST_POSITIVE:
-	return JAGS_POSINF;
+	ub = JAGS_POSINF;
 	break;
     case DIST_PROPORTION:
-	return 1;
+	ub = 1.0;
 	break;
     case DIST_SPECIAL:
 	//You must overload this function 
 	throw logic_error("Cannot call ScalarDist::u for special distribution");
     }
-    return 0; //Wall
+    return ub;
 }
 
 bool ScalarDist::isSupportFixed(vector<bool> const &fixmask) const
@@ -65,7 +70,7 @@ bool ScalarDist::isSupportFixed(vector<bool> const &fixmask) const
     }
 }
 
-unsigned int ScalarDist::df() const
+unsigned long ScalarDist::df() const
 {
     return 1;
 }

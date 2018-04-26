@@ -55,9 +55,8 @@ bool Slicer::updateStep(RNG *rng)
 
     // Randomly set number of steps in left and right directions,
     // subject to the limit in the maximal size of the interval
-    int j = static_cast<int>(rng->uniform() * _max);
-    int k = _max - 1 - j;
-
+    int j = static_cast<int>(rng->uniform() * (_max + 1));
+    int k = static_cast<int>(_max) - j;
 
     if (L < lower) {
 	L = lower;

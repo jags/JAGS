@@ -17,10 +17,10 @@ namespace bugs {
     public:
 	InterpLin ();
 	double scalarEval(std::vector<double const *> const &args,
-			  std::vector<unsigned int> const &lengths) const;
-	bool checkParameterLength(std::vector<unsigned int> const &len) const;
+			  std::vector<unsigned long> const &lengths) const;
+	bool checkParameterLength(std::vector<unsigned long> const &len) const;
 	bool checkParameterValue(std::vector <double const *> const &args,
-				 std::vector <unsigned int> const &lengths)
+				 std::vector <unsigned long> const &lengths)
 	    const;
     };
 

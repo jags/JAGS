@@ -54,7 +54,7 @@ static Node const * getParent(StochasticNode const *snode)
     } 
 }
 
-static double calExponent(SingletonGraphView const *gv, int i, 
+static double calExponent(SingletonGraphView const *gv, unsigned long i, 
 			  unsigned int chain)
 {   
     /*        
@@ -137,7 +137,7 @@ bool TruncatedGamma::canSample(StochasticNode *snode, Graph const &graph)
 
     // Calculate the coefficient of the power function
     double exp0 = calExponent(&gv, 0, 0);
-    for (unsigned int i = 0; i < stoch_nodes.size(); ++i) {
+    for (unsigned long i = 0; i < stoch_nodes.size(); ++i) {
 	double expi = calExponent(&gv, i, 0);
 	//Exclude exponents near 0 for numerical stability
 	if (fabs(expi) < TG_EPS) return false;

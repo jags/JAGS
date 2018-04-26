@@ -15,7 +15,7 @@ namespace jags {
     {
 	double x = *args[0];
 	vector<double const *> param(args.size() - 1);
-	for (unsigned int i = 1; i < args.size(); ++i) {
+	for (unsigned long i = 1; i < args.size(); ++i) {
 	    param[i-1] = args[i];
 	}
 	

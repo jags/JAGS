@@ -54,33 +54,36 @@ namespace mix {
 	: TemperedMetropolis(initialValue(gv, chain), nlevel, max_temp, nrep),
 	  _gv(gv), _chain(chain)
     {
-	int N = gv->length();
+	unsigned int N = gv->length();
 	_lower = new double[N];
 	_upper = new double[N];
 
 	double *lp = _lower;
 	double *up = _upper;
+	unsigned long start = 0;
         vector<StochasticNode*> const &snodes = _gv->nodes();
-	for (unsigned int j = 0; j < snodes.size(); ++j) {
-	    unsigned int length_j = snodes[j]->length();
+	for (unsigned long j = 0; j < snodes.size(); ++j) {
+	    unsigned long length_j = snodes[j]->length();
 	    if (isDirch(snodes[j])) {
 		//Special rule for Dirichlet distribution to enforce
 		//log transformation
-		for (unsigned int k = 0; k < length_j; ++k) {
+		for (unsigned long k = 0; k < length_j; ++k) {
 		    lp[k] = 0;
 		    up[k] = JAGS_POSINF;
 		}
-		_di.push_back(new DirichletInfo(snodes[j], lp - _lower, 
-						chain));
+		_di.push_back(new DirichletInfo(snodes[j], start, chain));
 	    }
 	    else {
 		snodes[j]->support(lp, up, length_j, chain);
 	    }
 	    lp += length_j;
 	    up += length_j;
-	    if (lp - _lower > N) {
-		throwLogicError("Invalid length in read_bounds (NormMix)");
+	    start += length_j;
+	    /*
+	    if (start > N) {
+		throwLogicError("Invalid length in NormMix constructor");
 	    }
+	    */
 	}
     }
 
@@ -171,8 +174,8 @@ namespace mix {
 		    return false;
 		}
 		double const *par = snodes[i]->parents()[0]->value(0);
-		unsigned int plen = snodes[i]->parents()[0]->length();
-		for (unsigned int j = 0; j < plen; ++j) {
+		unsigned long plen = snodes[i]->parents()[0]->length();
+		for (unsigned long j = 0; j < plen; ++j) {
 		    if (par[j] == 0) {
 			return false;
 		    }

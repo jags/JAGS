@@ -10,7 +10,7 @@ using std::vector;
 namespace jags {
 
 /* Comparison function for arrays of doubles of equal length */
-bool lt(double const *value1, double const *value2, unsigned int length)
+bool lt(double const *value1, double const *value2, unsigned long length)
 {
     for (unsigned long i = 0; i < length; ++i) {
         if (lt(value1[i], value2[i])) {

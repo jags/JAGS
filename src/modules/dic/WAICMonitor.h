@@ -23,7 +23,7 @@ namespace jags {
 	public:
 	    WAICMonitor(std::vector<StochasticNode const *> const &snodes);
 	    ~WAICMonitor();
-	    std::vector<unsigned int> dim() const;
+	    std::vector<unsigned long> dim() const;
 	    std::vector<double> const &value(unsigned int chain) const;
 	    bool poolChains() const;
 	    bool poolIterations() const;

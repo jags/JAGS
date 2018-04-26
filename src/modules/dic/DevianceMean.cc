@@ -24,9 +24,9 @@ namespace dic {
     {
     }
 
-    vector<unsigned int> DevianceMean::dim() const
+    vector<unsigned long> DevianceMean::dim() const
     {
-	return vector<unsigned int>(1, _values.size());
+	return vector<unsigned long>(1, _values.size());
     }
 
     bool DevianceMean::poolChains() const
@@ -47,7 +47,7 @@ namespace dic {
     void DevianceMean::update()
     {
 	_n++;
-	for (unsigned int i = 0; i < _snodes.size(); ++i) {
+	for (unsigned long i = 0; i < _snodes.size(); ++i) {
 	    double loglik = 0;
 	    unsigned int nchain = _snodes[i]->nchain();
 	    for (unsigned int ch = 0; ch < nchain; ++ch) {

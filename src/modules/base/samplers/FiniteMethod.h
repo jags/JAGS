@@ -11,7 +11,8 @@ namespace jags {
 	 */
 	class FiniteMethod : public ImmutableSampleMethod {
 	    SingletonGraphView const * const _gv;
-	    const int _lower, _upper;
+	    const double _lower, _upper;
+	    unsigned long _size;
 	  public:
 	    FiniteMethod(SingletonGraphView const *gv);
 	    void update(unsigned int chain, RNG *rng) const;

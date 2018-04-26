@@ -19,7 +19,7 @@ class RNGFactory
      * Destructor. An RNGFactory retains ownership of the RNG objects
      * it generates, and should delete them when the destructor is called.
      */
-    virtual ~RNGFactory() {};
+    virtual ~RNGFactory();
     /**
      * Sets the random seed of the RNG factory so that a reproducible
      * sequence of RNGs can be produced.

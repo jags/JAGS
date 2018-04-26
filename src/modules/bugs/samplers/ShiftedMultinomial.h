@@ -10,7 +10,7 @@ namespace jags {
 namespace bugs {
 
     class ShiftedMultinomial : public ConjugateMethod {
-	std::vector<int> _index;
+	std::vector<unsigned long> _index;
     public:
 	ShiftedMultinomial(SingletonGraphView const *gv);
 	static bool canSample(StochasticNode *snode, Graph const &graph);

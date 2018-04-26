@@ -56,12 +56,12 @@ static void calCoef(double *coef, SingletonGraphView const *gv,
         gv->stochasticChildren();
     unsigned long nchildren = stoch_children.size();
     
-    for (unsigned int i = 0; i < nchildren; ++i) {
+    for (unsigned long i = 0; i < nchildren; ++i) {
         coef[i] = -getScale(stoch_children[i], child_dist[i], chain);
     }
     double val = xold + 1;
     gv->setValue(&val, 1, chain);
-    for (unsigned int i = 0; i < nchildren; ++i) {
+    for (unsigned long i = 0; i < nchildren; ++i) {
         coef[i] += getScale(stoch_children[i], child_dist[i], chain);
     }
     gv->setValue(&xold, 1, chain);
@@ -132,7 +132,7 @@ void ConjugateGamma::update(unsigned int chain, RNG *rng) const
 {
     vector<StochasticNode *> const &stoch_children = 
 	_gv->stochasticChildren();
-    unsigned int nchildren = stoch_children.size();
+    unsigned long nchildren = stoch_children.size();
 
     //Need to initialize these for -Wall
     double r=0; // shape
@@ -170,7 +170,7 @@ void ConjugateGamma::update(unsigned int chain, RNG *rng) const
 	coef = _coef;
     }
 
-    for (unsigned int i = 0; i < nchildren; ++i) {
+    for (unsigned long i = 0; i < nchildren; ++i) {
 
 	double coef_i = empty ? 1 : coef[i];
 	if (coef_i > 0) {

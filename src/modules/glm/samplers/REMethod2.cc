@@ -58,8 +58,8 @@ namespace jags {
 		throwLogicError("Invalid REMethod2");
 	    }
 
-	    unsigned int nrow = sumLengths(_outcomes);
-	    unsigned int ncol = tau->stochasticChildren()[0]->length();
+	    unsigned long nrow = sumLengths(_outcomes);
+	    unsigned long ncol = tau->stochasticChildren()[0]->length();
 	    _z = cholmod_allocate_dense(nrow, ncol, nrow, CHOLMOD_REAL,
 					glm_wk);
 	}
@@ -102,8 +102,8 @@ namespace jags {
 		unsigned int i = _indices[j];
 		double const *eval = eps[i]->value(_chain);
 		double const *emean = eps[i]->parents()[0]->value(_chain);
-		for (unsigned int zcol = 0; zcol < _z->ncol; ++zcol) {
-		    int xcol = i * _z->ncol + zcol;
+		for (unsigned long zcol = 0; zcol < _z->ncol; ++zcol) {
+		    unsigned long xcol = i * _z->ncol + zcol;
 		    for (int xi = Xp[xcol]; xi < Xp[xcol+1]; ++xi) {
 			int row = Xi[xi];
 			int zi = _z->nrow * zcol + row;
@@ -120,14 +120,14 @@ namespace jags {
 	}
 
 	void REMethod2::calCoefSigma(double *A, double *b, double const *sigma0,
-				     unsigned int m) const
+				     unsigned long m) const
 	{
 	    double const *Zx = static_cast<double const *>(_z->x);
-	    unsigned int N = _outcomes.size();
+	    unsigned long N = _outcomes.size();
 	    
-	    int xrow = 0;
-	    for (unsigned int i = 0; i < N; ++i) {
-		unsigned int n = _outcomes[i]->length();
+	    unsigned long xrow = 0;
+	    for (unsigned long i = 0; i < N; ++i) {
+		unsigned long n = _outcomes[i]->length();
 		if (n == 1) {
 		    //Scalar outcome
 		    double Y = _outcomes[i]->value();
@@ -158,7 +158,7 @@ namespace jags {
 		    
 		    //X = Scaled design matrix for outcome i
 		    vector<double> X(m*n); //n x m matrix
-		    for (unsigned int j = 0; j < m; ++j) {
+		    for (unsigned long j = 0; j < m; ++j) {
 			double const *Zj = &Zx[j * _z->nrow + xrow];
 			for (unsigned int p = 0; p < n; ++p) {
 			    X[j*n + p] = Zj[p]/sigma0[j];

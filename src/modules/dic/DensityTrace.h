@@ -21,14 +21,14 @@ namespace jags {
    	    std::vector<Node const *> const _nodes;
    	    std::vector<std::vector<double> > _values; // density/log density/deviance corresponding to sampled values
 		DensityType const _density_type;  // enum is defined in model/Monitor.h
-		std::vector<unsigned int> const _dim;
+		std::vector<unsigned long> const _dim;
 		unsigned int const _nchain;
    	  public:
-   	    DensityTrace(std::vector<Node const *> const &nodes, std::vector<unsigned int> const &dim, 
+   	    DensityTrace(std::vector<Node const *> const &nodes, std::vector<unsigned long> const &dim, 
 			 DensityType const density_type, std::string const &monitor_name);
    	    void update();
    	    std::vector<double> const &value(unsigned int chain) const;
-   	    std::vector<unsigned int> dim() const;
+   	    std::vector<unsigned long> dim() const;
    	    bool poolChains() const;
    	    bool poolIterations() const;
    	};

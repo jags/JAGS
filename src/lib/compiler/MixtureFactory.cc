@@ -23,8 +23,8 @@ MixtureFactory::getMixtureNode(vector<Node const *> const &index_nodes,
        are used to index the mixture nodes
     */
     vector<Node const *> parameters;
-    vector<vector<int> > index_values;
-    for (map<vector<int>, Node const *>::const_iterator p = mixmap.begin();
+    vector<vector<unsigned long> > index_values;
+    for (map<vector<unsigned long>, Node const *>::const_iterator p = mixmap.begin();
          p != mixmap.end(); ++p)
     {
         index_values.push_back(p->first);

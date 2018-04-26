@@ -28,26 +28,28 @@ namespace jags {
 	}
 	else {
 		// Check that the implied number of dimensions is correct:
-		unsigned int arraydim = array->_range.scope().size();
-		unsigned int reqdim = range.scope().size();
+		unsigned long arraydim = array->_range.scope().size();
+		unsigned long reqdim = range.scope().size();
 		if ( arraydim != reqdim ) {
 			std::ostringstream msgstr;
 			msgstr << "Cannot get subset " << array->_name << 
-				print(range) << ": implied number of dimensions (" <<
-					reqdim << ") does not match the node dimensions (" <<
-					arraydim << ")";
+			    printRange(range) <<
+			    ": implied number of dimensions (" <<
+			    reqdim <<
+			    ") does not match the node dimensions (" <<
+			    arraydim << ")";
 			throw runtime_error(msgstr.str());
 		}
 		
 	    //Check validity of target range
 	    if (!array->_range.contains(range)) {
 		throw runtime_error(string("Cannot get subset ") +
-				    array->_name + print(range) +
+				    array->_name + printRange(range) +
 				    ". Range out of bounds");
 	    }
 
 	    for (RangeIterator p(range); !p.atEnd(); p.nextLeft()) {
-		unsigned int i = array->_range.leftOffset(p);
+		unsigned long i = array->_range.leftOffset(p);
 		_node_pointers.push_back(array->_node_pointers[i]);
 		_offsets.push_back(array->_offsets[i]);
 	    }
@@ -59,7 +61,7 @@ namespace jags {
 	vector<double> ans;
 	Node const *node = 0;
 	double const *values = 0;
-	for (unsigned int i = 0; i < _node_pointers.size(); ++i) {
+	for (unsigned long i = 0; i < _node_pointers.size(); ++i) {
 	    if (_node_pointers[i]) {
 		if (node != _node_pointers[i]) {
 		    node = _node_pointers[i];
@@ -74,7 +76,7 @@ namespace jags {
 	return ans;
     }
     
-    vector<unsigned int> const &NodeArraySubset::dim() const
+    vector<unsigned long> const &NodeArraySubset::dim() const
     {
 	return _dim;
     }
@@ -83,7 +85,7 @@ namespace jags {
     {
 	vector<Node const *> ans;
 	set<Node const *> nodeset;
-	for (unsigned int i = 0; i < _node_pointers.size(); ++i) {
+	for (unsigned long i = 0; i < _node_pointers.size(); ++i) {
 	    Node const * node = _node_pointers[i];
 	    if (node && nodeset.insert(node).second) {
 		ans.push_back(node);
@@ -107,7 +109,7 @@ namespace jags {
 	return _nchain;
     }
 
-    unsigned int NodeArraySubset::length() const
+    unsigned long NodeArraySubset::length() const
     {
 	return _node_pointers.size();
     }

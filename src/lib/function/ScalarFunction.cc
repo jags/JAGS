@@ -10,7 +10,7 @@ using std::find_if;
 
 namespace jags {
 
-ScalarFunction::ScalarFunction (string const &name, unsigned int npar)
+ScalarFunction::ScalarFunction (string const &name, unsigned long npar)
   : Function (name, npar)
 {
 }
@@ -24,8 +24,8 @@ ScalarFunction::checkParameterValue(vector<double const *> const &args) const
 bool ScalarFunction::isPower(vector<bool> const &mask,
 			     vector<bool> const &isfixed) const
 {
-    unsigned int nmask = 0;
-    for (unsigned int i = 0; i < mask.size(); ++i) {
+    unsigned long nmask = 0;
+    for (unsigned long i = 0; i < mask.size(); ++i) {
 	nmask += mask[i];
     }
     

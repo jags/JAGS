@@ -14,7 +14,7 @@ using std::logic_error;
 
 namespace jags {
 
-static vector<unsigned int> mkDim(ArrayFunction const *func, 
+static vector<unsigned long> mkDim(ArrayFunction const *func, 
 				  vector<Node const *> const &parents)
 {
     /* 
@@ -23,10 +23,10 @@ static vector<unsigned int> mkDim(ArrayFunction const *func,
     */
 
     unsigned long N = parents.size();
-    vector<vector<unsigned int> > dims(N);
+    vector<vector<unsigned long> > dims(N);
     vector<bool> fixed(N), discrete(N);
     vector<double const *> values(N);
-    for (unsigned int j = 0; j < N; ++j) {
+    for (unsigned long j = 0; j < N; ++j) {
 	dims[j] = parents[j]->dim();
 	fixed[j] = parents[j]->isFixed();
 	values[j] = parents[j]->value(0);
@@ -50,10 +50,10 @@ static vector<unsigned int> mkDim(ArrayFunction const *func,
     return func->dim(dims, values);
 }
 
-static vector<vector<unsigned int> > const &
+static vector<vector<unsigned long> > const &
 mkParameterDims(vector<Node const *> const &parameters) {
-    vector<vector<unsigned int> > dims(parameters.size());
-    for (unsigned int j = 0; j < parameters.size(); ++j) {
+    vector<vector<unsigned long> > dims(parameters.size());
+    for (unsigned long j = 0; j < parameters.size(); ++j) {
         dims[j] = parameters[j]->dim();
     }
     return getUnique(dims);

@@ -6,7 +6,7 @@ using std::set;
 
 namespace jags {
 
-DeterministicNode::DeterministicNode(vector<unsigned int> const &dim,
+DeterministicNode::DeterministicNode(vector<unsigned long> const &dim,
 				     unsigned int nchain,
                                      vector<Node const *> const &parents)
     : Node(dim, nchain, parents), _fixed(true)
@@ -14,7 +14,7 @@ DeterministicNode::DeterministicNode(vector<unsigned int> const &dim,
     //Add this node as a deterministic child of its parents
     //taking care to avoid repeats
     set<Node const*> pset;
-    for (unsigned int i = 0; i < parents.size(); ++i) {
+    for (unsigned long i = 0; i < parents.size(); ++i) {
 	Node const *p = parents[i];
 	if (pset.insert(p).second) {
 	    p->addChild(this);
@@ -59,7 +59,7 @@ bool DeterministicNode::isFixed() const
 
     void DeterministicNode::unlinkParents()
     {
-	for (unsigned int i = 0; i < parents().size(); ++i) {
+	for (unsigned long i = 0; i < parents().size(); ++i) {
 	    parents()[i]->removeChild(this);
 	}
     }

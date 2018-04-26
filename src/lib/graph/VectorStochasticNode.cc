@@ -18,7 +18,7 @@ using std::copy;
 
 namespace jags {
 
-static unsigned int mkLength(VectorDist const *dist, 
+static unsigned long mkLength(VectorDist const *dist, 
 			     vector<Node const *> const &parents)
 {
     /* 
@@ -29,7 +29,7 @@ static unsigned int mkLength(VectorDist const *dist,
     if (!checkNPar(dist, parents.size())) {
 	throw DistError(dist, "Incorrect number of parameters");
     }
-    vector<unsigned int> parameter_lengths(parents.size());
+    vector<unsigned long> parameter_lengths(parents.size());
     for (unsigned long j = 0; j < parents.size(); ++j) {
 	parameter_lengths[j] = parents[j]->length();
     }
@@ -39,10 +39,10 @@ static unsigned int mkLength(VectorDist const *dist,
     return dist->length(parameter_lengths);
 }
 
-static vector<unsigned int> const &
+static vector<unsigned long> const &
 mkParameterLengths(vector<Node const *> const &parameters) {
-    vector<unsigned int>  lengths(parameters.size());
-    for (unsigned int j = 0; j < parameters.size(); ++j) {
+    vector<unsigned long>  lengths(parameters.size());
+    for (unsigned long j = 0; j < parameters.size(); ++j) {
         lengths[j] = parameters[j]->length();
     }
     return getUnique(lengths);
@@ -52,7 +52,7 @@ VectorStochasticNode::VectorStochasticNode(VectorDist const *dist,
 					   unsigned int nchain,
 					   vector<Node const *> const &params,
 					   Node const *lower, Node const *upper)
-    : StochasticNode(vector<unsigned int>(1,mkLength(dist, params)), 
+    : StochasticNode(vector<unsigned long>(1,mkLength(dist, params)), 
 		     nchain, dist, params, lower, upper),
       _dist(dist), _lengths(mkParameterLengths(params))
 {
@@ -88,7 +88,7 @@ void VectorStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
     if (l || lower) {
 	lv = new double[_length];
 	if (l && lower) {
-	    for (unsigned int i = 0; i < _length; ++i) {
+	    for (unsigned long i = 0; i < _length; ++i) {
 		lv[i] = min(l[i], lower[i]);
 	    }
 	}
@@ -105,7 +105,7 @@ void VectorStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
     if (u || upper) {
 	uv = new double[_length];
 	if (u && upper) {
-	    for (unsigned int i = 0; i < _length; ++i) {
+	    for (unsigned long i = 0; i < _length; ++i) {
 		uv[i] = max(u[i], upper[i]);
 	    }
 	}
@@ -137,12 +137,12 @@ VectorStochasticNode::clone(vector<Node const *> const &parameters,
 }
     */
     
-unsigned int VectorStochasticNode::df() const
+unsigned long VectorStochasticNode::df() const
 {
     return _dist->df(_lengths);
 }
 
-void VectorStochasticNode::sp(double *lower, double *upper, unsigned int length,
+void VectorStochasticNode::sp(double *lower, double *upper, unsigned long length,
 			      unsigned int chain) const
 {
     _dist->support(lower, upper, length, _parameters[chain], _lengths);

@@ -186,7 +186,7 @@
    /**
     * Dump the contants of monitored node in CODA format
     *
-    * @param node Vector of monitored nodes to be dumped, each node
+    * @param nodes Vector of monitored nodes to be dumped, each node
     * is described by the variable name and index range. If the vector
     * is empty then ALL monitored nodes will be dumped.
     * 

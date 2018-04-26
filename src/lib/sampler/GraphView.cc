@@ -317,7 +317,7 @@ vector<DeterministicNode*> const &GraphView::deterministicChildren() const
   return _determ_children;
 }
 
-void GraphView::setValue(double const * value, unsigned int length,
+void GraphView::setValue(double const * value, unsigned long length,
 			 unsigned int chain) const
 {
     if (length != _length) {

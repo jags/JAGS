@@ -61,7 +61,7 @@ namespace bugs {
 	return value(par);
     }
     
-    unsigned int DRound::df() const
+    unsigned long DRound::df() const
     {
 	return 0;
     }

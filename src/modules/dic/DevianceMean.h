@@ -15,7 +15,7 @@ namespace dic {
 	unsigned int _n;
     public:
 	DevianceMean(std::vector<StochasticNode const *> const &nodes);
-	std::vector<unsigned int> dim() const;
+	std::vector<unsigned long> dim() const;
 	std::vector<double> const &value(unsigned int chain) const;
 	void update();
 	bool poolChains() const;

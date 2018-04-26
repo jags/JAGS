@@ -115,7 +115,7 @@ void BaseFunTest::alias()
 void BaseFunTest::arithmetic1(double v)
 {
     //Arithmetic functions taking a single argument
-    CPPUNIT_ASSERT_EQUAL(_neg->npar(), 1U);
+    CPPUNIT_ASSERT_EQUAL(_neg->npar(), 1UL);
     CPPUNIT_ASSERT(checkNPar(_add, 1));
     CPPUNIT_ASSERT(checkNPar(_multiply, 1));
 
@@ -129,9 +129,9 @@ void BaseFunTest::arithmetic2(double v1, double v2)
     //Arithmetic functions taking two arguments
     CPPUNIT_ASSERT(checkNPar(_add, 2));
     CPPUNIT_ASSERT(checkNPar(_multiply, 2));
-    CPPUNIT_ASSERT_EQUAL(_subtract->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_divide->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_pow->npar(), 2U);
+    CPPUNIT_ASSERT_EQUAL(_subtract->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_divide->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_pow->npar(), 2UL);
 
     CPPUNIT_ASSERT_EQUAL(v1 + v2, eval(_add, v1, v2));
     CPPUNIT_ASSERT_DOUBLES_EQUAL(v1 - v2, eval(_subtract,  v1, v2), tol);
@@ -181,7 +181,7 @@ void BaseFunTest::arithmetic()
 void BaseFunTest::logical1()
 {
     //Logical Not takes one argument
-    CPPUNIT_ASSERT_EQUAL(_not->npar(), 1U);
+    CPPUNIT_ASSERT_EQUAL(_not->npar(), 1UL);
 
     CPPUNIT_ASSERT_EQUAL(1.0, eval(_not, 0));
     CPPUNIT_ASSERT_EQUAL(0.0, eval(_not, 1));
@@ -193,8 +193,8 @@ void BaseFunTest::logical1()
 void BaseFunTest::logical2()
 {
     //Logical And and Logical Or take two arguments
-    CPPUNIT_ASSERT_EQUAL(_and->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_or->npar(), 2U);
+    CPPUNIT_ASSERT_EQUAL(_and->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_or->npar(), 2UL);
 
     double TRUE=1, FALSE=0;
 
@@ -243,12 +243,12 @@ void BaseFunTest::comparison2(double v1, double v2)
 void BaseFunTest::comparison()
 {
     //All of the comparison functions take 2 arguments
-    CPPUNIT_ASSERT_EQUAL(_equal->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_geq->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_gt->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_leq->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_lt->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_neq->npar(), 2U);
+    CPPUNIT_ASSERT_EQUAL(_equal->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_geq->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_gt->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_leq->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_lt->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_neq->npar(), 2UL);
 
     comparison2( 0.0,  0.0);
     comparison2( 1.0,  2.0);

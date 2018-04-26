@@ -18,7 +18,7 @@ class VectorFunction;
  */
 class VectorLogicalNode : public LogicalNode {
     VectorFunction const * const _func;
-    std::vector<unsigned int> _lengths;
+    std::vector<unsigned long> _lengths;
 public:
     /**
      * A logical node is defined by a function (which may be an inline

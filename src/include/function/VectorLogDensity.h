@@ -15,14 +15,14 @@ namespace jags {
 	VectorDist const *_dist;
     public:
 	VectorLogDensity(VectorDist const *dist);
-	unsigned int length(std::vector<unsigned int> const &lengths,
+	unsigned long length(std::vector<unsigned long> const &lengths,
 			    std::vector<double const *> const &values) const;
-	bool checkParameterLength(std::vector<unsigned int> const &lens) const;
+	bool checkParameterLength(std::vector<unsigned long> const &lens) const;
 	bool checkParameterValue(std::vector<double const *> const &args,
-				 std::vector<unsigned int> const &lens) const;
+				 std::vector<unsigned long> const &lens) const;
 	void evaluate(double *value,
 		      std::vector <double const *> const &args,
-		      std::vector<unsigned int> const &lens) const;
+		      std::vector<unsigned long> const &lens) const;
     };
 
 }

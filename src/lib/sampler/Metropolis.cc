@@ -48,7 +48,7 @@ bool Metropolis::isAdaptive() const
     return true;
 }
 
-unsigned int Metropolis::length() const
+unsigned long Metropolis::length() const
 {
     return _last_value.size();
 }

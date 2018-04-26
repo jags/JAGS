@@ -22,7 +22,7 @@ namespace mix {
     {}
 
     bool 
-    DNormMix::checkParameterLength(vector<unsigned int> const &lengths) const
+    DNormMix::checkParameterLength(vector<unsigned long> const &lengths) const
     {
 	if (lengths[0] == 1)
 	    return false; // Must be a mixture
@@ -33,7 +33,7 @@ namespace mix {
 
     bool 
     DNormMix::checkParameterValue(vector<double const *> const &par,
-				  vector<unsigned int> const &lengths) const
+				  vector<unsigned long> const &lengths) const
     {
 	for (unsigned int i = 0; i < NCAT(lengths); ++i) {
 	    if (TAU(par)[i] <= 0)
@@ -44,10 +44,10 @@ namespace mix {
 	return true;
     }
 
-    double DNormMix::logDensity(double const *x, unsigned int length, 
+    double DNormMix::logDensity(double const *x, unsigned long length, 
 				PDFType type,
 				vector<double const *> const &par,
-				vector<unsigned int> const &lengths,
+				vector<unsigned long> const &lengths,
 				double const *lower, double const *upper) 
 	const
     {
@@ -62,9 +62,9 @@ namespace mix {
     }
 
     void 
-    DNormMix::randomSample(double *x, unsigned int length,
+    DNormMix::randomSample(double *x, unsigned long length,
 			   vector<double const *> const &par, 
-			   vector<unsigned int> const &lengths, 
+			   vector<unsigned long> const &lengths, 
 			   double const *lower, double const *upper, RNG *rng) 
 	const
     {
@@ -79,8 +79,8 @@ namespace mix {
 	sump = 0;
 
 	// Select mixture component (r)
-	unsigned int r = Ncat - 1;
-	for (unsigned int i = 0; i < Ncat - 1; ++i) {
+	unsigned long r = Ncat - 1;
+	for (unsigned long i = 0; i < Ncat - 1; ++i) {
 	    sump += PROB(par)[i];
 	    if (sump > p_rand) {
 		r = i;
@@ -99,15 +99,15 @@ namespace mix {
     }
 
     void 
-    DNormMix::support(double *lower, double *upper, unsigned int length,
+    DNormMix::support(double *lower, double *upper, unsigned long length,
 		      vector<double const *> const &parameters,
-		      vector<unsigned int> const &lengths) const
+		      vector<unsigned long> const &lengths) const
     {
 	*lower = JAGS_NEGINF;
 	*upper = JAGS_POSINF;
     }
 
-    unsigned int DNormMix::length(vector<unsigned int> const &parlengths) const
+    unsigned long DNormMix::length(vector<unsigned long> const &parlengths) const
     {
 	return 1;
     }

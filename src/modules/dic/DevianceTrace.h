@@ -14,7 +14,7 @@ namespace dic {
 	std::vector<StochasticNode const *> _snodes;
     public:
 	DevianceTrace(std::vector<StochasticNode const *> const &nodes);
-	std::vector<unsigned int> dim() const;
+	std::vector<unsigned long> dim() const;
 	std::vector<double> const &value(unsigned int chain) const;
 	void update();
 	bool poolChains() const;

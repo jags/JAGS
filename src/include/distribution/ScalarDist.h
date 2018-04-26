@@ -40,9 +40,6 @@ class ScalarDist : public Distribution
    * @param npar Number of parameters, excluding upper and lower bound
    *
    * @param support Support of distribution
-   *
-   * @param discrete Logical flag indicating whether the distribution
-   * is discrete-valued.
    */
   ScalarDist(std::string const &name, unsigned int npar, Support support);
   /**
@@ -92,7 +89,7 @@ class ScalarDist : public Distribution
    * By default this is 1. For scalar distributions that are
    * deterministic functions of the parameters, this must be overridden.
    */
-  virtual unsigned int df() const;
+  virtual unsigned long df() const;
   /**
    * Returns a Monte Carlo estimate of the Kullback-Leibler divergence
    * between distributions with two different parameter values. This

@@ -16,31 +16,19 @@ using std::string;
 using std::ostringstream;
 using std::sort;
 
-static vector<int> asSigned(vector<unsigned int> const &orig)
+static vector<vector<unsigned long> > 
+makeScope(vector<unsigned long> const &lower,
+	  vector<unsigned long> const &upper)
 {
-    unsigned int n = orig.size();
-    vector<int> ans(n);
-    for (unsigned int i = 0; i < n; ++i) {
-        ans[i] = static_cast<int>(orig[i]);
-	if (ans[i] < 0) {
-	    throw out_of_range("Dimension too large in Range constructor");
-	}
-    }
-    return ans;
-}
-
-static vector<vector<int> > 
-makeScope(vector<int> const &lower, vector<int> const &upper)
-{
-    unsigned int ndim = lower.size();
+    unsigned long ndim = lower.size();
     if (upper.size() != ndim) {
 	throw logic_error("Dimension mismatch in Range constructor");
     }
     
-    vector<vector<int> > scope(ndim);
-    for (unsigned int i = 0; i < ndim; ++i) {
+    vector<vector<unsigned long> > scope(ndim);
+    for (unsigned long i = 0; i < ndim; ++i) {
 	if (lower[i] <= upper[i]) {
-	    for (int j = lower[i]; j <= upper[i]; ++j) {
+	    for (unsigned long j = lower[i]; j <= upper[i]; ++j) {
 		scope[i].push_back(j);
 	    }
 	}
@@ -50,18 +38,21 @@ makeScope(vector<int> const &lower, vector<int> const &upper)
 
 namespace jags {
 
-    SimpleRange::SimpleRange(vector<int> const &lower, vector<int> const &upper)
+    SimpleRange::SimpleRange(vector<unsigned long> const &lower,
+			     vector<unsigned long> const &upper)
 	: Range(makeScope(lower, upper))
     {
     }
-    
-    SimpleRange::SimpleRange(vector<int> const &index)
+
+    /*
+    SimpleRange::SimpleRange(vector<long> const &index)
 	: Range(makeScope(index, index))
     {
     }
+    */
     
-    SimpleRange::SimpleRange(vector<unsigned int> const &dim)
-	: Range(makeScope(vector<int>(dim.size(), 1), asSigned(dim)))
+    SimpleRange::SimpleRange(vector<unsigned long> const &dim)
+	: Range(makeScope(vector<unsigned long>(dim.size(), 1), dim))
     {
     }
 
@@ -74,14 +65,14 @@ namespace jags {
     {
     }
 
-    bool SimpleRange::contains(vector<int> const &index) const
+    bool SimpleRange::contains(vector<unsigned long> const &index) const
     {
-	unsigned int N = ndim(false);
+	unsigned long N = ndim(false);
 	if (N != index.size()) {
 	    return false;
 	}
 	
-	for (unsigned int i = 0; i < N; ++i) {
+	for (unsigned long i = 0; i < N; ++i) {
 	    if (index[i] < _first[i] || index[i] > _last[i]) {
 		return false;
 	    }
@@ -91,12 +82,12 @@ namespace jags {
     
     bool SimpleRange::contains(SimpleRange const &other) const
     {
-	unsigned int N = ndim(false);
+	unsigned long N = ndim(false);
 	if (N != other.ndim(false)) {
 	    return false;
 	}
 	
-	for (unsigned int i = 0; i < N; ++i) {
+	for (unsigned long i = 0; i < N; ++i) {
 	    if (other._first[i] < _first[i] || other._last[i] > _last[i]) {
 		return false;
 	    }
@@ -107,14 +98,14 @@ namespace jags {
 
     bool SimpleRange::contains(Range const &other) const
     {
-	unsigned int ndim = scope().size();
+	unsigned long ndim = scope().size();
 	if (other.scope().size() != ndim) {
 	    throw invalid_argument("SimpleRange::contains. Dimension mismatch");
 	}
 	
-	for (unsigned int i = 0; i < ndim; ++i) {
-	    vector<int> const &indices = other.scope()[i];
-	    for (unsigned int j = 0; j < indices.size(); ++j) {
+	for (unsigned long i = 0; i < ndim; ++i) {
+	    vector<unsigned long> const &indices = other.scope()[i];
+	    for (unsigned long j = 0; j < indices.size(); ++j) {
 		if (indices[j] < _first[i] || indices[j] > _last[i]) {
 		    return false;
 		}
@@ -123,12 +114,13 @@ namespace jags {
 	return true;
     }
     
-    unsigned int SimpleRange::leftOffset(vector<int> const &index) const
+    unsigned long
+    SimpleRange::leftOffset(vector<unsigned long> const &index) const
     {
-	unsigned int offset = 0;
-	int step = 1;
-	unsigned int ndim = _last.size();
-	for (unsigned int i = 0; i < ndim; i++) {
+	unsigned long offset = 0;
+	unsigned long step = 1;
+	unsigned long ndim = _last.size();
+	for (unsigned long i = 0; i < ndim; i++) {
 	    if (index[i] < _first[i] || index[i] > _last[i]) {
 		throw out_of_range("SimpleRange::leftOffset. Index outside of allowed range");
 	    }
@@ -138,11 +130,13 @@ namespace jags {
 	return offset;
     }
 
-    unsigned int SimpleRange::rightOffset(vector<int> const &index) const
+    unsigned long
+    SimpleRange::rightOffset(vector<unsigned long> const &index) const
     {
-	unsigned int offset = 0;
-	int step = 1;
-	for (int i = _last.size() - 1; i >= 0; --i) {
+	unsigned long offset = 0;
+	unsigned long step = 1;
+	for (unsigned long j = _last.size(); j > 0; --j) {
+	    unsigned long i = j - 1;
 	    if (index[i] < _first[i] || index[i] > _last[i]) {
 		throw out_of_range("SimpleRange::rightOffset. Index outside of allowed range");
 	    }
@@ -181,11 +175,11 @@ namespace jags {
 	    return "";
 	}
 
-	vector<int> const & lower = range.lower();
-	vector<int> const & upper = range.upper();
+	vector<unsigned long> const & lower = range.lower();
+	vector<unsigned long> const & upper = range.upper();
 	ostringstream ostr;
 	ostr << "[";
-	for (unsigned int i = 0; i < range.ndim(false); ++i) {
+	for (unsigned long i = 0; i < range.ndim(false); ++i) {
 	    if (i > 0)
 		ostr << ",";
 	    if (lower[i] == upper[i]) {

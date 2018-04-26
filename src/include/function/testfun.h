@@ -32,7 +32,7 @@
 /* Testing functions valid for all functions */
 
 //Check all possible values of mask using a predicate (see below)
-bool isdiscrete(jags::Function const *f, unsigned int npar,
+bool isdiscrete(jags::Function const *f, unsigned long npar,
 		bool (*predicate) (std::vector<bool> const &));
 
 //suitable predicates for isdiscrete
@@ -42,15 +42,15 @@ bool all(std::vector<bool> const &); //returns true if all arguments are true
 bool any(std::vector<bool> const &); //returns true if any argyments are true
 
 //Returns true if f is never an additive function
-bool neveradditive(jags::Function const *f, unsigned int npar);
+bool neveradditive(jags::Function const *f, unsigned long npar);
 //Returns true if f is never a scale function
-bool neverscale(jags::Function const *f, unsigned int npar);
+bool neverscale(jags::Function const *f, unsigned long npar);
 //Returns true if f is never a linear function
-bool neverlinear(jags::Function const *f, unsigned int npar);
+bool neverlinear(jags::Function const *f, unsigned long npar);
 //Returns true if f is never a power function
-bool neverpow(jags::Function const *f, unsigned int npar);
+bool neverpow(jags::Function const *f, unsigned long npar);
 //Returns true if f is never an additive, linear, scale, or power function
-bool neverclosed(jags::Function const *f, unsigned int npar);
+bool neverclosed(jags::Function const *f, unsigned long npar);
 
 /* Tests for scalar functions */
 

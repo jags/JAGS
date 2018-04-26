@@ -28,7 +28,7 @@ namespace base {
 	 * @param nburn Length of burnin
 	 */
 	RealSlicer(SingletonGraphView const *gv, unsigned int chain,
-		   double width = 1, long maxwidth = 10);
+		   double width = 1, unsigned int maxwidth = 10);
 	double value() const;
 	void setValue(double value);
 	void getLimits(double *lower, double *upper) const;

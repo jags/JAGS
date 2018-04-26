@@ -12,7 +12,7 @@ namespace jags {
 	: runtime_error(msg), _node(node)
     {
     }
-    
+
     void NodeError::printMessage(ostream &out, SymTab const &symtab) const
     {
 	out << "Error in node " <<  symtab.getName(_node) << "\n" 

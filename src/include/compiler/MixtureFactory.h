@@ -51,7 +51,7 @@ public:
    * shows the corresponding parent from which the mixture node copies
    * its value.
    *
-   * @param graph Model to which newly allocated mixturenodes are added.
+   * @param model Model to which newly allocated mixturenodes are added.
    *
    */
   MixtureNode *getMixtureNode(std::vector<Node const *> const &index,

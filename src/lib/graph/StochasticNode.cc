@@ -41,7 +41,7 @@ static vector<Node const *> mkParents(vector<Node const *> const &parameters,
     {
 	//Determine whether node is discrete-valued
 	vector<bool> mask(parameters.size());
-	for (unsigned int i = 0; i < parameters.size(); ++i) {
+	for (unsigned long i = 0; i < parameters.size(); ++i) {
 	    mask[i] = parameters[i]->isDiscreteValued();
 	}
 	if (!dist->checkParameterDiscrete(mask)) {
@@ -51,7 +51,7 @@ static vector<Node const *> mkParents(vector<Node const *> const &parameters,
 	return(dist->isDiscreteValued(mask));
     }
 
-StochasticNode::StochasticNode(vector<unsigned int> const &dim,
+StochasticNode::StochasticNode(vector<unsigned long> const &dim,
 			       unsigned int nchain,
 			       Distribution const *dist,
 			       vector<Node const *> const &parameters,
@@ -78,7 +78,7 @@ StochasticNode::StochasticNode(vector<unsigned int> const &dim,
     //Set up parameter vectors 
     for (unsigned int n = 0; n < nchain; ++n) {
 	_parameters[n].reserve(parameters.size());
-	for (unsigned int i = 0; i < parameters.size(); ++i) {
+	for (unsigned long i = 0; i < parameters.size(); ++i) {
 	    _parameters[n].push_back(parameters[i]->value(n));
 	}
     }
@@ -86,7 +86,7 @@ StochasticNode::StochasticNode(vector<unsigned int> const &dim,
     //Insert the current node as a child in all its parents
     //taking care to avoid repeats
     set<Node const*> pset;
-    for (unsigned int i = 0; i < parents().size(); ++i) {
+    for (unsigned long i = 0; i < parents().size(); ++i) {
 	Node const *p = parents()[i];
 	if (pset.insert(p).second) {
 	    p->addChild(this);
@@ -121,7 +121,7 @@ RVStatus StochasticNode::randomVariableStatus() const
 
 string StochasticNode::deparse(vector<string> const &parnames) const
 {
-    unsigned int npar = parnames.size();
+    unsigned long npar = parnames.size();
     if (_upper) --npar;
     if (_lower) --npar;
     if (!checkNPar(_dist, npar)) {
@@ -132,7 +132,7 @@ string StochasticNode::deparse(vector<string> const &parnames) const
 
     string name = _dist->name();
     name.append("(");
-    unsigned int i = 0; 
+    unsigned long i = 0; 
     for ( ; i < npar; ++i) {
 	if (i != 0) {
 	    name.append(",");
@@ -209,13 +209,13 @@ bool isSupportFixed(StochasticNode const *node)
     if (node->lowerBound())
 	parents.pop_back();
     vector<bool> fixmask(parents.size());
-    for (unsigned int i = 0; i < parents.size(); ++i) {
+    for (unsigned long i = 0; i < parents.size(); ++i) {
 	fixmask[i] = parents[i]->isFixed();
     }
     return node->distribution()->isSupportFixed(fixmask);
 }
 
-void StochasticNode::support(double *lower, double *upper, unsigned int length,
+void StochasticNode::support(double *lower, double *upper, unsigned long length,
 			     unsigned int chain) const
 {
     if (length != _length) {
@@ -231,14 +231,14 @@ void StochasticNode::support(double *lower, double *upper, unsigned int length,
         }
         if (_lower) {
             double const *lb = _lower->value(chain);
-            for (unsigned int i = 0; i < length; ++i) {
+            for (unsigned long i = 0; i < length; ++i) {
                 if (lower[i] < lb[i])
                     lower[i] = lb[i];
             }
         }
         if (_upper) {
             double const *ub = _upper->value(chain);
-            for (unsigned int i = 0; i < length; ++i) {
+            for (unsigned long i = 0; i < length; ++i) {
                 if (upper[i] > ub[i])
                     upper[i] = ub[i];
             }
@@ -251,7 +251,7 @@ bool isBounded(StochasticNode const *node)
     return node->lowerBound() || node->upperBound();
 }
 
-    void StochasticNode::setData(double const *value, unsigned int length)
+    void StochasticNode::setData(double const *value, unsigned long length)
     {
 	for (unsigned int n = 0; n < _nchain; ++n) {
 	    setValue(value, length, n);
@@ -261,7 +261,7 @@ bool isBounded(StochasticNode const *node)
 
     void StochasticNode::unlinkParents()
     {
-	for (unsigned int i = 0; i < parents().size(); ++i) {
+	for (unsigned long i = 0; i < parents().size(); ++i) {
 	    parents()[i]->removeChild(this);
 	}
     }

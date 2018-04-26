@@ -42,7 +42,7 @@ namespace base {
 	}
 	
 	//Set name attributes 
-	m->setName(name + print(range));
+	m->setName(name + printRange(range));
 	Range node_range = range;
 	if (isNULL(range)) {
 	    //Special syntactic rule: a null range corresponds to the whole
@@ -52,11 +52,11 @@ namespace base {
 	vector<string> elt_names;
 	if (node_range.length() > 1) {
 	    for (RangeIterator i(node_range); !i.atEnd(); i.nextLeft()) {
-		elt_names.push_back(name + print(i));
+		elt_names.push_back(name + printIndex(i));
 	    }
 	}
 	else {
-	    elt_names.push_back(name + print(range));
+	    elt_names.push_back(name + printRange(range));
 	}
 	m->setElementNames(elt_names);
 	

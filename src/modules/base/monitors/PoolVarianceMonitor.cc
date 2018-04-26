@@ -56,7 +56,7 @@ namespace base {
 		return _variances;
 	}
 	
-    vector<unsigned int> PoolVarianceMonitor::dim() const
+    vector<unsigned long> PoolVarianceMonitor::dim() const
     {
 	return _subset.dim();
     }

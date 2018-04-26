@@ -12,9 +12,9 @@ namespace jags {
 
     /** 
      * A MixMap is an STL map that associates an index value (a vector
-     * of unsigned integers) with a node.  
+     * of long integers) with a node.  
      */
-    typedef std::map<std::vector<int>, Node const *> MixMap;
+    typedef std::map<std::vector<unsigned long>, Node const *> MixMap;
 
 
 /**
@@ -34,7 +34,7 @@ namespace jags {
  */
 class MixtureNode : public DeterministicNode {
     MixTab const *_table;
-    unsigned int _Nindex;
+    unsigned long _Nindex;
     bool _discrete;
     std::vector<Node const *> _active_parents;
     void updateActive(unsigned int chain);
@@ -47,7 +47,7 @@ public:
      *
      * @param nchain Number of chains
      *
-     * @param map a MixMap object which associates each possible value
+     * @param mixmap a MixMap object which associates each possible value
      * of the index nodes with a single parent. 
      */
     MixtureNode(std::vector<Node const *> const &index,
@@ -65,7 +65,7 @@ public:
     /**
      * Returns the number of index nodes.
      */
-    unsigned int index_size() const;
+    unsigned long index_size() const;
     /**
      * Returns a pointer to the MixTab
      */

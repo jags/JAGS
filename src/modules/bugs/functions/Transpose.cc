@@ -15,28 +15,28 @@ namespace bugs {
 
     void
     Transpose::evaluate (double *value, vector<double const *> const &args,
-			 vector<vector<unsigned int> > const &dims) const
+			 vector<vector<unsigned long> > const &dims) const
     {
-	unsigned int nrow = dims[0][0];
-	unsigned int ncol = dims[0].size() == 2 ? dims[0][1] : 1;
-	unsigned int length = nrow * ncol;
-	for (unsigned int i = 0; i < length; ++i) {
+	unsigned long nrow = dims[0][0];
+	unsigned long ncol = dims[0].size() == 2 ? dims[0][1] : 1;
+	unsigned long length = nrow * ncol;
+	for (unsigned long i = 0; i < length; ++i) {
 	    value[i] = args[0][(i / ncol) + (i % ncol) * nrow];
 	}
     }
 
-    vector<unsigned int> 
-    Transpose::dim (vector <vector<unsigned int> > const &dims,
+    vector<unsigned long> 
+    Transpose::dim (vector <vector<unsigned long> > const &dims,
 		    vector <double const *> const &values) const
     {
-	vector<unsigned int> ans(2);
+	vector<unsigned long> ans(2);
 	ans[0] = dims[0].size() == 2 ? dims[0][1] : 1;
 	ans[1] = dims[0][0];
 	return ans;
     }
 
     bool 
-    Transpose::checkParameterDim (vector <vector<unsigned int> > const &dims) 
+    Transpose::checkParameterDim (vector <vector<unsigned long> > const &dims) 
 	const
     {
 	return isScalar(dims[0]) || isVector(dims[0]) || isMatrix(dims[0]);

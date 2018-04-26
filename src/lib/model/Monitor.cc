@@ -59,7 +59,7 @@ void Monitor::setElementNames(vector<string> const &names)
 SArray Monitor::dump(bool flat) const
 {
     unsigned int nchain = poolChains() ? 1 : nodes()[0]->nchain();
-    unsigned int nvalue = value(0).size();
+    unsigned long nvalue = value(0).size();
 
     vector<double> v(nvalue * nchain);
     vector<double>::iterator p = v.begin();
@@ -67,18 +67,18 @@ SArray Monitor::dump(bool flat) const
 	p = copy(value(ch).begin(), value(ch).end(), p);
     }
 
-    vector<unsigned int> vdim = dim();
-    unsigned int vlen = product(vdim);
+    vector<unsigned long> vdim = dim();
+    unsigned long vlen = product(vdim);
     if (nvalue % vlen != 0) {
 	throw logic_error("Inconsistent dimensions in Monitor");
     }
-    unsigned int niter = nvalue / vlen;
+    unsigned long niter = nvalue / vlen;
     if (poolIterations() && niter != 1) {
 	throw logic_error("Invalid number of iterations in Monitor");
     }
 
     if (flat) {
-	vdim = vector<unsigned int>(1, vlen);
+	vdim = vector<unsigned long>(1, vlen);
     }
 	
     vector<string> names(vdim.size(), "");

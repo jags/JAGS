@@ -4,6 +4,7 @@
 #include <util/dim.h>
 #include <util/nainf.h>
 #include <module/ModuleError.h>
+#include <util/integer.h>
 
 #include "DScaledWishart.h"
 
@@ -35,11 +36,11 @@ namespace jags {
 namespace glm {
 
     //FIXME: This is copy-pasted from the bugs module
-    static double logdet(double const *a, int n)
+    static double logdet(double const *a, unsigned long n)
     {
 	// Log determinant of n x n symmetric positive matrix a */
   
-	int N = n*n;
+	unsigned long N = n*n;
 	vector<double> acopy(N);
 	copy(a, a+N, acopy.begin());
 
@@ -47,13 +48,14 @@ namespace glm {
 	int lwork = -1;
 	double worktest = 0;
 	int info = 0;
-	F77_DSYEV("N","U", &n, &acopy[0], &n, &w[0], &worktest, &lwork, &info);
+	int ni = asInteger(n);
+	F77_DSYEV("N","U", &ni, &acopy[0], &ni, &w[0], &worktest, &lwork, &info);
 	if (info != 0) {
 	    throwRuntimeError("unable to calculate workspace size for dsyev");
 	}
 	lwork = static_cast<int>(worktest);
 	double *work = new double[lwork];
-	F77_DSYEV("N","U", &n, &acopy[0], &n, &w[0], work, &lwork, &info);
+	F77_DSYEV("N","U", &ni, &acopy[0], &ni, &w[0], work, &lwork, &info);
 	delete [] work;
 	if (info != 0) {
 	    throwRuntimeError("unable to calculate eigenvalues in dsyev");
@@ -64,17 +66,17 @@ namespace glm {
 	}
 
 	double logdet = 0;
-	for (int i = 0; i < n; i++) {
+	for (unsigned long i = 0; i < n; i++) {
 	    logdet += log(w[i]);
 	}
 	
 	return logdet;
     }
     
-    static double log_multigamma(double n, unsigned int p)
+    static double log_multigamma(double n, unsigned long p)
     {
 	double y =  (p * (p-1) * log(M_PI))/4;
-	for (unsigned int j = 0; j < p; ++j) {
+	for (unsigned long j = 0; j < p; ++j) {
 	    y += lgammafn((n-j)/2);
 	}
 	return y;
@@ -85,14 +87,14 @@ namespace glm {
     {}
 
     double
-    DScaledWishart::logDensity(double const *x, unsigned int length,
+    DScaledWishart::logDensity(double const *x, unsigned long length,
 			       PDFType type,
 			       vector<double const *> const &par,
-			       vector<vector<unsigned int> > const &dims,
+			       vector<vector<unsigned long> > const &dims,
 			       double const *lower, double const *upper) const
     {
 	double const *A = SCALE(par);
-	unsigned int p = NROW(dims);
+	unsigned long p = NROW(dims);
 	double df = DF(par);
 	double k = p + df - 1;
 	
@@ -115,8 +117,8 @@ namespace glm {
 	return loglik;
     }
 
-    void DScaledWishart::sampleWishart(double *x, unsigned int length,
-				       double const *R, unsigned int nrow,
+    void DScaledWishart::sampleWishart(double *x, unsigned long length,
+				       double const *R, unsigned long nrow,
 				       double k, RNG *rng)
     {
 	/* 
@@ -163,13 +165,13 @@ namespace glm {
 	}
     }
 
-void DScaledWishart::randomSample(double *x, unsigned int length,
+void DScaledWishart::randomSample(double *x, unsigned long length,
 				  vector<double const *> const &par,
-				  vector<vector<unsigned int> > const &dims,
+				  vector<vector<unsigned long> > const &dims,
 				  double const *lower, double const *upper,
 				  RNG *rng) const
 {
-    unsigned int nrow = NROW(dims);
+    unsigned long nrow = NROW(dims);
     double df = DF(par);
     double const *scale = SCALE(par);
     
@@ -184,42 +186,42 @@ void DScaledWishart::randomSample(double *x, unsigned int length,
 }
 
 bool
-DScaledWishart::checkParameterDim (vector<vector<unsigned int> > const &dims)
+DScaledWishart::checkParameterDim (vector<vector<unsigned long> > const &dims)
     const
 {
     return (isVector(dims[0]) || isScalar(dims[0])) && isScalar(dims[1]);
 }
 
-vector<unsigned int> 
-DScaledWishart::dim(vector<vector<unsigned int> > const &dims) const
+vector<unsigned long> 
+DScaledWishart::dim(vector<vector<unsigned long> > const &dims) const
 {
     if (isScalar(dims[0])) {
-	return vector<unsigned int>(1,1);
+	return vector<unsigned long>(1,1);
     }
     else {
-	return vector<unsigned int> (2, dims[0][0]);
+	return vector<unsigned long> (2, dims[0][0]);
     }
 }
 
 bool 
 DScaledWishart::checkParameterValue(vector<double const *> const &par,
-			   vector<vector<unsigned int> > const &dims) const
+			   vector<vector<unsigned long> > const &dims) const
 {
     if (DF(par) < 1) return false;
     double const *scale = SCALE(par);
-    unsigned int n = NROW(dims);
-    for (unsigned int i = 0; i < n; ++i) {
+    unsigned long n = NROW(dims);
+    for (unsigned long i = 0; i < n; ++i) {
 	if (scale[i] <= 0) return false;
     }
     return true;
 }
 
 
-void DScaledWishart::support(double *lower, double *upper, unsigned int length,
+void DScaledWishart::support(double *lower, double *upper, unsigned long length,
 		    vector<double const *> const &par,
-		    vector<vector<unsigned int> > const &dims) const
+		    vector<vector<unsigned long> > const &dims) const
 {
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	if (i % NROW(dims) == i / NROW(dims)) {
 	    //Diagonal elements
 	    lower[i] =  0;
@@ -231,18 +233,18 @@ void DScaledWishart::support(double *lower, double *upper, unsigned int length,
     }
 }
 
-void DScaledWishart::typicalValue(double *x, unsigned int length,
+void DScaledWishart::typicalValue(double *x, unsigned long length,
 			 vector<double const *> const &par,
-			 vector<vector<unsigned int> > const &dims,
+			 vector<vector<unsigned long> > const &dims,
 			 double const *lower, double const *upper) const
 {
     /* Returns the mean as a typical value. */
 
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	x[i] = 0;
     }
-    for (unsigned int i = 0; i < NROW(dims); ++i) {
-	unsigned int k = i * NROW(dims) + i;
+    for (unsigned long i = 0; i < NROW(dims); ++i) {
+	unsigned long k = i * NROW(dims) + i;
 	x[k] = DF(par)/(SCALE(par)[i] * SCALE(par)[i]);
     }
 }
@@ -252,7 +254,7 @@ bool DScaledWishart::isSupportFixed(vector<bool> const &fixmask) const
     return true;
 }
 
-unsigned int DScaledWishart::df(vector<vector<unsigned int> > const &dims) const
+unsigned long DScaledWishart::df(vector<vector<unsigned long> > const &dims) const
 {   
   return dims[0][0] * (dims[0][0] + 1) / 2;
 }

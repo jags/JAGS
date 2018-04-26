@@ -19,24 +19,24 @@ class DMState : public ArrayDist {
 public:
     DMState();
   
-    double logDensity(double const *x, unsigned int length, PDFType type,
+    double logDensity(double const *x, unsigned long length, PDFType type,
 		      std::vector<double const *> const &parameters,
-		      std::vector<std::vector<unsigned int> > const &dims,
+		      std::vector<std::vector<unsigned long> > const &dims,
 		      double const *lower, double const *upper)	const;
-    void randomSample(double *x, unsigned int length,
+    void randomSample(double *x, unsigned long length,
 		      std::vector<double const *> const &parameters,
-		      std::vector<std::vector<unsigned int> > const &dims,
+		      std::vector<std::vector<unsigned long> > const &dims,
 		      double const *lower, double const *upper, RNG *rng) const;
-    void support(double *lower, double *upper, unsigned int length,
+    void support(double *lower, double *upper, unsigned long length,
 		 std::vector<double const *> const &parameters,
-		 std::vector<std::vector<unsigned int> > const &dims) const;
+		 std::vector<std::vector<unsigned long> > const &dims) const;
     bool isSupportFixed(std::vector<bool> const &fixmask) const;
-    bool checkParameterDim(std::vector<std::vector<unsigned int> > const &dims)
+    bool checkParameterDim(std::vector<std::vector<unsigned long> > const &dims)
 	const;
     bool checkParameterDiscrete(std::vector<bool> const &mask) const;
     bool checkParameterValue(std::vector<double const *> const &par,
-			     std::vector<std::vector<unsigned int> > const &dims) const;
-    std::vector<unsigned int> dim(std::vector<std::vector<unsigned int> >
+			     std::vector<std::vector<unsigned long> > const &dims) const;
+    std::vector<unsigned long> dim(std::vector<std::vector<unsigned long> >
 				  const &dims) const;
     bool isDiscreteValued(std::vector<bool> const &mask) const;
 };

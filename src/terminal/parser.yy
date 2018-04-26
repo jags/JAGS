@@ -803,17 +803,17 @@ static jags::Range getRange(jags::ParseTree const *var)
   */
   unsigned int size = var->parameters().size();
 
-  std::vector<int>  ind_lower(size), ind_upper(size);
+  std::vector<unsigned long>  ind_lower(size), ind_upper(size);
   for (unsigned int i = 0; i < size; ++i) {
     jags::ParseTree const *range_element = var->parameters()[i];
     switch(range_element->parameters().size()) {
     case 1:
-      ind_lower[i] = (int) (range_element->parameters()[0]->value() + 1.0E-6);
+	ind_lower[i] = static_cast<int>(range_element->parameters()[0]->value());
       ind_upper[i] = ind_lower[i];
       break;
     case 2:
-      ind_lower[i] = (int) (range_element->parameters()[0]->value() + 1.0E-6);  
-      ind_upper[i] = (int) (range_element->parameters()[1]->value() + 1.0E-6);
+	ind_lower[i] = static_cast<int>(range_element->parameters()[0]->value());
+	ind_upper[i] = static_cast<int>(range_element->parameters()[1]->value());
       break;
     default:
       //Error! FIXME
@@ -922,7 +922,7 @@ void doDump(std::string const &file, jags::DumpType type, unsigned int chain)
 	std::vector<double> const &value = sarray.value();
 	long length = sarray.length();
 	out << "`" << name << "` <- " << std::endl;
-	std::vector<unsigned int> const &dim = sarray.dim(false);
+	std::vector<unsigned long> const &dim = sarray.dim(false);
 	bool discrete = sarray.isDiscreteValued();
 
 	if (dim.size() == 1) {
@@ -994,7 +994,7 @@ void dumpMonitors(std::string const &file, std::string const &type)
 	    out << ", \n";
 	}
 	out << "\"" << name << "\" = ";
-	std::vector<unsigned int> const &dim = sarray.dim(false);
+	std::vector<unsigned long> const &dim = sarray.dim(false);
 	bool discrete = sarray.isDiscreteValued();
 	bool named = !sarray.dimNames().empty();
 

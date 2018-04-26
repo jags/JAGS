@@ -193,7 +193,7 @@ static vector<double> density_full(int n1, int n2, int m1, double psi)
 {
     int ll = max(0, m1 - n2);
     int uu = min(n1, m1);
-    int N = uu - ll + 1;
+    unsigned int N = static_cast<unsigned int>(uu - ll + 1);
     vector<double> p(N);
 
     // Density at mode has reference value 1
@@ -328,7 +328,7 @@ double DHyper::q(double p, vector<double const *> const &parameters, bool lower,
     double psi;
     getParameters(n1, n2, m1, psi, parameters);
   
-    int ll = max((int) 0, m1 - n2);
+    int ll = max<int>(0, m1 - n2);
     int uu = min(n1, m1);
   
     vector<double> pi = density_full(n1, n2, m1, psi);

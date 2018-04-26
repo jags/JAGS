@@ -19,13 +19,13 @@ namespace dic {
 	std::vector<double> _values;
 	std::vector<double> _weights;
 	double _scale;
-	unsigned int _nchain;
+	unsigned long _nchain;
     public:
 	PDMonitor(std::vector<StochasticNode const *> const &snodes,
 		  std::vector<RNG *> const &rngs,
 		  unsigned int nrep, double scale=1);
 	~PDMonitor();
-	std::vector<unsigned int> dim() const;
+	std::vector<unsigned long> dim() const;
 	std::vector<double> const &value(unsigned int chain) const;
 	bool poolChains() const;
 	bool poolIterations() const;

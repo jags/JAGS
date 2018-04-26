@@ -33,7 +33,7 @@ unsigned int CODA(std::list<MonitorControl> const &mvec, std::string const &pref
  *
  * @param mvec List of MonitorControl objects containing monitors to be 
  * written out.
- * @param Prefix to be prepended to index and output file names
+ * @param prefix to be prepended to index and output file names
  * @param warn String that will contain warning messages on exit. It is
  *        cleared on entry.
  * @param type Name of the monitor type or "*" for all types
@@ -49,7 +49,7 @@ unsigned int CODA0(std::list<MonitorControl> const &mvec, std::string const &pre
  *
  * @param mvec List of MonitorControl objects containing monitors to be 
  * written out.
- * @param prefix Prefix to be added to index and output file names.
+ * @param prefix String to be prepended to index and output file names.
  * @param nchain Number of chains.
  * @param warn String that will contain warning messages on exit. It is
  *        cleared on entry.
@@ -65,7 +65,7 @@ unsigned int TABLE(std::list<MonitorControl> const &mvec, std::string const &pre
  *
  * @param mvec List of MonitorControl objects containing monitors to be 
  * written out.
- * @param Prefix to be prepended to index and output file names
+ * @param prefix String to be prepended to index and output file names
  * @param warn String that will contain warning messages on exit. It is
  *        cleared on entry.
  * @param type Name of the monitor type or "*" for all types

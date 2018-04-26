@@ -19,16 +19,16 @@ namespace jags {
 class DeterminsticNode;
 class StochasticNode;
 
-Node::Node(vector<unsigned int> const &dim, unsigned int nchain)
+Node::Node(vector<unsigned long> const &dim, unsigned int nchain)
     : _parents(0), _stoch_children(0), _dtrm_children(0), 
       _dim(getUnique(dim)), _length(product(dim)), _nchain(nchain), _data(0)
 {
     if (nchain==0)
 	throw logic_error("Node must have at least one chain");
 
-    unsigned int N = _length * _nchain;
+    unsigned long N = _length * _nchain;
     _data = new double[N];
-    for (unsigned int i = 0; i < N; ++i) {
+    for (unsigned long i = 0; i < N; ++i) {
 	_data[i] = JAGS_NA;
     }
 
@@ -36,7 +36,7 @@ Node::Node(vector<unsigned int> const &dim, unsigned int nchain)
     _stoch_children = new list<StochasticNode*>;
 }
 
-Node::Node(vector<unsigned int> const &dim, unsigned int nchain,
+Node::Node(vector<unsigned long> const &dim, unsigned int nchain,
 	   vector<Node const *> const &parents)
     : _parents(parents), _stoch_children(0), _dtrm_children(0), 
       _dim(getUnique(dim)), _length(product(dim)),
@@ -45,9 +45,9 @@ Node::Node(vector<unsigned int> const &dim, unsigned int nchain,
     if (nchain==0)
 	throw logic_error("Node must have at least one chain");
 
-    unsigned int N = _length * _nchain;
+    unsigned long N = _length * _nchain;
     _data = new double[N];
-    for (unsigned int i = 0; i < N; ++i) {
+    for (unsigned long i = 0; i < N; ++i) {
 	_data[i] = JAGS_NA;
     }
   
@@ -80,7 +80,7 @@ list<DeterministicNode*> const *Node::deterministicChildren()
 static bool isInitialized(Node const *node, unsigned int n)
 {
     double const *value = node->value(n);
-    for (unsigned int i = 0; i < node->length(); ++i) {
+    for (unsigned long i = 0; i < node->length(); ++i) {
 	if (value[i] == JAGS_NA) 
 	    return false;
     }
@@ -94,7 +94,7 @@ bool Node::initialize(RNG *rng, unsigned int n)
         return true;
 
     // Check that parents are initialized
-    for (unsigned int i = 0; i < _parents.size(); ++i) {
+    for (unsigned long i = 0; i < _parents.size(); ++i) {
         if (!isInitialized(_parents[i], n)) {
 	    return false; // Uninitialized parent
         }
@@ -114,7 +114,7 @@ unsigned int countChains(vector<Node const *> const &parameters)
 {
     unsigned int nchain = parameters.empty() ? 0 : parameters[0]->nchain();
 
-    for (unsigned int i = 1; i < parameters.size(); ++i) {
+    for (unsigned long i = 1; i < parameters.size(); ++i) {
 	if (parameters[i]->nchain() != nchain) {
 	    nchain = 0;
 	    break;
@@ -124,7 +124,7 @@ unsigned int countChains(vector<Node const *> const &parameters)
     return nchain;
 }
 
-void Node::setValue(double const *value, unsigned int length, unsigned int chain)
+void Node::setValue(double const *value, unsigned long length, unsigned int chain)
 {
    if (length != _length)
       throw NodeError(this, "Length mismatch in Node::setValue");
@@ -150,12 +150,12 @@ double const *Node::value(unsigned int chain) const
     return _data + chain * _length;
 }
 
-vector<unsigned int> const &Node::dim() const
+vector<unsigned long> const &Node::dim() const
 {
     return _dim;
 }
 
-unsigned int Node::length() const
+unsigned long Node::length() const
 {
     return _length;
 }

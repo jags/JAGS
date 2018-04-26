@@ -31,7 +31,7 @@ bool DMulti::isDiscreteValued(vector<bool> const &mask) const
     return true;
 }
 
-bool DMulti::checkParameterLength(vector<unsigned int> const &len) const
+bool DMulti::checkParameterLength(vector<unsigned long> const &len) const
 {
     //Check that PROB is non-empty and SIZE is a scalar
     return len[0] >= 1 && len[1] == 1;
@@ -44,7 +44,7 @@ bool DMulti::checkParameterDiscrete(vector<bool> const &mask) const
 
 bool 
 DMulti::checkParameterValue(vector<double const *> const &par,
-			    vector<unsigned int> const &len) const
+			    vector<unsigned long> const &len) const
 {
     if (SIZE(par) < 0)
 	return false;
@@ -52,7 +52,7 @@ DMulti::checkParameterValue(vector<double const *> const &par,
     // If SIZE is non-zero, we need at least one non-zero probability
     bool nz = SIZE(par) == 0;
 
-    for (unsigned int i = 0; i < len[0]; ++i) {
+    for (unsigned long i = 0; i < len[0]; ++i) {
 	if (PROB(par)[i] < 0)
 	    return false;
 	else if (PROB(par)[i] > 0)
@@ -62,14 +62,14 @@ DMulti::checkParameterValue(vector<double const *> const &par,
     return nz;
 }
 
-double DMulti::logDensity(double const *x, unsigned int length, PDFType type,
+double DMulti::logDensity(double const *x, unsigned long length, PDFType type,
 			  vector<double const *> const &par,
-			  vector<unsigned int> const &len,
+			  vector<unsigned long> const &len,
 			  double const *lower, double const *upper) const
 {
     double loglik = 0.0;
     double S = 0;
-    for (unsigned int i = 0; i < length; i++) {
+    for (unsigned long i = 0; i < length; i++) {
 	if (x[i] < 0 || floor(x[i]) != x[i]) {
 	    return JAGS_NEGINF;
 	}
@@ -91,7 +91,7 @@ double DMulti::logDensity(double const *x, unsigned int length, PDFType type,
     if (type != PDF_PRIOR) {
 	//Terms depending on parameters only
 	double sump = 0.0;
-	for (unsigned int i = 0; i < length; ++i) {
+	for (unsigned long i = 0; i < length; ++i) {
 	    sump += PROB(par)[i];
 	}
 	if (SIZE(par) != 0) {
@@ -101,7 +101,7 @@ double DMulti::logDensity(double const *x, unsigned int length, PDFType type,
 
     if (type != PDF_LIKELIHOOD) {
 	//Terms depending on sampled value only
-	for (unsigned int i = 0; i < length; ++i) {
+	for (unsigned long i = 0; i < length; ++i) {
 	    loglik -= lgammafn(x[i] + 1);
 	}
     }
@@ -115,9 +115,9 @@ double DMulti::logDensity(double const *x, unsigned int length, PDFType type,
     return loglik;
 }
 
-void DMulti::randomSample(double *x, unsigned int length,
+void DMulti::randomSample(double *x, unsigned long length,
 			  vector<double const *> const &par,
-			  vector<unsigned int> const &len,
+			  vector<unsigned long> const &len,
 			  double const *lower, double const *upper,
 			  RNG *rng) const
 {
@@ -128,11 +128,11 @@ void DMulti::randomSample(double *x, unsigned int length,
 
     //Normalize probability
     double sump = 0;
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	sump += prob[i];
     }
 
-    for (unsigned int i = 0; i < length - 1; i++) {
+    for (unsigned long i = 0; i < length - 1; i++) {
 	if (N == 0) {
 	    x[i] = 0;
 	}
@@ -145,11 +145,11 @@ void DMulti::randomSample(double *x, unsigned int length,
     x[length - 1] = N;
 }
 
-void DMulti::support(double *lower, double *upper, unsigned int length,
+void DMulti::support(double *lower, double *upper, unsigned long length,
 	     vector<double const *> const &par,
-	     vector<unsigned int> const &len) const
+	     vector<unsigned long> const &len) const
 {
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	lower[i] = 0;
         if (PROB(par)[i] == 0) 
            upper[i] = 0;
@@ -158,7 +158,7 @@ void DMulti::support(double *lower, double *upper, unsigned int length,
     }
 }
 
-unsigned int DMulti::length(vector<unsigned int> const &len) const
+unsigned long DMulti::length(vector<unsigned long> const &len) const
 {
     return len[0];
 }
@@ -168,21 +168,21 @@ bool DMulti::isSupportFixed(vector<bool> const &fixmask) const
     return fixmask[1];
 }
 
-unsigned int DMulti::df(vector<unsigned int> const &len) const
+unsigned long DMulti::df(vector<unsigned long> const &len) const
 {
     return len[0] - 1;
 } 
 
 double DMulti::KL(vector<double const *> const &par1,
 		  vector<double const *> const &par2,
-		  vector<unsigned int> const &lengths) const
+		  vector<unsigned long> const &lengths) const
 {
     if (SIZE(par1) != SIZE(par2))
 	return JAGS_POSINF;
 
-    unsigned int ncat = lengths[0];
+    unsigned long ncat = lengths[0];
     double y = 0, S1 = 0, S2 = 0;
-    for (unsigned int i = 0; i < ncat; ++i) {
+    for (unsigned long i = 0; i < ncat; ++i) {
 	double p1 = PROB(par1)[i];
 	double p2 = PROB(par2)[i];
 	

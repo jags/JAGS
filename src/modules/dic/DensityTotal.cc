@@ -17,10 +17,10 @@ using std::exp;
 namespace jags {
 namespace dic {
 
-    DensityTotal::DensityTotal(vector<Node const *> const &nodes, vector<unsigned int> const &dim,
+    DensityTotal::DensityTotal(vector<Node const *> const &nodes, vector<unsigned long> const &dim,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _values(nodes[0]->nchain()),
-	  _density_type(density_type), _dim(vector<unsigned int> (1,1)), _nchain(nodes[0]->nchain())
+	  _density_type(density_type), _dim(vector<unsigned long> (1,1)), _nchain(nodes[0]->nchain())
     {
 		// This monitor pools between variables so ignores the dim it is passed
 
@@ -84,7 +84,7 @@ namespace dic {
 	return _values[chain];
     }
 
-    vector<unsigned int> DensityTotal::dim() const
+    vector<unsigned long> DensityTotal::dim() const
     {
 	return _dim;
     }

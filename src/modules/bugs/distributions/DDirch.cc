@@ -33,25 +33,25 @@ string DDirch::alias() const
     return "ddirich";
 }
 
-unsigned int DDirch::length(vector<unsigned int> const &len) const
+unsigned long DDirch::length(vector<unsigned long> const &len) const
 {
     return LENGTH(len);
 }
 
-bool DDirch::checkParameterLength(vector<unsigned int> const &len) const
+bool DDirch::checkParameterLength(vector<unsigned long> const &len) const
 {
     return LENGTH(len) > 1;
 }
 
 bool
 DDirch::checkParameterValue(vector<double const *> const &par,
-                            vector<unsigned int> const &len) const
+                            vector<unsigned long> const &len) const
 {
     double const *alpha = ALPHA(par);
-    unsigned int length = LENGTH(len);
+    unsigned long length = LENGTH(len);
 
     bool has_nonzero_alpha = false;
-    for (unsigned int i = 0; i < length; i++) {
+    for (unsigned long i = 0; i < length; i++) {
 	if (alpha[i] < 0) {
 	    return false;
 	}
@@ -62,15 +62,15 @@ DDirch::checkParameterValue(vector<double const *> const &par,
     return has_nonzero_alpha;
 }
 
-double DDirch::logDensity(double const *x, unsigned int length, PDFType type,
+double DDirch::logDensity(double const *x, unsigned long length, PDFType type,
 			  vector<double const *> const &par,
-			  vector<unsigned int> const &len,
+			  vector<unsigned long> const &len,
 			  double const *lower, double const *upper) const
 {
     double const *alpha = ALPHA(par);
 
     double loglik = 0.0;
-    for (unsigned int i = 0; i < length; i++) {
+    for (unsigned long i = 0; i < length; i++) {
 	if (alpha[i] == 0) {
 	    if (x[i] > 0)
 		return JAGS_NEGINF;
@@ -83,7 +83,7 @@ double DDirch::logDensity(double const *x, unsigned int length, PDFType type,
     if (type != PDF_PRIOR) {
 	//Need to calculate normalizing constant
 	double alphasum = 0.0;
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned long i = 0; i < length; i++) {
 	    if (alpha[i] != 0) {
 		loglik -= lgammafn(alpha[i]);
 		alphasum += alpha[i];
@@ -95,9 +95,9 @@ double DDirch::logDensity(double const *x, unsigned int length, PDFType type,
     return loglik;
 }
 
-void DDirch::randomSample(double *x, unsigned int length,
+void DDirch::randomSample(double *x, unsigned long length,
                           vector<double const *> const &par,
-                          vector<unsigned int> const &len,
+                          vector<unsigned long> const &len,
 			  double const *lower, double const *upper,
 			  RNG *rng) const
 {
@@ -107,20 +107,20 @@ void DDirch::randomSample(double *x, unsigned int length,
        to create Dirichlet distribution.
     */
     double sumx = 0.0;
-    for (unsigned int i = 0; i < length; i++) {
+    for (unsigned long i = 0; i < length; i++) {
 	x[i] = (alpha[i]==0) ? 0 : rgamma(alpha[i], 1, rng);
 	sumx += x[i];
     }
-    for (unsigned int j = 0; j < length; j++) {
+    for (unsigned long j = 0; j < length; j++) {
 	x[j] /= sumx;
     }
 }
 
-void DDirch::support(double *lower, double *upper, unsigned int length,
+void DDirch::support(double *lower, double *upper, unsigned long length,
 		vector<double const *> const &par,
-		vector<unsigned int> const &len) const
+		vector<unsigned long> const &len) const
 {
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	lower[i] = 0;
 	if (ALPHA(par)[i] == 0)
 	    upper[i] = 0;
@@ -134,23 +134,23 @@ bool DDirch::isSupportFixed(vector<bool> const &fixmask) const
     return fixmask[0];
 }
 
-unsigned int DDirch::df(vector<unsigned int> const &len) const
+unsigned long DDirch::df(vector<unsigned long> const &len) const
 {
     return LENGTH(len) - 1;
 }
 
 double DDirch::KL(vector<double const *> const &par0,
 		  vector<double const *> const &par1,
-		  vector<unsigned int> const &len) const
+		  vector<unsigned long> const &len) const
 {
     //Generalization of the Kullback-Leibler divergence for the beta
     //distribution. We also have to take care of structural zeros as
     //in DCat
 
-    unsigned int N = LENGTH(len);
+    unsigned long N = LENGTH(len);
 
     double S0 = 0, S1 = 0, y = 0;
-    for (unsigned int i = 0; i < N; ++i) {
+    for (unsigned long i = 0; i < N; ++i) {
 	double a1 = ALPHA(par0)[i];
 	double a2 = ALPHA(par1)[i];
 

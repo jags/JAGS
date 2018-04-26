@@ -22,11 +22,11 @@ namespace bugs {
  */
 class ConjugateDirichlet : public ConjugateMethod {
     bool _mix;
-    const std::vector<int> _tree;
-    std::vector<std::vector<unsigned int> > _offsets;
-    std::vector<int> _leaves;
-    bool isActiveLeaf(int index, unsigned int chain) const;
-    bool isActiveTree(int index, unsigned int chain) const;
+    const std::vector<unsigned long> _tree;
+    std::vector<std::vector<unsigned long> > _offsets;
+    std::vector<unsigned long> _leaves;
+    bool isActiveLeaf(unsigned long index, unsigned int chain) const;
+    bool isActiveTree(unsigned long index, unsigned int chain) const;
 public:
     ConjugateDirichlet(SingletonGraphView const *gv);
     void update(unsigned int chain, RNG *rng) const;

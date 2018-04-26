@@ -14,10 +14,10 @@ using std::vector;
 #define CUTPOINTS(par) (par[1])
 #define NCUT(lengths) (lengths[1])
 
-static unsigned int value(vector<double const *> const &par, unsigned int ncut)
+static unsigned long value(vector<double const *> const &par, unsigned long ncut)
 {
     double t = T(par);
-    for (unsigned int i = 0; i < ncut; ++i) {
+    for (unsigned long i = 0; i < ncut; ++i) {
 	if (t <= CUTPOINTS(par)[i])
 	    return i;
     }
@@ -37,16 +37,16 @@ bool DInterval::isDiscreteValued(vector<bool> const &mask) const
     return true;
 }
 
-bool DInterval::checkParameterLength(vector<unsigned int> const &lengths) const
+bool DInterval::checkParameterLength(vector<unsigned long> const &lengths) const
 {
     return lengths[0] == 1 && lengths[1] >= 1;
 }
 
 bool DInterval::checkParameterValue(vector<double const *> const &par,
-				    vector<unsigned int> const &lengths) 
+				    vector<unsigned long> const &lengths) 
     const
 {
-    for (unsigned int i = 1; i < NCUT(lengths); ++i) {
+    for (unsigned long i = 1; i < NCUT(lengths); ++i) {
 	if (CUTPOINTS(par)[i] <= CUTPOINTS(par)[i-1])
 	    return false;
     }
@@ -54,15 +54,15 @@ bool DInterval::checkParameterValue(vector<double const *> const &par,
 }
 
 double 
-DInterval::logDensity(double const *y, unsigned int length, PDFType type,
+DInterval::logDensity(double const *y, unsigned long length, PDFType type,
 		      vector<double const *> const &par,
-		      vector<unsigned int> const &lengths,
+		      vector<unsigned long> const &lengths,
 		      double const *lower, double const *upper) const
 {
     if (*y < 0)
 	return JAGS_NEGINF;
     
-    unsigned int x = static_cast<unsigned int>(*y);
+    unsigned long x = static_cast<unsigned long>(*y);
     if (x > NCUT(lengths)) {
 	return JAGS_NEGINF;
     }
@@ -77,9 +77,9 @@ DInterval::logDensity(double const *y, unsigned int length, PDFType type,
     }
 }
 
-void DInterval::randomSample(double  *x, unsigned int length,
+void DInterval::randomSample(double  *x, unsigned long length,
 			     vector<double const *> const &par,
-			     vector<unsigned int> const &lengths,
+			     vector<unsigned long> const &lengths,
 			     double const *lower, double const *upper,
 			     RNG *rng) const
 {
@@ -90,16 +90,16 @@ void DInterval::randomSample(double  *x, unsigned int length,
     *x = static_cast<double>(value(par, NCUT(lengths)));
 }
 
-unsigned int DInterval::df(vector<unsigned int> const &lengths) const
+unsigned long DInterval::df(vector<unsigned long> const &lengths) const
 {
     return 0;
 }
 
-void DInterval::support(double *lower, double *upper, unsigned int length,
+void DInterval::support(double *lower, double *upper, unsigned long length,
 			vector<double const *> const &par,
-			vector<unsigned int> const &lengths) const
+			vector<unsigned long> const &lengths) const
 {
-    unsigned int y = value(par, NCUT(lengths));    
+    unsigned long y = value(par, NCUT(lengths));    
     *lower = y;
     *upper = y;
 }
@@ -110,17 +110,17 @@ bool DInterval::isSupportFixed(vector<bool> const &fixmask) const
     return fixmask[0] && fixmask[1];
 }
 
-unsigned int DInterval::length(vector<unsigned int> const &params) const
+unsigned long DInterval::length(vector<unsigned long> const &params) const
 {
     return 1;
 }
 
 double DInterval::KL(vector<double const *> const &par0,
 		     vector<double const *> const &par1,
-		     vector<unsigned int> const &lengths) const
+		     vector<unsigned long> const &lengths) const
 {
-    unsigned int y0 = value(par0, NCUT(lengths));
-    unsigned int y1 = value(par1, NCUT(lengths));
+    unsigned long y0 = value(par0, NCUT(lengths));
+    unsigned long y1 = value(par1, NCUT(lengths));
     return (y0 == y1) ? 0 : JAGS_POSINF;
 }
 

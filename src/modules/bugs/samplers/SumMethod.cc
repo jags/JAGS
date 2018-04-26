@@ -39,7 +39,7 @@ namespace jags {
 		 p != x.end(); ++p)
 	    {
 		double const *v = (*p)->value(ch);
-		unsigned int n = (*p)->length();
+		unsigned long n = (*p)->length();
 		y = accumulate(v, v+n, y);
 	    }
 	    return y;
@@ -211,7 +211,7 @@ namespace jags {
 		double sumx_new = _sumchild->value(chain)[0] - alpha;
 
 		// Rescale
-		unsigned int N = _x.size();
+		unsigned long N = _x.size();
 		vector<double> xnew;
 		if (_discrete) {
 		    xnew = vector<double>(N, floor(sumx_new/N));

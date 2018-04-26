@@ -40,8 +40,8 @@ class Node {
     Node &operator=(Node const &rhs);
 
 protected:
-    std::vector<unsigned int> const &_dim;
-    const unsigned int _length;
+    std::vector<unsigned long> const &_dim;
+    const unsigned long _length;
     const unsigned int _nchain;
     double *_data;
 
@@ -51,7 +51,7 @@ public:
      * @param dim Dimension of new Node.
      * @param nchain Number of chains that the Node will contain data on.
      */
-    Node(std::vector<unsigned int> const &dim, unsigned int nchain);
+    Node(std::vector<unsigned long> const &dim, unsigned int nchain);
     /**
      * Constructs a node with parents.  Each parent must contain data on
      * the same number of chains. Subclasses of Node may give specific
@@ -62,7 +62,7 @@ public:
      * @param parents vector of parent nodes. A node may not be its own
      * parent.
      */
-    Node(std::vector<unsigned int> const &dim, unsigned int nchain,
+    Node(std::vector<unsigned long> const &dim, unsigned int nchain,
 	 std::vector<Node const *> const &parents);
     /**
      * Destructor. 
@@ -135,7 +135,7 @@ public:
      *
      * @see SArray#setValue
      */
-    void setValue(double const *value, unsigned int length, unsigned int chain);
+    void setValue(double const *value, unsigned long length, unsigned int chain);
     /**
      * Indicates whether a node is discrete-valued or not.
      * @see SArray#isDiscreteValued
@@ -149,11 +149,11 @@ public:
     /**
      * Returns the length of the value array
      */
-    unsigned int length() const;
+    unsigned long length() const;
     /**
      * Returns the dimensions of the Node
      */
-    std::vector<unsigned int> const &dim() const;
+    std::vector<unsigned long> const &dim() const;
     /**
      * Swaps the values in the given chains
      */
@@ -179,7 +179,6 @@ public:
      * details.
      */
     virtual double logDensity(unsigned int chain, PDFType type) const = 0;
-    virtual unsigned int df() const = 0;
     virtual double KL(unsigned int chain1, unsigned int chain2, RNG *rng,
 		      unsigned int nrep) const = 0;
 	

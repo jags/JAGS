@@ -33,7 +33,7 @@ public:
     /**
      * Constructs a multi-dimensional constant node 
      */
-    ConstantNode(std::vector<unsigned int> const &dim, 
+    ConstantNode(std::vector<unsigned long> const &dim, 
 		 std::vector<double> const &value,
 		 unsigned int nchain, bool observed);
     /**

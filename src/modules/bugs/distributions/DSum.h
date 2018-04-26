@@ -13,28 +13,28 @@ class DSum : public ArrayDist {
 public:
     DSum();
 
-    double logDensity(double const *x, unsigned int length, PDFType type,
+    double logDensity(double const *x, unsigned long length, PDFType type,
 		      std::vector<double const *> const &parameters,
-		      std::vector<std::vector<unsigned int> > const &dims,
+		      std::vector<std::vector<unsigned long> > const &dims,
 		      double const *lower, double const *upper) const;
-    void randomSample(double *x, unsigned int length,
+    void randomSample(double *x, unsigned long length,
 		      std::vector<double const *> const &parameters,
-		      std::vector<std::vector<unsigned int> > const &dims,
+		      std::vector<std::vector<unsigned long> > const &dims,
 		      double const *lower, double const *upper,
 		      RNG *rng) const;
     bool isSupportFixed(std::vector<bool> const &fixmask) const;
     bool isDiscreteValued(std::vector<bool> const &mask) const;
-    unsigned int df(std::vector<std::vector<unsigned int> > const &dims) const;
+    unsigned long df(std::vector<std::vector<unsigned long> > const &dims) const;
     bool checkParameterValue(std::vector<double const *> const &params,
-			     std::vector<std::vector<unsigned int> > const &dims) const;
-    bool checkParameterDim(std::vector<std::vector<unsigned int> > const &dims)
+			     std::vector<std::vector<unsigned long> > const &dims) const;
+    bool checkParameterDim(std::vector<std::vector<unsigned long> > const &dims)
 	const;
     bool checkParameterDiscrete(std::vector<bool> const &mask) const;
-    void support(double *lower, double *upper, unsigned int length,
+    void support(double *lower, double *upper, unsigned long length,
 		 std::vector<double const *> const &parameters,
-		 std::vector<std::vector<unsigned int> > const &dims) const;
-    std::vector<unsigned int> 
-	dim(std::vector <std::vector<unsigned int> > const &dims) const;
+		 std::vector<std::vector<unsigned long> > const &dims) const;
+    std::vector<unsigned long> 
+	dim(std::vector <std::vector<unsigned long> > const &dims) const;
 };
 
 }}

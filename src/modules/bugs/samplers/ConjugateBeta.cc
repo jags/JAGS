@@ -105,7 +105,7 @@ void ConjugateBeta::update(unsigned int chain, RNG *rng) const
     default:
 	throwLogicError("Invalid distribution in ConjugateBeta sampler");
     }
-    unsigned int Nchild = stoch_children.size();
+    unsigned long Nchild = stoch_children.size();
 
     /* For mixture models, we count only stochastic children that
        depend on snode */
@@ -113,7 +113,7 @@ void ConjugateBeta::update(unsigned int chain, RNG *rng) const
     bool is_mix = !_gv->deterministicChildren().empty();
     if (is_mix) {
 	C = new double[Nchild];
-	for (unsigned int i = 0; i < Nchild; ++i) {
+	for (unsigned long i = 0; i < Nchild; ++i) {
 	    C[i] = *stoch_children[i]->parents()[0]->value(chain);
 	}
 	// Perturb current value, keeping in the legal range [0,1]
@@ -122,7 +122,7 @@ void ConjugateBeta::update(unsigned int chain, RNG *rng) const
 	_gv->setValue(&x, 1, chain);
 	// C[i] == 1 if parameter of child i has changed (so depends on snode)
 	// C[i] == 0 otherwise
-	for (unsigned int i = 0; i < Nchild; ++i) {
+	for (unsigned long i = 0; i < Nchild; ++i) {
 	    C[i] = (*stoch_children[i]->parents()[0]->value(chain) != C[i]);
 	}
     }

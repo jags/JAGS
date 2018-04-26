@@ -18,15 +18,15 @@ namespace bugs {
     }
 
     void Sort::evaluate (double *value, vector <double const *> const &args,
-			 vector<unsigned int> const &lengths) const
+			 vector<unsigned long> const &lengths) const
     {
-	for (unsigned int i = 0; i < lengths[0]; ++i) {
+	for (unsigned long i = 0; i < lengths[0]; ++i) {
 	    value[i] = args[0][i];
 	}
 	sort(value, value + lengths[0]);
     }
 
-    unsigned int Sort::length (vector<unsigned int> const &parlengths,
+    unsigned long Sort::length (vector<unsigned long> const &parlengths,
 			       vector<double const *> const &parvalues) const
     {
 	return parlengths[0];

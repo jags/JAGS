@@ -30,7 +30,7 @@ namespace base {
 	return _values[chain];
     }
 
-    vector<unsigned int> TraceMonitor::dim() const
+    vector<unsigned long> TraceMonitor::dim() const
     {
 	return _subset.dim();
     }

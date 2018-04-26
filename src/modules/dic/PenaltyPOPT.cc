@@ -13,7 +13,7 @@ namespace dic {
 
 
 	PenaltyPOPT::PenaltyPOPT(vector<Node const *> const &nodes,
-			 vector<unsigned int> const &dim, 
+			 vector<unsigned long> const &dim, 
 			 string const &monitor_name,
 			 vector<RNG *> const &rngs,
 			 unsigned int nrep)

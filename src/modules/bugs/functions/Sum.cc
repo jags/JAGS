@@ -12,11 +12,11 @@ namespace bugs {
     }
 
     double Sum::scalarEval(vector <double const *> const &args,
-			   vector<unsigned int> const &lengths) const
+			   vector<unsigned long> const &lengths) const
     {
 	double value = 0;
-	for (unsigned int j = 0; j < args.size(); ++j) {
-	    for (unsigned int i = 0; i < lengths[j]; ++i) {
+	for (unsigned long j = 0; j < args.size(); ++j) {
+	    for (unsigned long i = 0; i < lengths[j]; ++i) {
 		value += args[j][i];
 	    }
 	}
@@ -33,7 +33,7 @@ namespace bugs {
     {
 	//Only one argument may be additive. 
 	bool found = false;
-	for (unsigned int i = 0; i < mask.size(); ++i) {
+	for (unsigned long i = 0; i < mask.size(); ++i) {
 	    if (mask[i]) {
 		if (found) return false;
 		else found = true;

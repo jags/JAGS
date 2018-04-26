@@ -15,8 +15,8 @@ class DiscreteDSum : public RWDSum
 {
 public:
     DiscreteDSum(GraphView const *gv, unsigned int chain);
-    void step(std::vector<double> &value, unsigned int nrow,
-	      unsigned int ncol, double s, RNG *rng) const;
+    void step(std::vector<double> &value, unsigned long nrow,
+	      unsigned long ncol, double s, RNG *rng) const;
 };
 
 }}

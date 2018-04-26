@@ -57,7 +57,7 @@ public:
      * Returns the dimension of a single monitored value, which may
      * be replicated over chains and over iterations
      */
-    virtual std::vector<unsigned int> dim() const = 0;
+    virtual std::vector<unsigned long> dim() const = 0;
     /**
      * The vector of monitored values for the given chain
      */

@@ -4,6 +4,7 @@
 
 #include <rng/RNG.h>
 #include <module/ModuleError.h>
+#include <util/integer.h>
 
 #include <vector>
 #include <cmath>
@@ -43,8 +44,8 @@ namespace jags {
 
 	//FIXME We would not need this if we could call
 	//bugs::DWish::sampleWishart
-	void sampleWishart(double *X, int length,
-			   double const *R, double df, int nrow,
+	void sampleWishart(double *X, unsigned long length,
+			   double const *R, double df, unsigned long nrow,
 			   RNG *rng)
 	{
 	    if (df <= nrow) {
@@ -71,11 +72,12 @@ namespace jags {
 	    */
 	    vector<double> C(length);
 	    copy(R, R + length, C.rbegin());
-	    F77_DPOTRF("L", &nrow, &C[0], &nrow, &info);
+	    int ni = asInteger(nrow);
+	    F77_DPOTRF("L", &ni, &C[0], &ni, &info);
 	    if (info != 0) {
 		throwRuntimeError("Failed to get Cholesky decomposition of R");
 	    }
-	    F77_DTRTRI("L", "N", &nrow, &C[0], &nrow, &info);
+	    F77_DTRTRI("L", "N", &ni, &C[0], &ni, &info);
 	    if (info != 0) {
 		throwRuntimeError("Failed to invert Cholesky decomposition of R");
 	    }
@@ -87,30 +89,30 @@ namespace jags {
 	       - lower off-diagonal elements are zero
 	    */
 	    vector<double> Z(length);
-	    for (int j = 0; j < nrow; j++) {
+	    for (unsigned long j = 0; j < nrow; j++) {
 		double *Z_j = &Z[j*nrow]; //jth column of Z
-		for (int i = 0; i < j; i++) {
+		for (unsigned long i = 0; i < j; i++) {
 		    Z_j[i] = rnorm(0, 1, rng);
 		}
 		Z_j[j] = sqrt(rchisq(df - j, rng));    
-		for (int i = j + 1; i < nrow; i++) {
+		for (unsigned long i = j + 1; i < nrow; i++) {
 		    Z_j[i] = 0;
 		}
 	    }
 
 	    // Z = Z %*% C 
 	    double one = 1;
-	    F77_DTRMM("R", "U", "N", "N", &nrow, &nrow, &one, &C[0], &nrow,
-		      &Z[0], &nrow);
+	    
+	    F77_DTRMM("R", "U", "N", "N", &ni, &ni, &one, &C[0], &ni,
+		      &Z[0], &ni);
 
 	    // X = t(Z) %*% Z
 	    double zero = 0;
-	    F77_DSYRK("U", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, X,
-		      &nrow);
+	    F77_DSYRK("U", "T", &ni, &ni, &one, &Z[0], &ni, &zero, X, &ni);
 
 	    // Copy upper triangle of X to lower triangle
-	    for (int i = 0; i < nrow; ++i) {
-		for (int j = 0; j < i; ++j) {
+	    for (unsigned long i = 0; i < nrow; ++i) {
+		for (unsigned long j = 0; j < i; ++j) {
 		    X[j * nrow + i] = X[i * nrow + j];
 		}
 	    }

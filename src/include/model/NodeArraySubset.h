@@ -16,10 +16,10 @@ namespace jags {
      * 
      */
     class NodeArraySubset {
-	std::vector<unsigned int> _dim;
+	std::vector<unsigned long> _dim;
 	unsigned int _nchain;
 	std::vector<Node *> _node_pointers;
-	std::vector<unsigned int> _offsets;
+	std::vector<unsigned long> _offsets;
       public:
 	/**
 	 * Constructor. Creates a NodeArraySubset from a NodeArray
@@ -36,7 +36,7 @@ namespace jags {
 	/**
 	 * Returns the dimension of the subset
 	 */
-	std::vector<unsigned int> const &dim() const;
+	std::vector<unsigned long> const &dim() const;
 	/**
 	 * Returns a vector containing the nodes that contribute
 	 * values to the NodeArraySubset. Repeated values are removed.
@@ -54,7 +54,7 @@ namespace jags {
 	/**
 	 * Returns the number of values in the subset
 	 */
-	unsigned int length() const;
+	unsigned long length() const;
     };
     
 } /* namespace jags */

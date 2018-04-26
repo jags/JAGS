@@ -15,9 +15,9 @@ namespace dic {
 	std::vector<Node const *> const _nodes;
 	std::vector<RNG *> _rngs;
 	unsigned int _nrep;
-	unsigned int _nchain;
+	unsigned long _nchain;
 	std::vector<double> _values;
-	std::vector<unsigned int> const _dim;
+	std::vector<unsigned long> const _dim;
 	double _scale_cst;
 
 	// Protected constructor for use by PenaltyPOPTTotal:
@@ -33,7 +33,7 @@ namespace dic {
 		  unsigned int nrep);
 
 	~PenaltyPDTotal();
-	std::vector<unsigned int> dim() const;
+	std::vector<unsigned long> dim() const;
 	std::vector<double> const &value(unsigned int chain) const;
 	bool poolChains() const;
 	bool poolIterations() const;

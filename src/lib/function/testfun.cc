@@ -48,11 +48,11 @@ class BoolIterator : public std::vector<bool>
 {
 public:
     bool atEnd;
-    BoolIterator(unsigned int n) : vector<bool>(n, false), atEnd(false) {};
+    BoolIterator(unsigned long n) : vector<bool>(n, false), atEnd(false) {};
 
     void next() {
 	bool bump = true;
-	for (unsigned int i = 0; i < size(); ++i) {
+	for (unsigned long i = 0; i < size(); ++i) {
 	    if (bump) {
 		bool x = operator[](i); //current value
 		bump = x;
@@ -65,7 +65,7 @@ public:
     
 };
 
-bool isdiscrete(Function const *f, unsigned int npar,
+bool isdiscrete(Function const *f, unsigned long npar,
 		bool (*predicate) (vector<bool> const &))
 {
     CPPUNIT_ASSERT(checkNPar(f, npar));
@@ -84,7 +84,7 @@ bool never(vector<bool> const &mask) { return false; }
 bool all(vector<bool> const &mask) { return allTrue(mask); }
 bool any(vector<bool> const &mask) { return anyTrue(mask); }
 
-bool neveradditive(Function const *f, unsigned int npar)
+bool neveradditive(Function const *f, unsigned long npar)
 {
     CPPUNIT_ASSERT_MESSAGE(f->name(), checkNPar(f, npar));
 
@@ -97,7 +97,7 @@ bool neveradditive(Function const *f, unsigned int npar)
     return true;
 }
 
-bool neverlinear(Function const *f, unsigned int npar)
+bool neverlinear(Function const *f, unsigned long npar)
 {
     CPPUNIT_ASSERT_MESSAGE(f->name(), checkNPar(f, npar));
 
@@ -110,7 +110,7 @@ bool neverlinear(Function const *f, unsigned int npar)
     return true;
 }
 
-bool neverscale(Function const *f, unsigned int npar)
+bool neverscale(Function const *f, unsigned long npar)
 {
     CPPUNIT_ASSERT_MESSAGE(f->name(), checkNPar(f, npar));
 
@@ -123,7 +123,7 @@ bool neverscale(Function const *f, unsigned int npar)
     return true;
 }
 
-bool neverpow(Function const *f, unsigned int npar)
+bool neverpow(Function const *f, unsigned long npar)
 {
     CPPUNIT_ASSERT_MESSAGE(f->name(), checkNPar(f, npar));
 
@@ -136,7 +136,7 @@ bool neverpow(Function const *f, unsigned int npar)
     return true;
 }
 
-bool neverclosed(Function const *f, unsigned int npar)
+bool neverclosed(Function const *f, unsigned long npar)
 {
     return neverscale(f, npar) && neverlinear(f, npar) &&
 	neverpow(f, npar) && neveradditive(f, npar);
@@ -190,7 +190,7 @@ static vector<bool> discreteMask(vector<double const *> const &args)
 {
     vector<bool> out(args.size(), true);
     
-    for (unsigned int i = 0; i < args.size(); ++i) {
+    for (unsigned long i = 0; i < args.size(); ++i) {
 	double v = *args[i];
 	if (v != floor(v + 0.5)) {
 	    out[i] = false;
@@ -281,13 +281,13 @@ bool checkargs(ScalarFunction const *f, double x, double y, double z)
 }
 
 static vector<bool> discreteMask(vector<double const *> const &args,
-				 vector<unsigned int> const &arglen)
+				 vector<unsigned long> const &arglen)
 {
     vector<bool> out(args.size(), true);
     
-    for (unsigned int i = 0; i < args.size(); ++i) {
+    for (unsigned long i = 0; i < args.size(); ++i) {
 	double const *v = args[i];
-	for (unsigned int j = 0; j < arglen[i]; ++j) {
+	for (unsigned long j = 0; j < arglen[i]; ++j) {
 	    if (v[j] != floor(v[j] + 0.5)) {
 		out[i] = false;
 		break;
@@ -300,7 +300,7 @@ static vector<bool> discreteMask(vector<double const *> const &args,
 			   
 static bool checkVArgs(VectorFunction const *f,
 		       vector<double const *> const &args,
-		       vector<unsigned int> const &arglen)
+		       vector<unsigned long> const &arglen)
 {
     return args.size() == arglen.size() &&
 	checkNPar(f, args.size()) &&
@@ -311,7 +311,7 @@ static bool checkVArgs(VectorFunction const *f,
 
 static vector<double> checkVEval(VectorFunction const *f,
 				 vector<double const *> const &args,
-				 vector<unsigned int> const &arglen)
+				 vector<unsigned long> const &arglen)
 {
     // Evaluate vector function with checks
     CPPUNIT_ASSERT_MESSAGE(string("Valid arguments for ") + f->name(),
@@ -326,11 +326,12 @@ static vector<double> checkVEval(VectorFunction const *f,
 static vector<double const *> mkArgs(vector<double> const &x)
 {
     return vector<double const *>(1, &x[0]);
+    vector<unsigned long> arglen(1, x.size());
 }
 
-static vector<unsigned int> mkLens(vector<double> const &x)
+static vector<unsigned long> mkLens(vector<double> const &x)
 {
-    return vector<unsigned int>(1, x.size());
+    return vector<unsigned long>(1, x.size());
 }
 
 vector<double> veval(VectorFunction const *f, vector<double> const &x)
@@ -355,10 +356,10 @@ mkArgs(vector<double> const &x, vector<double> const &y)
     return arg;
 }
 
-static vector<unsigned int>
+static vector<unsigned long>
 mkLens(vector<double> const &x, vector<double> const &y)
 {
-    vector<unsigned int> arglen(2);
+    vector<unsigned long> arglen(2);
     arglen[0] = x.size();
     arglen[1] = y.size();
     return arglen;
@@ -388,11 +389,11 @@ static vector<double const *> mkArgs(vector<double> const &x,
     return arg;
 }
 
-static vector<unsigned int> mkLens(vector<double> const &x,
+static vector<unsigned long> mkLens(vector<double> const &x,
 				   vector<double> const &y,
 				   vector<double> const &z)
 {
-    vector<unsigned int> arglen(3);
+    vector<unsigned long> arglen(3);
     arglen[0] = x.size();
     arglen[1] = y.size();
     arglen[2] = z.size();
@@ -424,12 +425,12 @@ static vector<double const *> mkArgs(vector<double> const &x,
     return arg;
 }
 
-static vector<unsigned int> mkLens(vector<double> const &x,
+static vector<unsigned long> mkLens(vector<double> const &x,
 				   vector<double> const &y,
 				   vector<double> const &z,
 				   vector<double> const &w)
 {
-    vector<unsigned int> arglen(4);
+    vector<unsigned long> arglen(4);
     arglen[0] = x.size();
     arglen[1] = y.size();
     arglen[2] = z.size();

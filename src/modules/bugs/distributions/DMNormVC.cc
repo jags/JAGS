@@ -25,9 +25,9 @@ namespace jags {
 	{}
 
 	double
-	DMNormVC::logDensity(double const *x, unsigned int m, PDFType type,
+	DMNormVC::logDensity(double const *x, unsigned long m, PDFType type,
 			     vector<double const *> const &parameters,
-			     vector<vector<unsigned int> > const &dims,
+			     vector<vector<unsigned long> > const &dims,
 			     double const *lower, double const *upper) const
 	{
 	    double const * mu = parameters[0];
@@ -38,10 +38,10 @@ namespace jags {
 
 	    double loglik = 0;
 	    vector<double> delta(m);
-	    for (unsigned int i = 0; i < m; ++i) {
+	    for (unsigned long i = 0; i < m; ++i) {
 		delta[i] = x[i] - mu[i];
 		loglik -= (delta[i] * T[i + i * m] * delta[i])/2;
-		for (unsigned int j = 0; j < i; ++j) {
+		for (unsigned long j = 0; j < i; ++j) {
 		    loglik -= delta[i] * T[i + j * m] * delta[j];
 		}
 	    }
@@ -61,9 +61,9 @@ namespace jags {
 	}
 
 	void
-	DMNormVC::randomSample(double *x, unsigned int m,
+	DMNormVC::randomSample(double *x, unsigned long m,
 			       vector<double const *> const &parameters,
-			       vector<vector<unsigned int> > const &dims,
+			       vector<vector<unsigned long> > const &dims,
 			       double const *lower, double const *upper,
 			       RNG *rng) const
 	{
@@ -74,7 +74,7 @@ namespace jags {
 	}
 
 	bool
-	DMNormVC::checkParameterDim(vector<vector<unsigned int> > const &dims)
+	DMNormVC::checkParameterDim(vector<vector<unsigned long> > const &dims)
 	    const
 	{
 	    //Allow scalar mean and precision. 
@@ -88,19 +88,19 @@ namespace jags {
 	    return true;
 	}
 
-	vector<unsigned int>
-	DMNormVC::dim(vector<vector<unsigned int> > const &dims) const
+	vector<unsigned long>
+	DMNormVC::dim(vector<vector<unsigned long> > const &dims) const
 	{
 	    return dims[0];
 	}
 	
 	bool
 	DMNormVC::checkParameterValue(vector<double const *> const &parameters,
-				      vector<vector<unsigned int> > const &dims)
+				      vector<vector<unsigned long> > const &dims)
 	    const
 	{
 	    double const *precision = parameters[1];
-	    unsigned int n = dims[0][0];
+	    unsigned long n = dims[0][0];
 
 	    return check_symmetry(precision, n) &&
 		check_symmetric_ispd(precision, n);
@@ -108,23 +108,23 @@ namespace jags {
 
 
 	void
-	DMNormVC::support(double *lower, double *upper, unsigned int length,
+	DMNormVC::support(double *lower, double *upper, unsigned long length,
 			  vector<double const *> const &parameters,
-			  vector<vector<unsigned int> > const &dims) const
+			  vector<vector<unsigned long> > const &dims) const
 	{
-	    for (unsigned int i = 0; i < length; ++i) {
+	    for (unsigned long i = 0; i < length; ++i) {
 		lower[i] = JAGS_NEGINF;
 		upper[i] = JAGS_POSINF;
 	    }
 	}
 
 	void
-	DMNormVC::typicalValue(double *x, unsigned int m,
+	DMNormVC::typicalValue(double *x, unsigned long m,
 			       vector<double const *> const &parameters,
-			       vector<vector<unsigned int> > const &dims,
+			       vector<vector<unsigned long> > const &dims,
 			       double const *lower, double const *upper) const
 	{
-	    for (unsigned int i = 0; i < m; ++i) {
+	    for (unsigned long i = 0; i < m; ++i) {
 		x[i] = parameters[0][i];
 	    }
 	}

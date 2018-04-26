@@ -15,18 +15,18 @@ namespace bugs {
     }
 
     double DIntervalFunc::scalarEval(vector<double const *> const &args,
-				     vector<unsigned int> const &lengths) const
+				     vector<unsigned long> const &lengths) const
     {
-	unsigned int ncut = lengths[1];
+	unsigned long ncut = lengths[1];
 	double t = T(args);
-	for (unsigned int i = 0; i < ncut; ++i) {
+	for (unsigned long i = 0; i < ncut; ++i) {
 	    if (t <= CUTPOINTS(args)[i])
 		return i;
 	}
 	return ncut;
     }
     
-    bool DIntervalFunc::checkParameterLength (vector<unsigned int> const &args)
+    bool DIntervalFunc::checkParameterLength (vector<unsigned long> const &args)
 	const
     {
 	return args[0] == 1 && args[1] >= 1;

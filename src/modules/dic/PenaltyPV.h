@@ -14,7 +14,7 @@ namespace dic {
 		double _mean;
 		double _mm;
 		std::vector<double> _pv;
-		std::vector<unsigned int> _dim;
+		std::vector<unsigned long> _dim;
 		unsigned int const _nchain;
 		unsigned int _n;
    	  public:
@@ -22,7 +22,7 @@ namespace dic {
 		      std::string const &monitor_name);
    	    void update();
    	    std::vector<double> const &value(unsigned int chain) const;
-   	    std::vector<unsigned int> dim() const;
+   	    std::vector<unsigned long> dim() const;
    	    bool poolChains() const;
    	    bool poolIterations() const;
    	};

@@ -21,9 +21,9 @@ DMT::DMT()
   : ArrayDist("dmt", 3) 
 {}
 
-double DMT::logDensity(double const *x, unsigned int m, PDFType type,
+double DMT::logDensity(double const *x, unsigned long m, PDFType type,
 		       vector<double const *> const &parameters,
-		       vector<vector<unsigned int> > const &dims,
+		       vector<vector<unsigned long> > const &dims,
 		       double const *lower, double const *upper) const
 {
     double const * mu = parameters[0];
@@ -33,11 +33,11 @@ double DMT::logDensity(double const *x, unsigned int m, PDFType type,
     /* Calculate inner product ip = t(x - mu) %*% T %*% (x - mu) */
     double ip = 0;
     double * delta = new double[m];
-    for (unsigned int i = 0; i < m; ++i) {
+    for (unsigned long i = 0; i < m; ++i) {
 	delta[i] = x[i] - mu[i];
 	double const *Ti = T + i*m;
 	ip += (delta[i] * Ti[i] * delta[i]);
-	for (unsigned int j = 0; j < i; ++j) {
+	for (unsigned long j = 0; j < i; ++j) {
 	    ip += 2 * delta[i] * Ti[j] * delta[j];
 	}
     }
@@ -55,9 +55,9 @@ double DMT::logDensity(double const *x, unsigned int m, PDFType type,
     }
 }
 
-void DMT::randomSample(double *x, unsigned int length,
+void DMT::randomSample(double *x, unsigned long length,
 		       vector<double const *> const &parameters,
-		       vector<vector<unsigned int> > const &dims,
+		       vector<vector<unsigned long> > const &dims,
 		       double const *lower, double const *upper, RNG *rng) const
 {
 
@@ -67,12 +67,12 @@ void DMT::randomSample(double *x, unsigned int length,
 
     DMNorm::randomsample(x, mu, T, true, length, rng);
     double C = sqrt(rchisq(k, rng)/k);
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	x[i] = mu[i] + (x[i] - mu[i]) / C;
     }
 }
 
-bool DMT::checkParameterDim(vector<vector<unsigned int> > const &dims) const
+bool DMT::checkParameterDim(vector<vector<unsigned long> > const &dims) const
 {
   if (!isVector(dims[0]))
     return false;
@@ -85,16 +85,16 @@ bool DMT::checkParameterDim(vector<vector<unsigned int> > const &dims) const
   return true;
 }
 
-vector<unsigned int> DMT::dim(vector<vector<unsigned int> > const &dims) const
+vector<unsigned long> DMT::dim(vector<vector<unsigned long> > const &dims) const
 {
     return dims[0];
 }
 
 bool
 DMT::checkParameterValue(vector<double const *> const &parameters,
-			    vector<vector<unsigned int> > const &dims) const
+			    vector<vector<unsigned long> > const &dims) const
 {
-    unsigned int n = dims[0][0];
+    unsigned long n = dims[0][0];
     double const *T = parameters[1];
     double k = *parameters[2];
 
@@ -108,11 +108,11 @@ DMT::checkParameterValue(vector<double const *> const &parameters,
 }
 
 
-void DMT::support(double *lower, double *upper, unsigned int length,
+void DMT::support(double *lower, double *upper, unsigned long length,
 		     vector<double const *> const &parameters,
-		     vector<vector<unsigned int> > const &dims) const
+		     vector<vector<unsigned long> > const &dims) const
 {
-    for (unsigned int i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < length; ++i) {
 	lower[i] = JAGS_NEGINF;
 	upper[i] = JAGS_POSINF;
     }

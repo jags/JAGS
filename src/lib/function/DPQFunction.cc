@@ -19,7 +19,7 @@ namespace jags {
     bool DPQFunction::checkArgs(vector<double const *> const &args) const
     {
 	vector<double const *> param(_dist->npar());
-	for (unsigned int i = 0; i < param.size(); ++i) {
+	for (unsigned long i = 0; i < param.size(); ++i) {
 	    param[i] = args[i+1];
 	}
 	

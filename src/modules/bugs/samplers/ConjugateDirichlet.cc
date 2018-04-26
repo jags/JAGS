@@ -15,6 +15,7 @@
 #include <cmath>
 #include <algorithm>
 #include <map>
+#include <climits>
 
 #include <JRmath.h>
 
@@ -80,7 +81,7 @@ namespace jags {
 	//offsets in ascending order
 
 	vector<Node const *> const &par = anode->parents();
-	vector<unsigned int> const &off = anode->offsets();
+	vector<unsigned long> const &off = anode->offsets();
 
 	unsigned int j = 0;
 	for (unsigned int i = 0; i < par.size(); ++i) {
@@ -105,8 +106,8 @@ namespace jags {
 	vector<Node const *> const &par = mnode->parents();
 	    
 	//Check indices
-	unsigned int nindex = mnode->index_size();
-	for (unsigned int i = 0; i < nindex; ++i) {
+	unsigned long nindex = mnode->index_size();
+	for (unsigned long i = 0; i < nindex; ++i) {
 	    if (nodeset.count(par[i])) return false;
 	}
 	    
@@ -133,7 +134,7 @@ namespace jags {
 	return false;
     }
 
-    vector<int> makeTree(SingletonGraphView const *gv)
+    vector<unsigned long> makeTree(SingletonGraphView const *gv)
     {
 	/* 
 	   If canSample is true then the nodes in the GraphView gv
@@ -144,7 +145,7 @@ namespace jags {
 	   0 < j < i means that the unique parent of deterministic
 	   node "i" in the GraphView is deterministic node "j".  If
 	   the unique parent is the sampled node then we denote this
-	   by "tree[i] = -1".
+	   by "tree[i] = ULONG_MAX".
 
 	   This static function is called by the constructor, and the
 	   result is stored in the variable _tree;
@@ -152,7 +153,7 @@ namespace jags {
 	vector<DeterministicNode*> const &dchild = gv->deterministicChildren();
 	StochasticNode *snode = gv->node();
 
-	vector<int> tree(dchild.size(), -1);
+	vector<unsigned long> tree(dchild.size(), ULONG_MAX);
 	    
 	set<Node const *> nodeset;
 	nodeset.insert(snode);
@@ -169,7 +170,7 @@ namespace jags {
 			break;
 		    }
 		}
-		if (tree[j] == -1) {
+		if (tree[j] == ULONG_MAX) {
 		    throwLogicError("Invalid tree in ConjugateDirichlet");
 		}
 	    }
@@ -179,30 +180,30 @@ namespace jags {
 	return tree;
     }
 
-    vector<vector<unsigned int> > makeOffsets(SingletonGraphView const *gv,
-					      vector<int> const &tree)
+    vector<vector<unsigned long> > makeOffsets(SingletonGraphView const *gv,
+				       vector<unsigned long> const &tree)
     {
 	vector<DeterministicNode *> const &dchild = gv->deterministicChildren();
-	vector<vector<unsigned int> > offsets(dchild.size());
+	vector<vector<unsigned long> > offsets(dchild.size());
 	StochasticNode const *snode = gv->node();
 
 	for (unsigned int i = 0; i < dchild.size(); ++i) {
 	
-	    int j = tree[i]; //index of parent in dchild
+	    unsigned long j = tree[i]; //index of parent in dchild
 	    
 	    if (isMixture(dchild[i])) {
-		if (j != -1) offsets[i] = offsets[j];
+		if (j != ULONG_MAX) offsets[i] = offsets[j];
 	    }
 	    else if (AggNode const *a = dynamic_cast<AggNode const*>(dchild[i]))
 	    {
 		vector<Node const *> const &par_i = a->parents();
-		vector<unsigned int> const &off_i = a->offsets();
+		vector<unsigned long> const &off_i = a->offsets();
 		
-		Node const *target = (j == -1) ? 
+		Node const *target = (j == ULONG_MAX) ? 
 		    static_cast<Node const *>(snode) : 
 		    static_cast<Node const *>(dchild[j]);
 		
-		if (j == -1 || offsets[j].empty()) {
+		if (j == ULONG_MAX || offsets[j].empty()) {
 		    for (unsigned int k = 0; k < par_i.size(); ++k) {
 			if (par_i[k] == target) {
 			    offsets[i].push_back(k);
@@ -326,22 +327,22 @@ namespace jags {
 	ConjugateDirichlet::ConjugateDirichlet(SingletonGraphView const *gv)
 	    : ConjugateMethod(gv), _mix(isMix(gv)), _tree(makeTree(gv)),
 	      _offsets(gv->stochasticChildren().size()),
-	      _leaves(gv->stochasticChildren().size(), -1)
+	      _leaves(gv->stochasticChildren().size(), ULONG_MAX)
 	{
-	    vector<vector<unsigned int> > offsets = makeOffsets(gv, _tree);
+	    vector<vector<unsigned long> > offsets = makeOffsets(gv, _tree);
 	    
 	    //Create a map from stochastic children onto their indices
 	    vector<StochasticNode *> const &schild =
 		gv->stochasticChildren();
 
-	    map<StochasticNode const *, int> smap;
-	    for (unsigned int s = 0; s < schild.size(); ++s) {
-		smap.insert(pair<StochasticNode const*, int>(schild[s], s));
+	    map<StochasticNode const *, unsigned long> smap;
+	    for (unsigned long s = 0; s < schild.size(); ++s) {
+		smap.insert(pair<StochasticNode const*, unsigned long>(schild[s], s));
 	    }
 
 	    vector<DeterministicNode *> const &dchild = 
 		gv->deterministicChildren();
-	    for (unsigned int d = 0; d < dchild.size(); ++d) {
+	    for (unsigned long d = 0; d < dchild.size(); ++d) {
 	
 		list<StochasticNode *> const *dc = 
 		    dchild[d]->stochasticChildren();
@@ -349,7 +350,7 @@ namespace jags {
 		for (list<StochasticNode *>::const_iterator q = dc->begin(); 
 		     q != dc->end(); ++q) 
 		{
-		    map<StochasticNode const *,int>::iterator r = smap.find(*q);
+		    map<StochasticNode const *, unsigned long >::iterator r = smap.find(*q);
 		    if (r != smap.end()) {
 			_leaves[r->second] = d;
 			_offsets[r->second] = offsets[d];
@@ -360,13 +361,15 @@ namespace jags {
 	    }
 	}
 
-	bool ConjugateDirichlet::isActiveLeaf(int i, unsigned int chain) const
+	bool ConjugateDirichlet::isActiveLeaf(unsigned long i,
+					      unsigned int chain) const
 	{
 	    if (!_mix) return true;
 	    return isActiveTree(_leaves[i], chain);
 	}
 	
-	bool ConjugateDirichlet::isActiveTree(int i, unsigned int chain) const 
+	bool ConjugateDirichlet::isActiveTree(unsigned long i,
+					      unsigned int chain) const 
 	{
 	    /*
 	      Returns true if there is an active path from the sampled
@@ -375,7 +378,7 @@ namespace jags {
 	      set to another mixture component.
 	    */
 
-	    if (i == -1) {
+	    if (i == ULONG_MAX) {
 		return true; //We have reached the sampled node
 	    }
 
@@ -383,7 +386,7 @@ namespace jags {
 		_gv->deterministicChildren();
     
 	    if (MixtureNode const *m = asMixture(dchild[i])) {
-		if (_tree[i] == -1) {
+		if (_tree[i] == ULONG_MAX) {
 		    if (m->activeParent(chain) != _gv->node())
 			return false;
 		}
@@ -399,7 +402,7 @@ namespace jags {
 void ConjugateDirichlet::update(unsigned int chain, RNG *rng) const
 {
     StochasticNode *snode = _gv->node();
-    unsigned int size = snode->length();
+    unsigned long size = snode->length();
     double *alpha = new double[size];
     double *xnew = new double[size];
 
@@ -482,8 +485,8 @@ void ConjugateDirichlet::update(unsigned int chain, RNG *rng) const
 
 	vector<DeterministicNode*> const &dchild = _gv->deterministicChildren();
 	vector<bool> modified(dchild.size(), false);
-	for (unsigned int d = 0; d < dchild.size(); ++d) {
-	    if (_tree[d] == -1) {
+	for (unsigned long d = 0; d < dchild.size(); ++d) {
+	    if (_tree[d] == ULONG_MAX) {
 		MixtureNode *m = dynamic_cast<MixtureNode*>(dchild[d]);
 		if (m == 0 || m->activeParent(chain) == snode) {
 		    dchild[d]->deterministicSample(chain);

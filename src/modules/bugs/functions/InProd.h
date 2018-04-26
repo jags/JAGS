@@ -19,8 +19,8 @@ namespace bugs {
     public:
 	InProd ();
 	double scalarEval(std::vector <double const *> const &args,
-			  std::vector<unsigned int> const &lengths) const;
-	bool checkParameterLength (std::vector<unsigned int> const &len) const;
+			  std::vector<unsigned long> const &lengths) const;
+	bool checkParameterLength (std::vector<unsigned long> const &len) const;
 	bool isDiscreteValued(std::vector<bool> const &mask) const;
 	bool isScale(std::vector<bool> const &mask,
 		     std::vector<bool> const &fix) const;

@@ -35,11 +35,11 @@ namespace jags {
 */
 
 static vector<Node const *> sub_parents(vector<Node const *> const &parents, 
-					vector<unsigned int> const &offsets)
+					vector<unsigned long> const &offsets)
 {
     // Substitute parent nodes that are themselves AggNodes
     vector<Node const *> newparents(parents);
-    for (unsigned int i = 0; i < parents.size(); i++) {
+    for (unsigned long i = 0; i < parents.size(); i++) {
 	AggNode const *aggpar = dynamic_cast<AggNode const *>(parents[i]);
 	if (aggpar) {
 	    newparents[i] = aggpar->parents()[offsets[i]];
@@ -48,13 +48,13 @@ static vector<Node const *> sub_parents(vector<Node const *> const &parents,
     return newparents;
 }
 
-static vector<unsigned int> sub_offsets(vector<Node const *> const &parents, 
-					vector<unsigned int> const &offsets)
+static vector<unsigned long> sub_offsets(vector<Node const *> const &parents, 
+					vector<unsigned long> const &offsets)
 {
     // Substitute offsets for parents that are themselves AggNodes
 
-    vector<unsigned int> newoffsets(offsets);
-    for (unsigned int i = 0; i < offsets.size(); i++) {
+    vector<unsigned long> newoffsets(offsets);
+    for (unsigned long i = 0; i < offsets.size(); i++) {
 	AggNode const *aggpar = dynamic_cast<AggNode const *>(parents[i]);
 	if (aggpar) {
 	    newoffsets[i] = aggpar->offsets()[offsets[i]];
@@ -63,10 +63,10 @@ static vector<unsigned int> sub_offsets(vector<Node const *> const &parents,
     return newoffsets;
 }
 
-AggNode::AggNode(vector<unsigned int> const &dim,
+AggNode::AggNode(vector<unsigned long> const &dim,
 		 unsigned int nchain,
 		 vector<Node const *> const &parents,
-                 vector<unsigned int> const &offsets)
+                 vector<unsigned long> const &offsets)
     : DeterministicNode(dim, nchain, sub_parents(parents, offsets)), 
       _offsets(sub_offsets(parents, offsets)),
       _parent_values(_length * nchain), _discrete(true)
@@ -83,20 +83,20 @@ AggNode::AggNode(vector<unsigned int> const &dim,
     vector<Node const *> const &par = this->parents();
 
     // Check that offsets are valid
-    for (unsigned int i = 0; i < _length; i++) {
+    for (unsigned long i = 0; i < _length; i++) {
 	if (_offsets[i] >= par[i]->length())
 	    throw out_of_range("Invalid offset in Aggregate Node constructor");
     }
   
     // Setup parent values
     for (unsigned int ch = 0; ch < _nchain; ++ch) {
-	for (unsigned int i = 0; i < _length; ++i) {
+	for (unsigned long i = 0; i < _length; ++i) {
 	    _parent_values[i + ch * _length] = par[i]->value(ch) + _offsets[i];
 	}
     }
 
     // Check discreteness
-    for (unsigned int i = 0; i < par.size(); ++i) {
+    for (unsigned long i = 0; i < par.size(); ++i) {
 	if (!par[i]->isDiscreteValued()) {
 	    _discrete = false;
 	    break;
@@ -118,15 +118,10 @@ AggNode::~AggNode()
 
 void AggNode::deterministicSample(unsigned int chain)
 {
-    unsigned int N = _length * chain;
-    for (unsigned int i = 0; i < _length; ++i) {
+    unsigned long N = _length * chain;
+    for (unsigned long i = 0; i < _length; ++i) {
 	_data[i + N] = *_parent_values[i + N];
     }
-}
-
-AggNode const *asAggregate(Node *node)
-{
-  return dynamic_cast<AggNode const*>(node);
 }
 
 /*
@@ -202,7 +197,6 @@ bool AggNode::isClosed(set<Node const *> const &ancestors,
 	break;
     case DNODE_POWER:
 	return false;
-	break;
     }
     return true;
 }
@@ -231,7 +225,7 @@ bool AggNode::isDiscreteValued() const
   return _discrete;
 }
 
-vector<unsigned int> const &AggNode::offsets() const
+vector<unsigned long> const &AggNode::offsets() const
 {
     return _offsets;
 }

@@ -1,4 +1,7 @@
 #include <config.h>
+
+#include <util/integer.h>
+
 #include <stdexcept>
 #include <cmath>
 #include <cfloat>
@@ -21,6 +24,11 @@ static int coerceInteger(double fval)
     }
 }
 
+static unsigned long coerceULong(double fval)
+{
+    return static_cast<unsigned long>(fval + eps);
+}
+
 namespace jags {
 
 int asInteger(double fval)
@@ -39,4 +47,20 @@ bool checkInteger(double fval)
     return fabs(fval - coerceInteger(fval)) < eps;
 }
 
+    unsigned long asULong(double fval)
+    {
+	if (fval >= ULONG_MAX || fval < 0) {
+	    throw runtime_error("double value out of range for conversion to unsigned long");
+	}
+	return coerceULong(fval);
+    }
+
+    bool checkULong(double fval)
+    {
+	if (fval >= ULONG_MAX || fval < 0) {
+	    return false;
+	}
+	return fabs(fval - coerceULong(fval)) < eps;
+    }
+    
 }

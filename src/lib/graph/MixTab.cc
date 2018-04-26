@@ -9,24 +9,25 @@ using std::logic_error;
 
 namespace jags {
 
-    static SimpleRange mkRange(map<vector<int>, Node const *> const &mixmap)
+    static SimpleRange
+    mkRange(map<vector<unsigned long>, Node const *> const &mixmap)
     {
 	/* 
 	   Calculates the smallest SimpleRange enclosing the index
 	   values in the MixMap.  Also checks for consistency in the
 	   lengths of the index values.
 	*/
-	map<vector<int>, Node const *>::const_iterator p = mixmap.begin();
+	map<vector<unsigned long>, Node const *>::const_iterator p = mixmap.begin();
 
-	unsigned int N = p->first.size();
-	vector <int> lower(p->first), upper(p->first);
+	unsigned long N = p->first.size();
+	vector <unsigned long> lower(p->first), upper(p->first);
 	
 	for (++p ; p != mixmap.end(); ++p) {
 	    if (p->first.size() != N) {
 		throw logic_error("index size mismatch in MixTab");
 	    }
-	    for (unsigned int j = 0; j < N; ++j) {
-		int i = p->first[j];
+	    for (unsigned long j = 0; j < N; ++j) {
+		unsigned long i = p->first[j];
 		if (i < lower[j]) lower[j] = i;
 		if (i > upper[j]) upper[j] = i;
 	    }
@@ -35,21 +36,21 @@ namespace jags {
 	return SimpleRange(lower, upper);
     }
 
-    MixTab::MixTab(map<vector<int>, Node const *> const &mixmap)
+    MixTab::MixTab(map<vector<unsigned long>, Node const *> const &mixmap)
 	: _range(mkRange(mixmap)), _nodes(_range.length(), 0)
     {
-	for (map<vector<int>, Node const *>::const_iterator p = mixmap.begin();
+	for (map<vector<unsigned long>, Node const *>::const_iterator p = mixmap.begin();
 	     p != mixmap.end(); ++p)
 	{
 	    _nodes[_range.leftOffset(p->first)] = p->second;
 	}
     }
     
-    Node const * MixTab::getNode(vector<int> const &index) const
+    Node const * MixTab::getNode(vector<unsigned long> const &index) const
     {
 	if (!_range.contains(index)) return 0;
 
-	unsigned int offset = _range.leftOffset(index);
+	unsigned long offset = _range.leftOffset(index);
 	return _nodes[offset];
     }
 

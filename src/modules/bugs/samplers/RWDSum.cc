@@ -15,6 +15,8 @@ using std::log;
 using std::exp;
 using std::fabs;
 using std::set;
+using std::trunc;
+using std::fmod;
 
 //Target acceptance probability for Metropolis-Hastings algorithm
 #define PROB  0.5
@@ -62,47 +64,36 @@ static vector<double> nodeValues(GraphView const *gv, unsigned int chain)
 	}
     }
 
-    //Enforce discreteness of value vector, if necessary
     if (discrete) {
+	//Enforce discreteness of value vector
 	for (unsigned int i = 0; i < ans.size(); ++i) {
 	    ans[i] = static_cast<int>(ans[i]);
 	}
     }
     
     //Ensure that values of sampled nodes are consistent with dsum child
-    unsigned int nrow = dchild->length();
-    unsigned int ncol = gv->nodes().size();
+    unsigned long nrow = dchild->length();
+    unsigned long ncol = gv->nodes().size();
 
     if (ans.size() != nrow * ncol) {
 	throwLogicError("Inconsistent lengths in RWDSum method");
     }
     
-    for (unsigned int r = 0; r < nrow; ++r) {
+    for (unsigned long r = 0; r < nrow; ++r) {
 	
 	double delta = dchild->value(chain)[r];
-	for (unsigned int c = 0; c < ncol; ++c) {
+	for (unsigned long c = 0; c < ncol; ++c) {
 	    delta -= ans[c * nrow + r];
 	}
 	
 	if (delta != 0) {
+	    double eps = delta / ncol;
 	    if (discrete) {
-		int idelta = static_cast<int>(delta);
-		if (delta != idelta) {
-		    throwLogicError("Unable to satisfy dsum constraint");
-		}
-		int eps = idelta / ncol;
-		int resid = idelta % ncol;
-		
-		for (unsigned int c = 0; c < ncol; ++c) {
-		    ans[c * nrow + r] += eps;
-		}
-		ans[r] += resid;
+		eps = trunc(eps);
+		ans[r] += fmod(delta, ncol);
 	    }
-	    else {
-		double eps = delta / ncol;
-		for (unsigned int c = 0; c < ncol; ++c) {
-		    ans[c * nrow + r] += eps;
-		}
+	    for (unsigned long c = 0; c < ncol; ++c) {
+		ans[c * nrow + r] += eps;
 	    }
 	}
     }
@@ -134,11 +125,11 @@ void RWDSum::rescale(double p)
 void RWDSum::update(RNG *rng)
 {
     vector<double> value(length());
-    unsigned int nrow = _dsnode->length();
-    unsigned int ncol = _gv->nodes().size();
-    unsigned int nrep = nrow * (ncol - 1);
+    unsigned long nrow = _dsnode->length();
+    unsigned long ncol = _gv->nodes().size();
+    unsigned long nrep = nrow * (ncol - 1);
 
-    for (unsigned int j = 0; j < nrep; ++j) {
+    for (unsigned long j = 0; j < nrep; ++j) {
 	double log_p = -_gv->logFullConditional(_chain);
 	getValue(value);
 	step(value, nrow, ncol, _step_adapter.stepSize(), rng);
@@ -165,7 +156,7 @@ bool RWDSum::canSample(vector<StochasticNode *> const &nodes,
     if (nodes.size() < 2)
 	return false;
 
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
+    for (unsigned long i = 0; i < nodes.size(); ++i) {
 
 	// Nodes must be of full rank
 	if (multinom) {
@@ -187,7 +178,7 @@ bool RWDSum::canSample(vector<StochasticNode *> const &nodes,
     GraphView gv(nodes, graph, true);
 
     set<Node const *> nodeset;
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
+    for (unsigned long i = 0; i < nodes.size(); ++i) {
 	nodeset.insert(nodes[i]);
     }
 
@@ -202,7 +193,7 @@ bool RWDSum::canSample(vector<StochasticNode *> const &nodes,
 	    return false;
 	if (dschild->parents().size() != nodes.size())
 	    return false;
-	for (unsigned int j = 0; j < dschild->parents().size(); ++j) {
+	for (unsigned long j = 0; j < dschild->parents().size(); ++j) {
 	    if (nodeset.count(dschild->parents()[j]) == 0) {
 		return false;
 	    }

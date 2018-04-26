@@ -24,7 +24,7 @@ class Range;
 class Function
 {
     const std::string _name;
-    const unsigned int _npar;
+    const unsigned long _npar;
 public:
     /**
      * Constructor.
@@ -32,7 +32,7 @@ public:
      * @param npar number of parameters. If npar == 0 then the function
      * takes a variable number of parameters.
      */
-    Function(std::string const &name, unsigned int npar);
+    Function(std::string const &name, unsigned long npar);
     virtual ~Function ();
     /**
      * Returns the  BUGS language name of the function
@@ -48,7 +48,7 @@ public:
     /**
      * Returns the number of parameters. A variadic function returns 0. 
      */
-    unsigned int npar() const;
+    unsigned long npar() const;
     /**
      * Returns true if the function returns integer values. The
      * default implementation returns false. A function that returns
@@ -153,7 +153,7 @@ public:
  * Checks that a vector of parameters of length npar is consistent
  * with the function.
  */
-inline bool checkNPar(Function const *func, unsigned int npar)
+inline bool checkNPar(Function const *func, unsigned long npar)
 {
     return (func->npar() == 0 && npar > 0) || func->npar() == npar;
 }

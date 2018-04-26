@@ -79,7 +79,7 @@ bool readRData(vector<ParseTree*> const *array_list,
     
 	  /* Get the number of dimensions of the array */
 	  ParseTree const *pdim = 0;
-	  int ndim = 1;
+	  unsigned long ndim = 1;
 	  if ((*p)->parameters().size() == 2) {
 	      // Array has dimension attribute
 	      pdim = (*p)->parameters()[1];
@@ -89,13 +89,13 @@ bool readRData(vector<ParseTree*> const *array_list,
 	      else if (pdim->treeClass() == P_RANGE) {
 		  // R dump can store a contiguous integer sequence
 		  // using the ":" notation e.g. c(3,4,5) is written 3:5
-		  int lower = (int) pdim->parameters()[0]->value();
-		  int upper = (int) pdim->parameters()[1]->value();
-		  ndim = upper - lower + 1;
-		  if (ndim < 0 || lower <= 0) {
-		      cerr << "Invalid dimension attribute for variable " << name << endl;
+		  double lower = pdim->parameters()[0]->value();
+		  double upper = pdim->parameters()[1]->value();
+		  if (lower < 0 || upper <= lower) {
+		      cerr << "Invalid sequence " << name << " = " << lower << ":" << upper << endl;
 		      return false;
 		  }
+		  ndim = static_cast<unsigned long>(upper - lower + 1);
 	      }
 	      else {
 		  cerr << "Invalid dimension attribute for variable " << name << endl;
@@ -103,28 +103,28 @@ bool readRData(vector<ParseTree*> const *array_list,
 	      }
 	  }
 	  /* Get the dimensions of the array */
-	  vector<unsigned int> dim(ndim);
+	  vector<unsigned long> dim(ndim);
 	  if (pdim) {
 	      if (pdim->treeClass() == P_VECTOR) {
-		  for (int i = 0; i < ndim; ++i) {
-		      int dim_i = (int) (pdim->parameters()[i]->value() + 1.0E-6);
+		  for (unsigned long i = 0; i < ndim; ++i) {
+		      double dim_i = pdim->parameters()[i]->value();
 		      if (dim_i <= 0) {
 			  cerr << "Non-positive dimension for variable "
 			       << name << endl; 
 			  return false;
 		      }
-		      dim[i] = (unsigned int) dim_i;
+		      dim[i] = static_cast<unsigned long>(dim_i);
 		  }
 	      }
 	      else if (pdim->treeClass() == P_RANGE) {
-		  int lower = (int) pdim->parameters()[0]->value();
-		  for (int i = 0; i < ndim; ++i) {
-		      dim[i] = (unsigned int) (lower + i);
+		  double lower = pdim->parameters()[0]->value();
+		  for (unsigned long i = 0; i < ndim; ++i) {
+		      dim[i] = static_cast<unsigned long>(lower + i);
 		  }
 	      }
 	      /* Check that dimension is consistent with length */
 	      unsigned long dimprod = 1;
-	      for (int i = 0; i < ndim; i++) {
+	      for (unsigned long i = 0; i < ndim; i++) {
 		  dimprod *= dim[i];
 	      }
 	      if (dimprod != length) {

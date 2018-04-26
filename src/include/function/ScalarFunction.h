@@ -14,7 +14,7 @@ namespace jags {
 class ScalarFunction : public Function
 {
 public:
-    ScalarFunction(std::string const &name, unsigned int npar);
+    ScalarFunction(std::string const &name, unsigned long npar);
     /**
      * Evaluates the function and returns the result
      *

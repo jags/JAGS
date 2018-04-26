@@ -38,7 +38,7 @@ public:
    * with the name, so it can be retrieved with a call to getVariable.
    * If no dimension is given, the variable is assumed to be scalar.
    */
-  void addVariable(std::string const &name, std::vector<unsigned int> const &dim);
+  void addVariable(std::string const &name, std::vector<unsigned long> const &dim);
   /**
    * Returns a pointer to the  NodeArray associated with the given
    * name, or a NULL pointer if there is no such NodeArray.
@@ -93,7 +93,7 @@ public:
   /**
    * Returns the number of variables in the symbol table
    */
-  unsigned int size() const;
+  unsigned long size() const;
   /**
    * Deletes all the variables in the symbol table
    */

@@ -16,7 +16,7 @@ ScalarStochasticNode::ScalarStochasticNode(ScalarDist const *dist,
 					   unsigned int nchain,
 					   vector<Node const *> const &params,
 					   Node const *lower, Node const *upper)
-    : StochasticNode(vector<unsigned int>(1,1), nchain, dist, params, lower, upper),
+    : StochasticNode(vector<unsigned long>(1,1), nchain, dist, params, lower, upper),
       _dist(dist)
 {
     for(vector<Node const *>::const_iterator p = params.begin();
@@ -86,12 +86,7 @@ bool ScalarStochasticNode::checkParentValues(unsigned int chain) const
     }
 }
 
-bool isBounded(ScalarStochasticNode const *node)
-{
-    return node->lowerBound() || node->upperBound();
-}
-
-void ScalarStochasticNode::sp(double *lower, double *upper, unsigned int length,
+void ScalarStochasticNode::sp(double *lower, double *upper, unsigned long length,
 			      unsigned int chain) const
 {
     *lower = _dist->l(_parameters[chain]);
@@ -107,7 +102,7 @@ ScalarStochasticNode::clone(vector<Node const *> const &parameters,
 }
     */
     
-unsigned int ScalarStochasticNode::df() const
+unsigned long ScalarStochasticNode::df() const
 {
     return _dist->df();
 }

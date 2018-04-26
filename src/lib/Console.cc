@@ -416,7 +416,7 @@ bool Console::setMonitor(string const &name, Range const &range,
     }
     if (thin == 0) {
 	_err << "Failed to set " << type << " monitor for " <<
-	    name << print(range) << endl;
+	    name << printRange(range) << endl;
 	_err << "Thinning interval must be > 0" << endl;
 	return false;
     }
@@ -431,7 +431,7 @@ bool Console::setMonitor(string const &name, Range const &range,
 	bool ok = _model->setMonitor(name, range, thin, type, msg);
 	if (!ok) {
 	    _err << "Failed to set " << type << " monitor for " << 
-		name << print(range) << endl;
+		name << printRange(range) << endl;
 	    if (!msg.empty()) {
 		_err << msg << endl;
 	    }
@@ -455,7 +455,7 @@ bool Console::clearMonitor(string const &name, Range const &range,
       bool ok = _model->deleteMonitor(name, range, type);      
       if (!ok) {
 	  _err << "Failed to clear " << type << " monitor for node " << 
-	      name << print(range) << endl;
+	      name << printRange(range) << endl;
 	  return false;
       }
   }
@@ -509,9 +509,12 @@ bool Console::dumpState(map<string,SArray> &data_table,
       if (_model->rng(chain - 1)) {
 	_model->rng(chain - 1)->getState(rngstate);
 	
-	vector<unsigned int> dimrng(1,rngstate.size());
+	vector<unsigned long> dimrng(1,rngstate.size());
 	SArray rngsarray(dimrng);
-	rngsarray.setValue(rngstate);
+
+	vector<double> v;
+	copy(rngstate.begin(), rngstate.end(), v.begin());
+	rngsarray.setValue(v);
 	
 	data_table.insert(pair<string, SArray>(".RNG.state",rngsarray));
 	rng_name = _model->rng(chain - 1)->name();

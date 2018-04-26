@@ -15,7 +15,7 @@ namespace jags {
  *
  */
 class AggNode : public DeterministicNode {
-    std::vector<unsigned int> _offsets;
+    std::vector<unsigned long> _offsets;
     std::vector<double const *>  _parent_values;
     bool _discrete;
     /* Forbid copying */
@@ -48,10 +48,10 @@ public:
      *
      * @exception length_error out_of_range
      */
-    AggNode(std::vector<unsigned int> const &dim,
+    AggNode(std::vector<unsigned long> const &dim,
 	    unsigned int nchain,
 	    std::vector<Node const *> const &parents, 
-	    std::vector<unsigned int> const &offsets);
+	    std::vector<unsigned long> const &offsets);
     ~AggNode();
     /**
      * Copies values from parents.
@@ -78,7 +78,7 @@ public:
     /**
      * Returns the vector of offsets
      */
-    std::vector<unsigned int> const &offsets() const;
+    std::vector<unsigned long> const &offsets() const;
     //DeterministicNode *clone(std::vector<Node const *> const &parents) const;
 };
 

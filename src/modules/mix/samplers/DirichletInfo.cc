@@ -11,7 +11,7 @@ using std::log;
 namespace jags {
 namespace mix {
 
-    DirichletInfo::DirichletInfo(StochasticNode const *snode, unsigned int s,
+    DirichletInfo::DirichletInfo(StochasticNode const *snode, unsigned long s,
 				 unsigned int chain)
 	: start(s), end(s + snode->length()), length(snode->length()),
 	  sum(1), shape(0)

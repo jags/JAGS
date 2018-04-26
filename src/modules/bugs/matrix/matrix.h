@@ -14,7 +14,7 @@ namespace bugs {
  *
  * @param n number or rows or columns in the matrix
  */
-bool inverse (double *X, double const *A, int n);
+bool inverse (double *X, double const *A, unsigned long n);
 
 /**
  * Inverts a symmetrix positive definite matrix by Cholesky
@@ -28,7 +28,7 @@ bool inverse (double *X, double const *A, int n);
  *
  * @param n number or rows or columns in the matrix
  */
-bool inverse_spd (double *X, double const *A, int n);
+bool inverse_spd (double *X, double const *A, unsigned long n);
 
 /**
  * Checks whether a symmetric matrix is positive definite
@@ -38,7 +38,7 @@ bool inverse_spd (double *X, double const *A, int n);
  *
  * @param n number or rows or columns in the matrix
  */
-bool check_symmetric_ispd(double const *a, int n);
+bool check_symmetric_ispd(double const *a, unsigned long n);
 
 /**
  * Log determinant of a symmetric positive definite matrix
@@ -48,7 +48,7 @@ bool check_symmetric_ispd(double const *a, int n);
  *
  * @param n number or rows or columns in the matrix
  */
-double logdet(double const *A, int n);
+double logdet(double const *A, unsigned long n);
 
 /**
  * Checks the symmetry of a square matrix
@@ -59,7 +59,7 @@ double logdet(double const *A, int n);
  *
  * @param tol tolerance for symmetry test
  */
-bool check_symmetry(double const *X, unsigned int n, double tol=1e-7);
+bool check_symmetry(double const *X, unsigned long n, double tol=1e-7);
 
 }}
 

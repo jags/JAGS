@@ -14,12 +14,12 @@ namespace mix {
      */
     struct DirichletInfo 
     {
-	unsigned int start;
-	unsigned int end;
-	unsigned int length;
+	unsigned long start;
+	unsigned long end;
+	unsigned long length;
 	double sum;
 	double shape;
-	DirichletInfo(StochasticNode const *snode, unsigned int start,
+	DirichletInfo(StochasticNode const *snode, unsigned long start,
 		      unsigned int chain);
 	double gammaPenalty() const;
     };

@@ -58,8 +58,8 @@ public:
      * @param s Step size
      * @param rng Random number generator
      */
-    virtual void step(std::vector<double> &value, unsigned int nrow,
-		      unsigned int ncol, double s, RNG *rng) const = 0;
+    virtual void step(std::vector<double> &value, unsigned long nrow,
+		      unsigned long ncol, double s, RNG *rng) const = 0;
     /**
      * Tests whether nodes can be sampled
      *

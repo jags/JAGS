@@ -21,14 +21,14 @@ namespace bugs {
     public:
 	LogDet ();
 	void evaluate(double *x, std::vector<double const *> const &args,
-		      std::vector<std::vector<unsigned int> > const &dims) 
+		      std::vector<std::vector<unsigned long> > const &dims) 
 	    const;
-	bool checkParameterDim(std::vector<std::vector<unsigned int> > const &dims) const;
-	std::vector<unsigned int>
-	    dim(std::vector<std::vector<unsigned int> > const &dims,
+	bool checkParameterDim(std::vector<std::vector<unsigned long> > const &dims) const;
+	std::vector<unsigned long>
+	    dim(std::vector<std::vector<unsigned long> > const &dims,
 		std::vector<double const *> const &values) const;
 	bool checkParameterValue(std::vector<double const *> const &args,
-				 std::vector<std::vector<unsigned int> > const &dims) const;
+				 std::vector<std::vector<unsigned long> > const &dims) const;
     };
 
 }}

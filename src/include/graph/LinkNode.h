@@ -1,5 +1,5 @@
-#ifndef LINK__NODE_H_
-#define LINK__NODE_H_
+#ifndef LINK_NODE_H_
+#define LINK_NODE_H_
 
 #include <graph/LogicalNode.h>
 #include <vector>

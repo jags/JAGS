@@ -36,9 +36,9 @@ namespace dic {
     {
     }
 
-    vector<unsigned int> PDTrace::dim() const
+    vector<unsigned long> PDTrace::dim() const
     {
-	return vector<unsigned int> (1,1);
+	return vector<unsigned long> (1,1);
     }
  
     vector<double> const &PDTrace::value(unsigned int chain) const

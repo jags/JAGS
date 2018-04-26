@@ -15,10 +15,10 @@ CounterTab::CounterTab()
 
 CounterTab::~CounterTab()
 {
-  int n = _table.size();
-  for (int i = 0; i < n; i++) {
-    popCounter();
-  }
+    unsigned long n = _table.size();
+    for (unsigned int i = 0; i < n; i++) {
+	popCounter();
+    }
 }
 
 Counter * CounterTab::pushCounter(string const &name, Range const &range)

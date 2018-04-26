@@ -34,9 +34,9 @@ static bool hasRepeats(jags::Range const &target_range)
        be true most of the time.
     */
     
-    vector<vector<int> > const &scope = target_range.scope();
-    for (unsigned int i = 0; i < scope.size(); ++i) {
-	set<int> seen;
+    vector<vector<unsigned long> > const &scope = target_range.scope();
+    for (unsigned long i = 0; i < scope.size(); ++i) {
+	set<unsigned long> seen;
 	seen.insert(scope[i].begin(), scope[i].end());
 	if (seen.size() != scope[i].size()) return true;
     }
@@ -45,11 +45,11 @@ static bool hasRepeats(jags::Range const &target_range)
 
 namespace jags {
 
-    NodeArray::NodeArray(string const &name, vector<unsigned int> const &dim, 
+    NodeArray::NodeArray(string const &name, vector<unsigned long> const &dim, 
 			 unsigned int nchain)
 	: _name(name), _range(dim), _nchain(nchain), 
 	  _node_pointers(product(dim), 0),
-	  _offsets(product(dim), numeric_limits<unsigned int>::max())
+	  _offsets(product(dim), numeric_limits<unsigned long>::max())
 	  
     {
     }
@@ -58,19 +58,21 @@ namespace jags {
     {
 	if (!node) {
 	    throw logic_error(string("Attempt to insert NULL node at ") + 
-			      name() + print(target_range));
+			      name() + printRange(target_range));
 	}
 	if (node->dim() != target_range.dim(true)) {
 	    throw runtime_error(string("Cannot insert node into ") + name() + 
-				print(target_range) + ". Dimension mismatch");
+				printRange(target_range) +
+				". Dimension mismatch");
 	}
 	if (!_range.contains(target_range)) {
 	    throw runtime_error(string("Cannot insert node into ") + name() + 
-				print(target_range) + ". Range out of bounds");
+				printRange(target_range) +
+				". Range out of bounds");
 	}
 	if (hasRepeats(target_range)) {
 	    throw runtime_error(string("Cannot insert node into ") + name() +
-				print(target_range) + 
+				printRange(target_range) + 
 				". Range has repeat indices");
 	}
 
@@ -78,16 +80,16 @@ namespace jags {
 	for (RangeIterator p(target_range); !p.atEnd(); p.nextLeft()) {
 	    if (_node_pointers[_range.leftOffset(p)] != 0) {
 		throw runtime_error(string("Node ") + name() 
-				    + print(target_range)
+				    + printRange(target_range)
 				    + " overlaps previously defined nodes");
 	    }
 	}
 	
 	/* Set the _node_pointers array and the offset array */
-	unsigned int k = 0;
+	unsigned long k = 0;
 	for (RangeIterator p(target_range); !p.atEnd(); p.nextLeft())
 	{
-	    unsigned int i = _range.leftOffset(p);
+	    unsigned long i = _range.leftOffset(p);
 	    _node_pointers[i] = node;
 	    _offsets[i] = k++;
 	}
@@ -106,11 +108,12 @@ namespace jags {
 	//Check validity of target range
 	if (!_range.contains(target_range)) {
 	    throw runtime_error(string("Cannot get subset ") + name() + 
-				print(target_range) + ". Range out of bounds");
+				printRange(target_range) +
+				". Range out of bounds");
 	}
 	
 	if (target_range.length() == 1) {
-	    unsigned int start = _range.leftOffset(target_range.first());
+	    unsigned long start = _range.leftOffset(target_range.first());
 	    Node *node = _node_pointers[start];
 	    if (node && node->length() == 1) {
 		if (_offsets[start] != 0) {
@@ -136,9 +139,9 @@ namespace jags {
 	/* Otherwise create an aggregate node */
 	
 	vector<Node const *> nodes;
-	vector<unsigned int> offsets;
-	for (RangeIterator p(target_range); !p.atEnd(); p.nextLeft()) {
-	    unsigned int i = _range.leftOffset(p);
+	vector<unsigned long> offsets;
+	for (RangeIterator q(target_range); !q.atEnd(); q.nextLeft()) {
+	    unsigned long i = _range.leftOffset(q);
 	    if (_node_pointers[i] == 0) {
 		return 0;
 	    }
@@ -160,7 +163,7 @@ namespace jags {
 	}
 	
 	vector<double> const &x = value.value();
-	unsigned int N = value.length();
+	unsigned long N = value.length();
 	
 	//Gather all the nodes for which a data value is supplied
 	set<Node*> setnodes; 
@@ -170,17 +173,15 @@ namespace jags {
 		if (node == 0) {
 		    string msg = "Attempt to set value of undefined node ";
 		    throw runtime_error(msg + name() + 
-					print(value.range().leftIndex(i)));
+					printIndex(value.range().leftIndex(i)));
 		}
 		switch(node->randomVariableStatus()) {
 		case RV_FALSE:
 		    throw NodeError(node, 
 				    "Cannot set value of non-variable node");
-		    break;
 		case RV_TRUE_OBSERVED:
 		    throw NodeError(node,
 				    "Cannot overwrite value of observed node");
-		    break;
 		case RV_TRUE_UNOBSERVED:
 		    setnodes.insert(node);		
 		    break;
@@ -230,7 +231,7 @@ void NodeArray::getValue(SArray &value, unsigned int chain,
 	throw runtime_error(msg);
     }
 
-    unsigned int array_length = _range.length();
+    unsigned long array_length = _range.length();
     vector<double> array_value(array_length);
     for (unsigned int j = 0; j < array_length; ++j) {
 	Node const *node = _node_pointers[j];
@@ -260,8 +261,8 @@ void NodeArray::setData(SArray const &value, Model *model)
 		//Insert a new constant data node
 		ConstantNode *cnode = new ConstantNode(x[i], _nchain, true);
 		model->addNode(cnode);
-		SimpleRange target_range(_range.leftIndex(i));
-		insert(cnode, target_range);
+		vector<unsigned long> index = _range.leftIndex(i);
+		insert(cnode, SimpleRange(index, index));
 	    }
 	    else {
 		throw logic_error("Error in NodeArray::setData");
@@ -291,7 +292,8 @@ void NodeArray::setData(SArray const &value, Model *model)
 	if (node->length() == 1) {
 	    for (unsigned int i = 0; i < _range.length(); ++i) {
 		if (_node_pointers[i] == node) {
-		    return SimpleRange(_range.leftIndex(i));
+		    return SimpleRange(_range.leftIndex(i),
+				       _range.leftIndex(i));
 		}
 	    }
 	}
@@ -306,16 +308,19 @@ void NodeArray::setData(SArray const &value, Model *model)
 	}
 
 	//Then among generated nodes
-	for (map<Range, AggNode *>::const_iterator p = _generated_nodes.begin();
-	     p != _generated_nodes.end(); ++p) 
+	map<Range, AggNode *>::const_iterator p = _generated_nodes.begin();
+	for ( ; p != _generated_nodes.end(); ++p) 
 	{ 
 	    if (node == p->second) {
-		return p->first;
+		break;
 	    }
 	}
-	
-	throw logic_error("Failed to find Node range");
-	return Range(); //Wall
+
+	if (p == _generated_nodes.end()) {
+	    throw logic_error("Failed to find Node range");
+	}
+
+	return p->first;
     }
 
     unsigned int NodeArray::nchain() const

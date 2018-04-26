@@ -27,7 +27,7 @@ namespace jags {
      * Values that are numerically "nearly equal" are considered to
      * be equal.
      */
-    bool lt(double const *value1, double const *value2, unsigned int length);
+    bool lt(double const *value1, double const *value2, unsigned long length);
 
     /**
      * @short Fuzzy less than function for Nodes

@@ -76,12 +76,12 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
 	if (p == _bugs_monitors.end()) {
 		if ( type == "*" ) {
 		    string msg = string("No Monitor ") + name + 
-			print(range) + " found.\n";
+			printRange(range) + " found.\n";
 		    warn.append(msg);
 		}
 		else {
 		    string msg = string("No Monitor ") + name + 
-			print(range) + " with Type " + type + " found.\n";
+			printRange(range) + " with Type " + type + " found.\n";
 			warn.append(msg);
 		}
 	}
@@ -94,7 +94,8 @@ void BUGSModel::coda(vector<NodeId> const &node_ids, string const &stem,
 		}
 	    }
 	    if (q == monitors().end()) {
-		throw logic_error(string("Monitor ") + name + print(range) +
+		throw logic_error(string("Monitor ") + name +
+				  printRange(range) +
 				  " with type " + type + " not found");
 	    }
 	}
@@ -163,7 +164,7 @@ void BUGSModel::setParameters(map<string, SArray> const &param_table,
 	if (seed.value()[0] < 0) {
 	    throw runtime_error(".RNG.seed must be non-negative");
 	}
-	int iseed = static_cast<int>(seed.value()[0]);
+	unsigned int iseed = static_cast<unsigned int>(seed.value()[0]);
 	rng(chain)->init(iseed);
     }
 

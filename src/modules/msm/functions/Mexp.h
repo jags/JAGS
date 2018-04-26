@@ -11,11 +11,11 @@ class Mexp : public ArrayFunction
 public:
     Mexp();
     void evaluate (double *value, std::vector<double const *> const &args,
-		   std::vector<std::vector<unsigned int> > const &dims) const;
-    std::vector<unsigned int> 
-	dim(std::vector<std::vector<unsigned int> > const &dims,
+		   std::vector<std::vector<unsigned long> > const &dims) const;
+    std::vector<unsigned long> 
+	dim(std::vector<std::vector<unsigned long> > const &dims,
 	    std::vector<double const *> const &values) const;
-    bool checkParameterDim(std::vector <std::vector<unsigned int> > const &dims) const;
+    bool checkParameterDim(std::vector <std::vector<unsigned long> > const &dims) const;
 };
 
 }}

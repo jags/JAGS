@@ -17,7 +17,7 @@ using std::logic_error;
 namespace jags {
 namespace dic {
 
-    DensityTrace::DensityTrace(vector<Node const *> const &nodes, vector<unsigned int> const &dim,
+    DensityTrace::DensityTrace(vector<Node const *> const &nodes, vector<unsigned long> const &dim,
 		DensityType const density_type, string const &monitor_name)
 	: Monitor(monitor_name, nodes), _nodes(nodes), _values(nodes[0]->nchain()),
 	  _density_type(density_type), _dim(dim), _nchain(nodes[0]->nchain())
@@ -70,7 +70,7 @@ namespace dic {
 	return _values[chain];
     }
 
-    vector<unsigned int> DensityTrace::dim() const
+    vector<unsigned long> DensityTrace::dim() const
     {
 	return _dim;
     }

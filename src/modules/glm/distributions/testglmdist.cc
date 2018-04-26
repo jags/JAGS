@@ -61,9 +61,9 @@ void GLMDistTest::npar()
 {
     //CPPUNIT_ASSERT_MESSAGE("npar check", false);
 
-    CPPUNIT_ASSERT_EQUAL(_dscaled_gamma->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_dscaled_wishart->npar(), 2U);
-    CPPUNIT_ASSERT_EQUAL(_dordered_logit->npar(), 2U);
+    CPPUNIT_ASSERT_EQUAL(_dscaled_gamma->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_dscaled_wishart->npar(), 2UL);
+    CPPUNIT_ASSERT_EQUAL(_dordered_logit->npar(), 2UL);
 }
 
 void GLMDistTest::name()
@@ -415,9 +415,9 @@ void GLMDistTest::dkw_swish(vector<double> const &S,
     par.push_back(&df);
 
     //Set up dimensions
-    vector<vector<unsigned int> > dims;
-    dims.push_back(vector<unsigned int>(1, ndim));
-    dims.push_back(vector<unsigned int>(1, 1));
+    vector<vector<unsigned long> > dims;
+    dims.push_back(vector<unsigned long>(1, ndim));
+    dims.push_back(vector<unsigned long>(1, 1));
 
     //Sanity checks
     CPPUNIT_ASSERT_MESSAGE("scaled.wishart",

@@ -15,8 +15,8 @@ class DMultiDSum : public RWDSum
 {
 public:
     DMultiDSum(GraphView const *gv, unsigned int chain);
-    void step(std::vector<double> &value, unsigned int nrow,
-	      unsigned int ncol, double s, RNG *rng) const;
+    void step(std::vector<double> &value, unsigned int long,
+	      unsigned long ncol, double s, RNG *rng) const;
 };
 
 }}

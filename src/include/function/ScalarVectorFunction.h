@@ -14,7 +14,7 @@ namespace jags {
     class ScalarVectorFunction : public VectorFunction
     {
     public:
-	ScalarVectorFunction(std::string const &name, unsigned int npar);
+	ScalarVectorFunction(std::string const &name, unsigned long npar);
 	/**
 	 * Evaluates the function and returns the scalar result
 	 * @param args Vector of arguments
@@ -23,19 +23,19 @@ namespace jags {
 	 */
 	virtual double 
 	    scalarEval (std::vector <double const *> const &args,
-			std::vector <unsigned int> const &lengths) const = 0;
+			std::vector <unsigned long> const &lengths) const = 0;
 	/**
 	 * Implements VectorFunction#evaluate in terms of 
 	 * ScalarVectorFunction#eval.
 	 */
 	void evaluate(double *value, 
 		      std::vector <double const *> const &args,
-		      std::vector <unsigned int> const &lengths) const;
+		      std::vector <unsigned long> const &lengths) const;
 	/**
 	 * Implements VectorFunction#length, returning the value 1
 	 */
-	unsigned int 
-	    length(std::vector <unsigned int> const &arglengths,
+	unsigned long 
+	    length(std::vector <unsigned long> const &arglengths,
 		   std::vector <double const *> const &argvalues) const;
     };
 

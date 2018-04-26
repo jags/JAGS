@@ -54,7 +54,7 @@ enum ClosedFuncClass {DNODE_ADDITIVE, DNODE_LINEAR, DNODE_SCALE,
 class DeterministicNode : public Node {
     bool _fixed;
 public:
-    DeterministicNode(std::vector<unsigned int> const &dim,
+    DeterministicNode(std::vector<unsigned long> const &dim,
 		      unsigned int nchain,
 		      std::vector<Node const *> const &parents);
     ~DeterministicNode();

@@ -45,7 +45,7 @@ namespace base {
 	return _values;
     }
 
-    vector<unsigned int> PoolMeanMonitor::dim() const
+    vector<unsigned long> PoolMeanMonitor::dim() const
     {
 	return _subset.dim();
     }

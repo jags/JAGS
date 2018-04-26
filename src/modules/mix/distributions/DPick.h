@@ -24,7 +24,7 @@ namespace jags {
 	    bool checkParameterValue(std::vector<double const *> const &par)
 		const;
 	    double typicalValue(std::vector<double const *> const &par) const;
-	    unsigned int length(std::vector<unsigned int> const &lengths) const;
+	    unsigned long length(std::vector<unsigned long> const &lengths) const;
 	    bool isDiscreteValued(std::vector<bool> const &mask) const;
 	};
 	

@@ -12,7 +12,7 @@ class ScalarDist;
  */
 class ScalarStochasticNode : public StochasticNode {
     ScalarDist const * const _dist;
-    void sp(double *lower, double *upper, unsigned int length,
+    void sp(double *lower, double *upper, unsigned long length,
 	    unsigned int chain) const;
 public:
     /**
@@ -28,7 +28,7 @@ public:
     bool checkParentValues(unsigned int chain) const;
     //StochasticNode *clone(std::vector<Node const *> const &parents,
     //Node const *lower, Node const *upper) const;
-    unsigned int df() const;
+    unsigned long df() const;
     double KL(unsigned int ch1, unsigned int ch2, RNG *rng,
 	      unsigned int nrep) const;
 };

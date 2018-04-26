@@ -17,10 +17,10 @@ namespace bugs {
     }
 
     double Min::scalarEval(vector<double const *> const &args,
-			   vector<unsigned int> const &lengths) const
+			   vector<unsigned long> const &lengths) const
     {
 	double ans = *min_element(args[0], args[0] + lengths[0]);
-	for (unsigned int i = 1; i < args.size(); ++i) {
+	for (unsigned long i = 1; i < args.size(); ++i) {
 	    double mini = *min_element(args[i], args[i] + lengths[i]);
 	    ans = min(ans, mini);
 	}

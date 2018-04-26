@@ -27,11 +27,11 @@ namespace jags {
  * 
  */
 class Range {
-    std::vector<std::vector<int> > _scope;
+    std::vector<std::vector<unsigned long> > _scope;
   protected:
-    std::vector<unsigned int> _dim, _dim_dropped;
-    std::vector<int> _first, _last;
-    unsigned int _length;
+    std::vector<unsigned long> _dim, _dim_dropped;
+    std::vector<unsigned long> _first, _last;
+    unsigned long _length;
   public:
     /**
      * Default constructor which creates a NULL range of zero length.
@@ -48,7 +48,7 @@ class Range {
      *
      * @exception logic_error
      */
-    Range(std::vector<std::vector<int> > const &scope);
+    Range(std::vector<std::vector<unsigned long> > const &scope);
     /**
      * Virtual destructor
      */
@@ -66,7 +66,7 @@ class Range {
      * contained in the range. For example, the range [1:2,4,4:5]
      * contains 4 elements.
      */
-    unsigned int length() const;
+    unsigned long length() const;
     /**
      * Returns the index in position n when the indices in the Range
      * are put in column-major order (i.e. with the left hand index
@@ -74,7 +74,7 @@ class Range {
      *
      * @see RangeIterator
      */
-    std::vector<int> leftIndex(unsigned int n) const;
+    std::vector<unsigned long> leftIndex(unsigned long n) const;
     /**
      * Returns the index in position n when the indices in the Raneg
      * are put in row-major order (i.e. with the right hand index
@@ -82,7 +82,7 @@ class Range {
      *
      * @see RangeIterator
      */
-    std::vector<int> rightIndex(unsigned int n) const;
+    std::vector<unsigned long> rightIndex(unsigned long n) const;
     /**
      * Dimension of the range. The range [1:4,2,3:5] has dimension
      * (4,1,3) if drop==false and (4,3) if drop==true. Dropping of
@@ -90,7 +90,7 @@ class Range {
      *
      * @param drop Should dimensions of size 1 be dropped? 
      */
-    std::vector<unsigned int> const &dim(bool drop) const;
+    std::vector<unsigned long> const &dim(bool drop) const;
     /**
      * Number of dimensions covered by the Range. The range [1:4, 2,
      * 3:5] has 3 dimensions if drop==false and 2 dimensions if
@@ -98,17 +98,17 @@ class Range {
      *
      * @param drop Should dimensions of size 1 be counted?
      */
-    unsigned int ndim(bool drop) const;
+    unsigned long ndim(bool drop) const;
     /**
      * The first element of the Range (in either row-major or
      * column-major order).
      */
-    std::vector<int> const & first() const;
+    std::vector<unsigned long> const & first() const;
     /**
      * The last element of the Range (in either row-major or 
      * column-major order).
      */
-    std::vector<int> const & last() const;
+    std::vector<unsigned long> const & last() const;
     /**
      * Less than operator that gives a unique ordering of ranges
      * Ranges are first sorted by the first element, then the last
@@ -119,7 +119,7 @@ class Range {
     /**
      * Returns the scope vector used to construct the Range. 
      */
-    std::vector<std::vector<int> > const &scope() const;
+    std::vector<std::vector<unsigned long> > const &scope() const;
 };
 
 /**
@@ -142,8 +142,12 @@ inline bool isNULL(Range const &range) { return range.length() == 0; }
      * ellipses, e.g. the range c(3,7,4,2,2,5) is represented as
      * "[3...5]"
      */
-    std::string print(Range const &range);
+    std::string printRange(Range const &range);
 
+    std::string printRange(std::vector<unsigned long> const &dim);
+
+    std::string printIndex(std::vector<unsigned long> const &index);
+    
 } /* namespace jags */
 
 #endif /* RANGE_H_ */

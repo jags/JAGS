@@ -49,9 +49,9 @@ class VectorDist : public Distribution
      * 
      */
     virtual double 
-	logDensity(double const *x, unsigned int length, PDFType type,
+	logDensity(double const *x, unsigned long length, PDFType type,
 		   std::vector<double const *> const &parameters,
-		   std::vector<unsigned int> const &lengths,
+		   std::vector<unsigned long> const &lengths,
 		   double const *lbound, double const *ubound) const = 0;
     /**
      * Draws a random sample from the distribution. 
@@ -71,17 +71,17 @@ class VectorDist : public Distribution
      *
      * @exception length_error 
      */
-    virtual void randomSample(double *x, unsigned int length,
+    virtual void randomSample(double *x, unsigned long length,
 			      std::vector<double const *> const &parameters,
-			      std::vector<unsigned int> const &lengths, 
+			      std::vector<unsigned long> const &lengths, 
 			      double const *lbound, double const *ubound,
 			      RNG *rng) const = 0;
     /**
      * Returns the support of an unbounded distribution
      */
-    virtual void support(double *lower, double *upper, unsigned int length,
+    virtual void support(double *lower, double *upper, unsigned long length,
 			 std::vector<double const *> const &params, 
-			 std::vector<unsigned int> const &lengths) const = 0;
+			 std::vector<unsigned long> const &lengths) const = 0;
     /**
      * Indicates whether the support of the distribution is fixed.
      *
@@ -93,7 +93,7 @@ class VectorDist : public Distribution
      * Checks that lengths of the parameters are correct.
      */
     virtual bool 
-	checkParameterLength (std::vector<unsigned int> const &parameters) 
+	checkParameterLength (std::vector<unsigned long> const &parameters) 
 	const = 0;
     /**
      * Checks that the values of the parameters are consistent with
@@ -105,15 +105,15 @@ class VectorDist : public Distribution
      */
     virtual bool 
 	checkParameterValue(std::vector<double const *> const &parameters,
-			    std::vector<unsigned int> const &lengths) const = 0;
+			    std::vector<unsigned long> const &lengths) const = 0;
     /**
      * Calculates what the length of a sampled value should be, based
      * on the lengths of the parameters.
      *
      * @param par vector of lengths of the parameters.
      */
-    virtual unsigned int 
-	length (std::vector<unsigned int> const &par) const = 0;
+    virtual unsigned long 
+	length (std::vector<unsigned long> const &par) const = 0;
     /**
      * Returns the number of degrees of freedom of the distribution
      * given the parameter lengths. By default this is the same as
@@ -121,7 +121,7 @@ class VectorDist : public Distribution
      * and the support occupies a lower dimensional subspace. In this
      * case, the df member function must be overrideen.
      */
-    virtual unsigned int df(std::vector<unsigned int> const &lengths) const;
+    virtual unsigned long df(std::vector<unsigned long> const &lengths) const;
     /**
      * Returns a Monte Carlo estimate of the Kullback-Leibler
      * divergence between distributions with two different parameter
@@ -145,7 +145,7 @@ class VectorDist : public Distribution
      */
     double KL(std::vector<double const *> const &par1,
 	      std::vector<double const *> const &par2,
-	      std::vector<unsigned int> const &lengths,
+	      std::vector<unsigned long> const &lengths,
 	      double const *lower, double const *upper,
 	      RNG *rng, unsigned int nrep) const;
     /**
@@ -159,7 +159,7 @@ class VectorDist : public Distribution
    */
   virtual double KL(std::vector<double const *> const &par1,
 		    std::vector<double const *> const &par2,
-		    std::vector<unsigned int> const &lengths) const;
+		    std::vector<unsigned long> const &lengths) const;
 };
 
 } /* namespace jags */

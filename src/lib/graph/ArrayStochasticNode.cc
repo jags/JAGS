@@ -17,7 +17,7 @@ using std::max;
 
 namespace jags {
 
-static vector<unsigned int> mkDim(ArrayDist const *dist, 
+static vector<unsigned long> mkDim(ArrayDist const *dist, 
 				  vector<Node const *> const &parents)
 {
     /* 
@@ -28,7 +28,7 @@ static vector<unsigned int> mkDim(ArrayDist const *dist,
     if (!checkNPar(dist, parents.size())) {
 	throw DistError(dist, "Incorrect number of parameters");
     }
-    vector<vector<unsigned int> > parameter_dims(parents.size());
+    vector<vector<unsigned long> > parameter_dims(parents.size());
     for (unsigned long j = 0; j < parents.size(); ++j) {
 	parameter_dims[j] = parents[j]->dim();
     }
@@ -38,10 +38,10 @@ static vector<unsigned int> mkDim(ArrayDist const *dist,
     return dist->dim(parameter_dims);
 }
 
-static vector<vector<unsigned int> > const &
+static vector<vector<unsigned long> > const &
 mkParameterDims(vector<Node const *> const &parameters) {
-    vector<vector<unsigned int> > dims(parameters.size());
-    for (unsigned int j = 0; j < parameters.size(); ++j) {
+    vector<vector<unsigned long> > dims(parameters.size());
+    for (unsigned long j = 0; j < parameters.size(); ++j) {
         dims[j] = parameters[j]->dim();
     }
     return getUnique(dims);
@@ -52,7 +52,7 @@ ArrayStochasticNode::ArrayStochasticNode(ArrayDist const *dist,
 					 vector<Node const *> const &params,
 					 Node const *lower, Node const *upper,
 					 double const *data,
-					 unsigned int length)
+					 unsigned long length)
     : StochasticNode(mkDim(dist, params), nchain, dist, params, lower, upper),
       _dist(dist), _dims(mkParameterDims(params))
 {
@@ -94,7 +94,7 @@ void ArrayStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
     if (l || lower) {
 	lv = new double[_length];
 	if (l && lower) {
-	    for (unsigned int i = 0; i < _length; ++i) {
+	    for (unsigned long i = 0; i < _length; ++i) {
 		lv[i] = min(l[i], lower[i]);
 	    }
 	}
@@ -111,7 +111,7 @@ void ArrayStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
     if (u || upper) {
 	uv = new double[_length];
 	if (u && upper) {
-	    for (unsigned int i = 0; i < _length; ++i) {
+	    for (unsigned long i = 0; i < _length; ++i) {
 		uv[i] = max(u[i], upper[i]);
 	    }
 	}
@@ -143,12 +143,12 @@ ArrayStochasticNode::clone(vector<Node const *> const &parameters,
 }
     */
     
-unsigned int ArrayStochasticNode::df() const
+unsigned long ArrayStochasticNode::df() const
 {
     return _dist->df(_dims);
 }
 
-void ArrayStochasticNode::sp(double *lower, double *upper, unsigned int length,
+void ArrayStochasticNode::sp(double *lower, double *upper, unsigned long length,
 			     unsigned int chain) const
 {
     _dist->support(lower, upper, length, _parameters[chain], _dims);

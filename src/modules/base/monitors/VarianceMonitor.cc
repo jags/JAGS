@@ -51,7 +51,7 @@ namespace base {
 			variance on demand, which we could consider using for the
 			sake of efficiency...  
 			*/
-			rvar[i] = rmm[i] / (double) (_n - 1);
+			rvar[i] = rmm[i] / static_cast<double>(_n - 1);
 			
 		}
 	}
@@ -63,7 +63,7 @@ namespace base {
 		return _variances[chain];
 	}
 	
-    vector<unsigned int> VarianceMonitor::dim() const
+    vector<unsigned long> VarianceMonitor::dim() const
     {
 	return _subset.dim();
     }

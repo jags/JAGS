@@ -92,7 +92,7 @@ namespace lecuyer {
 	    return false;
 
 	unsigned int cg[6];
-	for (int i = 0; i < 6; ++i) {
+	for (unsigned int i = 0; i < 6; ++i) {
 	    cg[i] = static_cast<unsigned int>(state[i]);
 	}
     
@@ -114,7 +114,7 @@ namespace lecuyer {
 
 	unsigned int cg[6];
 	for (int i = 0; i < 6; ++i) {
-	    cg[i] = Cg[i];
+	    cg[i] = static_cast<unsigned int>(Cg[i]);
 	}
 
 	for (int i = 0; i < 6; ++i) {
@@ -126,7 +126,7 @@ namespace lecuyer {
     {
 	/* Component 1 */
 	double p1 = a12 * Cg[1] - a13n * Cg[0];
-	int k = p1 / m1;
+	long k = static_cast<long> (p1 / m1);
 	p1 -= k * m1;
 	if (p1 < 0.0)
 	    p1 += m1;
@@ -136,7 +136,7 @@ namespace lecuyer {
 
 	/* Component 2 */
 	double p2 = a21 * Cg[5] - a23n * Cg[3];
-	k = p2 / m2;
+	k = static_cast<long> (p2 / m2);
 	p2 -= k * m2;
 	if (p2 < 0.0)
 	    p2 += m2;

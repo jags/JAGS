@@ -19,7 +19,7 @@ namespace jags {
      * 
      * @see isScalar, isVector, isArray
      */
-    inline bool isFlat(std::vector<unsigned int> const &dim) 
+    inline bool isFlat(std::vector<unsigned long> const &dim) 
     {
 	return dim.empty() || 
 	    std::find(dim.begin(), dim.end(), 0U) != dim.end();
@@ -33,7 +33,7 @@ namespace jags {
      *
      * @see isFlat, isVector, isArray
      */
-    inline bool isScalar(std::vector<unsigned int> const &dim)
+    inline bool isScalar(std::vector<unsigned long> const &dim)
     {
 	return dim.size() == 1 && dim[0] == 1;
     }
@@ -46,7 +46,7 @@ namespace jags {
      *
      * @see isFlat, isScalar, isArray
      */
-    inline bool isVector(std::vector<unsigned int> const &dim)
+    inline bool isVector(std::vector<unsigned long> const &dim)
     {
 	return dim.size() == 1 && dim[0] > 1;
     }
@@ -59,7 +59,7 @@ namespace jags {
      *
      * @see isFlat, isScalar, isArray
      */
-    inline bool isArray(std::vector<unsigned int> const &dim)
+    inline bool isArray(std::vector<unsigned long> const &dim)
     {
 	return dim.size() > 1 && 
 	    std::find(dim.begin(), dim.end(), 0U) == dim.end();
@@ -71,7 +71,7 @@ namespace jags {
      * Tests whether the dimension represented by the vector "dim"
      * corresponds to a matrix (i.e. a two-dimensional array).
      */
-    inline bool isMatrix(std::vector<unsigned int> const &dim)
+    inline bool isMatrix(std::vector<unsigned long> const &dim)
     {
 	return dim.size() == 2 && dim[0] != 0 && dim[1] != 0;
     }
@@ -83,18 +83,18 @@ namespace jags {
      * Tests whether the dimension represented by the vector "dim"
      * corresponds to a square matrix.
      */
-    inline bool isSquareMatrix(std::vector<unsigned int> const &dim)
+    inline bool isSquareMatrix(std::vector<unsigned long> const &dim)
     {
 	return isMatrix(dim) && dim[0] == dim[1];
     }
     
     /**
      * Returns the product of the elements of a vector of unsigned
-     * integers. The most common usage of this function is to
+     * long integers. The most common usage of this function is to
      * calculate the number of elements in an array given its
      * dimensions.
      */
-    unsigned int product(std::vector<unsigned int> const &arg);
+    unsigned long product(std::vector<unsigned long> const &arg);
 
     /**
      * @short Drops redundant dimensions
@@ -107,31 +107,31 @@ namespace jags {
      * Flat dimensions (corresponding to elements with value
      * zero) are not removed.
      */
-    std::vector<unsigned int> drop(std::vector<unsigned int> const &dims);
+    std::vector<unsigned long> drop(std::vector<unsigned long> const &dims);
 
     /**
      * @short Gets a constant reference to a unique dimension 
      *
-     * Vectors of unsigned integers are frequently repeated objects in
+     * Vectors of unsigned long integers are frequently repeated objects in
      * the JAGS library, and are typically used to represent
      * dimensions of Nodes and NodeArrays. This function creates a
      * unique constant reference to the requested vector, avoiding
      * redundant copies of the vector taking up memory.
      */
-    std::vector<unsigned int> const &
-	getUnique(std::vector<unsigned int> const &dim);
+    std::vector<unsigned long> const &
+	getUnique(std::vector<unsigned long> const &dim);
 
     /**
      * @short Getst a constant reference to a unique vector of dimension
      *
-     * Vectors of vectors of unsigned integers are frequently repeated
+     * Vectors of vectors of unsigned long integers are frequently repeated
      * objects in the JAGS library (Typically as dimensions of
      * parameters for Functions and Distributions). This function
      * returns a reference to a unique copy of the requested vector in
      * order to save memory.
      */
-    std::vector<std::vector<unsigned int> > const & 
-	getUnique(std::vector<std::vector<unsigned int> > const &dimvec);
+    std::vector<std::vector<unsigned long> > const & 
+	getUnique(std::vector<std::vector<unsigned long> > const &dimvec);
     
 }
 

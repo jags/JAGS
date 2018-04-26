@@ -8,6 +8,8 @@
 
 #include <JRmath.h>
 
+#include <climits>
+
 using std::vector;
 using std::string;
 using std::copy;
@@ -20,7 +22,7 @@ namespace jags {
 namespace bugs {
 
 static inline 
-StochasticNode const *CHILD(SingletonGraphView const *gv, unsigned int i)
+StochasticNode const *CHILD(SingletonGraphView const *gv, unsigned long i)
 {
     return gv->stochasticChildren()[i];
 }
@@ -45,9 +47,9 @@ double const *PROB(StochasticNode const *cnode, unsigned int chain)
   depends on X.
   
   The makeIndex function checks this condition and returns a vector
-  if indices such that:
+  of indices such that:
      index[i] = j   if X[i] == n[j] 
-     index[i] = -1  if no child corresponds to index i.
+     index[i] = ULONG_MAX  if no child corresponds to index i.
 
   If the conditions are not satisfied, an empty vector is returned,
   indicating an error.
@@ -55,11 +57,12 @@ double const *PROB(StochasticNode const *cnode, unsigned int chain)
   NB It is only safe to call this after the other checks in canSample.
 */
 
-static vector<int> makeIndex(SingletonGraphView const *gv, unsigned int chain)
+static vector<unsigned long>
+makeIndex(SingletonGraphView const *gv, unsigned int chain)
 {
-    unsigned int m = gv->length(); //Length of sampled node
-    vector<int> index(m, -1);
-    unsigned int J = gv->stochasticChildren().size(); //Number of children
+    unsigned long m = gv->length(); //Length of sampled node
+    vector<unsigned long> index(m, ULONG_MAX);
+    unsigned long J = gv->stochasticChildren().size(); //Number of children
 
     // Store current value
     vector<double> xold = vector<double>(m);
@@ -70,26 +73,26 @@ static vector<int> makeIndex(SingletonGraphView const *gv, unsigned int chain)
     for (unsigned int j = 0; j < J; ++j) {
 	if (SIZE(CHILD(gv, j), chain) != 0) {
 	    gv->setValue(xold, chain);
-	    return vector<int>();
+	    return vector<unsigned long>();
 	}
     }
 
-    for (unsigned int i = 0; i < m; ++i) {
+    for (unsigned long i = 0; i < m; ++i) {
 	xnew[i] = 1;
 	gv->setValue(xnew, chain);
-	for (unsigned int j = 0; j < J; ++j) {
+	for (unsigned long j = 0; j < J; ++j) {
 	    bool found_index = false;
 	    double nj = SIZE(CHILD(gv,j), chain);
 	    if (nj > 1) {
 		// Size parameter does not correspond exactly to X[i]
 		gv->setValue(xold, chain);
-		return vector<int>();
+		return vector<unsigned long>();
 	    }
 	    if (nj == 1) {
 		if (found_index) {
 		    // More than one stochastic child depends on X[i]
 		    gv->setValue(xold, chain);
-		    return vector<int>();
+		    return vector<unsigned long>();
 		}
 		else {
 		    index[i] = j;
@@ -140,7 +143,7 @@ static vector<int> makeIndex(SingletonGraphView const *gv, unsigned int chain)
 	    return false;
 
 	// Check indices for chain 0. See notes for MakeIndex
-	vector<int> index = makeIndex(&gv, 0);
+	vector<unsigned long> index = makeIndex(&gv, 0);
 	if (index.empty()) {
 	    return false; 
 	}
@@ -158,7 +161,7 @@ static vector<int> makeIndex(SingletonGraphView const *gv, unsigned int chain)
     void ShiftedMultinomial::update(unsigned int chain, RNG *rng) const
     {
 	StochasticNode *snode = _gv->node(); // Sampled node
-	unsigned int m = snode->length(); // Length of sampled node
+	unsigned long m = snode->length(); // Length of sampled node
 	double N = SIZE(snode, chain);
 	double const *p = PROB(snode, chain);
 
@@ -168,9 +171,9 @@ static vector<int> makeIndex(SingletonGraphView const *gv, unsigned int chain)
 	vector<double> xnew = vector<double>(m, 0);
 	vector<double> y = vector<double>(m, 0);
 
-	for (unsigned int i = 0; i < m; ++i) {
-	    int j = _index[i];
-	    if (j >= 0) {
+	for (unsigned long i = 0; i < m; ++i) {
+	    unsigned long j = _index[i];
+	    if (j != ULONG_MAX) {
 		y[i] = *CHILD(_gv, j)->value(chain);
 		N -= y[i];
 		double pi = *PROB(CHILD(_gv, j), chain);

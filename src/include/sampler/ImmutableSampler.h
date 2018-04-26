@@ -29,7 +29,7 @@ namespace jags {
 	 * @param gv View of the sample graph, passed directly to the
 	 * parent class Sampler.
 	 *
-	 * @param methods Pointer to an ImmutableSampleMethod This
+	 * @param method Pointer to an ImmutableSampleMethod. This
 	 * must be dynamically allocated, as the
 	 * ImmutableSampler will take ownership of it, and
 	 * will delete it when the destructor is called.

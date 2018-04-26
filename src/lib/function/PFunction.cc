@@ -15,7 +15,7 @@ namespace jags {
     {
 	double x = *args[0];
 	vector<double const *> param(args.size() - 1);
-	for (unsigned int i = 1; i < args.size(); ++i) {
+	for (unsigned long i = 1; i < args.size(); ++i) {
 	    param[i-1] = args[i];
 	}
 	
@@ -28,7 +28,7 @@ namespace jags {
 	if (dist()->discrete()) {
 	    double x = *args[0];
 	    if (x != static_cast<int>(x))
-		return false;
+		return false; //FIXME: use checkInteger
 	}
 
 	return checkArgs(args);
