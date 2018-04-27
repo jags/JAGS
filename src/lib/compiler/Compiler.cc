@@ -533,7 +533,7 @@ Range Compiler::CounterRange(ParseTree const *var)
 		      + var->name());
   }
   vector<unsigned long> indices;
-  if (_resolution_level == 1) {
+  if (_compiler_mode == STOP_ON_ERROR) {
       if(!indexExpression(prange->parameters()[0], indices)) {
 	  CompileError(var, "Cannot evaluate range of counter", var->name());
       }
@@ -608,9 +608,9 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 				 printRange(subset_range));
 		}
 		node = array->getSubset(subset_range, _model);
-		if (node == 0 && _resolution_level == 2) {
-		    /* At resolution level 2 we make a note of all
-		       subsets that could not be resolved.
+		if (node == 0 && _compiler_mode == COLLECT_UNRESOLVED) {
+		    /* Nake a note of all subsets that could not be
+		       resolved.
 
 		       Example: we have just failed to resolve x[1:5]
 		       but we need to know which of x[1], x[2], x[3],
@@ -663,12 +663,12 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 	    else if (!_index_expression) {
 		//A stochastic subset
 		node = getMixtureNode(p, this);
-		if (node == 0 && _resolution_level == 2) {
+		if (node == 0 && _compiler_mode == COLLECT_UNRESOLVED) {
 		    getMissingMixParams(p, _umap, this);
 		}
 	    } 
 	}
-	else if (_resolution_level == 1) {
+	else if (_compiler_mode == STOP_ON_ERROR) {
 	    string msg;
 	    if (_lhs_vars.find(p->name()) == _lhs_vars.end()) {
 		msg = string("Unknown variable ") + p->name() + "\n" +
@@ -1096,7 +1096,7 @@ void Compiler::allocate(ParseTree const *rel)
 	_n_resolved++;
 	_is_resolved[_n_relations] = true;
     }
-    else if (_resolution_level == 3) {
+    else if (_compiler_mode == CLEAN_UNRESOLVED) {
 	/* 
 	   Remove from the set of unresolved parameters, any array
 	   subsets that are defined on the left hand side of a
@@ -1248,11 +1248,8 @@ void Compiler::writeRelations(ParseTree const *relations)
 	*/
 	traverseTree(relations, &Compiler::allocate, true, true);
 	if (_n_resolved == 0) {
-	    if (_resolution_level == 0) {
-		/* At resolution level 1 we get error messages about
-		   unresolved nodes
-		*/
-		_resolution_level = 1;
+	    if (_compiler_mode == PERMISSIVE) {
+		_compiler_mode = STOP_ON_ERROR;
 	    }
 	    else break;
 	}
@@ -1283,7 +1280,7 @@ void Compiler::writeRelations(ParseTree const *relations)
 	  These will be held in the map _umap along with the line
 	  numbers on which they are used.
 	*/
-	_resolution_level = 2; //See getArraySubset
+	_compiler_mode = COLLECT_UNRESOLVED; //See getArraySubset
 	traverseTree(relations, &Compiler::allocate);
 	if (_umap.empty()) {
 	    //Not clear what went wrong here, so throw a generic error message
@@ -1295,7 +1292,7 @@ void Compiler::writeRelations(ParseTree const *relations)
 	/*
 	  Step 3: Eliminate parameters that appear on the left of a relation
 	*/
-	_resolution_level = 3;
+	_compiler_mode = CLEAN_UNRESOLVED;
 	traverseTree(relations, &Compiler::allocate);
 
 	/* 
@@ -1406,7 +1403,7 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
 Compiler::Compiler(BUGSModel &model, map<string, SArray> const &data_table)
     : _model(model), _countertab(), 
       _data_table(data_table), _n_resolved(0), 
-      _n_relations(0), _is_resolved(0), _resolution_level(0),
+      _n_relations(0), _is_resolved(0), _compiler_mode(PERMISSIVE),
       _index_expression(0), _index_nodes()
 {
     if (_model.nodes().size() != 0)
