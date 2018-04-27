@@ -395,7 +395,7 @@ Range Compiler::getRange(ParseTree const *p,
      
      The default_range argument provides default values if the range
      expression is blank: e.g. foo[] or bar[,1].  The default range 
-     may a NULL range, in which case, missing indices will result in
+     may be a NULL range, in which case, missing indices will result in
      failure.
   */
   
@@ -533,10 +533,11 @@ Range Compiler::CounterRange(ParseTree const *var)
 		      + var->name());
   }
   vector<unsigned long> indices;
-  if(!indexExpression(prange->parameters()[0], indices)) {
-      CompileError(var, "Cannot evaluate range of counter", var->name());
+  if (_resolution_level == 1) {
+      if(!indexExpression(prange->parameters()[0], indices)) {
+	  CompileError(var, "Cannot evaluate range of counter", var->name());
+      }
   }
-  
   if (indices.empty()) {
     return Range();
   }
@@ -607,8 +608,8 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 				 printRange(subset_range));
 		}
 		node = array->getSubset(subset_range, _model);
-		if (node == 0 && _resolution_level == 1) {
-		    /* At resolution level 1 we make a note of all
+		if (node == 0 && _resolution_level == 2) {
+		    /* At resolution level 2 we make a note of all
 		       subsets that could not be resolved.
 
 		       Example: we have just failed to resolve x[1:5]
@@ -662,20 +663,22 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 	    else if (!_index_expression) {
 		//A stochastic subset
 		node = getMixtureNode(p, this);
-		if (node == 0 && _resolution_level == 1) {
+		if (node == 0 && _resolution_level == 2) {
 		    getMissingMixParams(p, _umap, this);
 		}
 	    } 
 	}
-	else if (_lhs_vars.find(p->name()) == _lhs_vars.end()) {
-	    string msg = string("Unknown variable ") + p->name() + "\n" +
-		"Either supply values for this variable with the data\n" +
-		"or define it  on the left hand side of a relation.";
-	    CompileError(p, msg);
-	}
 	else if (_resolution_level == 1) {
-	    string msg = string("Possible directed cycle involving ") +
-		p->name();
+	    string msg;
+	    if (_lhs_vars.find(p->name()) == _lhs_vars.end()) {
+		msg = string("Unknown variable ") + p->name() + "\n" +
+		    "Either supply values for this variable with the data\n" +
+		    "or define it  on the left hand side of a relation.";
+	    }
+	    else {
+		msg = string("Possible directed cycle involving ") +
+		    p->name();
+	    }
 	    CompileError(p, msg);
 	}
 	
@@ -1093,7 +1096,7 @@ void Compiler::allocate(ParseTree const *rel)
 	_n_resolved++;
 	_is_resolved[_n_relations] = true;
     }
-    else if (_resolution_level == 2) {
+    else if (_resolution_level == 3) {
 	/* 
 	   Remove from the set of unresolved parameters, any array
 	   subsets that are defined on the left hand side of a
@@ -1244,14 +1247,22 @@ void Compiler::writeRelations(ParseTree const *relations)
 	   models can be very slow.
 	*/
 	traverseTree(relations, &Compiler::allocate, true, true);
-	if (_n_resolved == 0) break;
+	if (_n_resolved == 0) {
+	    if (_resolution_level == 0) {
+		/* At resolution level 1 we get error messages about
+		   unresolved nodes
+		*/
+		_resolution_level = 1;
+	    }
+	    else break;
+	}
     }
     _is_resolved.clear();
-
+    
     if (_n_resolved == 0) {
-	/* 
-	   Somes nodes remain unresolved. We need to identify them and
-	   print an informative error message for the user. 
+	/*
+	   Some nodes remain unresolved. We need to identify them and
+	   print an informative error message for the user.
 	   
 	   The basic strategy is to identify nodes that appear on the
 	   right-hand side of a relation but cannot be resolved.  Then
@@ -1266,12 +1277,13 @@ void Compiler::writeRelations(ParseTree const *relations)
 	   each other).
 	*/
 
+	
 	/*
-	  Step 1: Collect identifiers for unresolved parameters.
+	  Step 2: Collect identifiers for unresolved parameters.
 	  These will be held in the map _umap along with the line
 	  numbers on which they are used.
 	*/
-	_resolution_level = 1; //See getArraySubset
+	_resolution_level = 2; //See getArraySubset
 	traverseTree(relations, &Compiler::allocate);
 	if (_umap.empty()) {
 	    //Not clear what went wrong here, so throw a generic error message
@@ -1281,13 +1293,13 @@ void Compiler::writeRelations(ParseTree const *relations)
 	map<pair<string,Range>, set<unsigned long> > umap_copy = _umap;
 
 	/*
-	  Step 2: Eliminate parameters that appear on the left of a relation
+	  Step 3: Eliminate parameters that appear on the left of a relation
 	*/
-	_resolution_level = 2;
+	_resolution_level = 3;
 	traverseTree(relations, &Compiler::allocate);
 
 	/* 
-	   Step 3: Informative error message for the user
+	   Step 4: Informative error message for the user
 	*/
 	ostringstream oss;
 	if (!_umap.empty()) {
