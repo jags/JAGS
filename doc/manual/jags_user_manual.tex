@@ -184,26 +184,62 @@ brackets must match the dimensions of the array.
 \subsection{Restrictions on index expressions}
 
 There are some restrictions on index expressions that are allowed on
-the left hand side of a relation. Firstly, they must be fixed, meaning
-that they must be expressed in terms of data, or constants defined in
-the model, or the index of an enclosing for loop (see below).  As
-a counter-example, the following code snippet is illegal:
-\begin{verbatim}
-     i ~ dcat(p)
-   x[i] ~ dnorm(0, 1)
+the left hand side of a relation or in a for loop.
 
-\end{verbatim}
-unless $i$ is observed and is supplied with the data. This restriction
-ensures that the node \verb+x[i]+ can be unambiguously referred to
-elsewhere in the model -- e.g. as a function argument or the parameter
-for a distribution -- and does not change from one iteration to
-another. Secondly, for vector-valued subsets, the same index must not
-be repeated. For example, supposed $\mu$ is a 2-vector and $T$ is a
-$2 \times 2$ matrix. Then \verb+dmnorm(mu, T)+ defines a bivariate
-normal random variable.  However, this code snippet is illegal:
+Firstly, they must be expressed in terms of data, or the index of an
+enclosing for loop (see below). They may not be defined in terms of
+other nodes. For example, the following model is illegal:
 \begin{verbatim}
-   indices <- c(1,1)
-   x[indices] ~ dmnorm(mu, T)
+model {
+   n <- 3
+   for (i in 1:n) {
+      y[i] ~ dnorm(0, 1)
+   }
+}
+\end{verbatim}
+An attempt to compile this model will fail with the message
+\begin{verbatim}
+Compilation error on line 3.
+Variable `n` cannot be used in an index expression
+Try defining it in a data block or supplying data values.
+\end{verbatim}
+As the message suggests, there are two ways to work around this. One
+is to put the definition of \texttt{n} in a separate data block:
+\begin{verbatim}
+data {
+   n <- 3
+}
+model {
+   for (i in 1:n) {
+      y[i] ~ dnorm(0, 1)
+   }
+}
+\end{verbatim}
+The other is to remove the relation that defines \texttt{n} from the model
+\begin{verbatim}
+model {
+   for (i in 1:n) {
+      y[i] ~ dnorm(0, 1)
+   }
+}
+\end{verbatim}
+and supply the value \texttt{n=3} with the data.
+
+This may seem like an arbitrary restriction, but there is a good
+reason for it. JAGS does not force you to declare the size of your
+arrays but can work out the dimensions for you. It does this with a
+single pass through the model calculating the maximum index used in
+each array {\em before any nodes are defined}. 
+
+There is an additional restriction for vector-valued subsets. The
+indices on the left hand must be contiguous and increasing. Repeated
+or decreasing indices are disallowed.
+
+Suppose that $\mu$ is a 2-vector and $T$ is a $2 \times 2$
+matrix. Then \verb+dmnorm(mu, T)+ defines a bivariate normal random
+variable.  This relation is illegal:
+\begin{verbatim}
+   x[c(1,1)] ~ dmnorm(mu[1:2], T[1:2,1:2])
 \end{verbatim}
 as it implies writing two different values to the same element \verb+x[1]+.
 

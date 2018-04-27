@@ -29,8 +29,8 @@ class Compiler;
 
 typedef void (Compiler::*CompilerMemFn) (ParseTree const *);
 
-enum CompilerMode {PERMISSIVE, STOP_ON_ERROR, COLLECT_UNRESOLVED,
-		   CLEAN_UNRESOLVED};
+enum CompilerMode {STANDARD, GET_DIMS, COLLECT_UNRESOLVED, CLEAN_UNRESOLVED};
+
 /**
  * @short Creates a BUGSModel from a ParseTree
  */

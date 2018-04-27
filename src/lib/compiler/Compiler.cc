@@ -95,182 +95,34 @@ static void CompileError(ParseTree const *p, string const &msg1,
     throw runtime_error(msg);
 }
 
-    /*
-     * By analysing the ParseTree containing the relations, we can
-     * find variables that appear on the right hand side of a relation
-     * but which are never defined. This is such a fundamental error
-     * that it is worth doing this before trying to build the Model.
-     */
+void Compiler::getLHSVars(ParseTree const *relations)
+{
+    /* 
+       Utility function to get the names of variables used on the
+       left hand side of a relation. These are added to the set
+       _lhs_vars. The main use of this information is to give better
+       diagnostic messages when we cannot resolve a variable name.
 
-    /*
-    static void getRHSNames(ParseTree const *t,
-			    map<string, int> &rhs,
-			    vector<string> const &cntrs)
-    {
-	//Get variable names that appear on the right hand side of a
-	//relation excluding active counters, and add them to the map
-	//rhs, which also records the line number.
-
-	//Safety check: truncation expressions can have NULL pointers
-	if (t == 0) return;
-	
-	if (t->treeClass() == P_VAR) {
-	    if (find(cntrs.begin(), cntrs.end(), t->name()) == cntrs.end()) {
-		//Not an active counter
-		if (rhs.count(t->name()) == 0) {
-		    //Not already used
-		    rhs[t->name()] = t->line();
-		}
-	    }
-	}
-	for (vector<ParseTree*>::const_iterator p = t->parameters().begin();
-	     p != t->parameters().end(); ++p)
-	{
-	    //Continue recursive search
-	    getRHSNames(*p, rhs, cntrs);
-	}
-    }
-    */
-
-    /* Experimental features to add additional checks prior to compilation
-
-    static void classifyVarNames(ParseTree const *rels,
-				 set<string> &lhs,
-				 map<string, int> &rhs,
-				 vector<string> &counters)
-    {
-	//Get variable names that appear on the left hand side and
-	//the right hand side of any relation. We also track the names
-	//of the active counters.
-	
-	for (vector<ParseTree*>::const_iterator p = rels->parameters().begin();
-	     p != rels->parameters().end(); ++p)
-	{
-	    vector<ParseTree *> const &par = (*p)->parameters();
-
-	    switch ((*p)->treeClass()) {
-	    case P_FOR:
-		getRHSNames(par[0]->parameters()[0], rhs, counters);
-		counters.push_back(par[0]->name());
-		classifyVarNames(par[1], lhs, rhs, counters);
-		counters.pop_back();
-		break;
-	    case P_STOCHREL: case P_DETRMREL:
-		lhs.insert(par[0]->name());
-		for (unsigned int i = 1; i < par.size(); ++i) {
-		    getRHSNames(par[i], rhs, counters);
-		}
-		break;
-	    default:
-		throw logic_error("Malformed parse tree");
-		break;
-	    }
-	}
-    }
-
-    static void classifyVarNames(ParseTree const *relations,
-				 set<string> &lhs,
-				 map<string, int> &rhs)
-
-    {
-	//Non-recursive form of classifyVarNames. We also check that
-	//the counter stack is valid.
-	
-	vector<string> counters;
-	classifyVarNames(relations, lhs, rhs, counters);
-	if (!counters.empty()) {
-	    string msg = string("Invalid counter stack\n") +
-		"Ensure that all for loops are closed";
-	    throw runtime_error(msg);
-	}
-    }
-
-    static void checkVarNames(ParseTree const *relations,
-			      map<string, SArray> const &data_table)
-    {
-	//Check that all parameters appearing on RHS of a relation are
-	//defined, either in a declaration or in the data
-	
-	set<string> lhs;
-	map<string, int> rhs;
-	classifyVarNames(relations, lhs, rhs);
-
-	//Erase variable names that appear on the LHS of a relation
-	for(set<string>::const_iterator p = lhs.begin(); p != lhs.end(); ++p) {
-	    rhs.erase(*p);
-	}
-	//Erase variable names that appear in the data table
-	for(map<string, SArray>::const_iterator p = data_table.begin();
-	    p != data_table.end(); ++p)
-	{
-	    rhs.erase(p->first);
-	}
-	
-	if (!rhs.empty()) {
-	    ostringstream oss;
-	    oss << "Unknown variable(s):\n";
-	    for (map<string, int>::iterator p = rhs.begin(); p != rhs.end();
-		 ++p)
-	    {
-		oss << p->first << " (line " <<  p->second << ")\n";
-	    }
-	    oss << "Either supply values for these variables with the data\n"
-		<< "or define them on the left hand side of a relation.";
-	    throw runtime_error(oss.str());
-
-	}
-    }
-
-    static void checkDecNames(vector<ParseTree *> const &declarations,
-			      map<string, SArray> const &data_table)
-    {
-	//Check that dimension expressions in node declarations
-	//do not depend on undefined nodes
-	map<string, int> rhs;
-	for (unsigned int i = 0; i < declarations.size(); ++i) {
-	    vector<ParseTree *> const &pari = declarations[i]->parameters();
-	    for (unsigned int j = 0; j < pari.size(); ++j) {
-		getRHSNames(pari[j], rhs, vector<string>());
-	    }
-
-	    //Erase variable names that appear in the data table
-	    for(map<string, SArray>::const_iterator p = data_table.begin();
-		p != data_table.end(); ++p)
-	    {
-		rhs.erase(p->first);
-	    }
-	    
-	    if (!rhs.empty()) {
-		ostringstream oss;
-		oss << "Cannot calculate dimensions of " <<
-		    declarations[i]->name() <<
-		    " because the following variables are undefined:\n";
-		for (map<string, int>::iterator p = rhs.begin(); p != rhs.end();
-		     ++p)
-		{
-		    oss << p->first << " (line " <<  p->second << ")\n";
-		}
-		oss << "Supply values for these variables with the data.";
-		throw runtime_error(oss.str());
-	    }
-	}
-    }
+       Although this function has a similar recursive structure to
+       traverseTree it expands for loops without defining a counter.
     */
     
-    void Compiler::getLHSVars(ParseTree const *rel)
+    vector<ParseTree*> const &relation_list = relations->parameters();
+    for (vector<ParseTree*>::const_reverse_iterator p = relation_list.rbegin(); 
+	 p != relation_list.rend(); ++p) 
     {
-	//Utility function to get the names of variables used on the
-	//left hand side of a relation. These are added to the set
-	//_lhs_vars. The main use of this information is to give better
-	//diagnostic messages when we cannot resolve a variable name.
-
-	if (rel->treeClass() != P_STOCHREL && rel->treeClass() != P_DETRMREL) {
-	    throw logic_error("Malformed parse tree in Compiler::getLHSVars");
+	TreeClass tc = (*p)->treeClass();
+	if (tc == P_STOCHREL || tc == P_DETRMREL) {
+	    ParseTree *var = (*p)->parameters()[0];
+	    _lhs_vars.insert(var->name());
 	}
-	
-	ParseTree *var = rel->parameters()[0];
-	_lhs_vars.insert(var->name());
+	else if (tc == P_FOR) {
+	    getLHSVars((*p)->parameters()[1]);
+	}
     }
+}
+
+
     
 Node * Compiler::constFromTable(ParseTree const *p)
 {
@@ -365,7 +217,7 @@ bool Compiler::indexExpression(ParseTree const *p, vector<unsigned long> &value)
 	    double v = node->value(0)[i];
 	    if (!checkULong(v)) {
 		throw NodeError(node, 
-				"Index expression evaluates to non-integer value");
+				"Index expression evaluates to invalid value");
 	    }
 	    value.push_back(asULong(v));
 	}
@@ -533,10 +385,8 @@ Range Compiler::CounterRange(ParseTree const *var)
 		      + var->name());
   }
   vector<unsigned long> indices;
-  if (_compiler_mode == STOP_ON_ERROR) {
-      if(!indexExpression(prange->parameters()[0], indices)) {
-	  CompileError(var, "Cannot evaluate range of counter", var->name());
-      }
+  if(!indexExpression(prange->parameters()[0], indices)) {
+      CompileError(var, "Cannot evaluate range of counter", var->name());
   }
   if (indices.empty()) {
     return Range();
@@ -668,21 +518,25 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 		}
 	    } 
 	}
-	else if (_compiler_mode == STOP_ON_ERROR) {
+	else {
+	    // Array not found in symbol table.
 	    string msg;
 	    if (_lhs_vars.find(p->name()) == _lhs_vars.end()) {
-		msg = string("Unknown variable ") + p->name() + "\n" +
+		msg = string("Unknown variable `") + p->name() + "`\n" +
 		    "Either supply values for this variable with the data\n" +
 		    "or define it  on the left hand side of a relation.";
 	    }
+	    else if (_compiler_mode == GET_DIMS) {
+		msg = string("Variable `") + p->name() +
+		    "` cannot be used in an index expression\n" +
+		    "Try defining it in a data block or supplying data values.";
+	    }
 	    else {
-		msg = string("Possible directed cycle involving ") +
-		    p->name();
+		msg = string("Possible directed cycle involving variable `") +
+		    p->name() + "` ";
 	    }
 	    CompileError(p, msg);
 	}
-	
-
     }
 
     return node;
@@ -1234,7 +1088,6 @@ void Compiler::writeConstantData(ParseTree const *relations)
 void Compiler::writeRelations(ParseTree const *relations)
 {
     writeConstantData(relations);
-    traverseTree(relations, &Compiler::getLHSVars);
 
     _is_resolved = vector<bool>(_n_relations, false);
     for (unsigned long N = _n_relations; N > 0; N -= _n_resolved) {
@@ -1248,10 +1101,7 @@ void Compiler::writeRelations(ParseTree const *relations)
 	*/
 	traverseTree(relations, &Compiler::allocate, true, true);
 	if (_n_resolved == 0) {
-	    if (_compiler_mode == PERMISSIVE) {
-		_compiler_mode = STOP_ON_ERROR;
-	    }
-	    else break;
+	    break;
 	}
     }
     _is_resolved.clear();
@@ -1403,7 +1253,7 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
 Compiler::Compiler(BUGSModel &model, map<string, SArray> const &data_table)
     : _model(model), _countertab(), 
       _data_table(data_table), _n_resolved(0), 
-      _n_relations(0), _is_resolved(0), _compiler_mode(PERMISSIVE),
+      _n_relations(0), _is_resolved(0), _compiler_mode(STANDARD),
       _index_expression(0), _index_nodes()
 {
     if (_model.nodes().size() != 0)
@@ -1493,10 +1343,15 @@ void Compiler::undeclaredVariables(ParseTree const *prelations)
 	    _model.symtab().addVariable(name, p->second.dim(false));
 	}
     }
-  
-    // Infer the dimension of remaining nodes from the relations
-    traverseTree(prelations, &Compiler::getArrayDim);
 
+    // Get names of variables on the LHS of a relation
+    getLHSVars(prelations);
+
+    // Infer the dimension of remaining nodes from the relations
+    _compiler_mode = GET_DIMS;
+    traverseTree(prelations, &Compiler::getArrayDim);
+    _compiler_mode = STANDARD;
+    
     map<string, vector<unsigned long> >::const_iterator i = _node_array_bounds.begin(); 
     for (; i != _node_array_bounds.end(); ++i) {
 	if (_model.symtab().getVariable(i->first)) {
