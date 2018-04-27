@@ -29,6 +29,8 @@ class Compiler;
 
 typedef void (Compiler::*CompilerMemFn) (ParseTree const *);
 
+enum CompilerMode {PERMISSIVE, STOP_ON_ERROR, COLLECT_UNRESOLVED,
+		   CLEAN_UNRESOLVED};
 /**
  * @short Creates a BUGSModel from a ParseTree
  */
@@ -39,7 +41,7 @@ class Compiler {
   std::map<std::string, std::vector<bool> > _constant_mask;
   unsigned int _n_resolved, _n_relations;
   std::vector<bool> _is_resolved;
-  int _resolution_level;
+  CompilerMode _compiler_mode;
   int _index_expression;
   std::vector<Node*> _index_nodes;
   LogicalFactory _logicalfactory;
