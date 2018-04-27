@@ -512,7 +512,7 @@ bool Console::dumpState(map<string,SArray> &data_table,
 	vector<unsigned long> dimrng(1,rngstate.size());
 	SArray rngsarray(dimrng);
 
-	vector<double> v;
+	vector<double> v(rngstate.size());
 	copy(rngstate.begin(), rngstate.end(), v.begin());
 	rngsarray.setValue(v);
 	
