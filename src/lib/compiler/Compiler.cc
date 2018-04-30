@@ -518,27 +518,23 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 		}
 	    } 
 	}
-	else {
-	    // Array not found in symbol table.
-	    string msg;
-	    if (_lhs_vars.find(p->name()) == _lhs_vars.end()) {
-		msg = string("Unknown variable `") + p->name() + "`\n" +
-		    "Either supply values for this variable with the data\n" +
-		    "or define it  on the left hand side of a relation.";
-	    }
-	    else if (_compiler_mode == GET_DIMS) {
-		msg = string("Variable `") + p->name() +
-		    "` cannot be used in an index expression\n" +
-		    "Try defining it in a data block or supplying data values.";
-	    }
-	    else {
-		msg = string("Possible directed cycle involving variable `") +
-		    p->name() + "` ";
-	    }
+	else if (_lhs_vars.find(p->name()) == _lhs_vars.end()) {
+	    string msg = string("Unknown variable ") + p->name() + "\n" +
+		"Either supply values for this variable with the data\n" +
+		"or define it  on the left hand side of a relation.";
+	    CompileError(p, msg);
+	}
+	else if (_compiler_mode == GET_DIMS) {
+	    string msg = string("Variable `") + p->name() +
+		"` cannot be used in an index expression\n" +
+		"Try defining it in a data block or supplying data values.";
+	}
+	else if (_compiler_mode == COLLECT_UNRESOLVED) {
+	    string msg = string("Possible directed cycle involving variable `")
+		+ p->name() + "` ";
 	    CompileError(p, msg);
 	}
     }
-
     return node;
 }
 
