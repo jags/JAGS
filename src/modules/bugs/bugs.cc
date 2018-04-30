@@ -63,6 +63,7 @@
 #include <functions/InProd.h>
 #include <functions/InterpLin.h>
 #include <functions/Inverse.h>
+#include <functions/InverseLU.h>
 #include <functions/LogDet.h>
 #include <functions/LogFact.h>
 #include <functions/LogGam.h>
@@ -176,6 +177,7 @@ namespace bugs {
 	insert(new InProd);
 	insert(new InterpLin);
 	insert(new Inverse);
+	insert(new InverseLU);
 	insert(new Log);
 	insert(new LogDet);
 	insert(new LogFact);

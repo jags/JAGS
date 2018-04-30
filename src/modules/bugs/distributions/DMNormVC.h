@@ -28,10 +28,6 @@ public:
 		    std::vector<double const *> const &parameters,
 		    std::vector<std::vector<unsigned long> > const &dims,
 		    double const *lower, double const *upper, RNG *rng) const;
-  void typicalValue(double *x, unsigned long length,
-		    std::vector<double const *> const &parameters,
-		    std::vector<std::vector<unsigned long> > const &dims,
-		    double const *lower, double const *upper) const;
   /**
    * Checks that mu is a vector, T is a square matrix and the sizes of
    * mu and T conform.

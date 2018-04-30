@@ -34,12 +34,8 @@ public:
    */
   bool checkParameterDim(std::vector<std::vector<unsigned long> > const &dims) 
       const;
-  /**
-   * Checks that T is symmetric. Note that there is currently NO CHECK
-   * that T is positive definite.
-   */
   bool checkParameterValue(std::vector<double const *> const &parameters,
-                           std::vector<std::vector<unsigned long> > const &dims) 
+                           std::vector<std::vector<unsigned long> > const &dims)
       const;
   std::vector<unsigned long> 
       dim(std::vector<std::vector<unsigned long> > const &dims) const;

@@ -34,7 +34,7 @@ namespace jags {
 	    double const * V  = parameters[1];
 
 	    vector<double> T(m * m);
-	    inverse_spd (&T[0], V, m);
+	    inverse_chol (&T[0], V, m);
 
 	    double loglik = 0;
 	    vector<double> delta(m);
@@ -94,19 +94,6 @@ namespace jags {
 	    return dims[0];
 	}
 	
-	bool
-	DMNormVC::checkParameterValue(vector<double const *> const &parameters,
-				      vector<vector<unsigned long> > const &dims)
-	    const
-	{
-	    double const *precision = parameters[1];
-	    unsigned long n = dims[0][0];
-
-	    return check_symmetry(precision, n) &&
-		check_symmetric_ispd(precision, n);
-	}
-
-
 	void
 	DMNormVC::support(double *lower, double *upper, unsigned long length,
 			  vector<double const *> const &parameters,
@@ -118,17 +105,6 @@ namespace jags {
 	    }
 	}
 
-	void
-	DMNormVC::typicalValue(double *x, unsigned long m,
-			       vector<double const *> const &parameters,
-			       vector<vector<unsigned long> > const &dims,
-			       double const *lower, double const *upper) const
-	{
-	    for (unsigned long i = 0; i < m; ++i) {
-		x[i] = parameters[0][i];
-	    }
-	}
-	
 	bool DMNormVC::isSupportFixed(vector<bool> const &fixmask) const
 	{
 	    return true;

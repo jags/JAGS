@@ -49,13 +49,13 @@ namespace glm {
 	double worktest = 0;
 	int info = 0;
 	int ni = asInteger(n);
-	F77_DSYEV("N","U", &ni, &acopy[0], &ni, &w[0], &worktest, &lwork, &info);
+	F77_DSYEV("N","L", &ni, &acopy[0], &ni, &w[0], &worktest, &lwork, &info);
 	if (info != 0) {
 	    throwRuntimeError("unable to calculate workspace size for dsyev");
 	}
 	lwork = static_cast<int>(worktest);
 	double *work = new double[lwork];
-	F77_DSYEV("N","U", &ni, &acopy[0], &ni, &w[0], work, &lwork, &info);
+	F77_DSYEV("N","L", &ni, &acopy[0], &ni, &w[0], work, &lwork, &info);
 	delete [] work;
 	if (info != 0) {
 	    throwRuntimeError("unable to calculate eigenvalues in dsyev");

@@ -7,9 +7,10 @@ namespace jags {
 namespace bugs {
 
     /**
-     * @short Inverts a square symmetric matrix
+     * @short Inverts a symmetric positive-definite matrix using the Cholesky
+     * decomposition
      * <pre>
-     * y[,] <- inverse(x[,])
+     * y <- inverse.chol(x[,])
      * </pre>
      */
     class Inverse: public ArrayFunction
@@ -23,8 +24,7 @@ namespace bugs {
 	    dim(std::vector<std::vector<unsigned long> > const &args,
 		std::vector<double const *> const &values) const;
 	bool checkParameterDim(std::vector<std::vector<unsigned long> > const &dims) const;
-	bool checkParameterValue(std::vector<double const *> const &args,
-				 std::vector<std::vector<unsigned long> > const &dims) const;
+	std::string alias() const;
     };
 
 }}

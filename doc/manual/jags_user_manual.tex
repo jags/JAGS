@@ -1755,6 +1755,7 @@ Hyperbolic arc-cosine  & arccosh   & acosh & R \\
 Arc-sine               & arcsin    & asin  & R \\
 Hyperbolic arc-sine    & arcsinh   & asinh & R \\
 Arc-tangent            & arctan    & atan  & R \\
+Cholesky inverse       & invers.chol & inverse & BUGS \\
 \hline
 \end{tabular}
 \caption{Functions with aliases in \texttt{bugs} module
@@ -2175,11 +2176,9 @@ may be scalar, vector, or higher-dimensional arrays.
 \hline
 Function & Description & Restrictions \\
 \hline
-\verb+c(x1, x2, ...)+ & Combine all arguments into a vector \\
 \verb+inprod(x1,x2)+ & Inner product & Dimensions of $x1$, $x2$ conform \\
 \verb+interp.lin(e,v1,v2)+ & Linear Interpolation & $e$ scalar, \\
                           &                     & $v1,v2$ conforming vectors \\
-\verb+logdet(m)+ & Log determinant & $m$ symmetric positive definite matrix \\
 \verb+max(x1,x2,...)+ & Maximum element among all arguments & \\
 \verb+mean(x)+  & Mean of elements of $x$ & \\
 \verb+min(x1,x2,...)+ & Minimum element among all arguments & \\
@@ -2194,10 +2193,21 @@ Function & Description & Restrictions \\
   arguments}
 \end{table}
 
-\subsection{Vector- and array-valued functions}
+\subsection{Vector constructor functions}
 
-Table \ref{table:bugs:vector} lists vector- or matrix-valued functions
-in the \texttt{bugs} module. 
+The \verb+c()+ function combines its arguments to form a vector.
+\begin{verbatim}
+y <- c(x1, x2, x3)
+\end{verbatim}
+where the arguments may be scalars, vectors, matrices or
+higher-dimensional arrays. The \verb+c()+ function with a single
+argument may be used to convert a matrix (or array) to a vector, e.g.
+if \texttt{x} is an $N \times M$ matrix and
+\begin{verbatim}
+y <- c(x)
+\end{verbatim}
+then \texttt{y} is a vector of length $NM$ containing the elements of
+\texttt{x} in column-major order.
 
 The \texttt{rep} function replicates elements of a vector. If
 \begin{verbatim}
@@ -2212,14 +2222,32 @@ y <- rep(v[1:M], t[1:M])
 \end{verbatim}
 In this case element \verb+v[i]+ is replicated \verb+t[i]+ times.
 
-The  \texttt{sort} function accepts a vector and returns the
-same values sorted in ascending order; \texttt{rank} returns a vector
-of ranks of the elements; \texttt{order} returns a permutation that
-sorts the elements of the vector in ascending order.  Ties are broken
-by giving the smallest rank/order in the output vector to the element
-with the smallest index in the input vector.
+\subsection{Vector ranking and sorting functions}
 
+\begin{table}
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Usage & Description & Restrictions \\
+\hline
+\verb+rank(v)+ & Ranks of elements of $v$ & $v$ is a vector   \\
+\verb+order(v)+ & Ordering permutation of $v$ & $v$ is a vector \\
+\verb+sort(v)+ & Elements of $v$ in order & $v$ is a vector \\
+\hline
+\end{tabular}
+\caption{Vector ranking and sorting functions in the \texttt{bugs}
+  module \label{table:bugs:ranking}}
+\end{center}
+\end{table}
 
+Vector ranking and sorting functions in the bugs module are summarized
+in table~\ref{table:bugs:ranking}. The \texttt{sort} function accepts
+a vector and returns the same values sorted in ascending order;
+\texttt{rank} returns a vector of ranks of the elements;
+\texttt{order} returns a permutation that sorts the elements of the
+vector in ascending order.  Ties are broken by giving the smallest
+rank/order in the output vector to the element with the smallest index
+in the input vector.
 
 The \texttt{order} and \texttt{rank} functions are complementary
 in the sense that if
@@ -2252,6 +2280,7 @@ When $z$ is a stochastic vector, the first code is invalid -- JAGS
 only allows fixed indices on the left hand side of a relation -- but
 the second code still works.
 
+\subsection{Matrix functions}
 
 \begin{table}
 \begin{center}
@@ -2259,21 +2288,67 @@ the second code still works.
 \hline
 Usage & Description & Restrictions \\
 \hline
-\verb+inverse(a)+ & Matrix inverse & $a$ is a symmetric positive definite matrix  \\
-%\verb+mexp(a)+ & Matrix exponential & $a$ is a square matrix \\
-\verb+rank(v)+ & Ranks of elements of $v$ & $v$ is a vector   \\
-\verb+rep(v, t)+ & Replicate elements of $v$ & $v,t$ are vectors, $t$ is integer\\
-\verb+order(v)+ & Ordering permutation of $v$ & $v$ is a vector \\
-\verb+sort(v)+ & Elements of $v$ in order & $v$ is a vector  \\
-\verb+t(a)+    & Transpose                & $a$ is a matrix \\
-\verb+a %*% b+  & Matrix multiplication & $a,b$ conforming vector or matrices\\
+\verb+inverse.chol(m)+ & Matrix inverse & $m$ is a symmetric positive definite matrix  \\
+\verb+inverse.lu(m)+ & Matrix inverse & $m$ is an invertible square matrix  \\
+\verb+logdet(m)+ & Log determinant & $m$ symmetric positive definite matrix \\
+\verb+t(m)+    & Transpose                & $a$ is a matrix \\
+\verb+m1 %*% m2+  & Matrix multiplication & $m1,m2$ conforming vector or matrices\\
 
 \hline
 \end{tabular}
-\caption{Vector- or matrix-valued functions in the \texttt{bugs}
-  module \label{table:bugs:vector}}
+\caption{Functions on matrices in the \texttt{bugs}
+  module \label{table:bugs:matrix}}
 \end{center}
 \end{table}
+
+Functions taking matrix arguments are summarized in
+table~\ref{table:bugs::matrix}.
+
+The matrix multiplication operator \verb+%*%+ operator is an example
+of the binary \verb+%special%+ operator discussed in
+section~\ref{section:base:functions}. The two input matrices must be
+conforming, {\em i.e.} for \verb+m1 %*% m2+ to be valid, the number of
+columns of $m1$ must equal the number of rows of $m2$. If the first
+argument is a vector then it is treated as a row-vector (a matrix with
+one row), and if the second argument is a vector then it is treated as
+a column vector (a matrix with one column).
+
+The \texttt{t} function returns the transpose of any input matrix. If
+$v$ is a vector then \texttt{t(v)} treats $v$ as a column vector and
+returns a row vector.
+
+There are two functions to perform matrix inversion. The most general
+one is \texttt{matrix.lu} which uses the LU decomposition\footnote{The
+  matrix $M$ is decomposed as $M = LU$ where L is lower-triangular and
+  U is upper-triangular. It can then be inverted by solving two sets
+  of triangular equations} and works with any square invertible
+matrix.  Many of the matrices associated with multivariate probability
+distributions have additional constraints: they are {\em symmetric}
+({\em i.e.} $m_{ij} = m_{ji}$) and {\em positive definite} ({\em i.e.}
+$x^T M x > 0$ for any conforming vector $x$). This is true for
+variance and precision matrices, for example. To invert these matrices
+use the \texttt{matrix.chol} function. The \texttt{inverse.chol}
+function has the alias \texttt{inverse} for compatibility with
+OpenBUGS and earlier versions of JAGS.
+
+The \texttt{logdet} function calculates the log-determinant of a
+symmetric positive-definite matrix. It may be useful in custom
+likelihood calculations.
+
+\subsubsection{Notes on symmetric positive definite matrices}
+
+The \texttt{inverse.chol} and \texttt{logdet} functions do not check
+the symmetry of the input matrix. They only use the lower triangle of
+the input matrix and assume that the upper triangle is symmetric. It
+is therefore recommended to use these functions only when the input is
+guaranteed to be symmetric. Applying these functions to arbitrary
+matrices risks generating spurious results without any visible error
+message. 
+
+The same considerations apply to multivariate distributions that
+expect a symmetric positive definite matrix as input,
+e.g. {\texttt{dmnorm}, \texttt{dmt} and \texttt{dwish} in the bugs
+  module and \texttt{dscaled.wishart} in the glm module.
 
 \section{Distributions in the bugs module}
 \label{section:bugs:distributions}

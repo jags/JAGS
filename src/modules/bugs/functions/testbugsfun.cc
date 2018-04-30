@@ -342,7 +342,7 @@ void BugsFunTest::name()
     CPPUNIT_ASSERT_EQUAL(string("sort"), _sort->name());
 
     //Matrix functions
-    CPPUNIT_ASSERT_EQUAL(string("inverse"), _inverse->name());
+    CPPUNIT_ASSERT_EQUAL(string("inverse.chol"), _inverse->name());
     CPPUNIT_ASSERT_EQUAL(string("logdet"), _logdet->name());
     CPPUNIT_ASSERT_EQUAL(string("%*%"), _matmult->name());
     CPPUNIT_ASSERT_EQUAL(string("t"), _transpose->name());
@@ -412,7 +412,7 @@ void BugsFunTest::alias()
     CPPUNIT_ASSERT_EQUAL(string(""), _sort->alias());
 
     //Matrix functions
-    CPPUNIT_ASSERT_EQUAL(string(""), _inverse->alias());
+    CPPUNIT_ASSERT_EQUAL(string("inverse"), _inverse->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _logdet->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _matmult->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _transpose->alias());

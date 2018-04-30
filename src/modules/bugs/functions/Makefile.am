@@ -13,7 +13,8 @@ Sort.cc Rank.cc Abs.cc Cos.cc Sin.cc Tan.cc Cosh.cc Sinh.cc Tanh.cc	\
 ArcCos.cc ArcSin.cc ArcTan.cc ArcCosh.cc ArcSinh.cc ArcTanh.cc		\
 InterpLin.cc Round.cc Trunc.cc Equals.cc Prod.cc MatMult.cc		\
 Transpose.cc DSumFunc.cc DIntervalFunc.cc DRoundFunc.cc IfElse.cc	\
-Order.cc Combine.cc Rep.cc BesselI.cc BesselJ.cc BesselK.cc BesselY.cc
+Order.cc Combine.cc Rep.cc BesselI.cc BesselJ.cc BesselK.cc BesselY.cc  \
+InverseLU.cc
 
 noinst_HEADERS = LogGam.h Phi.h Sum.h Log.h Logit.h Probit.h		\
 CLogLog.h InProd.h Max.h SD.h ICLogLog.h Mean.h Sqrt.h ILogit.h Min.h	\
@@ -21,7 +22,8 @@ Step.h Exp.h LogFact.h Inverse.h LogDet.h Sort.h Rank.h Abs.h Cos.h	\
 Sin.h Tan.h Cosh.h Sinh.h Tanh.h ArcCos.h ArcSin.h ArcTan.h ArcCosh.h	\
 ArcSinh.h ArcTanh.h InterpLin.h Round.h Trunc.h Equals.h Prod.h		\
 MatMult.h Transpose.h DSumFunc.h DIntervalFunc.h DRoundFunc.h		\
-IfElse.h Order.h Combine.h Rep.h BesselI.h BesselJ.h BesselK.h BesselY.h
+IfElse.h Order.h Combine.h Rep.h BesselI.h BesselJ.h BesselK.h BesselY.h \
+InverseLU.h
 
 ### Test library 
 

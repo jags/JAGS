@@ -98,13 +98,7 @@ DMT::checkParameterValue(vector<double const *> const &parameters,
     double const *T = parameters[1];
     double k = *parameters[2];
 
-    if (k < 2) {
-	return false;
-    }
-    else {
-	//NB Not checking positive definiteness
-	return check_symmetry(T, n);
-    }
+    return k >= 2;
 }
 
 

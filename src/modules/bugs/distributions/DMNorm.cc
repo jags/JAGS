@@ -125,21 +125,17 @@ bool DMNorm::checkParameterDim(vector<vector<unsigned long> > const &dims) const
     return true;
 }
 
+bool DMNorm::checkParameterValue(vector<double const *> const &parameters,
+				 vector<vector<unsigned long> > const &dims)
+    const
+{
+    return true; //FIXME: Define default in base clase
+}
+    
 vector<unsigned long> DMNorm::dim(vector<vector<unsigned long> > const &dims) const
 {
     return dims[0];
 }
-
-bool
-DMNorm::checkParameterValue(vector<double const *> const &parameters,
-			    vector<vector<unsigned long> > const &dims) const
-{
-    double const *precision = parameters[1];
-    unsigned long n = dims[0][0];
-
-    return check_symmetry(precision, n) && check_symmetric_ispd(precision, n);
-}
-
 
 void DMNorm::support(double *lower, double *upper, unsigned long length,
 		     vector<double const *> const &parameters,

@@ -36,12 +36,4 @@ namespace bugs {
 	return vector<unsigned long>(1,1);
     }
 
-
-    bool 
-    LogDet::checkParameterValue(vector<double const *> const &args,
-				vector<vector<unsigned long> > const &dims) const
-    {
-	return check_symmetry(args[0], dims[0][0]);
-    }
-
 }}
