@@ -162,9 +162,10 @@ bool inverse_chol (double *X, double const *A, unsigned long n)
 	throwRuntimeError("Cannot invert symmetric positive definite matrix");
     }
 
+    //Copy lower to upper triangle
     for (unsigned long i = 0; i < n; ++i) {
 	for (unsigned long j = 0; j < i; ++j) {
-	    X[j*n + i] = X[i*n + j];
+	    X[i*n + j] = X[j*n + i];
 	}
     }
 

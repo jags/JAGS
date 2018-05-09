@@ -107,10 +107,10 @@ static void sampleWishart(double *X, int length,
     double zero = 0;
     F77_DSYRK("L", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, X, &nrow);
 
-    // Copy upper triangle of X to lower triangle
+    // Copy lower triangle of X to upper triangle
     for (int i = 0; i < nrow; ++i) {
 	for (int j = 0; j < i; ++j) {
-	    X[j * nrow + i] = X[i * nrow + j];
+	    X[i * nrow + j] = X[j * nrow + i];
 	}
     }
 }

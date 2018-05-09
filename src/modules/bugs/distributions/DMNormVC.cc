@@ -110,5 +110,11 @@ namespace jags {
 	    return true;
 	}
 
+	bool DMNormVC::checkParameterValue(vector<double const *> const &parameters,
+					   vector<vector<unsigned long> > const &dims) const
+	{
+	    return true; //FIXME: define in base class
+	}
+
     }
 }

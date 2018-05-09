@@ -103,12 +103,12 @@ namespace jags {
 	    // Z = Z %*% C 
 	    double one = 1;
 	    
-	    F77_DTRMM("R", "L", "N", "N", &ni, &ni, &one, &C[0], &ni,
+	    F77_DTRMM("R", "U", "N", "N", &ni, &ni, &one, &C[0], &ni,
 		      &Z[0], &ni);
 
 	    // X = t(Z) %*% Z
 	    double zero = 0;
-	    F77_DSYRK("L", "T", &ni, &ni, &one, &Z[0], &ni, &zero, X, &ni);
+	    F77_DSYRK("U", "T", &ni, &ni, &one, &Z[0], &ni, &zero, X, &ni);
 
 	    // Copy upper triangle of X to lower triangle
 	    for (unsigned long i = 0; i < nrow; ++i) {
