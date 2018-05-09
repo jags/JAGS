@@ -294,12 +294,14 @@ Range Compiler::getRange(ParseTree const *p,
     }
   }
 
+  /*
   if (!isNULL(default_range)) {
       // If a default range is given, the subset cannot be outside of it
       if (!default_range.contains(Range(scope))) {
 	  CompileError(p, "Index out of range taking subset of ", name);
       }
   }
+  */
   
   return Range(scope);
 }
@@ -317,13 +319,12 @@ SimpleRange Compiler::VariableSubsetRange(ParseTree const *var)
 
     string const &name = var->name();
     if (_countertab.getCounter(name)) {
-	CompileError(var, "Attempt to redefine counter defined in for loop:",
+	CompileError(var, "Attempt to redefine counter inside a for loop:",
 		     name);
     }
     NodeArray *array = _model.symtab().getVariable(name);
     SimpleRange default_range;
-    if (array) {
-	// Declared node
+    if (array && array->isLocked()) {
 	vector<ParseTree*> const &range_list = var->parameters();
     
 	if (range_list.empty()) {
@@ -339,7 +340,8 @@ SimpleRange Compiler::VariableSubsetRange(ParseTree const *var)
 
     Range range = getRange(var, default_range);
     if (isNULL(range)) {
-	CompileError(var, "Cannot evaluate subset expression for", name);
+	return SimpleRange();
+	//CompileError(var, "Cannot evaluate subset expression for", name);
     }
     
     //New in 4.1.0: Enforce use of simple ranges on the LHS of a relation
@@ -450,13 +452,19 @@ Node *Compiler::getArraySubset(ParseTree const *p)
     else {
 	NodeArray *array = _model.symtab().getVariable(p->name());
 	if (array) {
-	    Range subset_range = getRange(p, array->range());
+	    SimpleRange default_range;
+	    if (array->isLocked()) {
+		default_range = array->range();
+	    }
+	    Range subset_range = getRange(p, default_range);
 	    if (!isNULL(subset_range)) {
 		//A fixed subset
+		/*
 		if (!array->range().contains(subset_range)) {
 		    CompileError(p, "Subset out of range:", array->name() +
 				 printRange(subset_range));
 		}
+		*/
 		node = array->getSubset(subset_range, _model);
 		if (node == 0 && _compiler_mode == COLLECT_UNRESOLVED) {
 		    /* Nake a note of all subsets that could not be
@@ -510,7 +518,7 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 		    }
 		}
 	    }
-	    else if (!_index_expression) {
+	    else if (array->isLocked() && !_index_expression) {
 		//A stochastic subset
 		node = getMixtureNode(p, this);
 		if (node == 0 && _compiler_mode == COLLECT_UNRESOLVED) {
@@ -523,11 +531,6 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 		"Either supply values for this variable with the data\n" +
 		"or define it  on the left hand side of a relation.";
 	    CompileError(p, msg);
-	}
-	else if (_compiler_mode == GET_DIMS) {
-	    string msg = string("Variable `") + p->name() +
-		"` cannot be used in an index expression\n" +
-		"Try defining it in a data block or supplying data values.";
 	}
 	else if (_compiler_mode == COLLECT_UNRESOLVED) {
 	    string msg = string("Possible directed cycle involving variable `")
@@ -921,9 +924,21 @@ void Compiler::allocate(ParseTree const *rel)
 	ParseTree *var = rel->parameters()[0];
 	NodeArray *array = symtab.getVariable(var->name());
 	if (!array) {
-	    //Undeclared array. Its size is inferred from the dimensions of
-	    //the newly created node
-	    vector<unsigned long> const &dim = node->dim();
+	    //Undeclared array. Create a new array big enough to
+	    //contain the node
+	    vector<unsigned long> dim = node->dim();
+	    SimpleRange target_range = VariableSubsetRange(var);
+	    bool lock = false;
+	    if (isNULL(target_range)) {
+		//No range given on LHS. New node fills the whole array
+		target_range = SimpleRange(dim);
+		lock = true;
+	    }
+	    else {
+		//Range given on LHS. Set initial dimension of array
+		//to be equal to the upper limit of the target range.
+		dim = target_range.upper();
+	    }
 	    for (unsigned int i = 0; i < dim.size(); ++i) {
 		if (dim[i] == 0) {
 		    CompileError(var, "Zero dimension for variable " +
@@ -932,7 +947,10 @@ void Compiler::allocate(ParseTree const *rel)
 	    }
 	    symtab.addVariable(var->name(), dim);
 	    array = symtab.getVariable(var->name());
-	    array->insert(node, array->range());
+	    array->insert(node, target_range);
+	    if (lock) {
+		array->lock();
+	    }
 	}
 	else {
 	    // Check if a node is already inserted into this range
@@ -972,8 +990,6 @@ void Compiler::allocate(ParseTree const *rel)
 	}
     }
 }
-
-
     
 void Compiler::setConstantMask(ParseTree const *rel)
 {
@@ -1086,6 +1102,7 @@ void Compiler::writeRelations(ParseTree const *relations)
     writeConstantData(relations);
 
     _is_resolved = vector<bool>(_n_relations, false);
+    bool noresolve = false;
     for (unsigned long N = _n_relations; N > 0; N -= _n_resolved) {
 	_n_resolved = 0;
 	/* 
@@ -1097,10 +1114,20 @@ void Compiler::writeRelations(ParseTree const *relations)
 	*/
 	traverseTree(relations, &Compiler::allocate, true, true);
 	if (_n_resolved == 0) {
-	    break;
+	    if (noresolve) {
+		break;
+	    }
+	    else {
+		_model.symtab().lock();
+		noresolve = true;
+	    }
+	}
+	else {
+	    noresolve = false;
 	}
     }
-    _is_resolved.clear();
+    _is_resolved.clear(); //Why?
+    _model.symtab().lock();
     
     if (_n_resolved == 0) {
 	/*
@@ -1187,7 +1214,7 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
        Traverse parse tree, expanding FOR loops and applying function
        fun to relations.
 
-       In JAGS 4.3.0 we do a breadth first search, i.e. we process the
+       In JAGS >= 4.3.0 we do a breadth first search, i.e. we process the
        relations within each block before expanding the for loops. This
        allows us to optionally reverse through the relations. See
        writeRelations for more details.
@@ -1303,10 +1330,13 @@ void Compiler::declareVariables(vector<ParseTree*> const &dec_list)
 	_model.symtab().addVariable(name, dim);
     }
 
+    //Lock declared arrays
+    NodeArray *array = _model.symtab().getVariable(name);
+    array->lock();
+
     //Check consistency with data, if supplied
     map<string, SArray>::const_iterator q = _data_table.find(name);
     if (q != _data_table.end()) {
-	NodeArray const *array = _model.symtab().getVariable(name);
 	if (q->second.range() != array->range()) {
 	    string msg = string("Dimensions of ") + name + 
 		" in declaration (" + printRange(array->range()) + 
@@ -1315,76 +1345,27 @@ void Compiler::declareVariables(vector<ParseTree*> const &dec_list)
 	    CompileError(node_dec, msg);
 	}
     }
+
   }
 }
 
 void Compiler::undeclaredVariables(ParseTree const *prelations)
 {
-    //Find parameters on RHS of relations that are never defined
-    //checkVarNames(prelations, _data_table);
-    
     // Get undeclared variables from data table
     for (map<string, SArray>::const_iterator p = _data_table.begin();
 	 p != _data_table.end(); ++p) 
     {
 	string const &name = p->first;
-	NodeArray const *array = _model.symtab().getVariable(name);
-	if (array) {
-	    if (p->second.range() != array->range()) {
-		//Should have been checked already in declareVariables
-		throw logic_error("Dimension mismatch");
-	    }
-	}
-	else {
+	NodeArray *array = _model.symtab().getVariable(name);
+	if (!array) {
 	    _model.symtab().addVariable(name, p->second.dim(false));
+	    array = _model.symtab().getVariable(name);
+	    array->lock();
 	}
     }
 
     // Get names of variables on the LHS of a relation
     getLHSVars(prelations);
-
-    // Infer the dimension of remaining nodes from the relations
-    _compiler_mode = GET_DIMS;
-    traverseTree(prelations, &Compiler::getArrayDim);
-    _compiler_mode = STANDARD;
-    
-    map<string, vector<unsigned long> >::const_iterator i = _node_array_bounds.begin(); 
-    for (; i != _node_array_bounds.end(); ++i) {
-	if (_model.symtab().getVariable(i->first)) {
-	    //Node already declared or defined by data. Check consistency 
-	    NodeArray const * array = _model.symtab().getVariable(i->first);
-	    vector<unsigned long> const &upper = array->range().upper();
-	    if (upper.size() != i->second.size()) {
-		string msg = "Dimension mismatch for variable ";
-		msg.append(i->first);
-		throw runtime_error(msg);
-	    }
-	    for (unsigned int j = 0; j < upper.size(); ++j) {
-		if (i->second[j] <= 0 || i->second[j] > upper[j]) {
-		    string msg =  string("Index out of range for variable ") + 
-			i->first;
-		    throw runtime_error(msg);
-		}
-	    } 
-	}
-	else {
-	    //Variable not declared. Use inferred size
-	    vector<unsigned long> const &upper = i->second;
-	    unsigned long ndim = upper.size();
-	    vector<unsigned long> dim(ndim);
-	    for (unsigned int j = 0; j < ndim; ++j) {
-		if (upper[j] <= 0) {
-		    string msg = string("Invalid dimension for ") + i->first;
-		    throw runtime_error(msg);
-		}
-		else {
-		    dim[j] = static_cast<unsigned int>(upper[j]);
-		}
-	    }
-				 
-	    _model.symtab().addVariable(i->first, dim);
-	}
-    }
 }
 
 /* 

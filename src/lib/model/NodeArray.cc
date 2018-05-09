@@ -23,7 +23,6 @@ using std::logic_error;
 using std::set;
 using std::numeric_limits;
 
-
 static bool hasRepeats(jags::Range const &target_range) 
 {
     /* Returns true if the target range has any repeated indices 
@@ -43,80 +42,148 @@ static bool hasRepeats(jags::Range const &target_range)
     return false;
 }
 
-namespace jags {
+static vector<unsigned long> expand(vector<unsigned long> const &dim)
+{
+    vector<unsigned long> truedim = dim;
+    for (unsigned long i = 0; i < dim.size(); ++i) {
+	truedim[i] = static_cast<unsigned long>(1.05 * dim[i]);
+    }
 
+    return truedim;
+}
+
+namespace jags {
+    
     NodeArray::NodeArray(string const &name, vector<unsigned long> const &dim, 
 			 unsigned int nchain)
-	: _name(name), _range(dim), _nchain(nchain), 
-	  _node_pointers(product(dim), 0),
-	  _offsets(product(dim), numeric_limits<unsigned long>::max())
+	: _name(name), _range(dim), _true_range(expand(dim)), _nchain(nchain), 
+	  _node_pointers(product(expand(dim)), 0),
+	  _offsets(product(expand(dim)), numeric_limits<unsigned long>::max()),
+	  _locked(false)
 	  
     {
     }
 
+    void NodeArray::grow(Range const &target_range) {
+
+	vector<unsigned long> upper = _range.upper();
+	vector<unsigned long> true_upper = _true_range.upper();
+	
+	bool resize = false, extend = false;
+	vector<vector<unsigned long> > const &scope = target_range.scope();
+	for (unsigned long d = 0; d < scope.size(); ++d) {
+	    vector<unsigned long> const &v = scope[d];
+	    for (unsigned long i = 0; i < v.size(); ++i) {
+		if (v[i] > true_upper[d]) {
+		    upper[d] = v[i];
+		    true_upper[d] = v[i];
+		    resize = true;
+		}
+		else if (v[i] > upper[d]) {
+		    upper[d] = v[i];
+		    extend = true;
+		}
+	    }
+	}
+
+	if (resize) {
+	    SimpleRange new_range = SimpleRange(upper);
+	    SimpleRange new_true_range = SimpleRange(expand(upper));
+	    unsigned long N  = product(new_true_range.dim(false));
+	    vector<unsigned long> new_offsets(N, numeric_limits<unsigned long>::max());
+	    vector<Node *> new_node_pointers(N, 0);
+	    for (RangeIterator p(_range); !p.atEnd(); p.nextLeft()) {
+		unsigned long k = _true_range.leftOffset(p);
+		unsigned long l = new_true_range.leftOffset(p);
+		new_offsets[l] = _offsets[k];
+		new_node_pointers[l] = _node_pointers[k];
+	    }
+
+	    _range = new_range;
+	    _true_range = new_true_range;
+	    _node_pointers = new_node_pointers;
+	    _offsets = new_offsets;
+	}
+	else if (extend) {
+	    _range = SimpleRange(upper);
+	}
+	
+    }
+    
     void NodeArray::insert(Node *node, Range const &target_range)
     {
-	if (!node) {
-	    throw logic_error(string("Attempt to insert NULL node at ") + 
-			      name() + printRange(target_range));
-	}
-	if (node->dim() != target_range.dim(true)) {
-	    throw runtime_error(string("Cannot insert node into ") + name() + 
-				printRange(target_range) +
-				". Dimension mismatch");
-	}
-	if (!_range.contains(target_range)) {
-	    throw runtime_error(string("Cannot insert node into ") + name() + 
-				printRange(target_range) +
-				". Range out of bounds");
-	}
+	// Check validity of target range
 	if (hasRepeats(target_range)) {
 	    throw runtime_error(string("Cannot insert node into ") + name() +
 				printRange(target_range) + 
 				". Range has repeat indices");
 	}
-
-	/* Check that the range is not already occupied, even partially */
+	if (!_range.contains(target_range)) {
+	    if (_locked) {
+		throw runtime_error(string("Cannot insert node into ") + name()
+				    + printRange(target_range) +
+				    ". Range out of bounds");
+	    }
+	    else {
+		grow(target_range);
+	    }
+	}
 	for (RangeIterator p(target_range); !p.atEnd(); p.nextLeft()) {
-	    if (_node_pointers[_range.leftOffset(p)] != 0) {
+	    if (_node_pointers[_true_range.leftOffset(p)] != 0) {
 		throw runtime_error(string("Node ") + name() 
 				    + printRange(target_range)
 				    + " overlaps previously defined nodes");
 	    }
 	}
-	
-	/* Set the _node_pointers array and the offset array */
-	unsigned long k = 0;
-	for (RangeIterator p(target_range); !p.atEnd(); p.nextLeft())
-	{
-	    unsigned long i = _range.leftOffset(p);
-	    _node_pointers[i] = node;
-	    _offsets[i] = k++;
+	if (!node) {
+	    //Was an error but now NodeArrays can grow dynamically it is
+	    //useful to be able to pass a null node.
+	    return;
 	}
 	
-	/* Add multivariate nodes to range map */
+	if (node->dim() != target_range.dim(true)) {
+	    throw runtime_error(string("Cannot insert node into ") + name() + 
+				printRange(target_range) +
+				". Dimension mismatch");
+	}
+	
+	// Set the _node_pointers array and the offset array
+	unsigned long s = 0;
+	for (RangeIterator p(target_range); !p.atEnd(); p.nextLeft())
+	{
+	    unsigned long k = _true_range.leftOffset(p);
+	    _node_pointers[k] = node;
+	    _offsets[k] = s++;
+	}
+	
+	// Add multivariate nodes to range map
 	if (node->length() > 1) {
 	    _mv_nodes[target_range] = node;
 	}
 	
-	/* Add node to the graph */
+	// Add node to the graph
 	_member_graph.insert(node);
     }
     
     Node *NodeArray::getSubset(Range const &target_range, Model &model)
     {
 	//Check validity of target range
-	if (!_range.contains(target_range)) {
-	    throw runtime_error(string("Cannot get subset ") + name() + 
-				printRange(target_range) +
-				". Range out of bounds");
+	if (!isNULL(target_range) && !_range.contains(target_range)) {
+	    if (_locked) {
+		throw runtime_error(string("Cannot get subset ") + name() + 
+				    printRange(target_range) +
+				    ". Range out of bounds");
+	    }
+	    else {
+		return 0;
+	    }
 	}
 	
 	if (target_range.length() == 1) {
-	    unsigned long start = _range.leftOffset(target_range.first());
-	    Node *node = _node_pointers[start];
+	    unsigned long i = _true_range.leftOffset(target_range.first());
+	    Node *node = _node_pointers[i];
 	    if (node && node->length() == 1) {
-		if (_offsets[start] != 0) {
+		if (_offsets[i] != 0) {
 		    throw logic_error("Invalid scalar node in NodeArray");
 		}
 		return node;
@@ -141,7 +208,7 @@ namespace jags {
 	vector<Node const *> nodes;
 	vector<unsigned long> offsets;
 	for (RangeIterator q(target_range); !q.atEnd(); q.nextLeft()) {
-	    unsigned long i = _range.leftOffset(q);
+	    unsigned long i = _true_range.leftOffset(q);
 	    if (_node_pointers[i] == 0) {
 		return 0;
 	    }
@@ -158,22 +225,22 @@ namespace jags {
 
     void NodeArray::setValue(SArray const &value, unsigned int chain)
     {
-	if (!(_range == value.range())) {
+	if (_range != value.range()) {
 	    throw runtime_error(string("Dimension mismatch in ") + name());
 	}
 	
 	vector<double> const &x = value.value();
-	unsigned long N = value.length();
 	
 	//Gather all the nodes for which a data value is supplied
-	set<Node*> setnodes; 
-	for (unsigned int i = 0; i < _range.length(); ++i) {
-	    if (x[i] != JAGS_NA) {
-		Node *node = _node_pointers[i];
+	set<Node*> setnodes;
+	for (RangeIterator p(_range); !p.atEnd(); p.nextLeft()) {
+	    unsigned long j = _range.leftOffset(p);
+	    if (x[j] != JAGS_NA) {
+		unsigned long k = _true_range.leftOffset(p);
+		Node *node = _node_pointers[k];
 		if (node == 0) {
 		    string msg = "Attempt to set value of undefined node ";
-		    throw runtime_error(msg + name() + 
-					printIndex(value.range().leftIndex(i)));
+		    throw runtime_error(msg + name() + printIndex(p));
 		}
 		switch(node->randomVariableStatus()) {
 		case RV_FALSE:
@@ -190,7 +257,7 @@ namespace jags {
 	}
   
 
-	for (set<Node*>::const_iterator p = setnodes.begin(); 
+	for (set<Node*>::const_iterator p = setnodes.begin();
 	     p != setnodes.end(); ++p) 
 	{
 	    //Step through each node
@@ -199,13 +266,15 @@ namespace jags {
 	    vector<double> node_value(node->length());
 
 	    //Get vector of values for this node
-	    for (unsigned int i = 0; i < N; ++i) {
-		if (_node_pointers[i] == node) {
-		    if (_offsets[i] > node->length()) {
+	    for (RangeIterator q(_range); !q.atEnd(); q.nextLeft()) {
+		unsigned long k = _true_range.leftOffset(q);
+		if (_node_pointers[k] == node) {
+		    if (_offsets[k] > node->length()) {
 			throw logic_error("Invalid offset in NodeArray::setValue");
 		    }
 		    else {
-			node_value[_offsets[i]] = x[i];
+			unsigned long j = _range.leftOffset(q);
+			node_value[_offsets[k]] = x[j];
 		    }
 		}
 	    }
@@ -222,54 +291,56 @@ namespace jags {
 	}
     }
 
-void NodeArray::getValue(SArray &value, unsigned int chain, 
-			 bool (*condition)(Node const *)) const
-{
-    if (!(_range == value.range())) {
-	string msg("Dimension mismatch when getting value of node array ");
-	msg.append(name());
-	throw runtime_error(msg);
-    }
-
-    unsigned long array_length = _range.length();
-    vector<double> array_value(array_length);
-    for (unsigned int j = 0; j < array_length; ++j) {
-	Node const *node = _node_pointers[j];
-	if (node && condition(node)) {
-	    array_value[j] = node->value(chain)[_offsets[j]];
+    void NodeArray::getValue(SArray &value, unsigned int chain, 
+			     bool (*condition)(Node const *)) const
+    {
+	if (_range != value.range()) {
+	    string msg("Dimension mismatch when getting value of node array ");
+	    msg.append(name());
+	    throw runtime_error(msg);
 	}
-	else {
-	    array_value[j] = JAGS_NA;
-	}
-    }
 
-    value.setValue(array_value);
-}
-
-void NodeArray::setData(SArray const &value, Model *model)
-{
-    if (!(_range == value.range())) {
-	throw runtime_error(string("Dimension mismatch when setting value of node array ") + name());
-    }
-
-    vector<double> const &x = value.value();
-  
-    //Gather all the nodes for which a data value is supplied
-    for (unsigned int i = 0; i < _range.length(); ++i) {
-	if (x[i] != JAGS_NA) {
-	    if (_node_pointers[i] == 0) {
-		//Insert a new constant data node
-		ConstantNode *cnode = new ConstantNode(x[i], _nchain, true);
-		model->addNode(cnode);
-		vector<unsigned long> index = _range.leftIndex(i);
-		insert(cnode, SimpleRange(index, index));
+	vector<double> array_value(_range.length());
+	for (RangeIterator p(_range); !p.atEnd(); p.nextLeft()) {
+	    unsigned long j = _range.leftOffset(p);
+	    unsigned long k = _true_range.leftOffset(p);
+	    Node const *node = _node_pointers[k];
+	    if (node && condition(node)) {
+		array_value[j] = node->value(chain)[_offsets[k]];
 	    }
 	    else {
-		throw logic_error("Error in NodeArray::setData");
+		array_value[j] = JAGS_NA;
+	    }
+	}
+
+	value.setValue(array_value);
+    }
+
+    void NodeArray::setData(SArray const &value, Model *model)
+    {
+	if (_range != value.range()) {
+	    throw runtime_error(string("Dimension mismatch when setting value of node array ") + name());
+	}
+
+	vector<double> const &x = value.value();
+  
+	//Gather all the nodes for which a data value is supplied
+	for (RangeIterator p(_range); !p.atEnd(); p.nextLeft()) {
+	    unsigned long j = _range.leftOffset(p);
+	    if (x[j] != JAGS_NA) {
+		unsigned long k = _true_range.leftOffset(p);
+		if (_node_pointers[k] == 0) {
+		    //Insert a new constant data node
+		    ConstantNode *cnode = new ConstantNode(x[j], _nchain, true);
+		    model->addNode(cnode);
+		    insert(cnode, SimpleRange(p, p));
+		}
+		else {
+		    throw logic_error("Error in NodeArray::setData");
+		}
 	    }
 	}
     }
-}
 
 
     string const &NodeArray::name() const
@@ -290,10 +361,10 @@ void NodeArray::setData(SArray const &value, Model *model)
 	
 	//Look among inserted nodes first
 	if (node->length() == 1) {
-	    for (unsigned int i = 0; i < _range.length(); ++i) {
+	    for (unsigned int i = 0; i < _true_range.length(); ++i) {
 		if (_node_pointers[i] == node) {
-		    return SimpleRange(_range.leftIndex(i),
-				       _range.leftIndex(i));
+		    return SimpleRange(_true_range.leftIndex(i),
+				       _true_range.leftIndex(i));
 		}
 	    }
 	}
@@ -326,6 +397,16 @@ void NodeArray::setData(SArray const &value, Model *model)
     unsigned int NodeArray::nchain() const
     {
 	return _nchain;
+    }
+
+    void NodeArray::lock()
+    {
+	_locked = true;
+    }
+
+    bool NodeArray::isLocked() const
+    {
+	return _locked;
     }
 	
 } //namespace jags

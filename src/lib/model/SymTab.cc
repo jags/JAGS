@@ -173,4 +173,13 @@ string SymTab::getName(Node const *node) const
     return node->deparse(parnames);
 }
 
+    void SymTab::lock() {
+	map<string, NodeArray*>::iterator p;
+	for (p = _varTable.begin(); p != _varTable.end(); ++p) {
+	    p->second->lock();
+	}
+
+
+    }
+    
 } //namespace jags

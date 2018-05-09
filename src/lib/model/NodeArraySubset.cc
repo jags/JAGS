@@ -23,8 +23,11 @@ namespace jags {
 	if (isNULL(range)) {
 	    // Special syntax rule: a NULL range means the whole array
 	    _dim = array->range().dim(false);
-	    _node_pointers = array->_node_pointers;
-	    _offsets = array->_offsets;
+	    for (RangeIterator p(array->_range); !p.atEnd(); p.nextLeft()) {
+		unsigned long i = array->_true_range.leftOffset(p);
+		_node_pointers.push_back(array->_node_pointers[i]);
+		_offsets.push_back(array->_offsets[i]);
+	    }
 	}
 	else {
 		// Check that the implied number of dimensions is correct:
@@ -49,7 +52,7 @@ namespace jags {
 	    }
 
 	    for (RangeIterator p(range); !p.atEnd(); p.nextLeft()) {
-		unsigned long i = array->_range.leftOffset(p);
+		unsigned long i = array->_true_range.leftOffset(p);
 		_node_pointers.push_back(array->_node_pointers[i]);
 		_offsets.push_back(array->_offsets[i]);
 	    }

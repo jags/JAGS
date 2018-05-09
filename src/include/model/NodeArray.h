@@ -25,14 +25,17 @@ class AggNode;
 class NodeArray {
   friend class NodeArraySubset;
   std::string _name;
-  SimpleRange _range;
+  SimpleRange _range, _true_range;
   Graph _member_graph;
   unsigned int _nchain;
   std::vector<Node *> _node_pointers;
   std::vector<unsigned long> _offsets;
   std::map<Range, Node *> _mv_nodes;
   std::map<Range, AggNode *> _generated_nodes;
-
+  bool _locked;
+  
+  /* Grow dynamically */
+  void grow(Range const &target_range);
   /* Forbid copying */
   NodeArray(NodeArray const &orig);
   NodeArray &operator=(NodeArray const &rhs);
@@ -45,24 +48,36 @@ public:
 	    unsigned int nchain);
   /**
    * Inserts a node into the subset of the NodeArray defined by range.
-   * The dimension of the node must conform with the given range.
-   * The given range must not overlap any previously inserted node.
-   * Repeated indices in the given range are not allowed.
-   *
-   * The node is added to an internal graph. 
+   * 
+   * @param node Node to insert. This may be a NULL pointer, in which
+   * case the checks on the validity of the range are carried out (See
+   * below) but no action is taken. If the pointer is not NULL then
+   * its dimension must match the given range.
+   * 
+   * @range Range to insert.  The given range must not overlap any
+   * previously inserted node.  Repeated indices in the given range
+   * are not allowed.  The NodeArray may grow to accommodate a range
+   * beyond its current dimension, unless it is locked (See
+   * NodeArray#lock). If a NodeArray is locked, it is an error to
+   * attempt to insert a node beyond the current dimension of the
+   * NodeArray.
    *
    * @exception runtime_error
    */
   void insert(Node *node, Range const &range);
-
   /**
-   * Returns a subset of the NodeArray. If the range corresponds to a
-   * previously inserted node, this will be returned. Otherwise, an
-   * aggregate node will be generated, and it will be added to the
-   * given model.  Generated nodes are cached so a future call to
-   * getSubset will return the same node. If the range is not
-   * completely covered by inserted nodes, a NULL pointer will be
-   * returned.
+   * Returns a subset of the NodeArray. 
+   * 
+   * @param range Subset of the NodeArray to return. If the range
+   * corresponds to a previously inserted node, this will be
+   * returned. Otherwise, an AggNode will be generated, if possible.
+   * Generated nodes are cached so a future call to getSubset will
+   * return the same node. If the requested range is not completely
+   * covered by inserted nodes, a NULL pointer will be returned. 
+   *
+   * @param model If the call to getSubset generates a new AggNode,
+   * this will be added to the given model, which then takes ownership
+   * of it.
    */
   Node* getSubset(Range const &range, Model &model);
   /**
@@ -101,7 +116,7 @@ public:
    */
   std::string const &name() const;
   /**
-   * Returns the range of indices covered by the NodeArray
+   * Returns the range of indices covered by the NodeArray.
    */
   SimpleRange const &range() const;
   /**
@@ -114,6 +129,16 @@ public:
    * Returns the number of chains of the nodes stored in the array
    */
   unsigned int nchain() const;
+  /**
+   * Locks the NodeArray so it cannot grow any more when a node is
+   * inserted beyond the current range.
+   */
+  void lock();
+  /**
+   * Returns true if the NodeArray is locked
+   */
+  bool isLocked() const;
+
 };
 
 } /* namespace jags */

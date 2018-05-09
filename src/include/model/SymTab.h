@@ -105,6 +105,10 @@ public:
    * If the node name is not found, an empty string is returned
    */
   std::string getName(Node const *node) const;
+  /**
+   * Locks all the NodeArrays contained in the SymTab
+   */
+  void lock();
 };
 
 } /* namespace jags */
