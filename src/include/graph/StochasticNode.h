@@ -48,6 +48,7 @@ class StochasticNode : public Node {
     Node const * const _upper;
     bool _observed;
     const bool _discrete;
+    const std::array<int, 2> _depth;
     virtual void sp(double *lower, double *upper, unsigned long length,
 		    unsigned int chain) const = 0;
 protected:
@@ -71,6 +72,11 @@ public:
                    std::vector<Node const *> const &parameters,
 		   Node const *lower, Node const *upper);
     ~StochasticNode();
+    /**
+     * StochasticNodes have a stochastic depth one greater than their
+     * deepest parent. The deterministic depth is always zero.
+     */
+    std::array<int, 2> const &depth() const;
     /**
      * Returns a pointer to the Distribution.
      */

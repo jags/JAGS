@@ -4,6 +4,7 @@
 #include <list>
 #include <vector>
 #include <string>
+#include <array>
 
 #include <distribution/Distribution.h>
 // Required for PDFtype enum
@@ -76,6 +77,12 @@ public:
      * Vector of parents.
      */
     std::vector<Node const *> const &parents() const;
+    /**
+     * Returns the topological depth of a node as an array of length
+     * 2. The first element is the stochastic depth, the second is the
+     * deterministic depth.
+     */
+    virtual std::array<int, 2> const &depth() const = 0;
     /**
      * Draws a random sample from the node's prior distribution.
      * @param rng Pointer to random number generator

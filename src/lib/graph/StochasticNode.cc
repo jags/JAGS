@@ -19,6 +19,7 @@ using std::string;
 using std::runtime_error;
 using std::logic_error;
 using std::set;
+using std::array;
 
 namespace jags {
 
@@ -51,6 +52,17 @@ static vector<Node const *> mkParents(vector<Node const *> const &parameters,
 	return(dist->isDiscreteValued(mask));
     }
 
+    static array<int, 2> mkDepth(vector<Node const *> const &parameters)
+    {
+	int sd = 1;
+	for (unsigned long i = 0; i < parameters.size(); ++i) {
+	    int sdi = parameters[i]->depth()[0];
+	    if (sdi >= sd) sd = sdi + 1;
+	}
+	array<int, 2> depth = {sd, 0};
+	return depth;
+    }
+
 StochasticNode::StochasticNode(vector<unsigned long> const &dim,
 			       unsigned int nchain,
 			       Distribution const *dist,
@@ -59,7 +71,9 @@ StochasticNode::StochasticNode(vector<unsigned long> const &dim,
     : Node(dim, nchain, mkParents(parameters, lower, upper)), 
       _dist(dist), _lower(lower), _upper(upper), 
       _observed(false), 
-      _discrete(mkDiscrete(dist, parameters)), _parameters(nchain)
+      _discrete(mkDiscrete(dist, parameters)),
+      _depth(mkDepth(parameters)),
+      _parameters(nchain)
 {
     if (!checkNPar(dist, parameters.size())) {
 	throw DistError(_dist, "Incorrect number of parameters");
@@ -99,6 +113,11 @@ StochasticNode::~StochasticNode()
 {
 }
 
+array<int, 2> const & StochasticNode::depth() const
+{
+    return _depth;
+}
+    
 Distribution const *StochasticNode::distribution() const
 {
     return _dist;

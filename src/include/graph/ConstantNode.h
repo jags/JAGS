@@ -37,6 +37,11 @@ public:
 		 std::vector<double> const &value,
 		 unsigned int nchain, bool observed);
     /**
+     * Constant nodes have both stochastic depth and deterministic
+     * depth zero.
+     */
+    std::array<int, 2> const &depth() const;
+    /**
      * Indicates whether a ConstantNode is discrete-valued
      */
     bool isDiscreteValued() const;

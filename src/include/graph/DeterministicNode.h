@@ -53,11 +53,18 @@ enum ClosedFuncClass {DNODE_ADDITIVE, DNODE_LINEAR, DNODE_SCALE,
  */
 class DeterministicNode : public Node {
     bool _fixed;
+    const std::array<int, 2> _depth;
 public:
     DeterministicNode(std::vector<unsigned long> const &dim,
 		      unsigned int nchain,
 		      std::vector<Node const *> const &parents);
     ~DeterministicNode();
+    /**
+     * A DeterministicNode has the same stochastic depth as its
+     * deepest parent. Its deterministic depth is one greater than its
+     * deepest parent with the same stochastic depth.
+     */
+    std::array<int, 2> const &depth() const;
     /**
      * Random samples from a Deterministic node are not random.
      * This function simply calculates the value of the node from its

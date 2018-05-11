@@ -10,6 +10,7 @@ using std::string;
 using std::ostringstream;
 using std::floor;
 using std::logic_error;
+using std::array;
 
 namespace jags {
 
@@ -36,6 +37,12 @@ namespace jags {
 	}
     }
 
+    array<int, 2> const &ConstantNode::depth() const
+    {
+	static const std::array<int, 2> _depth = {0, 0};
+	return _depth;
+    }
+    
     bool ConstantNode::isDiscreteValued() const
     {
 	double const *val = value(0);
