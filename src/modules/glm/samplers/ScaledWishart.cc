@@ -48,6 +48,8 @@ extern "C" {
 
 
 //FIXME We would not need this if we could call bugs::DWish::sampleWishart
+//FIXME This is using the upper triangle of the matrix R, unlike the
+//rest of JAGS
 static void sampleWishart(double *X, int length,
 			  double const *R, double k, int nrow,
 			  jags::RNG *rng)
