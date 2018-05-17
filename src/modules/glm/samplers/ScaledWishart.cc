@@ -48,8 +48,7 @@ extern "C" {
 
 
 //FIXME We would not need this if we could call bugs::DWish::sampleWishart
-//FIXME This is using the upper triangle of the matrix R, unlike the
-//rest of JAGS
+//FIXME: Check against sampleWishart.cc in this dir
 static void sampleWishart(double *X, int length,
 			  double const *R, double k, int nrow,
 			  jags::RNG *rng)
@@ -102,17 +101,17 @@ static void sampleWishart(double *X, int length,
 
     // Z = Z %*% C 
     double one = 1;
-    F77_DTRMM("R", "L", "N", "N", &nrow, &nrow, &one, &C[0], &nrow, &Z[0],
+    F77_DTRMM("R", "U", "N", "N", &nrow, &nrow, &one, &C[0], &nrow, &Z[0],
 	      &nrow);
 
     // X = t(Z) %*% Z
     double zero = 0;
-    F77_DSYRK("L", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, X, &nrow);
+    F77_DSYRK("U", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, X, &nrow);
 
-    // Copy lower triangle of X to upper triangle
+    // Copy upper triangle of X to lower triangle
     for (int i = 0; i < nrow; ++i) {
 	for (int j = 0; j < i; ++j) {
-	    X[i * nrow + j] = X[j * nrow + i];
+	    X[j * nrow + i] = X[i * nrow + j];
 	}
     }
 }
