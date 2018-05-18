@@ -48,10 +48,17 @@ using std::set;
 using std::fabs;
 using std::max_element;
 
-
-
 namespace jags {
-
+    
+    static bool emptyRange(ParseTree const *var)
+    {
+	if (var->treeClass() != P_VAR) {
+	    throw logic_error("Expecting variable expression");
+	}
+	vector<ParseTree*> const &range_list = var->parameters();
+	return range_list.empty();
+    }
+    
     typedef pair<vector<unsigned long>, vector<double> > CNodeKey;
 
     static bool lt(CNodeKey const &k1, CNodeKey const &k2) {
@@ -459,12 +466,10 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 	    Range subset_range = getRange(p, default_range);
 	    if (!isNULL(subset_range)) {
 		//A fixed subset
-		/*
-		if (!array->range().contains(subset_range)) {
+		if (array->isLocked() && !array->range().contains(subset_range)) {
 		    CompileError(p, "Subset out of range:", array->name() +
 				 printRange(subset_range));
 		}
-		*/
 		node = array->getSubset(subset_range, _model);
 		if (node == 0 && _compiler_mode == COLLECT_UNRESOLVED) {
 		    /* Nake a note of all subsets that could not be
@@ -532,7 +537,7 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 		"or define it  on the left hand side of a relation.";
 	    CompileError(p, msg);
 	}
-	else if (_compiler_mode == COLLECT_UNRESOLVED) {
+	else if (_compiler_mode == ENFORCING) {
 	    string msg = string("Possible directed cycle involving variable `")
 		+ p->name() + "` ";
 	    CompileError(p, msg);
@@ -906,6 +911,20 @@ void Compiler::allocate(ParseTree const *rel)
 {
     if (_is_resolved[_n_relations])
 	return;
+
+    ParseTree *var = rel->parameters()[0];
+    SimpleRange target_range = VariableSubsetRange(var);
+    
+    if (isNULL(target_range) && !emptyRange(var)) {
+	//There is a range expression but it could not be evaluated
+	if (_compiler_mode == PERMISSIVE) {
+	    return;
+	}
+	else if (_compiler_mode == ENFORCING) {
+	    CompileError(var, "Unable to calculate subset expression for array",
+			 var->name());
+	}
+    }
     
     Node *node = 0;
     
@@ -921,7 +940,6 @@ void Compiler::allocate(ParseTree const *rel)
     
     SymTab &symtab = _model.symtab();
     if (node) {
-	ParseTree *var = rel->parameters()[0];
 	NodeArray *array = symtab.getVariable(var->name());
 	if (!array) {
 	    //Undeclared array. Create a new array big enough to
@@ -929,7 +947,7 @@ void Compiler::allocate(ParseTree const *rel)
 	    vector<unsigned long> dim = node->dim();
 	    SimpleRange target_range = VariableSubsetRange(var);
 	    bool lock = false;
-	    if (isNULL(target_range)) {
+	    if (emptyRange(var)) {
 		//No range given on LHS. New node fills the whole array
 		target_range = SimpleRange(dim);
 		lock = true;
@@ -1128,8 +1146,12 @@ void Compiler::writeRelations(ParseTree const *relations)
     }
     _is_resolved.clear(); //Why?
     _model.symtab().lock();
+
     
     if (_n_resolved == 0) {
+	_compiler_mode = ENFORCING; //See getArraySubset
+	traverseTree(relations, &Compiler::allocate);
+	
 	/*
 	   Some nodes remain unresolved. We need to identify them and
 	   print an informative error message for the user.
@@ -1276,7 +1298,7 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
 Compiler::Compiler(BUGSModel &model, map<string, SArray> const &data_table)
     : _model(model), _countertab(), 
       _data_table(data_table), _n_resolved(0), 
-      _n_relations(0), _is_resolved(0), _compiler_mode(STANDARD),
+      _n_relations(0), _is_resolved(0), _compiler_mode(PERMISSIVE),
       _index_expression(0), _index_nodes()
 {
     if (_model.nodes().size() != 0)
