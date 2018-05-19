@@ -1,3 +1,4 @@
+
 #include <config.h>
 
 #include <rng/RNG.h>
@@ -128,6 +129,8 @@ bool ConjugateNormal::canSample(StochasticNode *snode, Graph const &graph)
 
 void ConjugateNormal::update(unsigned int chain, RNG *rng) const
 {
+    #pragma omp critical
+    {
     vector<StochasticNode *> const &stoch_children = 
 	_gv->stochasticChildren();
     unsigned long nchildren = stoch_children.size();
@@ -259,6 +262,7 @@ void ConjugateNormal::update(unsigned int chain, RNG *rng) const
 	throwLogicError("Invalid distribution in conjugate normal method");
     }
     _gv->setValue(&xnew, 1, chain);
+    }
 }
 
 }}

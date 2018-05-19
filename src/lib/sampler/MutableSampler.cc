@@ -25,11 +25,9 @@ namespace jags {
 	}
     }
 
-    void MutableSampler::update(vector<RNG*> const &rngs)
+    void MutableSampler::update(unsigned int ch, RNG * rng)
     {
-	for (unsigned int ch = 0; ch < rngs.size(); ++ch) {
-	    _methods[ch]->update(rngs[ch]);
-	}
+	_methods[ch]->update(rng);
     }
 
     void MutableSampler::adaptOff()

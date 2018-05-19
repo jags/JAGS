@@ -58,7 +58,7 @@ namespace jags {
 		      std::vector<REMethod*> const &methods,
 		      std::string const &name);
 	    ~RESampler();
-	    void update(std::vector<RNG*> const &rngs);
+	    void update(unsigned int chain, RNG *rng);
 	    bool isAdaptive() const;
 	    void adaptOff();
 	    bool checkAdaptation() const;

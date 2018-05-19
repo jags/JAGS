@@ -401,6 +401,8 @@ namespace jags {
 
 void ConjugateDirichlet::update(unsigned int chain, RNG *rng) const
 {
+    #pragma omp critical
+    {
     StochasticNode *snode = _gv->node();
     unsigned long size = snode->length();
     double *alpha = new double[size];
@@ -508,6 +510,7 @@ void ConjugateDirichlet::update(unsigned int chain, RNG *rng) const
 
     delete [] xnew;
     delete [] alpha;
+    }
 }
 
 

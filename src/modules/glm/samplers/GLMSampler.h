@@ -49,7 +49,7 @@ namespace glm {
 	 * Deletes the sub-views and the methods passed to the constructor.
 	 */
 	~GLMSampler();
-	void update(std::vector<RNG*> const &rngs);
+	void update(unsigned int chain, RNG *rng);
 	bool isAdaptive() const;
 	void adaptOff();
 	bool checkAdaptation() const;

@@ -166,6 +166,7 @@ namespace glm {
 	Xp[c] = r;
 
 	//Set up sparse representation of the design matrix
+	#pragma omp critical
 	_x = cholmod_allocate_sparse(nrow, ncol, r, 1, 1, 0, CHOLMOD_REAL, glm_wk);
 	int *_xp = static_cast<int*>(_x->p);
 	int *_xi = static_cast<int*>(_x->i);
@@ -192,6 +193,7 @@ namespace glm {
 	    delete _outcomes.back();
 	    _outcomes.pop_back();
 	}
+	#pragma omp critical
 	cholmod_free_sparse(&_x, glm_wk);
     }
     
@@ -200,7 +202,7 @@ namespace glm {
        Cholesky decomposition.
        
        This only needs to be done once, when the GLMMethod is
-       craeted. It is a stripped-down version of the code in update.
+       created. It is a stripped-down version of the code in update.
        Note that the values of the sparse matrices are never
        referenced.
     */
@@ -209,8 +211,7 @@ namespace glm {
 	unsigned int nrow = _view->length();
 
 	// Prior contribution 
-	cholmod_sparse *Aprior =  
-	    cholmod_allocate_sparse(nrow, nrow, _nz_prior, 1, 1, 0, CHOLMOD_PATTERN, glm_wk); 
+	cholmod_sparse *Aprior = cholmod_allocate_sparse(nrow, nrow, _nz_prior, 1, 1, 0, CHOLMOD_PATTERN, glm_wk); 
 	int *Ap = static_cast<int*>(Aprior->p);
 	int *Ai = static_cast<int*>(Aprior->i);
 
@@ -238,17 +239,17 @@ namespace glm {
 	Ap[c] = r;
 	
 	// Likelihood contribution
-    
+
 	cholmod_sparse *t_x = cholmod_transpose(_x, 0, glm_wk);
 	cholmod_sort(t_x, glm_wk);
 	cholmod_sparse *Alik = cholmod_aat(t_x, 0, 0, 0, glm_wk);
 	cholmod_sparse *A = cholmod_add(Aprior, Alik, 0, 0, 0, 0, glm_wk);
-
+	
 	//Free working matrices
 	cholmod_free_sparse(&t_x, glm_wk);
 	cholmod_free_sparse(&Aprior, glm_wk);
 	cholmod_free_sparse(&Alik, glm_wk);
-
+	
 	A->stype = -1;
 	_factor = cholmod_analyze(A, glm_wk); 
 	cholmod_free_sparse(&A, glm_wk);
@@ -267,9 +268,10 @@ namespace glm {
 	unsigned int nrow = _view->length();
 	b = new double[nrow];
 
-	cholmod_sparse *Aprior =  
-	    cholmod_allocate_sparse(nrow, nrow, _nz_prior, 1, 1, 0, 
-				    CHOLMOD_REAL, glm_wk); 
+	cholmod_sparse *Aprior = 0;
+	#pragma omp critical
+	Aprior = cholmod_allocate_sparse(nrow, nrow, _nz_prior, 1, 1, 0,
+					 CHOLMOD_REAL, glm_wk); 
     
 	// Set up prior contributions to A, b
 	int *Ap = static_cast<int*>(Aprior->p);
@@ -320,8 +322,12 @@ namespace glm {
 	   matrix. Try this with the lsat example to see what speed-up
 	   it gives.
 	*/
-	cholmod_sparse *t_x = cholmod_transpose(_x, 1, glm_wk);
-	cholmod_sort(t_x, glm_wk); //Needed for multivariate outcomes
+	cholmod_sparse *t_x = 0;
+	#pragma omp critical
+	{
+	    t_x = cholmod_transpose(_x, 1, glm_wk);
+	    cholmod_sort(t_x, glm_wk); //Needed for multivariate outcomes
+	}
 	
 	int *Tp = static_cast<int*>(t_x->p);
 	int *Ti = static_cast<int*>(t_x->i);
@@ -405,15 +411,18 @@ namespace glm {
 	    }
 	    c += m;
 	}
-	
-	cholmod_sparse *Alik = cholmod_ssmult(t_x, _x, CHOLMOD_REAL, 1, 0,
-					      glm_wk);
-	cholmod_free_sparse(&t_x, glm_wk);
-	double one[2] = {1, 0};
-	A = cholmod_add(Aprior, Alik, one, one, 1, 0, glm_wk);
 
-	cholmod_free_sparse(&Aprior, glm_wk);
-	cholmod_free_sparse(&Alik, glm_wk);
+	#pragma omp critical
+	{
+	    cholmod_sparse *Alik = cholmod_ssmult(t_x, _x, CHOLMOD_REAL, 1, 0,
+						  glm_wk);
+	    cholmod_free_sparse(&t_x, glm_wk);
+	    double one[2] = {1, 0};
+	    A = cholmod_add(Aprior, Alik, one, one, 1, 0, glm_wk);
+	    
+	    cholmod_free_sparse(&Aprior, glm_wk);
+	    cholmod_free_sparse(&Alik, glm_wk);
+	}
     }
 
     bool GLMMethod::isAdaptive() const

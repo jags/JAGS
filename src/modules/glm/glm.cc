@@ -56,8 +56,10 @@ namespace glm {
 	insert(new ScaledGammaFactory);
 	insert(new ScaledWishartFactory);
 
+	/*
 	//insert(new IWLSFactory);
 	insert(new GLMGenericFactory);
+	*/
 	insert(new HolmesHeldFactory);
 
 	/*

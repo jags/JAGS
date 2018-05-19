@@ -78,6 +78,11 @@ ACX_LAPACK([],[
 	AC_MSG_ERROR("You need to install the LAPACK library")
 ])
 
+AC_LANG_PUSH([C++])
+AX_OPENMP
+CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+AC_LANG_POP
+
 jagsmoddir=${libdir}/JAGS/modules-${JAGS_MAJOR}
 AC_SUBST(jagsmoddir)
 

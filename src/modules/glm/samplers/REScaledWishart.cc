@@ -17,8 +17,6 @@
 using std::vector;
 using std::sqrt;
 
-extern cholmod_common *glm_wk;
-
 namespace jags {
     namespace glm {
 

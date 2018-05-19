@@ -33,11 +33,9 @@ namespace jags {
 	    }
 	}
 
-	void RESampler::update(vector<RNG*> const &rngs)
+	void RESampler::update(unsigned int ch, RNG *rng)
 	{
-	    for (unsigned int ch = 0; ch < rngs.size(); ++ch) {
-		_methods[ch]->update(rngs[ch]);
-	    }
+	    _methods[ch]->update(rng);
 	}
 
 	void RESampler::adaptOff()

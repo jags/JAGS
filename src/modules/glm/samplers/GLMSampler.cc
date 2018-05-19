@@ -37,11 +37,9 @@ namespace glm {
 	}
     }
 
-    void GLMSampler::update(vector<RNG*> const &rngs)
+    void GLMSampler::update(unsigned int ch, RNG * rng)
     {
-	for (unsigned int ch = 0; ch < rngs.size(); ++ch) {
-	    _methods[ch]->update(rngs[ch]);
-	}
+	_methods[ch]->update(rng);
     }
 
     void GLMSampler::adaptOff()

@@ -102,6 +102,7 @@ namespace glm {
 	    }
 	}
 
+	#pragma omp critical 
 	cholmod_free_sparse(&A, glm_wk);
 	delete [] b;
 	

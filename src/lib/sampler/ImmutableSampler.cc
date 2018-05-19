@@ -22,11 +22,9 @@ namespace jags {
 	delete _method;
     }
 
-    void ImmutableSampler::update(vector<RNG*> const &rngs)
+    void ImmutableSampler::update(unsigned int ch, RNG * rng)
     {
-	for (unsigned int ch = 0; ch < _nchain; ++ch) {
-	    _method->update(ch, rngs[ch]);
-	}
+	_method->update(ch, rng);
     }
 
     bool ImmutableSampler::isAdaptive() const

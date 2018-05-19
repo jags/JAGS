@@ -40,11 +40,7 @@ namespace jags {
 	ImmutableSampler(GraphView *gv, ImmutableSampleMethod* method,
 			 std::string const &name);
 	~ImmutableSampler();
-	/**
-	 * Updates all chains in parallel using the update method
-	 * provided to the constructor
-	 */
-	void update(std::vector<RNG*> const &rngs);
+	void update(unsigned int chain, RNG * rng);
 	/**
 	 * The sampler is not adaptive
 	 */

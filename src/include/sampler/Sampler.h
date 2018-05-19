@@ -43,12 +43,13 @@ public:
      */
     std::vector<StochasticNode*> const &nodes() const;
     /**
-     * Every sampler must update the vector of nodes and its immediate
-     * deterministic descendants using the update function.
+     * Updates the sampled nodes and their immediate deterministic
+     * descendants for the given chain.
      *
-     * @param rng vector of Pseudo-random number generator functions.
+     * @param chain Chain number
+     * @param rng Pseudo-random number generator.
      */
-    virtual void update(std::vector<RNG *> const &rng) = 0;
+    virtual void update(unsigned int chain, RNG * rng) = 0;
     /**
      * When a sampler is constructed, it may be in adaptive mode, which
      * allows it to adapt its behaviour for increased

@@ -130,6 +130,8 @@ bool ConjugateGamma::canSample(StochasticNode *snode, Graph const &graph)
 
 void ConjugateGamma::update(unsigned int chain, RNG *rng) const
 {
+    #pragma omp critical
+    {
     vector<StochasticNode *> const &stoch_children = 
 	_gv->stochasticChildren();
     unsigned long nchildren = stoch_children.size();
@@ -235,7 +237,8 @@ void ConjugateGamma::update(unsigned int chain, RNG *rng) const
     else {
 	xnew = rgamma(r, 1/mu, rng);
     }
-    _gv->setValue(&xnew, 1, chain);  
+    _gv->setValue(&xnew, 1, chain);
+    }
 }
 
 }}

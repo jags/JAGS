@@ -52,18 +52,22 @@ namespace glm {
 	
 	// Get LDL' decomposition of posterior precision
 	A->stype = -1;
-	int ok = cholmod_factorize(A, _factor, glm_wk);
-	cholmod_free_sparse(&A, glm_wk);
-	if (!ok) {
-	    throwRuntimeError("Cholesky decomposition failure in GLMBlock");
+        #pragma omp critical
+	{
+	    int ok = cholmod_factorize(A, _factor, glm_wk);
+	    cholmod_free_sparse(&A, glm_wk);
+	    if (!ok) {
+		throwRuntimeError("Cholesky decomposition failure in GLMBlock");
+	    }
 	}
 
 	// Use the LDL' decomposition to generate a new sample
 	// with mean mu such that A %*% mu = b and precision A. 
 	
 	unsigned int nrow = _view->length();
-	cholmod_dense *w = cholmod_allocate_dense(nrow, 1, nrow, CHOLMOD_REAL, 
-						  glm_wk);
+	cholmod_dense *w = 0;
+	#pragma omp critical
+	w = cholmod_allocate_dense(nrow, 1, nrow, CHOLMOD_REAL, glm_wk);
 
 	// Permute RHS
 	double *wx = static_cast<double*>(w->x);
@@ -72,7 +76,9 @@ namespace glm {
 	    wx[i] = b[perm[i]];
 	}
 
-	cholmod_dense *u1 = cholmod_solve(CHOLMOD_L, _factor, w, glm_wk);
+	cholmod_dense *u1 = 0;
+        #pragma omp critical
+	u1 = cholmod_solve(CHOLMOD_L, _factor, w, glm_wk);
 	updateAuxiliary(u1, _factor, rng);
 
 	double *u1x = static_cast<double*>(u1->x);
@@ -92,7 +98,9 @@ namespace glm {
 		}
 	}
 
-	cholmod_dense *u2 = cholmod_solve(CHOLMOD_DLt, _factor, u1, glm_wk);
+	cholmod_dense *u2 = 0;
+        #pragma omp critical
+	u2 = cholmod_solve(CHOLMOD_DLt, _factor, u1, glm_wk);
 
 	// Permute solution
 	double *u2x = static_cast<double*>(u2->x);
@@ -100,10 +108,12 @@ namespace glm {
 	    b[perm[i]] = u2x[i];
 	}
 
-	cholmod_free_dense(&w, glm_wk);
-	cholmod_free_dense(&u1, glm_wk);
-	cholmod_free_dense(&u2, glm_wk);
-
+        #pragma omp critical
+	{
+            cholmod_free_dense(&w, glm_wk);
+            cholmod_free_dense(&u1, glm_wk);
+            cholmod_free_dense(&u2, glm_wk);
+        }
 	//Shift origin back to original scale
 	int r = 0;
 	for (vector<StochasticNode*>::const_iterator p = 
