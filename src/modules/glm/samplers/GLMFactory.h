@@ -4,6 +4,8 @@
 #include "GLMMethod.h"
 #include <sampler/SamplerFactory.h>
 
+#include <set>
+
 namespace jags {
 
     class LinkNode;
@@ -36,14 +38,15 @@ namespace glm {
 	 * or a NULL pointer. Sub-classes of GLMFactory only have to
 	 * implement the abstract member function newMethod.
 	 */
-	GLMSampler * makeSampler(std::list<StochasticNode*> const &free_nodes, 
+	GLMSampler * makeSampler(std::list<StochasticNode*> const &free_nodes,
+				 std::set<StochasticNode*> &skip_nodes,
 				 Graph const &graph, bool gibbs) const;
 	/**
 	 * Wraps GLMFactory#makeSampler and returns a single
 	 * newly-allocated sampler in a vector.
 	 */
 	std::vector<Sampler*> 
-	    makeSamplers(std::list<StochasticNode*> const &free_nodes, 
+	    makeSamplers(std::list<StochasticNode*> const &free_nodes,
 			 Graph const &graph) const;
 	/**
 	 * Checks that an outcome variable in a GLM has the correct
@@ -114,6 +117,7 @@ namespace glm {
 	 * exploit the same data augmentation used by the GLMSampler.
 	 */
 	void makeRESamplers(std::list<StochasticNode*> const &free_nodes,
+			    std::set<StochasticNode*> &skip_nodes,
 			    GLMSampler const *s, Graph const &graph,
 			    std::vector<Sampler*> &samplers) const;
     };
