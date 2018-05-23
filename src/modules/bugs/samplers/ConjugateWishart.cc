@@ -87,8 +87,6 @@ ConjugateWishart::ConjugateWishart(SingletonGraphView const *gv)
 void 
 ConjugateWishart::update(unsigned int chain, RNG *rng) const
 {
-    #pragma omp critical
-    {
     vector<StochasticNode *> const &stoch_children = 
 	_gv->stochasticChildren();
     unsigned long nchildren = stoch_children.size();
@@ -148,7 +146,6 @@ ConjugateWishart::update(unsigned int chain, RNG *rng) const
 
     DWish::randomSample(&xnew[0], N, &R[0], df, nrow, rng);
     _gv->setValue(xnew, chain);
-    }
 }
 
 }}

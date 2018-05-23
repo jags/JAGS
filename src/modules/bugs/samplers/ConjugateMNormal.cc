@@ -141,8 +141,6 @@ bool ConjugateMNormal::canSample(StochasticNode *snode, Graph const &graph)
 
 void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
 {
-    #pragma omp critical
-    {
     vector<StochasticNode *> const &stoch_children = 
           _gv->stochasticChildren();
     unsigned long nchildren = stoch_children.size();
@@ -326,7 +324,6 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
     delete [] Acopy;
     delete [] b;
     delete [] xnew;
-    }
 }
 
 }}
