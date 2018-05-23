@@ -39,7 +39,7 @@ namespace glm {
 	 */
 	void update(double z, double n, RNG *rng);
 	/**
-	 * Rturns the mean of the current normal component
+	 * Returns the mean of the current normal component
 	 */
 	double mean() const;
 	/**
@@ -49,7 +49,7 @@ namespace glm {
 	/**
 	 * Gets the parameters of the mixture distribution. 
 	 * 
-	 * This is not required by the GLM machinery, bu it is useful
+	 * This is not required by the GLM machinery, but it is useful
 	 * to expose the parameters of the mixture distribution for
 	 * testing purposes.
 	 */
