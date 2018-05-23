@@ -53,6 +53,8 @@ double rbeta(double aa, double bb, JRNG *rng)
     static double olda = -1.0;
     static double oldb = -1.0;
 
+    #pragma omp threadprivate(beta, gamma, delta, k1, k2, olda, oldb)
+    
     /* Test if we need new "initializing" */
     qsame = (olda == aa) && (oldb == bb);
     if (!qsame) { olda = aa; oldb = bb; }

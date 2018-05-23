@@ -49,10 +49,15 @@ double rbinom(double nin, double pp, JRNG *rng)
     static double c, fm, npq, p1, p2, p3, p4, qn;
     static double xl, xll, xlr, xm, xr;
 
+    #pragma omp threadprivate(c, fm, npq, p1, p2, p3, p4, qn)
+    #pragma omp threadprivate(xl, xll, xlr, xm, xr)
+    
     static double psave = -1.0;
     static int nsave = -1;
     static int m;
 
+    #pragma omp threadprivate(psave, nsave, m)
+    
     double f, f1, f2, u, v, w, w2, x, x1, x2, z, z2;
     double p, q, np, g, r, al, alv, amaxp, ffm, ynorm;
     int i, ix, k, n;

@@ -100,11 +100,18 @@ double rhyper(double nn1in, double nn2in, double kkin, JRNG *rng)
     static int ks = -1;
     static int n1s = -1, n2s = -1;
 
+    #pragma omp threadprivate(ks, n1s, n2s)
+    
     static int k, m;
     static int minjx, maxjx, n1, n2;
 
+    #pragma omp threadprivate(k, m, minjx, maxjx, n1, n2)
+
     static double a, d, s, w;
     static double tn, xl, xr, kl, kr, lamdl, lamdr, p1, p2, p3;
+
+    #pragma omp threadprivate(a, d, s, w)
+    #pragma omp threadprivate(tn, xl, xr, kl, kr, lamdl, lamdr, p1, p2, p3)
 
 
     /* check parameter validity */

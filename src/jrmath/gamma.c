@@ -97,6 +97,8 @@ double gammafn(double x)
     static int ngam = 0;
     static double xmin = 0, xmax = 0., xsml = 0., dxrel = 0.;
 
+    #pragma omp threadprivate(ngam, xmin, xmax, xsml, dxrel)
+    
     /* Initialize machine dependent constants, the first time gamma() is called.
 	FIXME for threads ! */
     if (ngam == 0) {

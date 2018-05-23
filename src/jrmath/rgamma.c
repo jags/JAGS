@@ -83,6 +83,8 @@ double rgamma(double a, double scale, JRNG *rng)
     static double s, s2, d;    /* no. 1 (step 1) */
     static double q0, b, si, c;/* no. 2 (step 4) */
 
+    #pragma omp threadprivate(aa, aaa, s, s2, d, q0, b, si, c)
+    
     double e, p, q, r, t, u, v, w, x, ret_val;
 
     if (!R_FINITE(a) || !R_FINITE(scale) || a < 0.0 || scale <= 0.0) {
