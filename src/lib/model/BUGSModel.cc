@@ -174,7 +174,7 @@ void BUGSModel::setParameters(map<string, SArray> const &param_table,
 	    throw runtime_error(".RNG.state supplied, but RNG type not set");
 	}
 	SArray const &state = param_table.find(".RNG.state")->second;
-	vector<int>(istate);
+	vector<int> istate;
 	//double const *value = state.value();
 	vector<double> const &value = state.value();
 	for (unsigned int i = 0; i < state.length(); ++i) {

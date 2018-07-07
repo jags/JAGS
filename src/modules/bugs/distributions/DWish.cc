@@ -105,7 +105,7 @@ void DWish::randomSample(double *X, unsigned long length,
     vector<double> Z(length);
     for (unsigned long j = 0; j < nrow; j++) {
 	double *Z_j = &Z[j*nrow]; //jth column of Z
-	for (int i = 0; i < j; i++) {
+	for (unsigned long i = 0; i < j; i++) {
 	    Z_j[i] = rnorm(0, 1, rng);
 	}
 	Z_j[j] = sqrt(rchisq(k - j, rng));    

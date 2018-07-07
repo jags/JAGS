@@ -94,11 +94,7 @@ bool
 DMT::checkParameterValue(vector<double const *> const &parameters,
 			    vector<vector<unsigned long> > const &dims) const
 {
-    unsigned long n = dims[0][0];
-    double const *T = parameters[1];
-    double k = *parameters[2];
-
-    return k >= 2;
+    return *parameters[2] >= 2;
 }
 
 

@@ -61,6 +61,7 @@ namespace jags {
     
     typedef pair<vector<unsigned long>, vector<double> > CNodeKey;
 
+    /*
     static bool lt(CNodeKey const &k1, CNodeKey const &k2) {
 	//Sort first on dimension
 	if (k1.first < k2.first) {
@@ -75,6 +76,7 @@ namespace jags {
 	}
 
     }
+    */
     typedef map<CNodeKey, ConstantNode *, fuzzy_less<CNodeKey> > CNodeMap;
 
 #include <sstream>

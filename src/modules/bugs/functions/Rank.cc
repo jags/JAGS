@@ -32,7 +32,7 @@ namespace bugs {
 	stable_sort(argptrs.begin(), argptrs.end(), lt_doubleptr);
 
 	//Ranks can be inferred from the sorted vector of pointers
-	for (long i = 0; i < N; ++i) {
+	for (unsigned long i = 0; i < N; ++i) {
 	    value[argptrs[i] - args[0]] = i + 1;
 	}
     }

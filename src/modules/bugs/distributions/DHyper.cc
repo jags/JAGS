@@ -221,7 +221,7 @@ static vector<double> density_full(int n1, int n2, int m1, double psi)
     }
   
     //Normalize
-    for (int i = 0; i < N; ++i) {
+    for (unsigned int i = 0; i < N; ++i) {
 	p[i] /= sump;
     }
     return p;

@@ -295,7 +295,7 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
        the call to DPOSV. The result is stored in b
     */
     double * Acopy = new double[N];
-    for (int i = 0; i < N; ++i) {
+    for (unsigned long i = 0; i < N; ++i) {
 	Acopy[i] = A[i];
     }
     int one = 1;
