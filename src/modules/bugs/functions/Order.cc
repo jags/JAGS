@@ -38,12 +38,12 @@ namespace bugs {
     }
 
     unsigned long Order::length (vector<unsigned long> const &lengths,
-				vector<double const *> const &parvalues) const
+				vector<double const *> const &) const
     {
 	return lengths[0];
     }
 
-    bool Order::isDiscreteValued(vector<bool> const &mask) const
+    bool Order::isDiscreteValued(vector<bool> const &) const
     {
 	return true;
     }

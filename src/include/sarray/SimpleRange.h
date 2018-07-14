@@ -23,6 +23,10 @@ namespace jags {
 	 */
 	SimpleRange();
 	/**
+	 * Copy constructor
+	 */
+	SimpleRange(SimpleRange const &range) = default;
+	/**
 	 * Destructor
 	 */
 	~SimpleRange();
@@ -40,13 +44,6 @@ namespace jags {
 	 */
 	SimpleRange(std::vector<unsigned long> const &lower, 
 		    std::vector<unsigned long> const &upper);
-
-	/**
-	 * Constructs a scalar range from an index. The upper and lower
-	 * bounds are both equal to the supplied index.  
-	 */
-	//SimpleRange(std::vector<long> const &index);
-
 	/**
 	 * Constructs a range from a dimension. For each index, the lower
 	 * limit is 1 and  the upper limit is the corresponding element of
@@ -56,7 +53,10 @@ namespace jags {
 	 * that creates a scalar range from a vector of signed long integers.
 	 */
 	SimpleRange(std::vector<unsigned long> const &dim);
-	
+	/**
+	 * Copy assignment
+	 */
+	SimpleRange & operator=(SimpleRange const &) = default;
 	/**
 	 * Equality operator. A SimpleRange is uniquely defined by
 	 * its lower and upper limits, so testing for equality is

@@ -55,7 +55,7 @@ namespace jags {
 
     void ConstantNode::randomSample(RNG*, unsigned int) {}
 
-    string ConstantNode::deparse(vector<string> const &parents) const
+    string ConstantNode::deparse(vector<string> const &) const
     {
 	ostringstream os;
 	if (length() == 1) {
@@ -85,6 +85,22 @@ namespace jags {
     void ConstantNode::unlinkParents()
     {
 
+    }
+
+    double ConstantNode::logDensity(unsigned int, PDFType) const
+    {
+	return 0.0;
+    }
+
+    unsigned int ConstantNode::df() const
+    {
+	return 0;
+    }
+
+    double ConstantNode::KL(unsigned int, unsigned int,
+			    RNG *, unsigned int) const
+    {
+	return 0.0;
     }
     
 } //namespace jags

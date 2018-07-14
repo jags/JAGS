@@ -26,7 +26,7 @@ Sampler *
 DirichletFactory::makeSampler(StochasticNode *snode, Graph const &graph) const
 {
     unsigned int nchain = snode->nchain();
-    vector<MutableSampleMethod*> methods(nchain, 0);
+    vector<MutableSampleMethod*> methods(nchain, nullptr);
     vector<StochasticNode*> nodes(1, snode);
     SingletonGraphView *gv = new SingletonGraphView(snode, graph);
     for (unsigned int ch = 0; ch < nchain; ++ch) {

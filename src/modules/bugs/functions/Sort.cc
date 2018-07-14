@@ -27,7 +27,7 @@ namespace bugs {
     }
 
     unsigned long Sort::length (vector<unsigned long> const &parlengths,
-			       vector<double const *> const &parvalues) const
+				vector<double const *> const &) const
     {
 	return parlengths[0];
     }

@@ -1,5 +1,5 @@
-#ifndef _MARSAGLIA_RNG_H_
-#define _MARSAGLIA_RNG_H_
+#ifndef MARSAGLIA_RNG_H_
+#define MARSAGLIA_RNG_H_
 
 #include <rng/RmathRNG.h>
 
@@ -20,4 +20,4 @@ namespace base {
 
 }}
 
-#endif /* _MARSAGLIA_RNG_H_ */
+#endif /* MARSAGLIA_RNG_H_ */

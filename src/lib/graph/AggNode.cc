@@ -154,12 +154,12 @@ bool AggNode::isClosed(set<Node const *> const &ancestors,
     {
 	//Only one parent may be additive, and it must be completely
 	//embedded in the AggNode
-	Node const *pnode = 0;
+	Node const *pnode = nullptr;
 	vector<bool> pmask;
 	vector<Node const *> const &par = parents();
 	for (unsigned int i = 0; i < par.size(); ++i) {
 	    if (ancestors.count(par[i])) {
-		if (pnode == 0) {
+		if (pnode == nullptr) {
 		    pnode = par[i];
 		    pmask = vector<bool>(pnode->length(), false);
 		}

@@ -196,7 +196,7 @@ void MixtureNode::updateActive(unsigned int chain)
     }
 
     _active_parents[chain] = _table->getNode(i);
-    if (_active_parents[chain] == 0) {
+    if (_active_parents[chain] == nullptr) {
 	/*
 	std::cout << "Got " << print(SimpleRange(i)) << "\nOriginally\n";
 	for (unsigned int j = 0; j < _Nindex; ++j) {
@@ -296,7 +296,7 @@ bool MixtureNode::isClosed(set<Node const *> const &ancestors,
     return true;
 }
 
-bool MixtureNode::checkParentValues(unsigned int chain) const
+bool MixtureNode::checkParentValues(unsigned int) const
 {
     return true;
 }

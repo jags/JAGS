@@ -246,4 +246,4 @@ namespace bugs {
 
 }}
 
-jags::bugs::BUGSModule _bugs_module;
+static jags::bugs::BUGSModule _bugs_module;

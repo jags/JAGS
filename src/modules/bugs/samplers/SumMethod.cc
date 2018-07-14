@@ -72,7 +72,7 @@ namespace jags {
 	SumMethod::isCandidate(StochasticNode *snode, Graph const &graph)
 	{
 	    //We can only sample scalar nodes
-	    if (snode->length() != 1) return 0;
+	    if (snode->length() != 1) return nullptr;
 	    
 	    SingletonGraphView gv(snode, graph);
 
@@ -81,23 +81,23 @@ namespace jags {
 	       
 	    */
 	    vector<StochasticNode*> const &schildren = gv.stochasticChildren();
-	    StochasticNode *sumchild = 0;
+	    StochasticNode *sumchild = nullptr;
 	    for (unsigned int i = 0; i < schildren.size(); ++i) {
 		if (schildren[i]->distribution()->name() == "sum") {
 		    /* There should be only one sum node and it must be
 		       observed */
-		    if (sumchild) return 0;
-		    if(!isObserved(schildren[i])) return 0;
+		    if (sumchild) return nullptr;
+		    if(!isObserved(schildren[i])) return nullptr;
 		    sumchild = schildren[i];
 		}
 	    }
-	    if (!sumchild) return 0;
+	    if (!sumchild) return nullptr;
 	    
 	    /* Deterministic descendants must be an additive function
 	     * of snode
 	     */
 	    if (schildren.size() == 1) {
-		if (!checkAdditive(&gv, false)) return 0;
+		if (!checkAdditive(&gv, false)) return nullptr;
 	    }
 	    else {
 		/* 
@@ -114,7 +114,7 @@ namespace jags {
 		    lgraph.insert(dchildren[j]);
 		}
 		SingletonGraphView lgv(snode, lgraph);
-		if (!checkAdditive(&lgv, false)) return 0;
+		if (!checkAdditive(&lgv, false)) return nullptr;
 	    }
 
 	    return sumchild;
@@ -125,7 +125,7 @@ namespace jags {
 	{
 	    //Are individual nodes candidates?
 	    StochasticNode *sumchild = isCandidate(snodes[0], graph);
-	    if (sumchild == 0) return false;
+	    if (sumchild == nullptr) return false;
 	    for (unsigned int i = 1; i < snodes.size(); ++i) {
 		if (isCandidate(snodes[i], graph) != sumchild) return false;
 	    }
@@ -178,7 +178,7 @@ namespace jags {
 	    : MutableSampleMethod(), _gv(gv), _chain(chain),
 	      _sum(gv->stochasticChildren()[0]->value(chain)[0]),
 	      _discrete(gv->nodes()[0]->isDiscreteValued()),
-	      _x(gv->length()), _i(0), _j(0), _sumchild(0), _fast(false),
+	      _x(gv->length()), _i(0), _j(0), _sumchild(nullptr), _fast(false),
 	      _sumdiff(0), _iter(0), _width(2), _max(10), _adapt(true)
 	{
 	    if (gv->stochasticChildren().size() == 1) {

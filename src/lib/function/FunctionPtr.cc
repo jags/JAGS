@@ -6,23 +6,23 @@ using std::string;
 namespace jags {
 
 FunctionPtr::FunctionPtr()
-    : lfunc(0), sfunc(0), vfunc(0), afunc(0)
+    : lfunc(nullptr), sfunc(nullptr), vfunc(nullptr), afunc(nullptr)
 {}
 
 FunctionPtr::FunctionPtr(ScalarFunction const *sf)
-    : lfunc(0), sfunc(sf), vfunc(0), afunc(0)
+    : lfunc(nullptr), sfunc(sf), vfunc(nullptr), afunc(nullptr)
 {}
 
 FunctionPtr::FunctionPtr(VectorFunction const *vf)
-    : lfunc(0), sfunc(0), vfunc(vf), afunc(0)
+    : lfunc(nullptr), sfunc(nullptr), vfunc(vf), afunc(nullptr)
 {}
 
 FunctionPtr::FunctionPtr(ArrayFunction const *af)
-    : lfunc(0), sfunc(0), vfunc(0), afunc(af)
+    : lfunc(nullptr), sfunc(nullptr), vfunc(nullptr), afunc(af)
 {}
 
 FunctionPtr::FunctionPtr(LinkFunction const *lf)
-    : lfunc(lf), sfunc(0), vfunc(0), afunc(0)
+    : lfunc(lf), sfunc(nullptr), vfunc(nullptr), afunc(nullptr)
 {}
 
 string const &FunctionPtr::name() const
@@ -67,7 +67,7 @@ Function const * FUNC(FunctionPtr const &p)
     else if (p.afunc)
 	return p.afunc;
     else
-	return 0;
+	return nullptr;
 }
 
 bool FunctionPtr::operator==(FunctionPtr const &rhs) const
@@ -79,7 +79,7 @@ bool FunctionPtr::operator==(FunctionPtr const &rhs) const
 
 bool isNULL(FunctionPtr const &p)
 {
-    return (p.lfunc==0 && p.sfunc == 0 && p.vfunc == 0 && p.afunc == 0);
+    return (p.lfunc==nullptr && p.sfunc == nullptr && p.vfunc == nullptr && p.afunc == nullptr);
 }
 
 } //namespace jags

@@ -14,7 +14,7 @@ namespace jags {
 namespace base {
 
     bool 
-    FiniteFactory::canSample(StochasticNode *snode, Graph const &graph) const
+    FiniteFactory::canSample(StochasticNode *snode, Graph const &) const
     {
 	return FiniteMethod::canSample(snode);
     }

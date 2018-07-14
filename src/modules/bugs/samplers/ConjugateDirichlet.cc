@@ -29,7 +29,7 @@ using std::list;
 
 namespace jags {
 
-    Node const *findUniqueParent(Node const *node,
+    static Node const *findUniqueParent(Node const *node,
 				 set<Node const *> const &nodeset)
     {
 	/*
@@ -42,19 +42,19 @@ namespace jags {
 	  If no parents are in nodeset, a logic error is thrown.
 	*/
 	vector<Node const *> const &par = node->parents();
-	Node const *param = 0;
+	Node const *param = nullptr;
 	    
 	for (unsigned int i = 0; i < par.size(); ++i) {
 	    if (nodeset.count(par[i])) {
 		if (param) {
-		    if (param != par[i]) return 0;
+		    if (param != par[i]) return nullptr;
 		}
 		else {
 		    param = par[i];
 		}
 	    }
 	}
-	if (param == 0) {
+	if (param == nullptr) {
 	    throwLogicError("Error in ConjugateDirichlet::canSample");
 	}
 	    
@@ -62,8 +62,8 @@ namespace jags {
     }
 
 
-    bool checkAggNode(AggNode const *anode, 
-		      set<Node const *> const &nodeset)
+    static bool checkAggNode(AggNode const *anode, 
+			     set<Node const *> const &nodeset)
     {
 	/* 
 	   Utility function called by ConjugateDirichlet::canSample
@@ -75,7 +75,7 @@ namespace jags {
 	*/
 	    
 	Node const *param = findUniqueParent(anode, nodeset);
-	if (param == 0) return false;
+	if (param == nullptr) return false;
 	    
 	//Check that parent is entirely contained in anode with
 	//offsets in ascending order
@@ -92,8 +92,8 @@ namespace jags {
 	return true;
     }
 
-    bool checkMixNode(MixtureNode const *mnode, 
-		      set<Node const *> const &nodeset)
+    static bool checkMixNode(MixtureNode const *mnode, 
+			     set<Node const *> const &nodeset)
     {
 	/*
 	  Utility function called by ConjugateDirichlet::canSample
@@ -112,10 +112,10 @@ namespace jags {
 	}
 	    
 	//Check for unique parent
-	return findUniqueParent(mnode, nodeset) != 0;
+	return findUniqueParent(mnode, nodeset) != nullptr;
     }
 
-    bool isMix(SingletonGraphView const *gv)
+    static bool isMix(SingletonGraphView const *gv)
     {
 	/* 
 	   Utility function called by constructor. It returns true if
@@ -134,7 +134,7 @@ namespace jags {
 	return false;
     }
 
-    vector<unsigned long> makeTree(SingletonGraphView const *gv)
+    static vector<unsigned long> makeTree(SingletonGraphView const *gv)
     {
 	/* 
 	   If canSample is true then the nodes in the GraphView gv
@@ -160,7 +160,7 @@ namespace jags {
 	    
 	for (unsigned int j = 0; j < dchild.size(); ++j) {
 	    Node const *parent = findUniqueParent(dchild[j], nodeset);
-	    if (parent == 0) {
+	    if (parent == nullptr) {
 		throwLogicError("Invalid tree in ConjugateDirichlet");
 	    }
 	    if (parent != snode) {
@@ -179,9 +179,9 @@ namespace jags {
 	    
 	return tree;
     }
-
-    vector<vector<unsigned long> > makeOffsets(SingletonGraphView const *gv,
-				       vector<unsigned long> const &tree)
+    
+    static vector<vector<unsigned long> >
+    makeOffsets(SingletonGraphView const *gv, vector<unsigned long> const &tree)
     {
 	vector<DeterministicNode *> const &dchild = gv->deterministicChildren();
 	vector<vector<unsigned long> > offsets(dchild.size());
@@ -298,7 +298,10 @@ namespace jags {
 		case MULTI:
 		    if (gv.isDependent(param[1])) return false;
 		    break;
-		default:
+		case BERN: case BETA: case BIN: case CHISQ: case DEXP:
+		case DIRCH: case EXP: case GAMMA: case LNORM: case LOGIS:
+		case MNORM: case NEGBIN: case NORM: case PAR: case POIS:
+		case T: case UNIF: case WEIB: case WISH: case OTHERDIST:
 		    return false;
 		}
 	    }
@@ -414,7 +417,7 @@ void ConjugateDirichlet::update(unsigned int chain, RNG *rng) const
     vector<StochasticNode *> const &schild = _gv->stochasticChildren();
     for (unsigned int i = 0; i < schild.size(); ++i) {
 	unsigned int index = 0;
-	double const *N = 0;
+	double const *N = nullptr;
 
 	if (isActiveLeaf(i, chain)) {
 	    switch(_child_dist[i]) {
@@ -445,7 +448,10 @@ void ConjugateDirichlet::update(unsigned int chain, RNG *rng) const
 		    }
 		}
 		break;
-	    default:
+	    case BERN: case BETA: case BIN: case CHISQ: case DEXP:
+	    case DIRCH: case EXP: case GAMMA: case LNORM: case LOGIS:
+	    case MNORM: case NEGBIN: case NORM: case PAR: case POIS:
+	    case T: case UNIF: case WEIB: case WISH: case OTHERDIST:
 		throwLogicError("Invalid distribution in ConjugateDirichlet");
 	    }
 	}
@@ -488,14 +494,15 @@ void ConjugateDirichlet::update(unsigned int chain, RNG *rng) const
 	for (unsigned long d = 0; d < dchild.size(); ++d) {
 	    if (_tree[d] == ULONG_MAX) {
 		MixtureNode *m = dynamic_cast<MixtureNode*>(dchild[d]);
-		if (m == 0 || m->activeParent(chain) == snode) {
+		if (m == nullptr || m->activeParent(chain) == snode) {
 		    dchild[d]->deterministicSample(chain);
 		    modified[d] = true;
 		}
 	    }
 	    else if (modified[_tree[d]]) {
 		MixtureNode *m = dynamic_cast<MixtureNode*>(dchild[d]);
-		if (m == 0 || m->activeParent(chain) == dchild[_tree[d]]) {
+		if (m == nullptr || m->activeParent(chain) == dchild[_tree[d]])
+		{
 		    dchild[d]->deterministicSample(chain);
 		    modified[d] = true;
 		}

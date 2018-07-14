@@ -20,7 +20,8 @@ namespace jags {
 	    return bessel_k(*args[0], *args[1], expo);
 	}
 
-	bool BesselK::checkParameterValue(vector <double const *> const &args)
+	bool
+	BesselK::checkParameterValue(vector <double const *> const &args) const
 	{
 	    return *args[0] >= 0;
 	}

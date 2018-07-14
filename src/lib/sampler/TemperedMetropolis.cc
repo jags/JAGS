@@ -43,7 +43,7 @@ TemperedMetropolis::TemperedMetropolis(vector<double> const &value,
 	throw invalid_argument("Invalid max_level in TemperedMetropolis");
     }
     
-    _step_adapter.push_back(0);
+    _step_adapter.push_back(nullptr);
     StepAdapter *adapter = new StepAdapter(0.1);
     _step_adapter.push_back(adapter);
 }
@@ -149,7 +149,7 @@ void TemperedMetropolis::step(vector<double> &value, double s, RNG *rng) const
     }
 }
 
-double TemperedMetropolis::logJacobian(vector<double> const &value) const
+double TemperedMetropolis::logJacobian(vector<double> const &) const
 {
     return 0;
 }

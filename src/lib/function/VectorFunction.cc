@@ -12,8 +12,8 @@ VectorFunction::VectorFunction (string const &name, unsigned long npar)
 }
 
 bool 
-VectorFunction::checkParameterValue(vector<double const *> const &args,
-				    vector<unsigned long> const &lengths) const
+VectorFunction::checkParameterValue(vector<double const *> const &,
+				    vector<unsigned long> const &) const
 {
     return true;
 }

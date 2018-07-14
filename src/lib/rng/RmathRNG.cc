@@ -177,7 +177,7 @@ double RmathRNG::normal()
 	    s = 1.0;
 	u1 = u1 + u1 - s;
 	u1 *= 32.0;
-	i = (int) u1;
+	i = static_cast<int>(u1);
 	if (i == 32)
 	    i = 31;
 	if (i != 0) {
@@ -301,7 +301,7 @@ double RmathRNG::normal()
 
     }/*switch*/
 
-    // Not reached, but an exit statement is required for -Wall
+    // Not reached, but an exit statement is required for gcc -Wall
     throw logic_error("Bad exit from RmathRNG::normal");
     return 0;
 }

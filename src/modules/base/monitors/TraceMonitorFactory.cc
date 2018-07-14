@@ -20,12 +20,12 @@ namespace base {
 					     string &msg)
     {
 	if (type != "trace")
-	    return 0;
+	    return nullptr;
 
 	NodeArray *array = model->symtab().getVariable(name);
 	if (!array) {
 	    msg = string("Variable ") + name + " not found";
-	    return 0;
+	    return nullptr;
 	}
 
 	TraceMonitor *m = new TraceMonitor(NodeArraySubset(array, range));

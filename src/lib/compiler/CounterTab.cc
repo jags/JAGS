@@ -44,7 +44,7 @@ Counter *CounterTab::getCounter(string const &name) const
     if (name == p->first)
       return p->second;
   }
-  return 0;
+  return nullptr;
 }
 
 } //namespace jags

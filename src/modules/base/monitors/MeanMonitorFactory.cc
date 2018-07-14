@@ -21,15 +21,15 @@ namespace base {
 					     string &msg)
     {
 	if (type != "mean" && type != "poolmean")
-	    return 0;
+	    return nullptr;
 
 	NodeArray *array = model->symtab().getVariable(name);
 	if (!array) {
 	    msg = string("Variable ") + name + " not found";
-	    return 0;
+	    return nullptr;
 	}
 	
-	Monitor *m = 0;
+	Monitor *m = nullptr;
 	
 	if ( type == "mean" ) {
 		m = new MeanMonitor(NodeArraySubset(array, range));

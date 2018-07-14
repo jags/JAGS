@@ -9,6 +9,7 @@
 #include <sampler/Linear.h>
 #include <sampler/SingletonGraphView.h>
 #include <module/ModuleError.h>
+#include <util/integer.h>
 
 #include <set>
 #include <vector>
@@ -49,8 +50,8 @@ extern "C" {
 
 //FIXME We would not need this if we could call bugs::DWish::sampleWishart
 //FIXME: Check against sampleWishart.cc in this dir
-static void sampleWishart(double *X, int length,
-			  double const *R, double k, int nrow,
+static void sampleWishart(double *X, unsigned long length,
+			  double const *R, double k, unsigned long nrow,
 			  jags::RNG *rng)
 {
     int info = 0;
@@ -72,11 +73,12 @@ static void sampleWishart(double *X, int length,
     */
     vector<double> C(length);
     copy(R, R + length, C.rbegin());
-    F77_DPOTRF("L", &nrow, &C[0], &nrow, &info);
+    int ni = jags::asInteger(nrow);
+    F77_DPOTRF("L", &ni, &C[0], &ni, &info);
     if (info != 0) {
 	jags::throwRuntimeError("Failed to get Cholesky decomposition of R");
     }
-    F77_DTRTRI("L", "N", &nrow, &C[0], &nrow, &info);
+    F77_DTRTRI("L", "N", &ni, &C[0], &ni, &info);
     if (info != 0) {
 	jags::throwRuntimeError("Failed to invert Cholesky decomposition of R");
     }
@@ -88,29 +90,28 @@ static void sampleWishart(double *X, int length,
        - lower off-diagonal elements are zero
     */
     vector<double> Z(length);
-    for (int j = 0; j < nrow; j++) {
+    for (unsigned long j = 0; j < nrow; j++) {
 	double *Z_j = &Z[j*nrow]; //jth column of Z
-	for (int i = 0; i < j; i++) {
+	for (unsigned long i = 0; i < j; i++) {
 	    Z_j[i] = rnorm(0, 1, rng);
 	}
 	Z_j[j] = sqrt(rchisq(k - j, rng));    
-	for (int i = j + 1; i < nrow; i++) {
+	for (unsigned long i = j + 1; i < nrow; i++) {
 	    Z_j[i] = 0;
 	}
     }
 
     // Z = Z %*% C 
     double one = 1;
-    F77_DTRMM("R", "U", "N", "N", &nrow, &nrow, &one, &C[0], &nrow, &Z[0],
-	      &nrow);
+    F77_DTRMM("R", "U", "N", "N", &ni, &ni, &one, &C[0], &ni, &Z[0], &ni);
 
     // X = t(Z) %*% Z
     double zero = 0;
-    F77_DSYRK("U", "T", &nrow, &nrow, &one, &Z[0], &nrow, &zero, X, &nrow);
+    F77_DSYRK("U", "T", &ni, &ni, &one, &Z[0], &ni, &zero, X, &ni);
 
     // Copy upper triangle of X to lower triangle
-    for (int i = 0; i < nrow; ++i) {
-	for (int j = 0; j < i; ++j) {
+    for (unsigned long i = 0; i < nrow; ++i) {
+	for (unsigned long j = 0; j < i; ++j) {
 	    X[j * nrow + i] = X[i * nrow + j];
 	}
     }
@@ -173,7 +174,7 @@ namespace jags {
 	    : SampleMethodNoAdapt(), _gv(gv), _chain(chain)
 	{
 	    vector<Node const *> const &par = _gv->node()->parents();  
-	    unsigned int nrow = par[0]->dim()[0];
+	    unsigned long nrow = par[0]->dim()[0];
 	    
 	    double const *S = par[0]->value(_chain); //Prior scale
 	    double df = *par[1]->value(_chain); //Prior degrees of freedom
@@ -193,12 +194,12 @@ namespace jags {
 
 	    double tdf = *param[1]->value(_chain);
 	    double const *S = param[0]->value(_chain);
-	    int nrow = param[0]->dim()[0];
-	    int N = nrow * nrow;
+	    unsigned long nrow = param[0]->dim()[0];
+	    unsigned long N = nrow * nrow;
 	    double const *x = _gv->node()->value(_chain);
 	    
 	    //Update hyper-parameters _a
-	    for (int i = 0; i < nrow; ++i) {
+	    for (unsigned long i = 0; i < nrow; ++i) {
 		double shape = (nrow + tdf)/2;
 		double rate = tdf * x[i*nrow+i] + 1/(S[i]*S[i]);
 		_a[i] = rgamma(shape, 1/rate, rng);
@@ -207,7 +208,7 @@ namespace jags {
 	    //Prior contribution to Wishart parameters
 	    double wdf = nrow + tdf - 1; //Degrees of freedom for Wishart
 	    vector<double> R(N, 0); //Scale matrix for Wishart
-	    for (int i = 0; i < nrow; ++i) {
+	    for (unsigned long i = 0; i < nrow; ++i) {
 		R[i*nrow+i] = 2 * tdf * _a[i];
 	    }
 
@@ -220,8 +221,8 @@ namespace jags {
 		double const *Y = (*p)->value(_chain);
 		double const *mu = (*p)->parents()[0]->value(_chain);
 	    
-		for (int i = 0; i < nrow; i++) {
-		    for (int j = 0; j < nrow; j++) {
+		for (unsigned long i = 0; i < nrow; i++) {
+		    for (unsigned long j = 0; j < nrow; j++) {
 			R[i*nrow + j] += (Y[i] - mu[i]) * (Y[j] - mu[j]);
 		    }
 		}

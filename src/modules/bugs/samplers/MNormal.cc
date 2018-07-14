@@ -38,7 +38,7 @@ MNormMetropolis::MNormMetropolis(SingletonGraphView const *gv,
 				 unsigned int chain)
     : Metropolis(initValue(gv, chain)),
       _gv(gv), _chain(chain), 
-      _mean(0), _var(0), _prec(0), 
+      _mean(nullptr), _var(nullptr), _prec(nullptr), 
       _n(0), _n_isotonic(0), _sump(0), _meanp(0), _lstep(0), _nstep(10), 
       _p_over_target(true)
 {
@@ -75,7 +75,7 @@ void MNormMetropolis::update(RNG *rng)
     unsigned long N = _gv->length();
 
     vector<double> eps(N);
-    DMNorm::randomsample(&eps[0], 0, _var, false, N, rng);
+    DMNorm::randomsample(&eps[0], nullptr, _var, false, N, rng);
     vector<double> xnew(N);
     for (unsigned int i = 0; i < N; ++i) {
 	xnew[i] = xold[i] + eps[i] * step;

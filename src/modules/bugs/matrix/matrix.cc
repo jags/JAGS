@@ -37,7 +37,7 @@ double logdet(double const *a, unsigned long n)
     throwRuntimeError("unable to calculate workspace size for dsyev");
   }
   lwork = static_cast<int>(worktest);
-  vector<double> work(lwork);
+  vector<double> work(static_cast<unsigned long>(lwork));
   F77_DSYEV("N","L", &ni, &acopy[0], &ni, &w[0], &work[0], &lwork, &info);
   if (info != 0) {
     throwRuntimeError("unable to calculate eigenvalues in dsyev");
@@ -55,12 +55,12 @@ double logdet(double const *a, unsigned long n)
   return logdet;
 }
 
+/*
 bool check_symmetric_ispd(double const *a, unsigned long n)
 {
-    /* Checks that an n x n symmetric matrix is positive definite.
-       The code is essentially the same as logdet, but we return
-       false if the smallest eigenvalue is less than zero.
-    */
+    // Checks that an n x n symmetric matrix is positive definite.
+    // The code is essentially the same as logdet, but we return
+    //   false if the smallest eigenvalue is less than zero.
   
     unsigned long N = n*n;
     vector<double> acopy(N);
@@ -87,6 +87,7 @@ bool check_symmetric_ispd(double const *a, unsigned long n)
 
     return w[0] > 0;
 }
+*/
 
 /*
 double det(double const *a, int n)

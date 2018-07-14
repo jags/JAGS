@@ -42,12 +42,12 @@ namespace base {
 	return found;
     }
     
-    bool Add::isLinear(vector<bool> const &mask, vector<bool> const &fix) const
+    bool Add::isLinear(vector<bool> const &, vector<bool> const &) const
     {
 	return true;
     }
 
-    bool Add::isScale(vector<bool> const &mask, vector<bool> const &fix) const
+    bool Add::isScale(vector<bool> const &mask, vector<bool> const &) const
     {
 	return allTrue(mask);
     }

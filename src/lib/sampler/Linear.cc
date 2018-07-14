@@ -19,7 +19,7 @@ typedef bool (DeterministicNode::*NodeCheckFn) (GraphMarks const&, bool) const;
 
 static bool isLink(DeterministicNode const *dnode)
 {
-    return dynamic_cast<LinkNode const*>(dnode) != 0;
+    return dynamic_cast<LinkNode const*>(dnode) != nullptr;
 }
 
     bool checkAdditive(SingletonGraphView const *sgv, bool fixed)

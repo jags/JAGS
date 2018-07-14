@@ -54,7 +54,7 @@ public:
    * below) but no action is taken. If the pointer is not NULL then
    * its dimension must match the given range.
    * 
-   * @range Range to insert.  The given range must not overlap any
+   * @param range Range to insert.  The given range must not overlap any
    * previously inserted node.  Repeated indices in the given range
    * are not allowed.  The NodeArray may grow to accommodate a range
    * beyond its current dimension, unless it is locked (See

@@ -20,7 +20,7 @@ namespace jags {
 	    param[i] = args[i+1];
 	}
 
-	return _dist->logDensity(*args[0], PDF_FULL, param, 0, 0);
+	return _dist->logDensity(*args[0], PDF_FULL, param, nullptr, nullptr);
     }
 
     bool 

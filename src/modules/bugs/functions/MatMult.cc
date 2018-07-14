@@ -46,7 +46,7 @@ namespace bugs {
 
     vector<unsigned long> 
     MatMult::dim (vector <vector<unsigned long> > const &dims,
-		  vector<double const *> const &values) const
+		  vector<double const *> const &) const
     {
 	vector<unsigned long> ans(2,1);
 

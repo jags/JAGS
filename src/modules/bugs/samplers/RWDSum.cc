@@ -31,15 +31,15 @@ namespace bugs {
  */
 static StochasticNode const *getDSumNode(GraphView const *gv)
 {
-    StochasticNode const *dsnode = 0;
+    StochasticNode const *dsnode = nullptr;
     for (unsigned int i = 0; i < gv->stochasticChildren().size(); ++i) {
 	if (gv->stochasticChildren()[i]->distribution()->name() == "dsum") {
-	    if (dsnode == 0) {
+	    if (dsnode == nullptr) {
 		dsnode = gv->stochasticChildren()[i];
 	    }
 	    else {
 		//There should be a single dsum child
-		return 0;
+		return nullptr;
 	    }
 	}
     }

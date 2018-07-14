@@ -15,7 +15,7 @@ namespace base {
 	return *args[0] || *args[1];
     }
 
-    bool Or::isDiscreteValued(vector<bool> const &mask) const
+    bool Or::isDiscreteValued(vector<bool> const &) const
     {
 	return true;
     }

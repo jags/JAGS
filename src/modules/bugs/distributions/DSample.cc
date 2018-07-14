@@ -40,7 +40,7 @@ namespace jags {
 	    : VectorDist("dsample", 2) 
 	{}
 	
-	bool DSample::isDiscreteValued(vector<bool> const &mask) const
+	bool DSample::isDiscreteValued(vector<bool> const &) const
 	{
 	    return true; //Takes only 0, 1 values
 	}
@@ -169,11 +169,11 @@ namespace jags {
 	void DSample::randomSample(double *x, unsigned long length,
 				   vector<double const *> const &par,
 				   vector<unsigned long> const &parlen,
-				   double const *lower, double const *upper,
+				   double const *, double const *,
 				   RNG *rng) const
 	{
 	    double const * const probs = par[0];
-	    const long N = parlen[0];
+	    const unsigned long N = parlen[0];
 	    
 	    //Create a vector of pointers to the elements of the vector
 	    //of probability weights. Sort them in reverse order.
@@ -217,7 +217,7 @@ namespace jags {
 	    }
 	}
 
-	bool DSample::isSupportFixed(vector<bool> const &fixmask) const
+	bool DSample::isSupportFixed(vector<bool> const &) const
 	{
 	    return true;
 	}

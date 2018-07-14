@@ -95,4 +95,4 @@ namespace base {
 
 }}
 
-jags::base::BaseModule _base_module;
+static jags::base::BaseModule _base_module;

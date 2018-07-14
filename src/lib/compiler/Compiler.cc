@@ -88,8 +88,8 @@ string ToString(const T& val)
     return strm.str();
 }
 
-static void CompileError(ParseTree const *p, string const &msg1, 
-			 string const &msg2 = "")
+[[noreturn]] static void CompileError(ParseTree const *p, string const &msg1, 
+				      string const &msg2 = "")
 {
     string msg = string("Compilation error on line ") + ToString(p->line())
 	+ ".";
@@ -144,18 +144,18 @@ Node * Compiler::constFromTable(ParseTree const *p)
     if (_countertab.getCounter(p->name())) {
 	// DO NOT get value from the data table if there is a counter
 	// that shares the same name.
-	return 0;
+	return nullptr;
     }
     map<string,SArray>::const_iterator i = _data_table.find(p->name());
     if (i == _data_table.end()) {
-	return 0;
+	return nullptr;
     }
     SArray const &sarray = i->second;
 
     Range subset_range = getRange(p, sarray.range());
     if (isNULL(subset_range)) {
 	//Range expression not evaluated
-	return 0;
+	return nullptr;
     }
     else if (subset_range.length() > 1) {
 	//Multivariate constant
@@ -168,7 +168,7 @@ Node * Compiler::constFromTable(ParseTree const *p)
 	    unsigned long offset = sarray.range().leftOffset(r);
 	    value[j] = v[offset];
 	    if (value[j] == JAGS_NA) {
-		return 0;
+		return nullptr;
 	    }
 	}
 	return getConstant(subset_range.dim(false), value, 
@@ -180,7 +180,7 @@ Node * Compiler::constFromTable(ParseTree const *p)
 	unsigned long offset = sarray.range().leftOffset(subset_range.first());  
 	double value = sarray.value()[offset];
 	if (value == JAGS_NA) {
-	    return 0;
+	    return nullptr;
 	}
 	else {
 	    return getConstant(value, _model.nchain(), true);
@@ -419,7 +419,7 @@ Range Compiler::CounterRange(ParseTree const *var)
 			  vector<double> const &value,
 			  unsigned int nchain, bool observed)
     {
-	ConstantNode * cnode = 0;
+	ConstantNode * cnode = nullptr;
 	if (_index_expression) {
 	    cnode = new ConstantNode(dim, value, nchain, observed);
 	    _index_nodes.push_back(cnode);
@@ -441,7 +441,7 @@ Range Compiler::CounterRange(ParseTree const *var)
 
 Node *Compiler::getArraySubset(ParseTree const *p)
 {
-    Node *node = 0;
+    Node *node = nullptr;
     
     if (p->treeClass() != P_VAR) {
 	throw logic_error("Expecting expression");
@@ -473,7 +473,7 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 				 printRange(subset_range));
 		}
 		node = array->getSubset(subset_range, _model);
-		if (node == 0 && _compiler_mode == COLLECT_UNRESOLVED) {
+		if (node == nullptr && _compiler_mode == COLLECT_UNRESOLVED) {
 		    /* Nake a note of all subsets that could not be
 		       resolved.
 
@@ -528,7 +528,7 @@ Node *Compiler::getArraySubset(ParseTree const *p)
 	    else if (array->isLocked() && !_index_expression) {
 		//A stochastic subset
 		node = getMixtureNode(p, this);
-		if (node == 0 && _compiler_mode == COLLECT_UNRESOLVED) {
+		if (node == nullptr && _compiler_mode == COLLECT_UNRESOLVED) {
 		    getMissingMixParams(p, _umap, this);
 		}
 	    } 
@@ -575,7 +575,7 @@ Node *Compiler::getLength(ParseTree const *p, SymTab const &symtab)
     if (array) {
 	Range subset_range = getRange(var, array->range());
 	if (isNULL(subset_range)) {
-	    return 0;
+	    return nullptr;
 	}
 	else {
 	    double length = product(subset_range.dim(true));
@@ -583,7 +583,7 @@ Node *Compiler::getLength(ParseTree const *p, SymTab const &symtab)
 	}
     }
     else {
-	return 0;
+	return nullptr;
     }
 }
 
@@ -601,7 +601,7 @@ Node *Compiler::getDim(ParseTree const *p, SymTab const &symtab)
     if (array) {
 	Range subset_range = getRange(var, array->range());
 	if (isNULL(subset_range)) {
-	    return 0;
+	    return nullptr;
 	}
 	else {
 	    vector<unsigned long> idim = subset_range.dim(false);
@@ -615,7 +615,7 @@ Node *Compiler::getDim(ParseTree const *p, SymTab const &symtab)
 	}
     }
     else {
-	return 0;
+	return nullptr;
     }
 }
 
@@ -628,7 +628,7 @@ Node *Compiler::getDim(ParseTree const *p, SymTab const &symtab)
 Node * Compiler::getParameter(ParseTree const *t)
 {
     vector<Node const *> parents;
-    Node *node = 0;
+    Node *node = nullptr;
 
     switch (t->treeClass()) {
     case P_VALUE:
@@ -671,12 +671,12 @@ Node * Compiler::getParameter(ParseTree const *t)
     }
 
     if (!node)
-        return 0;
+        return nullptr;
 
     if (_index_expression) {
 	//Random variables in index expressions must be observed
 	if (node->randomVariableStatus() == RV_TRUE_UNOBSERVED)
-	    return 0;
+	    return nullptr;
     }
 
     return node;
@@ -729,11 +729,11 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
     // Create the parameter vector
     vector<Node const *> parameters;
     if (!getParameterVector(distribution, parameters)) {
-	return 0;
+	return nullptr;
     }
 
     // Set upper and lower bounds
-    Node *lBound = 0, *uBound = 0;
+    Node *lBound = nullptr, *uBound = nullptr;
     if (stoch_relation->parameters().size() == 3) {
 	//Truncated distribution
 	ParseTree const *truncated = stoch_relation->parameters()[2];
@@ -747,13 +747,13 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
 	if (ll) {
 	    lBound = getParameter(ll);
 	    if (!lBound) {
-		return 0;
+		return nullptr;
 	    }
 	}
 	if (ul) {
 	    uBound = getParameter(ul);
 	    if (!uBound) {
-		return 0;
+		return nullptr;
 	    }
 	}
     }
@@ -763,7 +763,7 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
        we put the data in an array of doubles pointed to by this_data,
        and set data_length equal to the length of the array
     */
-    double *this_data = 0;
+    double *this_data = nullptr;
     unsigned long data_length = 0;
 
     ParseTree *var = stoch_relation->parameters()[0];
@@ -788,7 +788,7 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
 	}
 	if (nmissing == data_length) {
 	    delete [] this_data;
-	    this_data = 0;
+	    this_data = nullptr;
 	    data_length = 0;
 	}
 	else if (nmissing != 0) {
@@ -838,7 +838,7 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
 	    }
 	}
     }
-    StochasticNode *snode = 0;
+    StochasticNode *snode = nullptr;
     if (SCALAR(dist)) {
 	snode =  new ScalarStochasticNode(SCALAR(dist), _model.nchain(),
 					  parameters, 
@@ -870,7 +870,7 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
 Node * Compiler::allocateLogical(ParseTree const *rel)
 {
     ParseTree *expression = rel->parameters()[1];
-    Node *node = 0;
+    Node *node = nullptr;
     vector <Node const *> parents;
 
     switch (expression->treeClass()) {
@@ -914,7 +914,7 @@ void Compiler::allocate(ParseTree const *rel)
     if (_is_resolved[_n_relations])
 	return;
 
-    ParseTree *var = rel->parameters()[0];
+    ParseTree const * const var = rel->parameters()[0];
     SimpleRange target_range = VariableSubsetRange(var);
     
     if (isNULL(target_range) && !emptyRange(var)) {
@@ -928,7 +928,7 @@ void Compiler::allocate(ParseTree const *rel)
 	}
     }
     
-    Node *node = 0;
+    Node *node = nullptr;
     
     if (rel->treeClass() == P_STOCHREL) {
 	node = allocateStochastic(rel);
@@ -947,17 +947,17 @@ void Compiler::allocate(ParseTree const *rel)
 	    //Undeclared array. Create a new array big enough to
 	    //contain the node
 	    vector<unsigned long> dim = node->dim();
-	    SimpleRange target_range = VariableSubsetRange(var);
+	    SimpleRange range = VariableSubsetRange(var);
 	    bool lock = false;
 	    if (emptyRange(var)) {
 		//No range given on LHS. New node fills the whole array
-		target_range = SimpleRange(dim);
+		range = SimpleRange(dim);
 		lock = true;
 	    }
 	    else {
 		//Range given on LHS. Set initial dimension of array
 		//to be equal to the upper limit of the target range.
-		dim = target_range.upper();
+		dim = range.upper();
 	    }
 	    for (unsigned int i = 0; i < dim.size(); ++i) {
 		if (dim[i] == 0) {
@@ -967,7 +967,7 @@ void Compiler::allocate(ParseTree const *rel)
 	    }
 	    symtab.addVariable(var->name(), dim);
 	    array = symtab.getVariable(var->name());
-	    array->insert(node, target_range);
+	    array->insert(node, range);
 	    if (lock) {
 		array->lock();
 	    }
@@ -990,7 +990,6 @@ void Compiler::allocate(ParseTree const *rel)
 	   subsets that are defined on the left hand side of a
 	   relation
 	*/
-	ParseTree *var = rel->parameters()[0];
 	SimpleRange range = VariableSubsetRange(var);
 	_umap.erase(pair<string, Range>(var->name(), range));
 	

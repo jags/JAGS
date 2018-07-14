@@ -32,7 +32,7 @@ namespace bugs {
 	return args[0] == 1 && args[1] >= 1;
     }
     
-    bool DIntervalFunc::isDiscreteValued(vector<bool> const &mask) const
+    bool DIntervalFunc::isDiscreteValued(vector<bool> const &) const
     {
 	return true;
     }

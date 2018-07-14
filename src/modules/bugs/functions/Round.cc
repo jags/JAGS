@@ -16,10 +16,11 @@ namespace bugs {
     double Round::evaluate(vector<double const *> const &args) const
     {
 	/* The C99 round function does not exist in the current C++ standard */
+	//FIXME: C++11
 	return floor(*args[0] + 0.5);
     }
 
-    bool Round::isDiscreteValued(vector<bool> const &mask) const
+    bool Round::isDiscreteValued(vector<bool> const &) const
     {
 	return true;
     }

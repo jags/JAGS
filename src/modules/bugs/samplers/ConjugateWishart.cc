@@ -52,14 +52,11 @@ bool ConjugateWishart::canSample(StochasticNode *snode, Graph const &graph)
 	if (isBounded(schild[i])) {
 	    return false; //Bounded
 	}
-	switch(getDist(schild[i])) {
-	case MNORM:
-	    if (gv.isDependent(schild[i]->parents()[0])) {
-		return false; //mean parameter depends on snode
-	    }
-	    break;
-	default:
+	if (getDist(schild[i]) != MNORM) {
 	    return false;
+	}
+	if (gv.isDependent(schild[i]->parents()[0])) {
+	    return false; //mean parameter depends on snode
 	}
     }
 

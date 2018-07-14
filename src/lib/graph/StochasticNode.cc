@@ -206,12 +206,12 @@ StochasticNode::clone(vector<Node const *> const &parents) const
     
 double const *StochasticNode::lowerLimit(unsigned int chain) const
 {
-    return _lower ? _lower->value(chain) : 0;
+    return _lower ? _lower->value(chain) : nullptr;
 }
 
 double const *StochasticNode::upperLimit(unsigned int chain) const
 {
-    return _upper ? _upper->value(chain) : 0;
+    return _upper ? _upper->value(chain) : nullptr;
 }
 
 

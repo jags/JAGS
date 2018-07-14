@@ -14,8 +14,8 @@ namespace jags {
     {}
 
     unsigned long 
-    VectorLogDensity::length(vector<unsigned long> const &lengths,
-			     vector<double const *> const &values) const
+    VectorLogDensity::length(vector<unsigned long> const &,
+			     vector<double const *> const &) const
     {
 	return 1;
     }
@@ -35,7 +35,7 @@ namespace jags {
 	}
 
 	value[0] = _dist->logDensity(args[0], lengths[0], PDF_FULL, 
-				     dargs, dlengths, 0, 0);
+				     dargs, dlengths, nullptr, nullptr);
     }
 
     bool

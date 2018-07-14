@@ -167,7 +167,7 @@ bool RScalarDist::canBound() const
     return true;
 }
 
-bool RScalarDist::isDiscreteValued(vector<bool> const &mask) const
+bool RScalarDist::isDiscreteValued(vector<bool> const &) const
 {
     return _discrete;
 }

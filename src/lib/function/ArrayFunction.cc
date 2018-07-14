@@ -12,8 +12,8 @@ ArrayFunction::ArrayFunction (string const &name, unsigned long npar)
 }
 
 bool 
-ArrayFunction::checkParameterValue(vector<double const *> const &args,
-				   vector<vector<unsigned long> > const &dims) 
+ArrayFunction::checkParameterValue(vector<double const *> const &,
+				   vector<vector<unsigned long> > const &) 
     const
 {
     return true;

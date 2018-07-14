@@ -44,13 +44,12 @@ static Node const * getParent(StochasticNode const *snode)
     switch(getDist(snode)) {
     case GAMMA: case NORM: case DEXP: case WEIB: case LNORM:
 	return snode->parents()[1];
-	break;
     case EXP: case POIS:
 	return snode->parents()[0];
-	break;
-    default:
+    case BERN: case BETA: case BIN: case CAT: case CHISQ: case DIRCH:
+    case LOGIS: case MNORM: case MULTI: case NEGBIN: case PAR: case T:
+    case UNIF: case WISH: case OTHERDIST:
         throwLogicError("Invalid distribution in TruncatedGamma sampler");
-	return 0; //-Wall
     } 
 }
 
@@ -127,7 +126,9 @@ bool TruncatedGamma::canSample(StochasticNode *snode, Graph const &graph)
 		return false; //non-scale parameter depends on snode
 	    }
 	    break;
-	default:
+	case BERN: case BETA: case BIN: case CAT: case CHISQ: case DIRCH:
+	case LOGIS: case MNORM:	case MULTI: case NEGBIN: case PAR: case T:
+	case UNIF: case WISH: case OTHERDIST:
 	    return false;
 	}
     }
@@ -167,7 +168,9 @@ bool TruncatedGamma::canSample(StochasticNode *snode, Graph const &graph)
 	case NORM: case LNORM:
 	    shape += 0.5;
 	    break;
-	default:
+	case BERN: case BETA: case BIN: case CAT: case CHISQ: case DIRCH:
+	case LOGIS: case MNORM:	case MULTI: case NEGBIN: case PAR:
+	case T: case UNIF: case WISH: case OTHERDIST:
 	    return false;
 	}
     }
@@ -230,13 +233,14 @@ void TruncatedGamma::update(unsigned int chain, RNG *rng) const
 		r += 0.5;
 		mu += c * (log(Y) - m) * (log(Y) - m) / 2;
 		break;
-	    default:
+	    case BERN: case BETA: case BIN: case CAT: case CHISQ: case DIRCH:
+	    case LOGIS: case MNORM: case MULTI: case NEGBIN: case PAR: case T:
+	    case UNIF: case WISH: case OTHERDIST:
 		throwLogicError("Invalid distribution in TruncatedGamma");
 	    }
 	}
     }
     if (mu == 0) {
-	
 	throwNodeError(snode, "Degenerate posterior in TruncatedGamma sampler");
     }
 

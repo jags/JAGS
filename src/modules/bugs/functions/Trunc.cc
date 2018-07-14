@@ -20,7 +20,7 @@ namespace bugs {
 	return args[0][0] >= 0 ? floor(args[0][0]) : -floor(-args[0][0]);
     }
 
-    bool Trunc::isDiscreteValued(vector<bool> const &mask) const
+    bool Trunc::isDiscreteValued(vector<bool> const &) const
     {
 	return true;
     }

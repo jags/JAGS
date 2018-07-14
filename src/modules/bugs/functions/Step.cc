@@ -17,7 +17,7 @@ namespace bugs {
 	return *args[0] >= 0 ? 1 : 0;
     }
 
-    bool Step::isDiscreteValued(vector<bool> const &mask) const
+    bool Step::isDiscreteValued(vector<bool> const &) const
     {
 	return true;
     }

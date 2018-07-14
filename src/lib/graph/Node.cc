@@ -20,8 +20,9 @@ class DeterminsticNode;
 class StochasticNode;
 
 Node::Node(vector<unsigned long> const &dim, unsigned int nchain)
-    : _parents(0), _stoch_children(0), _dtrm_children(0), 
-      _dim(getUnique(dim)), _length(product(dim)), _nchain(nchain), _data(0)
+    : _parents(0), _stoch_children(nullptr), _dtrm_children(nullptr), 
+      _dim(getUnique(dim)), _length(product(dim)), _nchain(nchain),
+      _data(nullptr)
 {
     if (nchain==0)
 	throw logic_error("Node must have at least one chain");
@@ -38,9 +39,9 @@ Node::Node(vector<unsigned long> const &dim, unsigned int nchain)
 
 Node::Node(vector<unsigned long> const &dim, unsigned int nchain,
 	   vector<Node const *> const &parents)
-    : _parents(parents), _stoch_children(0), _dtrm_children(0), 
+    : _parents(parents), _stoch_children(nullptr), _dtrm_children(nullptr), 
       _dim(getUnique(dim)), _length(product(dim)),
-      _nchain(nchain), _data(0)
+      _nchain(nchain), _data(nullptr)
 {
     if (nchain==0)
 	throw logic_error("Node must have at least one chain");

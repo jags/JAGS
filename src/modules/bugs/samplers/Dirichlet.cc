@@ -84,7 +84,7 @@ double DirchMetropolis::logJacobian(vector<double> const &value) const
 
     double lj = 0;
     for (unsigned int i = 0; i < value.size(); ++i) {
-        if (value[i]) {
+        if (value[i] != 0) {
 	   lj += log(value[i]);
         }
     }

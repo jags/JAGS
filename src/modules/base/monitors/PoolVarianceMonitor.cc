@@ -46,16 +46,16 @@ namespace base {
 		
 		// Variance itself only needs to be calculated once per iteration:
 		for (unsigned int i = 0; i < _variances.size(); ++i) {
-			_variances[i] = _mms[i] / (double) (_n - 1);
+		    _variances[i] = _mms[i] / static_cast<double>(_n - 1);
 		}
 		
     }
 
-    vector<double> const &PoolVarianceMonitor::value(unsigned int chain) const
+    vector<double> const &PoolVarianceMonitor::value(unsigned int) const
     {
-		return _variances;
-	}
-	
+	return _variances;
+    }
+    
     vector<unsigned long> PoolVarianceMonitor::dim() const
     {
 	return _subset.dim();

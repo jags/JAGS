@@ -15,8 +15,8 @@ namespace jags {
     {}
     
     vector<unsigned long> ArrayLogDensity::dim(
-	vector<vector<unsigned long> > const &dims,
-	vector<double const *> const &values) const
+	vector<vector<unsigned long> > const &,
+	vector<double const *> const &) const
     {
 	return vector<unsigned long>(1, 1);
     }
@@ -36,7 +36,7 @@ namespace jags {
 	}
 
 	value[0] = _dist->logDensity(args[0], product(dims[0]), PDF_FULL, 
-				     dargs, ddims, 0, 0);
+				     dargs, ddims, nullptr, nullptr);
     }
 
     

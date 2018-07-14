@@ -63,13 +63,13 @@ bool DSum::isSupportFixed(vector<bool> const &fixmask) const
     return allTrue(fixmask);
 }
 
-unsigned long DSum::df(vector<vector<unsigned long> > const &dims) const
+unsigned long DSum::df(vector<vector<unsigned long> > const &) const
 {
     return 0;
 }
 
-bool DSum::checkParameterValue(vector<double const *> const &params,
-			       vector<vector<unsigned long> > const &dims) const
+bool DSum::checkParameterValue(vector<double const *> const &,
+			       vector<vector<unsigned long> > const &) const
 {
     return true;
 }

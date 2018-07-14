@@ -17,7 +17,7 @@ namespace jags {
 	void InverseLU::evaluate (double *value, vector<double const *> const &args,
 				vector<vector<unsigned long> > const &dims) const
 	{
-	    inverse_lu (value, args[0], asInteger(dims[0][0]));
+	    inverse_lu (value, args[0], dims[0][0]);
 	}
 
 	bool 

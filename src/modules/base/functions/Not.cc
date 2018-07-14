@@ -16,7 +16,7 @@ double Not::evaluate(vector<double const*> const &args) const
     return *args[0] == 0;
 }
 
-bool Not::isDiscreteValued(vector<bool> const &mask) const
+bool Not::isDiscreteValued(vector<bool> const &) const
 {
     return true;
 }

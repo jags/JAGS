@@ -26,7 +26,7 @@ DCat::DCat()
     : VectorDist("dcat", 1) 
 {}
 
-bool DCat::isDiscreteValued(vector<bool> const &mask) const
+bool DCat::isDiscreteValued(vector<bool> const &) const
 {
     return true;
 }
@@ -49,7 +49,7 @@ bool DCat::checkParameterValue(vector<double const *> const &par,
 double DCat::logDensity(double const *x, unsigned long length, PDFType type,
 			vector<double const *> const &par,
 			vector<unsigned long> const &lengths,
-			double const *lower, double const *upper) const
+			double const *, double const *) const
 {
     unsigned long y = static_cast<unsigned long>(*x);
     if (y < 1 || y > NCAT(lengths)) {
@@ -73,7 +73,7 @@ double DCat::logDensity(double const *x, unsigned long length, PDFType type,
 void DCat::randomSample(double *x, unsigned long length,
 			vector<double const *> const &par,
 			vector<unsigned long> const &lengths,
-			double const *lower, double const *upper,
+			double const *, double const *,
 			RNG *rng) const
 {
     double sump = 0;
@@ -93,7 +93,7 @@ void DCat::randomSample(double *x, unsigned long length,
 }
 
 void DCat::support(double *lower, double *upper, unsigned long length,
-	           vector<double const *> const &par,
+	           vector<double const *> const &,
 	           vector<unsigned long> const &lengths) const
 {
     if (length != 1)
@@ -103,7 +103,7 @@ void DCat::support(double *lower, double *upper, unsigned long length,
     *upper = NCAT(lengths);
 }
 
-bool DCat::isSupportFixed(vector<bool> const &fixmask) const
+bool DCat::isSupportFixed(vector<bool> const &) const
 {
     return true;
 }
@@ -113,7 +113,7 @@ bool DCat::checkParameterLength(vector<unsigned long> const &lengths) const
     return NCAT(lengths) > 0;
 }
 
-unsigned long DCat::length(vector<unsigned long> const &lengths) const
+unsigned long DCat::length(vector<unsigned long> const &) const
 {
     return 1;
 }

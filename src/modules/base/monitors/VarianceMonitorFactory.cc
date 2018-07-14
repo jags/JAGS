@@ -21,15 +21,15 @@ namespace base {
 					     string &msg)
     {
 	if (type != "variance" && type != "poolvariance")
-	    return 0;
+	    return nullptr;
 
 	NodeArray *array = model->symtab().getVariable(name);
 	if (!array) {
 	    msg = string("Variable ") + name + " not found";
-	    return 0;
+	    return nullptr;
 	}
 	
-	Monitor *m = 0;
+	Monitor *m = nullptr;
 	
 	if ( type == "variance" ) {
 		m = new VarianceMonitor(NodeArraySubset(array, range));

@@ -62,8 +62,8 @@ namespace jags {
     vector<double> NodeArraySubset::value(unsigned int chain) const
     {
 	vector<double> ans;
-	Node const *node = 0;
-	double const *values = 0;
+	Node const *node = nullptr;
+	double const *values = nullptr;
 	for (unsigned long i = 0; i < _node_pointers.size(); ++i) {
 	    if (_node_pointers[i]) {
 		if (node != _node_pointers[i]) {

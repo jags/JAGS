@@ -61,8 +61,8 @@ double DNorm::randomSample(vector<double const *> const &par,
     double sigma = SIGMA(par);
 
     //Fix non-finite boundaries: ilr-normal functions do not accept them
-    if (lower && *lower == JAGS_NEGINF) lower = 0;
-    if (upper && *upper == JAGS_POSINF) upper = 0;
+    if (lower && *lower == JAGS_NEGINF) lower = nullptr;
+    if (upper && *upper == JAGS_POSINF) upper = nullptr;
     
     if (lower && upper) {
 	double left = (*lower - mu)/sigma;

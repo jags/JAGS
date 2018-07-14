@@ -105,8 +105,8 @@ namespace jags {
 		for (unsigned long zcol = 0; zcol < _z->ncol; ++zcol) {
 		    unsigned long xcol = i * _z->ncol + zcol;
 		    for (int xi = Xp[xcol]; xi < Xp[xcol+1]; ++xi) {
-			int row = Xi[xi];
-			int zi = _z->nrow * zcol + row;
+			unsigned long row = static_cast<unsigned long>(Xi[xi]);
+			unsigned long zi = _z->nrow * zcol + row;
 			Zx[zi] += Xx[xi] * (eval[zcol] - emean[zcol]);
 		    }
 		}

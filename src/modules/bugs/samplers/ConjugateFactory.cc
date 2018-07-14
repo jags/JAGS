@@ -64,7 +64,8 @@ bool ConjugateFactory::canSample(StochasticNode * snode,
     case MULTI:
 	ans = ShiftedMultinomial::canSample(snode, graph);
 	break;
-    default:
+    case BERN: case CAT: case DEXP: case LNORM: case LOGIS:  case PAR: 
+    case T: case WEIB: case OTHERDIST:
 	break;
     }
     
@@ -75,7 +76,7 @@ Sampler *ConjugateFactory::makeSampler(StochasticNode *snode,
 				       Graph const &graph) const
 {
     SingletonGraphView *gv = new SingletonGraphView(snode, graph);
-    ConjugateMethod* method = 0;
+    ConjugateMethod* method = nullptr;
     string name;
 
     switch (getDist(snode)) {
@@ -140,7 +141,8 @@ Sampler *ConjugateFactory::makeSampler(StochasticNode *snode,
 	method = new ShiftedMultinomial(gv);
 	name = "bugs::ShiftedMultiNomial";
 	break;
-    default:
+    case BERN: case CAT: case DEXP: case LNORM: case LOGIS:  case PAR: 
+    case T: case WEIB: case OTHERDIST:
 	throwLogicError("Unable to create conjugate sampler");
     }
     

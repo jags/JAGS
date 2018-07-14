@@ -61,12 +61,12 @@ void ScalarStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
 {
     double const *l = lowerLimit(chain);
     if (lb) {
-	if (l == 0 || *lb < *l)
+	if (l == nullptr || *lb < *l)
 	    l = lb;
     }
     double const *u = upperLimit(chain);
     if (ub) {
-	if (u == 0 || *ub > *u)
+	if (u == nullptr || *ub > *u)
 	    u = ub;
     }
     if (l && u && *l > *u) throw NodeError(this, "Inconsistent bounds");
@@ -86,7 +86,7 @@ bool ScalarStochasticNode::checkParentValues(unsigned int chain) const
     }
 }
 
-void ScalarStochasticNode::sp(double *lower, double *upper, unsigned long length,
+void ScalarStochasticNode::sp(double *lower, double *upper, unsigned long,
 			      unsigned int chain) const
 {
     *lower = _dist->l(_parameters[chain]);
@@ -127,7 +127,7 @@ unsigned long ScalarStochasticNode::df() const
 	    double kl =  _dist->KL(_parameters[ch1], _parameters[ch2]);
 	    if (kl == JAGS_NA) {
 		return _dist->KL(_parameters[ch1], _parameters[ch2],
-				 0, 0, rng, nrep);
+				 nullptr, nullptr, rng, nrep);
 	    }
 	    else {
 		return kl;

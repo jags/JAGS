@@ -30,7 +30,7 @@ namespace base {
     }
 
     bool 
-    Divide::isPower(vector<bool> const &mask, vector<bool> const &fix) const
+    Divide::isPower(vector<bool> const &, vector<bool> const &) const
     {
 	return true;
     }

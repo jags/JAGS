@@ -13,7 +13,7 @@ namespace jags {
 
 	void Seq::evaluate(double *value, 
 			   vector <double const *> const &par_values,
-			   vector <unsigned long> const &par_lengths) const
+			   vector <unsigned long> const &) const
 	{
 	    int lhs = static_cast<int>(*par_values[0]);
 	    int rhs = static_cast<int>(*par_values[1]);
@@ -26,7 +26,7 @@ namespace jags {
 	    }
 	}
 
-	unsigned long Seq::length(vector <unsigned long> const &lengths,
+	unsigned long Seq::length(vector <unsigned long> const &,
 				  vector <double const *> const &values) const
 	{
 	    long lhs = static_cast<long>(*values[0]);
@@ -45,7 +45,7 @@ namespace jags {
 	    return (len[0] == 1) && (len[1] == 1);
 	}
 
-        bool Seq::isDiscreteValued(vector<bool> const &mask) const
+        bool Seq::isDiscreteValued(vector<bool> const &) const
 	{
 	    return true;
 	}

@@ -1,5 +1,5 @@
-#ifndef _WICHMANN_HILL_RNG_H_
-#define _WICHMANN_HILL_RNG_H_
+#ifndef WICHMANN_HILL_RNG_H_
+#define WICHMANN_HILL_RNG_H_
 
 #include <rng/RmathRNG.h>
 
@@ -20,4 +20,4 @@ namespace base {
 
 }}
 
-#endif /* _WICHMANN_HILL_RNG_H_ */
+#endif /* WICHMANN_HILL_RNG_H_ */

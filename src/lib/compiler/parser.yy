@@ -22,9 +22,9 @@ using jags::ParseTree;
   
 #define YYDEBUG 1
   
-  static std::vector<ParseTree *> * _pvariables = 0;
-  static ParseTree *_pdata = 0;
-  static ParseTree *_prelations = 0;
+  static std::vector<ParseTree *> * _pvariables = nullptr;
+  static ParseTree *_pdata = nullptr;
+  static ParseTree *_prelations = nullptr;
   
   static void setName(ParseTree *p, std::string *name);
   static void setParameters(ParseTree *p, std::vector<ParseTree*> *parameters);
@@ -352,15 +352,15 @@ distribution: FUNC '(' expression_list ')'
 //We should replace these with a new ParseTree object of tclass P_NULL
 
 truncated: 'T' '(' expression ','  expression ')' {$$ = Truncated($3,$5);}
-| 'T' '(' ',' expression ')' {$$ = Truncated(0,$4);}
-| 'T' '(' expression ',' ')' {$$ = Truncated($3,0);}
-| 'T' '(' ',' ')' {$$ = Truncated(0,0);}
+| 'T' '(' ',' expression ')' {$$ = Truncated(nullptr,$4);}
+| 'T' '(' expression ',' ')' {$$ = Truncated($3,nullptr);}
+| 'T' '(' ',' ')' {$$ = Truncated(nullptr,nullptr);}
 ;
 
 interval: 'I' '(' expression ','  expression ')' {$$ = Interval($3,$5);}
-| 'I' '(' ',' expression ')' {$$ = Interval(0,$4);}
-| 'I' '(' expression ',' ')' {$$ = Interval($3,0);}
-| 'I' '(' ',' ')' {$$ = Interval(0,0);}
+| 'I' '(' ',' expression ')' {$$ = Interval(nullptr,$4);}
+| 'I' '(' expression ',' ')' {$$ = Interval($3,nullptr);}
+| 'I' '(' ',' ')' {$$ = Interval(nullptr,nullptr);}
 ;
 
 var: NAME {
@@ -485,9 +485,9 @@ int parse_bugs (std::FILE *file, std::vector<ParseTree*> * &dec_list,
 	delete _pdata;
 	val = 1;
     }
-    _pvariables = 0;
-    _prelations = 0;
-    _pdata = 0;
+    _pvariables = nullptr;
+    _prelations = nullptr;
+    _pdata = nullptr;
 
     yylex_destroy();
 

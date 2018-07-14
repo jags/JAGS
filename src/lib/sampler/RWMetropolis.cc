@@ -63,7 +63,7 @@ void RWMetropolis::step(vector<double> &value, double s, RNG *rng) const
     }
 }
 
-double RWMetropolis::logJacobian(vector<double> const &value) const
+double RWMetropolis::logJacobian(vector<double> const &) const
 {
     return 0;
 }

@@ -23,8 +23,7 @@ public:
      */
     ArrayStochasticNode(ArrayDist const *dist, unsigned int nchain,
 			std::vector<Node const *> const &parameters,
-			Node const *lower, Node const *upper,
-			double const *data=0, unsigned long length=0);
+			Node const *lower, Node const *upper);
     double logDensity(unsigned int chain, PDFType type) const;
     void randomSample(RNG *rng, unsigned int chain);
     void truncatedSample(RNG *rng, unsigned int chain,

@@ -22,7 +22,7 @@ namespace bugs {
 	return svalue;
     }
 
-    bool Mean::isScale(vector<bool> const &mask, vector<bool> const &fix) const
+    bool Mean::isScale(vector<bool> const &, vector<bool> const &) const
     {
 	return true;
     }

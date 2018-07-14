@@ -115,8 +115,8 @@ public:
      * @param upper Optional upper bound
      */
     virtual void truncatedSample(RNG *rng, unsigned int chain,
-				 double const *lower=0, 
-				 double const *upper=0) = 0;
+				 double const *lower=nullptr, 
+				 double const *upper=nullptr) = 0;
     /**
      * Stochastic nodes always represent random variables in the model.
      */

@@ -18,7 +18,7 @@ namespace jags {
 	public:
 	    BesselK ();
 	    double evaluate(std::vector<double const *> const &args) const;
-	    bool checkParameterValue(std::vector <double const *> const &args);
+	    bool checkParameterValue(std::vector <double const *> const &args) const;
 	};
 	
     }

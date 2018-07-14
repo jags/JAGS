@@ -90,7 +90,7 @@ namespace jags {
 struct SSI {
   Node const *node;
   vector<unsigned long> indices;
-  SSI() : node(0) {}
+  SSI() : node(nullptr) {}
 };
 
 
@@ -279,7 +279,7 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
     if (nparents > 10) {
 	//This algorithm grinds to a halt with too many stochastic
 	//parents. So bail out after 10
-	return 0;
+	return nullptr;
     }
     vector<unsigned long> lower(nparents), upper(nparents);
     for (unsigned int i = 0; i < nparents; ++i) {
@@ -289,17 +289,17 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	    !isSupportFixed(snode))
 	{
 	    //Must have discrete, scalar parents with fixed support
-	    return 0;
+	    return nullptr;
 	}
 	
 	// Get lower and upper limits of support
 	double l = JAGS_NEGINF, u = JAGS_POSINF;
 	snode->support(&l, &u, 1U, 0);
 	if (!jags_finite(l) || !jags_finite(u)) {
-	    return 0; //Unbounded parent => serious trouble
+	    return nullptr; //Unbounded parent => serious trouble
 	}
 	if (l < 0 || u > ULONG_MAX) {
-	    return 0; //Can't cast to unsigned long
+	    return nullptr; //Can't cast to unsigned long
 	}
 	lower[i] = static_cast<unsigned long>(l);
 	upper[i] = static_cast<unsigned long>(u);
@@ -370,7 +370,7 @@ getMixtureNode1(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	Node *subset_node = array->getSubset(ranges[i].second, 
 					     compiler->model());
 	if (!subset_node) {
-	    return 0;
+	    return nullptr;
 	}
 	subsets[ranges[i].first] = subset_node;
 	if (subset_node != subset_node0) {
@@ -402,7 +402,7 @@ getMixtureNode2(NodeArray *array, vector<SSI> const &limits, Compiler *compiler)
 	    mixmap[ranges[i].first] = subset_node;
 	}
 	else {
-	    return 0;
+	    return nullptr;
 	}
 
     }
@@ -425,7 +425,7 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
     }
   
     NodeArray *array = compiler->model().symtab().getVariable(var->name());
-    if (array == 0) {
+    if (array == nullptr) {
 	throw runtime_error(string("Unknown parameter: ") + var->name());
     }
 
@@ -454,8 +454,8 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
 	    p0 = range_element->parameters()[0];
 	    if(!compiler->indexExpression(p0, ssi.indices)) {
 		ssi.node = compiler->getParameter(p0);
-		if (ssi.node == 0)
-		    return 0;
+		if (ssi.node == nullptr)
+		    return nullptr;
 		else
 		    ++nvi;
 	    }
@@ -533,7 +533,7 @@ Node * getMixtureNode(ParseTree const * var, Compiler *compiler)
 		p0 = range_element->parameters()[0];
 		if(!compiler->indexExpression(p0, ssi.indices)) {
 		    ssi.node = compiler->getParameter(p0);
-		    if (ssi.node == 0) {
+		    if (ssi.node == nullptr) {
 			resolved = false;
 		    }
 		}

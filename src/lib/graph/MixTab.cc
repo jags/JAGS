@@ -37,7 +37,7 @@ namespace jags {
     }
 
     MixTab::MixTab(map<vector<unsigned long>, Node const *> const &mixmap)
-	: _range(mkRange(mixmap)), _nodes(_range.length(), 0)
+	: _range(mkRange(mixmap)), _nodes(_range.length(), nullptr)
     {
 	for (map<vector<unsigned long>, Node const *>::const_iterator p = mixmap.begin();
 	     p != mixmap.end(); ++p)
@@ -48,7 +48,7 @@ namespace jags {
     
     Node const * MixTab::getNode(vector<unsigned long> const &index) const
     {
-	if (!_range.contains(index)) return 0;
+	if (!_range.contains(index)) return nullptr;
 
 	unsigned long offset = _range.leftOffset(index);
 	return _nodes[offset];

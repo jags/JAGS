@@ -21,26 +21,25 @@ using std::string;
 using std::binary_search;
 using std::upper_bound;
 
+static double mkLower(jags::SingletonGraphView const *gv) {
+    double lower = 0, upper = 0;
+    gv->node()->support(&lower, &upper, 1, 0);
+    return lower;
+}
+
+static double mkUpper(jags::SingletonGraphView const *gv) {
+    double lower = 0, upper = 0;
+    gv->node()->support(&lower, &upper, 1, 0);
+    return upper;
+}
+
+static unsigned long mkSize(jags::SingletonGraphView const *gv) {
+    double lower = 0, upper = 0;
+    gv->node()->support(&lower, &upper, 1, 0);
+    return static_cast<unsigned long>(upper - lower + 1);
+}
+
 namespace jags {
-
-    double mkLower(SingletonGraphView const *gv) {
-	double lower = 0, upper = 0;
-	gv->node()->support(&lower, &upper, 1, 0);
-	return lower;
-    }
-
-    double mkUpper(SingletonGraphView const *gv) {
-	double lower = 0, upper = 0;
-	gv->node()->support(&lower, &upper, 1, 0);
-	return upper;
-    }
-
-    unsigned long mkSize(SingletonGraphView const *gv) {
-	double lower = 0, upper = 0;
-	gv->node()->support(&lower, &upper, 1, 0);
-	return static_cast<unsigned long>(upper - lower + 1);
-    }
-
 namespace base {
 
     FiniteMethod::FiniteMethod(SingletonGraphView const *gv)

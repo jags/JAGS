@@ -18,7 +18,7 @@ namespace jags {
     namespace bugs {
 
 	bool
-	RW1Factory::canSample(StochasticNode * snode, Graph const &graph) const
+	RW1Factory::canSample(StochasticNode * snode, Graph const &) const
 	{
 	    return snode->distribution()->name() == "drw1";
 	}
@@ -27,7 +27,7 @@ namespace jags {
 	RW1Factory::makeSampler(StochasticNode *snode, Graph const &graph) const
 	{
 	    unsigned int N = snode->nchain();
-	    vector<MutableSampleMethod*> methods(N, 0);
+	    vector<MutableSampleMethod*> methods(N, nullptr);
 	    
 	    SingletonGraphView *gv = new SingletonGraphView(snode, graph);
 	    for (unsigned int ch = 0; ch < N; ++ch) {

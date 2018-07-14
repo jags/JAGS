@@ -24,7 +24,7 @@ bool Neg::isDiscreteValued(vector<bool> const &mask) const
   return mask[0];
 }
 
-bool Neg::isScale(vector<bool> const &mask, vector<bool> const &fix) const
+bool Neg::isScale(vector<bool> const &, vector<bool> const &) const
 {
     return true;
 }

@@ -24,7 +24,7 @@ namespace glm {
     class Outcome  {
       protected:
 	double const &_lp;
-	unsigned int _length;
+	unsigned long _length;
 	double const *_vmean;
       public:
 	/**

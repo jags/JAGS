@@ -85,7 +85,7 @@ namespace glm {
 	vector<StochasticNode *> const &schildren = 
 	    _view->stochasticChildren();
 
-	int nrow = schildren.size();
+	unsigned long nrow = schildren.size();
 
 	cholmod_sparse *pt_x = 0;
 	#pragma omp critical
@@ -98,14 +98,14 @@ namespace glm {
 	    cholmod_free_sparse(&t_x, glm_wk);
 	}
 	
-	int ncol = _x->ncol;
+	unsigned long ncol = _x->ncol;
 	vector<double> d(ncol, 1);
 	if (!_factor->is_ll) {
 	    // LDL' decomposition. The diagonal D matrix is stored as
 	    // the diagonal of _factor
 	    int *fp = static_cast<int*>(_factor->p);
 	    double *fx = static_cast<double*>(_factor->x);
-	    for (int r = 0; r < ncol; ++r) {
+	    for (unsigned long r = 0; r < ncol; ++r) {
 		d[r] = fx[fp[r]];
 	    }
 	}
@@ -120,7 +120,7 @@ namespace glm {
 	X = cholmod_allocate_dense(ncol, 1, ncol, CHOLMOD_REAL, glm_wk);
 	double *Xx = static_cast<double*>(X->x);
 
-	for (int r = 0; r < nrow; ++r) {
+	for (unsigned long r = 0; r < nrow; ++r) {
 
 	    // We need to do this loop with minimal memory
 	    // allocation. The cholmod_solve2 function uses a

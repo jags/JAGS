@@ -21,8 +21,8 @@ namespace jags {
     }
 
     unsigned long 
-    ScalarVectorFunction::length(vector <unsigned long> const &lengths,
-				 vector <double const *> const &values) const
+    ScalarVectorFunction::length(vector <unsigned long> const &,
+				 vector <double const *> const &) const
     {
 	return 1;
     }

@@ -122,23 +122,10 @@ public:
      */
     virtual void deterministicSample(unsigned int chain) = 0;
 
-   /**
-    * Returns the log of the density of a StochasticNode
-    * given the current parameter values. For a ConstantNode
-    * or a DeterministicNode this will simply return 0.
-    *
-    * @param chain Number of chain (starting from zero) for which
-    * to evaluate log density.
-    *
-    * @param type Indicates whether the full probability density
-    * function is required (PDF_FULL) or whether partial calculations
-    * are permitted (PDF_PRIOR, PDF_LIKELIHOOD). See PDFType for
-    * details.
-    */
-    inline double logDensity(unsigned int chain, PDFType type) const { return 0.0; }
-    inline unsigned int df() const  { return 0; }
-    inline double KL(unsigned int chain1, unsigned int chain2, RNG *rng,
-		      unsigned int nrep) const { return 0.0; }
+    double logDensity(unsigned int chain, PDFType type) const;
+    unsigned int df() const;
+    double KL(unsigned int chain1, unsigned int chain2, RNG *rng,
+	      unsigned int nrep) const;
     /**
      * Used by dumpNodeNames to gather a specific subset of node types:
      */

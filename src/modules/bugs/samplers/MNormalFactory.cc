@@ -17,7 +17,7 @@ namespace jags {
 namespace bugs {
 
 bool 
-MNormalFactory::canSample(StochasticNode * snode, Graph const &graph) const
+MNormalFactory::canSample(StochasticNode * snode, Graph const &) const
 {
     return snode->distribution()->name() == "dmnorm" && !isBounded(snode);
 }
@@ -26,7 +26,7 @@ Sampler *
 MNormalFactory::makeSampler(StochasticNode *snode, Graph const &graph) const
 {
     unsigned int N = snode->nchain();
-    vector<MutableSampleMethod*> methods(N, 0);
+    vector<MutableSampleMethod*> methods(N, nullptr);
 
     SingletonGraphView *gv = new SingletonGraphView(snode, graph);
     for (unsigned int ch = 0; ch < N; ++ch) {

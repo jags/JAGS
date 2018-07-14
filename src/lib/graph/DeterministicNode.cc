@@ -86,5 +86,21 @@ bool DeterministicNode::isFixed() const
 	    parents()[i]->removeChild(this);
 	}
     }
+
+    double DeterministicNode::logDensity(unsigned int, PDFType) const
+    {
+	return 0.0;
+    }
+
+    unsigned int DeterministicNode::df() const
+    {
+	return 0;
+    }
+
+    double DeterministicNode::KL(unsigned int, unsigned int,
+				 RNG *, unsigned int) const
+    {
+	return 0.0;
+    }
     
 } //namespace jags

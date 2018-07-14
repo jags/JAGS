@@ -32,13 +32,12 @@ string Function::alias() const
     }
 
 
-bool Function::isDiscreteValued(vector<bool> const &mask) const
+bool Function::isDiscreteValued(vector<bool> const &) const
 {
   return false;
 }
 
-bool Function::isScale(vector<bool> const &mask,
-		       vector<bool> const &isfixed) const
+bool Function::isScale(vector<bool> const &, vector<bool> const &) const
 {
     return false;
 }
@@ -49,14 +48,13 @@ bool Function::isLinear(vector<bool> const &mask,
     return isScale(mask, isfixed);
 }
 
-bool Function::isAdditive(vector<bool> const &mask,
-			  vector<bool> const &isfixed) const
+bool Function::isAdditive(vector<bool> const &, vector<bool> const &) const
 {
     return false;
 }
     
 bool 
-Function::isPower(vector<bool> const &mask, vector<bool> const &isfixed) const
+Function::isPower(vector<bool> const &, vector<bool> const &) const
 {
     return false;
 }
@@ -76,12 +74,12 @@ string Function::deparse(vector<string> const &par) const
     return name;
 }
 
-    bool Function::checkParameterDiscrete(vector<bool> const &mask) const
+    bool Function::checkParameterDiscrete(vector<bool> const &) const
     {
 	return true;
     }
 
-    bool Function::checkParameterFixed(std::vector<bool> const &mask) const
+    bool Function::checkParameterFixed(std::vector<bool> const &) const
     {
 	return true;
     }

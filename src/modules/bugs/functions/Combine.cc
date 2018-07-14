@@ -29,7 +29,7 @@ namespace jags {
 	}
 
 	unsigned long Combine::length (vector<unsigned long> const &lens,
-				      vector<double const *> const &vals) const
+				       vector<double const *> const &) const
 	{
 	    return accumulate(lens.begin(), lens.end(), 0U);
 	}
@@ -59,22 +59,22 @@ namespace jags {
 	}
 	
 	bool Combine::isScale(vector<bool> const &mask, 
-			      vector<bool> const &fixed) const
+			      vector<bool> const &) const
 	{
 	    //The Combine function behaves like an aggregate node
 	    //and so has the same rules for preserving scale functions
 	    return allTrue(mask);
 	}
 
-	bool Combine::isLinear(vector<bool> const &mask, 
-			       vector<bool> const &fixed) const
+	bool Combine::isLinear(vector<bool> const &, 
+			       vector<bool> const &) const
 	{
 	    //The Combine function behaves like an aggregate node
 	    //and so has the same rules for preserving linear functions
 	    return true;
 	}
 
-	bool Combine::checkParameterLength(vector<unsigned long> const &args)
+	bool Combine::checkParameterLength(vector<unsigned long> const &)
 	    const
 	{
 	    return true;

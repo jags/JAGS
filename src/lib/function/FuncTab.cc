@@ -55,7 +55,7 @@ struct isLinkName: public binary_function<FunctionPtr, string, bool>
 {
     bool operator()(FunctionPtr const &func, string const &name) const
     {
-	return LINK(func) != 0 && LINK(func)->linkName() == name;
+	return LINK(func) != nullptr && LINK(func)->linkName() == name;
     }
 };
 
@@ -90,7 +90,7 @@ LinkFunction const * FuncTab::findLink (string const &name) const
     FuncList::const_iterator p =
 	find_if(_flist.begin(), _flist.end(), bind2nd(isLinkName(), name));
 
-    return (p == _flist.end()) ? 0 : LINK(*p);
+    return (p == _flist.end()) ? nullptr : LINK(*p);
 }
 
 void FuncTab::erase(FunctionPtr const &func)

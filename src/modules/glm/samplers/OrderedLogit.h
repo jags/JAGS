@@ -28,7 +28,7 @@ namespace glm {
     {
 	double const &_y;
 	double const *_cuts;
-	const unsigned int _ncut;
+	const unsigned long _ncut;
 	double _z;
 	double _tau;
 	double _sigma2;

@@ -9,11 +9,19 @@ class Node;
 class Distribution;
 class Function;
 
-void throwRuntimeError(std::string const &message);
-void throwLogicError(std::string const &message);
-void throwNodeError(Node const *node, std::string const &message);
-void throwDistError(Distribution const *dist, std::string const &message);
-void throwFuncError(Function const *func, std::string const &message);
+    [[noreturn]] void throwRuntimeError(std::string const &message);
+
+    [[noreturn]]
+    void throwLogicError(std::string const &message);
+
+    [[noreturn]]
+    void throwNodeError(Node const *node, std::string const &message);
+
+    [[noreturn]]
+    void throwDistError(Distribution const *dist, std::string const &message);
+
+    [[noreturn]]
+    void throwFuncError(Function const *func, std::string const &message);
 
 } /* namespace jags */
 

@@ -24,7 +24,10 @@ namespace bugs {
 	switch(getDist(snode)) {
 	case POIS: case BIN: case NEGBIN:
 	    break;
-	default:
+	case BERN: case BETA: case CAT: case CHISQ: case DEXP: case DIRCH:
+	case EXP: case GAMMA: case LNORM: case LOGIS: case MNORM: case MULTI:
+	case NORM: case PAR: case T: case UNIF: case WEIB: case WISH:
+	case OTHERDIST:
 	    return false;
 	}
 	if (isBounded(snode))
@@ -86,7 +89,10 @@ namespace bugs {
 	    lambda = (1 - pi) * lambda + pi;
 	    xnew += rnbinom(N - y, lambda, rng);
 	    break;
-	default:
+	case BERN: case BETA: case CAT: case CHISQ: case DEXP: case DIRCH:
+	case EXP: case GAMMA: case LNORM: case LOGIS: case MNORM: case MULTI:
+	case NORM: case PAR: case T: case UNIF: case WEIB: case WISH:
+	case OTHERDIST:
 	    throwLogicError("Invalid distribution in ShiftedCount");
 	}
 	_gv->setValue(&xnew, 1, chain);

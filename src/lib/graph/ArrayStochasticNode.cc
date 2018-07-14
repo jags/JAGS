@@ -50,9 +50,7 @@ mkParameterDims(vector<Node const *> const &parameters) {
 ArrayStochasticNode::ArrayStochasticNode(ArrayDist const *dist,
 					 unsigned int nchain,
 					 vector<Node const *> const &params,
-					 Node const *lower, Node const *upper,
-					 double const *data,
-					 unsigned long length)
+					 Node const *lower, Node const *upper)
     : StochasticNode(mkDim(dist, params), nchain, dist, params, lower, upper),
       _dist(dist), _dims(mkParameterDims(params))
 {
@@ -89,7 +87,7 @@ void ArrayStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
     */
     
     double const *l = lowerLimit(chain);
-    double *lv = 0;
+    double *lv = nullptr;
 
     if (l || lower) {
 	lv = new double[_length];
@@ -107,7 +105,7 @@ void ArrayStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
     }
 
     double const *u = upperLimit(chain);
-    double *uv = 0;
+    double *uv = nullptr;
     if (u || upper) {
 	uv = new double[_length];
 	if (u && upper) {

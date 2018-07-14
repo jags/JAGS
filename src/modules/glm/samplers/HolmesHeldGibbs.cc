@@ -46,7 +46,7 @@ namespace jags {
 		throwLogicError("Wrong stype in HolmesHeldGibbs::update");
 	    }
 	    
-	    int nrow = _view->length();
+	    unsigned long nrow = _view->length();
 	    vector<double> theta(nrow);
 	    _view->getValue(theta, _chain);
 
@@ -58,9 +58,9 @@ namespace jags {
 
 	    //Extract diagonal from A
 	    vector<double> diagA(nrow);
-	    for (int c = 0; c < nrow; ++c) {
+	    for (unsigned long c = 0; c < nrow; ++c) {
 		for (int j = Ap[c]; j < Ap[c+1]; ++j) {
-		    if (Ai[j] == c) {
+		    if (static_cast<unsigned long>(Ai[j]) == c) {
 			diagA[c] = Ax[j];
 			break;
 		    }
@@ -84,7 +84,7 @@ namespace jags {
 		
 		for (int r = xp[c]; r < xp[c+1]; ++r) {
 
-		    int i = xi[r];
+		    unsigned long i = static_cast<unsigned long>(xi[r]);
 		    
 		    double theta_i = theta[i];
 		    

@@ -22,7 +22,7 @@ ScalarDist::ScalarDist(string const &name, unsigned int npar, Support support)
 {
 }
 
-double ScalarDist::l(vector<double const *> const &parameters) const
+double ScalarDist::l(vector<double const *> const &) const
 {
     double lb = JAGS_POSINF;
     
@@ -41,7 +41,7 @@ double ScalarDist::l(vector<double const *> const &parameters) const
     return lb;
 }
 
-double ScalarDist::u(vector<double const *> const &parameters) const
+double ScalarDist::u(vector<double const *> const &) const
 {
     double ub = JAGS_NEGINF;
     
@@ -59,7 +59,7 @@ double ScalarDist::u(vector<double const *> const &parameters) const
     return ub;
 }
 
-bool ScalarDist::isSupportFixed(vector<bool> const &fixmask) const
+bool ScalarDist::isSupportFixed(vector<bool> const &) const
 {
     if (_support == DIST_SPECIAL) {
 	//You must overload this function 
@@ -90,8 +90,8 @@ unsigned long ScalarDist::df() const
 	return div / nrep;
     }
 
-    double ScalarDist::KL(vector<double const *> const &par1,
-			  vector<double const *> const &par2) const
+    double ScalarDist::KL(vector<double const *> const &,
+			  vector<double const *> const &) const
     {
 	return JAGS_NA;
     }

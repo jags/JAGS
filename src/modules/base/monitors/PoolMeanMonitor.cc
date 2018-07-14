@@ -40,7 +40,7 @@ namespace base {
 		}
     }
 
-    vector<double> const &PoolMeanMonitor::value(unsigned int chain) const
+    vector<double> const &PoolMeanMonitor::value(unsigned int) const
     {
 	return _values;
     }

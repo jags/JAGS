@@ -35,9 +35,9 @@ unsigned long VectorDist::df(vector<unsigned long> const &par) const
 	return div / nrep;
     }
 
-    double VectorDist::KL(std::vector<double const *> const &par1,
-			  std::vector<double const *> const &par2,
-			  std::vector<unsigned long> const &lengths) const
+    double VectorDist::KL(std::vector<double const *> const &,
+			  std::vector<double const *> const &,
+			  std::vector<unsigned long> const &) const
     {
 	return JAGS_NA;
     }

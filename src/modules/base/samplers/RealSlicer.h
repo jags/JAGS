@@ -25,7 +25,6 @@ namespace base {
 	 * @param width Initial width of slice
 	 * @param maxwidth Maximal width of slice as a multiple of the width
 	 * parameter
-	 * @param nburn Length of burnin
 	 */
 	RealSlicer(SingletonGraphView const *gv, unsigned int chain,
 		   double width = 1, unsigned int maxwidth = 10);

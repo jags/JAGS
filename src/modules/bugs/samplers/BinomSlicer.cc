@@ -67,11 +67,9 @@ namespace jags {
 	    case SLICER_POSINF:
 		throwNodeError(_gv->node(),
 			       "Slicer stuck at value with infinite density");
-		break;
 	    case SLICER_NEGINF:
 		throwNodeError(_gv->node(),
 			       "Current value is inconsistent with data");
-		break;
 	    case SLICER_OK:
 		break;
 	    }

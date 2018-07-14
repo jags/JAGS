@@ -21,10 +21,10 @@ extern cholmod_common *glm_wk;
 namespace jags {
     namespace glm {
 
-	static unsigned int sumLengths(vector<Outcome*> const &outcomes)
+	static unsigned long sumLengths(vector<Outcome*> const &outcomes)
 	{
-	    unsigned int s = 0;
-	    for (unsigned int i = 0; i < outcomes.size(); ++i) {
+	    unsigned long s = 0;
+	    for (unsigned long i = 0; i < outcomes.size(); ++i) {
 		s += outcomes[i]->length();
 	    }
 	    return s;
@@ -40,8 +40,8 @@ namespace jags {
 	    calDesign();
 	    symbolic();
 
-	    unsigned int nrow = sumLengths(_outcomes);
-	    unsigned int ncol = eps->nodes()[0]->length();
+	    unsigned long nrow = sumLengths(_outcomes);
+	    unsigned long ncol = eps->nodes()[0]->length();
 	    _z = cholmod_allocate_dense(nrow, ncol, nrow, CHOLMOD_REAL,
 					glm_wk);
 	}
@@ -125,7 +125,7 @@ namespace jags {
 	    for (vector<StochasticNode*>::const_iterator p = 
 		     _view->nodes().begin();  p != _view->nodes().end(); ++p)
 	    {
-		unsigned int length = (*p)->length();
+		unsigned long length = (*p)->length();
 		double const *xold = (*p)->value(_chain);
 		for (unsigned int i = 0; i < length; ++i, ++r) {
 		    b[r] += xold[i];
@@ -139,7 +139,7 @@ namespace jags {
 	void REMethod::calDesignSigma()
 	{
 	    //Sanity checks
-	    unsigned int Neps = _eps->nodes().size();
+	    unsigned long Neps = _eps->nodes().size();
 	    if (_z->nrow != _x->nrow) {
 		throwLogicError("Row mismatch in REMethod");
 	    }
@@ -166,11 +166,11 @@ namespace jags {
 	    for (unsigned int i = 0; i < Neps; ++i) {
 		double const *eval = eps[i]->value(_chain);
 		double const *emean = eps[i]->parents()[0]->value(_chain);
-		for (unsigned int zcol = 0; zcol < _z->ncol; ++zcol) {
-		    int xcol = i * _z->ncol + zcol;
+		for (unsigned long zcol = 0; zcol < _z->ncol; ++zcol) {
+		    unsigned long xcol = i * _z->ncol + zcol;
 		    for (int xi = Xp[xcol]; xi < Xp[xcol+1]; ++xi) {
-			int row = Xi[xi];
-			int zi = _z->nrow * zcol + row;
+			unsigned long row = static_cast<unsigned long>(Xi[xi]);
+			unsigned long zi = _z->nrow * zcol + row;
 			Zx[zi] += Xx[xi] * (eval[zcol] - emean[zcol]);
 		    }
 		}
@@ -192,25 +192,25 @@ namespace jags {
 	}
 
 	void REMethod::calCoefSigma(double *A, double *b, double const *sigma0,
-				    unsigned int m) const
+				    unsigned long m) const
 	{
 	    double const *Zx = static_cast<double const *>(_z->x);
-	    unsigned int N = _outcomes.size();
+	    unsigned long N = _outcomes.size();
 
-	    int xrow = 0;
-	    for (unsigned int i = 0; i < N; ++i) {
-		unsigned int n = _outcomes[i]->length();
+	    unsigned long xrow = 0;
+	    for (unsigned long i = 0; i < N; ++i) {
+		unsigned long n = _outcomes[i]->length();
 		if (n == 1) {
 		    //Scalar outcome
 		    double Y = _outcomes[i]->value();
 		    double mu = _outcomes[i]->mean();
 		    double lambda = _outcomes[i]->precision();
 		    vector<double> X(m);
-		    for (unsigned int j = 0; j < m; ++j) {
+		    for (unsigned long j = 0; j < m; ++j) {
 			X[j] =  Zx[j * _z->nrow + xrow]/sigma0[j];
 		    }
-		    for (unsigned int j = 0; j < m; ++j) {
-			for (unsigned int k = 0; k < m; ++k) {
+		    for (unsigned long j = 0; j < m; ++j) {
+			for (unsigned long k = 0; k < m; ++k) {
 			    A[j*m + k] += X[j] * X[k] * lambda;
 			}
 			b[j] += (Y - mu) * X[j] * lambda;
@@ -263,7 +263,7 @@ namespace jags {
 	
 	double REMethod::logLikelihoodSigma(double const *sigma,
 					    double const *sigma0,
-					    unsigned int m) const
+					    unsigned long m) const
 	{
 	    vector<double> A(m*m, 0);
 	    vector<double> b(m, 0);

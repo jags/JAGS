@@ -35,15 +35,13 @@ getScale(StochasticNode const *snode, ConjugateDist d, unsigned int chain)
     switch(d) {
     case GAMMA: case NORM: case DEXP: case WEIB: case LNORM:
 	return *snode->parents()[1]->value(chain);
-	break;
     case EXP: case POIS:
 	return *snode->parents()[0]->value(chain);
-	break;
-    default:
-	throwNodeError(snode, 
+    case BERN: case BETA: case BIN: case CAT: case CHISQ: case DIRCH:
+    case LOGIS: case MNORM: case MULTI: case NEGBIN: case PAR: case T:
+    case UNIF: case WISH: case OTHERDIST:
+	throwNodeError(snode,
 		       "Can't get scale parameter: invalid distribution");
-	return 0; //-Wall
-	
     } 
 }
 
@@ -69,7 +67,7 @@ static void calCoef(double *coef, SingletonGraphView const *gv,
 
 
 ConjugateGamma::ConjugateGamma(SingletonGraphView const *gv)
-    : ConjugateMethod(gv), _coef(0)
+    : ConjugateMethod(gv), _coef(nullptr)
 {
     if(!gv->deterministicChildren().empty() && checkScale(gv, true)) 
     {
@@ -94,7 +92,10 @@ bool ConjugateGamma::canSample(StochasticNode *snode, Graph const &graph)
 	//cases of the gamma distribution and are handled by the conjugate
 	//gamma method.
 	break;
-    default:
+    case BERN: case BETA: case BIN: case CAT: case DEXP: case DIRCH:
+    case LNORM: case LOGIS: case MNORM: case MULTI: case NEGBIN: case NORM:
+    case PAR: case POIS: case T: case UNIF: case WEIB: case WISH:
+    case OTHERDIST:
 	return false;
     }
 
@@ -115,7 +116,9 @@ bool ConjugateGamma::canSample(StochasticNode *snode, Graph const &graph)
 		return false; //non-scale parameter depends on snode
 	    }
 	    break;
-	default:
+	case BERN: case BETA: case BIN: case CAT: case CHISQ: case DIRCH:
+	case LOGIS: case MNORM: case MULTI: case NEGBIN: case PAR: case T:
+	case UNIF: case WISH: case OTHERDIST:	    
 	    return false;
 	}
     }
@@ -153,15 +156,18 @@ void ConjugateGamma::update(unsigned int chain, RNG *rng) const
 	r = *param[0]->value(chain)/2;
 	mu = 0.5; //FIXME: This was wrong in 3.x.y. Needs testing
 	break;
-    default:
+    case BERN: case BETA: case BIN: case CAT: case DEXP: case DIRCH:
+    case LNORM: case LOGIS: case MNORM: case MULTI: case NEGBIN: case NORM:
+    case PAR: case POIS: case T: case UNIF: case WEIB: case WISH:
+    case OTHERDIST:	
 	throwLogicError("invalid distribution in ConjugateGamma method");
     }
 
     // likelihood 
-    double *coef = 0;
+    double *coef = nullptr;
     bool empty = _gv->deterministicChildren().empty();
     bool temp_coef = false;
-    if (!empty && _coef == 0) {
+    if (!empty && _coef == nullptr) {
 	    temp_coef = true;
 	    coef = new double[nchildren];
 	    calCoef(coef, _gv, _child_dist, chain);
@@ -208,7 +214,9 @@ void ConjugateGamma::update(unsigned int chain, RNG *rng) const
 		r+= 0.5;
 		mu += coef_i * (log(Y) - m) * (log(Y) - m) / 2;
 		break;
-	    default:
+	    case BERN: case BETA: case BIN: case CAT: case CHISQ: case DIRCH:
+	    case LOGIS: case MNORM: case MULTI: case NEGBIN: case PAR: case T:
+	    case UNIF: case WISH: case OTHERDIST:	
 		throwLogicError("Invalid distribution in Conjugate Gamma method"); 
 	    }
 	}

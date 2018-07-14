@@ -18,8 +18,8 @@ namespace glm {
      */
     class LGMix {
 	double _n;
-	int _r;
-	int _ncomp;	
+	long _r;
+	unsigned int _ncomp;	
 	double _weights[10];
 	double _means[10];
 	double _variances[10];

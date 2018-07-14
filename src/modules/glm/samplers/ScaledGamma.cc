@@ -136,7 +136,7 @@ namespace jags {
 	void ScaledGamma::update(RNG *rng)
 	{
 	    vector<StochasticNode *> const &sch = _gv->stochasticChildren();
-	    unsigned int nchildren = sch.size();
+	    unsigned long nchildren = sch.size();
     
 	    double r = 0; //shape
 	    double mu = 0; //rate (1/scale)

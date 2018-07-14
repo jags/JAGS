@@ -45,12 +45,12 @@ namespace bugs {
 	return found;
     }
     
-    bool Sum::isScale(vector<bool> const &mask, vector<bool> const &fix) const
+    bool Sum::isScale(vector<bool> const &mask, vector<bool> const &) const
     {
 	return allTrue(mask);
     }
 
-    bool Sum::isLinear(vector<bool> const &mask, vector<bool> const &fix) const
+    bool Sum::isLinear(vector<bool> const &, vector<bool> const &) const
     {
 	return true;
     }

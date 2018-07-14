@@ -1,5 +1,5 @@
-#ifndef _MERSENNE_TWISTER_RNG_H_
-#define _MERSENNE_TWISTER_RNG_H_
+#ifndef MERSENNE_TWISTER_RNG_H_
+#define MERSENNE_TWISTER_RNG_H_
 
 #include <rng/RmathRNG.h>
 

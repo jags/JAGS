@@ -27,7 +27,7 @@ namespace bugs {
 
     vector<unsigned long> 
     Transpose::dim (vector <vector<unsigned long> > const &dims,
-		    vector <double const *> const &values) const
+		    vector <double const *> const &) const
     {
 	vector<unsigned long> ans(2);
 	ans[0] = dims[0].size() == 2 ? dims[0][1] : 1;
@@ -42,14 +42,12 @@ namespace bugs {
 	return isScalar(dims[0]) || isVector(dims[0]) || isMatrix(dims[0]);
     }
 
-    bool Transpose::isAdditive(vector<bool> const &mask,
-			       vector<bool> const &isfixed) const
+    bool Transpose::isAdditive(vector<bool> const &, vector<bool> const &) const
     {
 	return true;
     }
     
-    bool Transpose::isScale(vector<bool> const &mask,
-		            vector<bool> const &isfixed) const
+    bool Transpose::isScale(vector<bool> const &, vector<bool> const &) const
     {
 	return true;
     }

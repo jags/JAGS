@@ -40,7 +40,7 @@ void LinkNode::deterministicSample(unsigned int chain)
     _data[chain] = _func->inverseLink(*_parameters[chain][0]);
 }
 
-bool LinkNode::checkParentValues(unsigned int chain) const
+bool LinkNode::checkParentValues(unsigned int) const
 {
     return true;
 }

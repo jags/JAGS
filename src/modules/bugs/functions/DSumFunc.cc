@@ -45,19 +45,18 @@ namespace bugs {
 
     vector<unsigned long>  
     DSumFunc::dim(vector<vector<unsigned long> > const &dims,
-		  vector<double const *> const &values) const
+		  vector<double const *> const &) const
     {
 	return dims[0];
     }
 
-    bool DSumFunc::isLinear(vector<bool> const &mask, 
-			    vector<bool> const &fixed) const
+    bool DSumFunc::isLinear(vector<bool> const &, vector<bool> const &) const
     {
 	return true;
     }
 
     bool DSumFunc::isScale(vector<bool> const &mask, 
-			   vector<bool> const &fixed) const
+			   vector<bool> const &) const
     {
 	return allTrue(mask);
     }

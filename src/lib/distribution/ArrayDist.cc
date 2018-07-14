@@ -38,9 +38,9 @@ unsigned long ArrayDist::df(vector<vector<unsigned long> > const &pdims) const
 	return div / nrep;
     }
 
-    double ArrayDist::KL(vector<double const *> const &par1,
-			 vector<double const *> const &par2,
-			 vector<vector<unsigned long> > const &dims) const
+    double ArrayDist::KL(vector<double const *> const &,
+			 vector<double const *> const &,
+			 vector<vector<unsigned long> > const &) const
     {
 	return JAGS_NA;
     }

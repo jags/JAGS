@@ -18,7 +18,7 @@ double Equal::evaluate(vector<double const *> const &args) const
   return *args[0] == *args[1];
 }
 
-bool Equal::isDiscreteValued(vector<bool> const &mask) const
+bool Equal::isDiscreteValued(vector<bool> const &) const
 {
   return true;
 }

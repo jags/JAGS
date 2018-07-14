@@ -57,7 +57,7 @@ namespace jags {
     NodeArray::NodeArray(string const &name, vector<unsigned long> const &dim, 
 			 unsigned int nchain)
 	: _name(name), _range(dim), _true_range(expand(dim)), _nchain(nchain), 
-	  _node_pointers(product(expand(dim)), 0),
+	  _node_pointers(product(expand(dim)), nullptr),
 	  _offsets(product(expand(dim)), numeric_limits<unsigned long>::max()),
 	  _locked(false)
 	  
@@ -91,7 +91,7 @@ namespace jags {
 	    SimpleRange new_true_range = SimpleRange(expand(upper));
 	    unsigned long N  = product(new_true_range.dim(false));
 	    vector<unsigned long> new_offsets(N, numeric_limits<unsigned long>::max());
-	    vector<Node *> new_node_pointers(N, 0);
+	    vector<Node *> new_node_pointers(N, nullptr);
 	    for (RangeIterator p(_range); !p.atEnd(); p.nextLeft()) {
 		unsigned long k = _true_range.leftOffset(p);
 		unsigned long l = new_true_range.leftOffset(p);
@@ -129,7 +129,7 @@ namespace jags {
 	    }
 	}
 	for (RangeIterator p(target_range); !p.atEnd(); p.nextLeft()) {
-	    if (_node_pointers[_true_range.leftOffset(p)] != 0) {
+	    if (_node_pointers[_true_range.leftOffset(p)] != nullptr) {
 		throw runtime_error(string("Node ") + name() 
 				    + printRange(target_range)
 				    + " overlaps previously defined nodes");
@@ -175,7 +175,7 @@ namespace jags {
 				    ". Range out of bounds");
 	    }
 	    else {
-		return 0;
+		return nullptr;
 	    }
 	}
 	
@@ -209,8 +209,8 @@ namespace jags {
 	vector<unsigned long> offsets;
 	for (RangeIterator q(target_range); !q.atEnd(); q.nextLeft()) {
 	    unsigned long i = _true_range.leftOffset(q);
-	    if (_node_pointers[i] == 0) {
-		return 0;
+	    if (_node_pointers[i] == nullptr) {
+		return nullptr;
 	    }
 	    nodes.push_back(_node_pointers[i]);
 	    offsets.push_back(_offsets[i]);
@@ -238,7 +238,7 @@ namespace jags {
 	    if (x[j] != JAGS_NA) {
 		unsigned long k = _true_range.leftOffset(p);
 		Node *node = _node_pointers[k];
-		if (node == 0) {
+		if (node == nullptr) {
 		    string msg = "Attempt to set value of undefined node ";
 		    throw runtime_error(msg + name() + printIndex(p));
 		}
@@ -329,7 +329,7 @@ namespace jags {
 	    unsigned long j = _range.leftOffset(p);
 	    if (x[j] != JAGS_NA) {
 		unsigned long k = _true_range.leftOffset(p);
-		if (_node_pointers[k] == 0) {
+		if (_node_pointers[k] == nullptr) {
 		    //Insert a new constant data node
 		    ConstantNode *cnode = new ConstantNode(x[j], _nchain, true);
 		    model->addNode(cnode);

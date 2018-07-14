@@ -28,7 +28,7 @@ namespace jags {
 	DMNormVC::logDensity(double const *x, unsigned long m, PDFType type,
 			     vector<double const *> const &parameters,
 			     vector<vector<unsigned long> > const &dims,
-			     double const *lower, double const *upper) const
+			     double const *, double const *) const
 	{
 	    double const * mu = parameters[0];
 	    double const * V  = parameters[1];
@@ -64,7 +64,7 @@ namespace jags {
 	DMNormVC::randomSample(double *x, unsigned long m,
 			       vector<double const *> const &parameters,
 			       vector<vector<unsigned long> > const &dims,
-			       double const *lower, double const *upper,
+			       double const *, double const *,
 			       RNG *rng) const
 	{
 	    double const * mu = parameters[0];
@@ -96,8 +96,8 @@ namespace jags {
 	
 	void
 	DMNormVC::support(double *lower, double *upper, unsigned long length,
-			  vector<double const *> const &parameters,
-			  vector<vector<unsigned long> > const &dims) const
+			  vector<double const *> const &,
+			  vector<vector<unsigned long> > const &) const
 	{
 	    for (unsigned long i = 0; i < length; ++i) {
 		lower[i] = JAGS_NEGINF;
@@ -105,13 +105,13 @@ namespace jags {
 	    }
 	}
 
-	bool DMNormVC::isSupportFixed(vector<bool> const &fixmask) const
+	bool DMNormVC::isSupportFixed(vector<bool> const &) const
 	{
 	    return true;
 	}
 
-	bool DMNormVC::checkParameterValue(vector<double const *> const &parameters,
-					   vector<vector<unsigned long> > const &dims) const
+	bool DMNormVC::checkParameterValue(vector<double const *> const &,
+					   vector<vector<unsigned long> > const &) const
 	{
 	    return true; //FIXME: define in base class
 	}

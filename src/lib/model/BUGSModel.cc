@@ -154,7 +154,7 @@ void BUGSModel::setParameters(map<string, SArray> const &param_table,
 
     //Strip off .RNG.seed (user-supplied random seed)
     if (param_table.find(".RNG.seed") != param_table.end()) {
-	if (rng(chain) == 0) {
+	if (rng(chain) == nullptr) {
 	    throw runtime_error(".RNG.seed supplied but RNG type not set");
 	}
 	SArray const &seed = param_table.find(".RNG.seed")->second;
@@ -170,7 +170,7 @@ void BUGSModel::setParameters(map<string, SArray> const &param_table,
 
     //Strip off .RNG.state (saved state from previous run)
     if (param_table.find(".RNG.state") != param_table.end()) {
-	if (rng(chain) == 0) {
+	if (rng(chain) == nullptr) {
 	    throw runtime_error(".RNG.state supplied, but RNG type not set");
 	}
 	SArray const &state = param_table.find(".RNG.state")->second;
@@ -201,7 +201,7 @@ bool BUGSModel::setMonitor(string const &name, Range const &range,
     }
 
     msg.clear();
-    Monitor *monitor = 0;
+    Monitor *monitor = nullptr;
 
     list<pair<MonitorFactory*, bool> > const &faclist = monitorFactories();
     for(list<pair<MonitorFactory*, bool> >::const_iterator j = faclist.begin();

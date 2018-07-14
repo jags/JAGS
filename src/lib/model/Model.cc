@@ -85,7 +85,7 @@ static bool checkClosure(vector<Node*> const &nodes)
 }
 
 Model::Model(unsigned int nchain)
-    : _samplers(0), _nchain(nchain), _rng(nchain, 0), _iteration(0),
+    : _samplers(0), _nchain(nchain), _rng(nchain, nullptr), _iteration(0),
       _is_initialized(false), _adapt(false), _data_gen(false)
 {
 }
@@ -120,7 +120,7 @@ void Model::chooseRNGs()
     //Count number of unassigned RNGs
     unsigned int n  = 0;
     for (unsigned int i = 0; i < _nchain; ++i) {
-	if (_rng[i] == 0)
+	if (_rng[i] == nullptr)
 	    ++n;
     }
 
@@ -149,7 +149,7 @@ void Model::chooseRNGs()
     else {
 	unsigned int j = 0;
 	for (unsigned int i = 0; i < _nchain; ++i) {
-	    if (_rng[i] == 0) {
+	    if (_rng[i] == nullptr) {
 		_rng[i] = new_rngs[j++];
 	    }
 	}

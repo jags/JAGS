@@ -53,7 +53,7 @@ namespace glm {
 	    throwLogicError("Wrong stype in GLMGibbs::update");
 	}
 	
-	int nrow = _view->length();
+	unsigned long nrow = _view->length();
 	vector<double> theta(nrow);
 	_view->getValue(theta, _chain);
 
@@ -63,9 +63,9 @@ namespace glm {
 
 	//Extract diagonal from A
 	vector<double> diagA(nrow);
-	for (int c = 0; c < nrow; ++c) {
+	for (unsigned long c = 0; c < nrow; ++c) {
 	    for (int j = Ap[c]; j < Ap[c+1]; ++j) {
-		if (Ai[j] == c) {
+		if (static_cast<unsigned long>(Ai[j]) == c) {
 		    diagA[c] = Ax[j];
 		    break;
 		}
@@ -73,7 +73,7 @@ namespace glm {
 	}
 
 	//Update element-wise
-	for (int i = 0; i < nrow; ++i) {
+	for (unsigned long i = 0; i < nrow; ++i) {
 	    
 	    double theta_old = theta[i];
 		

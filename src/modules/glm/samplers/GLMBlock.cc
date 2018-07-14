@@ -119,9 +119,9 @@ namespace glm {
 	for (vector<StochasticNode*>::const_iterator p = 
 		 _view->nodes().begin();  p != _view->nodes().end(); ++p)
 	{
-	    unsigned int length = (*p)->length();
+	    unsigned long length = (*p)->length();
 	    double const *xold = (*p)->value(_chain);
-	    for (unsigned int i = 0; i < length; ++i, ++r) {
+	    for (unsigned long i = 0; i < length; ++i, ++r) {
 		b[r] += xold[i];
 	    }
 	}

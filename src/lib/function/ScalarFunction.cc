@@ -16,13 +16,13 @@ ScalarFunction::ScalarFunction (string const &name, unsigned long npar)
 }
 
 bool 
-ScalarFunction::checkParameterValue(vector<double const *> const &args) const
+ScalarFunction::checkParameterValue(vector<double const *> const &) const
 {
     return true;
 }
 
 bool ScalarFunction::isPower(vector<bool> const &mask,
-			     vector<bool> const &isfixed) const
+			     vector<bool> const &) const
 {
     unsigned long nmask = 0;
     for (unsigned long i = 0; i < mask.size(); ++i) {

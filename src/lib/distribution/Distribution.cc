@@ -33,17 +33,17 @@ unsigned long Distribution::npar () const
   return _npar;
 }
 
-bool Distribution::isLocationParameter(unsigned int i) const
+bool Distribution::isLocationParameter(unsigned int) const
 {
     return false;
 }
 
-bool Distribution::isScaleParameter(unsigned int i) const
+bool Distribution::isScaleParameter(unsigned int) const
 {
     return false;
 }
 
-bool Distribution::isDiscreteValued(vector<bool> const &mask) const
+bool Distribution::isDiscreteValued(vector<bool> const &) const
 {
     return false;
 }
@@ -53,7 +53,7 @@ bool Distribution::canBound() const
     return false;
 }
 
-bool Distribution::checkParameterDiscrete(vector<bool> const &mask) const
+bool Distribution::checkParameterDiscrete(vector<bool> const &) const
 {
     return true;
 }

@@ -17,7 +17,7 @@ namespace jags {
 namespace base {
 
     BaseRNGFactory::BaseRNGFactory()
-	: _index(0), _seed(static_cast<unsigned int>(time(NULL)))
+	: _index(0), _seed(static_cast<unsigned int>(time(nullptr)))
     {
     }
 
@@ -37,7 +37,7 @@ namespace base {
     {
 	vector<RNG *> ans;
 	for (unsigned int i = 0; i < n; i++) {
-	    RNG *rng = 0;
+	    RNG *rng = nullptr;
 	    switch(_index) {
 	    case 0:
 		rng =  new WichmannHillRNG(_seed, DEFAULT_NORM_KIND);
@@ -71,9 +71,9 @@ namespace base {
 
     RNG * BaseRNGFactory::makeRNG(string const &name)
     {
-	unsigned int seed = static_cast<unsigned int>(time(NULL));
+	unsigned int seed = static_cast<unsigned int>(time(nullptr));
 
-	RNG *rng = 0;
+	RNG *rng = nullptr;
 	if (name == "base::Wichmann-Hill")
 	    rng = new WichmannHillRNG(seed, DEFAULT_NORM_KIND);
 	else if (name == "base::Marsaglia-Multicarry")
@@ -83,7 +83,7 @@ namespace base {
 	else if (name == "base::Mersenne-Twister")
 	    rng = new MersenneTwisterRNG(seed, DEFAULT_NORM_KIND);
 	else
-	    return 0;
+	    return nullptr;
 
 	_rngvec.push_back(rng);
 	return rng;

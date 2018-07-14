@@ -84,8 +84,8 @@ void Censored::update(unsigned int chain, RNG * rng) const
     double const *b = breaks(_gv)->value(chain);
     unsigned long ymax = breaks(_gv)->length();
 
-    double const *lower = (y == 0) ? 0 : b + y - 1;
-    double const *upper = (y == ymax) ? 0 : b + y;
+    double const *lower = (y == 0) ? nullptr : b + y - 1;
+    double const *upper = (y == ymax) ? nullptr : b + y;
 	
     _snode->truncatedSample(rng, chain, lower, upper);
 }

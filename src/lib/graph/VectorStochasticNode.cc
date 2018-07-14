@@ -84,7 +84,7 @@ void VectorStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
     
 {
     double const *l = lowerLimit(chain);
-    double *lv = 0;
+    double *lv = nullptr;
     if (l || lower) {
 	lv = new double[_length];
 	if (l && lower) {
@@ -101,7 +101,7 @@ void VectorStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
     }
 
     double const *u = upperLimit(chain);
-    double *uv = 0;
+    double *uv = nullptr;
     if (u || upper) {
 	uv = new double[_length];
 	if (u && upper) {
@@ -169,7 +169,7 @@ void VectorStochasticNode::sp(double *lower, double *upper, unsigned long length
 				   _lengths);
 	    if (kl == JAGS_NA) {
 		return _dist->KL(_parameters[ch1], _parameters[ch2], _lengths,
-				 0, 0, rng, nrep);
+				 nullptr, nullptr, rng, nrep);
 	    }
 	    else {
 		return kl;

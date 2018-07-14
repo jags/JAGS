@@ -52,10 +52,10 @@ namespace jags {
 	}
 
 	double DRW1::logDensity(double const *x, unsigned long length,
-				PDFType type,
+				PDFType ,
 				vector<double const *> const &par,
 				vector<unsigned long> const &len,
-				double const *lower, double const *upper) const
+				double const *, double const *) const
 	{
 	    double tau = TAU(par);
 	    double sigma = 1/sqrt(tau);
@@ -70,7 +70,7 @@ namespace jags {
 	void DRW1::randomSample(double *x, unsigned long length,
 				vector<double const *> const &par,
 				vector<unsigned long> const &len,
-				double const *lower, double const *upper,
+				double const *, double const *,
 				RNG *rng) const
 	{
 	    double tau = TAU(par);
@@ -89,7 +89,7 @@ namespace jags {
 	}
 
 	void DRW1::support(double *lower, double *upper, unsigned long length,
-			   vector<double const *> const &par,
+			   vector<double const *> const &,
 			   vector<unsigned long> const &len) const
 	{
 	    for (unsigned long i = 0; i < length; ++i) {
@@ -98,7 +98,7 @@ namespace jags {
 	    }
 	}
 
-	bool DRW1::isSupportFixed(vector<bool> const &fixmask) const
+	bool DRW1::isSupportFixed(vector<bool> const &) const
 	{
 	    return true;
 	}

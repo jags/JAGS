@@ -35,13 +35,13 @@ namespace base {
     }
     
     bool 
-    Subtract::isScale(vector<bool> const &mask, vector<bool> const &fix) const
+    Subtract::isScale(vector<bool> const &mask, vector<bool> const &) const
     {
 	return allTrue(mask);
     }
     
     bool 
-    Subtract::isLinear(vector<bool> const &mask, vector<bool> const &fix) const
+    Subtract::isLinear(vector<bool> const &, vector<bool> const &) const
     {
 	return true;
     }

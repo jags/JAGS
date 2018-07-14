@@ -20,7 +20,7 @@ namespace bugs {
     void LogDet::evaluate (double *x, vector<double const *> const &args,
 			   vector<vector<unsigned long> > const &dims) const
     {
-	*x = logdet(args[0], asInteger(dims[0][0]));
+	*x = logdet(args[0], dims[0][0]);
     }
 
     bool 
@@ -30,8 +30,8 @@ namespace bugs {
     }
 
     vector<unsigned long>
-    LogDet::dim(vector<vector<unsigned long> > const &dims,
-		vector<double const *> const &values) const
+    LogDet::dim(vector<vector<unsigned long> > const &,
+		vector<double const *> const &) const
     {
 	return vector<unsigned long>(1,1);
     }

@@ -29,18 +29,16 @@ namespace bugs {
 
 bool ConjugateBeta::canSample(StochasticNode *snode, Graph const &graph)
 {
-    switch(getDist(snode)) {
-    case BETA:
-	break;
-    case UNIF:
+    ConjugateDist dist = getDist(snode);
+    if (dist ==  UNIF) {
 	// dunif(0,1) is equivalent to dbeta(1,1) 
 	if(!(*snode->parents()[0]->value(0) == 0 &&
 	     *snode->parents()[1]->value(0) == 1 &&
 	     snode->parents()[0]->isFixed() &&
 	     snode->parents()[1]->isFixed()))
 	    return false;
-	break;
-    default:
+    }
+    else if (dist != BETA) {
 	return false;
     }
 
@@ -72,7 +70,10 @@ bool ConjugateBeta::canSample(StochasticNode *snode, Graph const &graph)
 	    break;
 	case BERN:
 	    break;
-	default:
+	case BETA: case CAT: case CHISQ: case DEXP: case DIRCH: case EXP:
+	case GAMMA: case LNORM: case LOGIS: case MNORM: case MULTI: case NORM:
+	case PAR: case POIS: case T: case UNIF: case WEIB: case WISH:
+	case OTHERDIST:
 	    return false;
 	}
     }
@@ -102,14 +103,17 @@ void ConjugateBeta::update(unsigned int chain, RNG *rng) const
 	a = 1;
 	b = 1;
 	break;
-    default:
+    case BERN: case BIN: case CAT: case CHISQ: case DEXP: case DIRCH: case EXP:
+    case GAMMA: case LNORM: case LOGIS: case MNORM: case MULTI: case NEGBIN:
+    case NORM: case PAR: case POIS: case T: case WEIB: case WISH:
+    case OTHERDIST:
 	throwLogicError("Invalid distribution in ConjugateBeta sampler");
     }
     unsigned long Nchild = stoch_children.size();
 
     /* For mixture models, we count only stochastic children that
        depend on snode */
-    double *C = 0;
+    double *C = nullptr;
     bool is_mix = !_gv->deterministicChildren().empty();
     if (is_mix) {
 	C = new double[Nchild];
@@ -147,7 +151,10 @@ void ConjugateBeta::update(unsigned int chain, RNG *rng) const
 		a += y;
 		b += 1 - y;
 		break;
-	    default:
+	    case BETA: case CAT: case CHISQ: case DEXP: case DIRCH: case EXP:
+	    case GAMMA: case LNORM: case LOGIS: case MNORM: case MULTI:
+	    case NORM: case PAR: case POIS: case T: case UNIF: case WEIB:
+	    case WISH: case OTHERDIST:
 		throwLogicError("Invalid distribution in Conjugate Beta sampler");
 	    }
 	}

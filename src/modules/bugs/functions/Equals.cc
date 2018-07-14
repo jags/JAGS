@@ -19,7 +19,7 @@ namespace bugs {
 	return fabs(*args[0] - *args[1]) < 16 *DBL_EPSILON;
     }
 
-    bool Equals::isDiscreteValued(vector<bool> const &mask) const
+    bool Equals::isDiscreteValued(vector<bool> const &) const
     {
 	return true;
     }

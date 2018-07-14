@@ -88,14 +88,14 @@ static bool isParameter(Node const *node)
     return node->randomVariableStatus() == RV_TRUE_UNOBSERVED;
 }
 
-static bool alwaysTrue(Node const *node)
+static bool alwaysTrue(Node const *)
 {
   return true;
 }
 
 Console::Console(ostream &out, ostream &err)
-  : _out(out), _err(err), _model(0), _pdata(0), _prelations(0), 
-    _pvariables(0)
+  : _out(out), _err(err), _model(nullptr),
+    _pdata(nullptr), _prelations(nullptr),  _pvariables(nullptr)
 {
 }
 
@@ -135,7 +135,7 @@ static void getVariableNames(ParseTree const *ptree, set<string> &nameset,
 	 p != param.end(); ++p) 
     {  
 	//ParseTree objects of type P_BOUND can have null parameters
-	if (*p == 0) continue;
+	if (*p == nullptr) continue;
       
 	if ((*p)->treeClass() == P_FOR) {
 	    ParseTree *counter = (*p)->parameters()[0];
@@ -161,21 +161,20 @@ bool Console::checkModel(FILE *file)
 	_out << "Replacing existing model" << endl;
 	clearModel();
     }
-    _model = 0;
+    _model = nullptr;
 
     string message;
     int status =  parse_bugs(file, _pvariables, _pdata, _prelations, message);
     if (status != 0) {
 	_err << endl << "Error parsing model file:" << endl << message << endl;
 	//Tidy up
-	delete _pdata; _pdata = 0;
-	delete _prelations; _prelations = 0;
+	delete _pdata; _pdata = nullptr;
+	delete _prelations; _prelations = nullptr;
 	if (_pvariables) {
 	    for (unsigned int i = 0; i < _pvariables->size(); ++i) {
 		delete (*_pvariables)[i];
 	    }
-	    delete _pvariables;
-	    _pvariables = 0;
+	    delete _pvariables; _pvariables = nullptr;
 	}
 	
 	return false;
@@ -215,7 +214,7 @@ bool Console::compile(map<string, SArray> &data_table, unsigned int nchain,
 	clearModel();
     }
 
-    RNG *datagen_rng = 0;
+    RNG *datagen_rng = nullptr;
     if (_pdata && gendata) {
 	_model = new BUGSModel(1);
 
@@ -262,7 +261,7 @@ bool Console::compile(map<string, SArray> &data_table, unsigned int nchain,
 	    _out << "   Reading data back into data table" << endl;
 	    _model->symtab().readValues(data_table, 0, alwaysTrue);
 	    delete _model;
-	    _model = 0;
+	    _model = nullptr;
 	}
 	CATCH_ERRORS;
     }
@@ -318,7 +317,7 @@ bool Console::compile(map<string, SArray> &data_table, unsigned int nchain,
 
 bool Console::initialize()
 {
-    if (_model == 0) {
+    if (_model == nullptr) {
 	_err << "Can't initialize. No model!" << endl;
 	return false;
     }
@@ -344,7 +343,7 @@ bool Console::initialize()
 bool Console::setParameters(map<string, SArray> const &init_table,
 			    unsigned int chain)
 {
-  if (_model == 0) {
+  if (_model == nullptr) {
     _err << "Can't set initial values. No model!" << endl;    
     return false;
   }
@@ -363,7 +362,7 @@ bool Console::setParameters(map<string, SArray> const &init_table,
 
 bool Console::setRNGname(string const &name, unsigned int chain)
 {
-    if (_model == 0) {
+    if (_model == nullptr) {
 	_err << "Can't set RNG name. No model!" << endl;    
 	return false;
     }
@@ -381,7 +380,7 @@ bool Console::setRNGname(string const &name, unsigned int chain)
 
 bool Console::update(unsigned int n)
 {
-    if (_model == 0) {
+    if (_model == nullptr) {
 	_err << "Can't update. No model!" << endl;    
 	return false;
     }
@@ -467,8 +466,7 @@ bool Console::clearMonitor(string const &name, Range const &range,
 void Console::clearModel()
 {
     _out << "Deleting model" << endl;
-    delete _model; 
-    _model = 0;
+    delete _model; _model = nullptr;
 }
 
 bool Console::dumpState(map<string,SArray> &data_table,
@@ -487,7 +485,7 @@ bool Console::dumpState(map<string,SArray> &data_table,
     _err << "Invalid chain number" << endl;
     return false;
   }
-  bool (*selection)(Node const *) = 0;
+  bool (*selection)(Node const *) = nullptr;
   switch (type) {
   case DUMP_PARAMETERS:
     selection = isParameter;
@@ -531,7 +529,7 @@ bool Console::dumpState(map<string,SArray> &data_table,
 bool Console::dumpMonitors(map<string,SArray> &data_table,
 			   string const &type, bool flat) 
 {
-    if (_model == 0) {
+    if (_model == nullptr) {
 	_err << "Cannot dump monitors.  No model!" << endl;
 	return false;
     }
@@ -554,10 +552,10 @@ bool Console::dumpMonitors(map<string,SArray> &data_table,
 void Console::dumpNodeNames(vector<string> &node_names,
 	     string const &type, bool flat) const
 {
-    if (_model == 0) {
-		_err << "Cannot dump node names.  No model!" << endl;
-		return;
-	}
+    if (_model == nullptr) {
+	_err << "Cannot dump node names.  No model!" << endl;
+	return;
+    }
 	
     string warn;
 	_model->dumpNodeNames(node_names, type, flat, warn);
@@ -614,7 +612,7 @@ BUGSModel const *Console::model()
 
 unsigned int Console::nchain() const
 {
-  if (_model == 0) {
+  if (_model == nullptr) {
     return 0;
   }
   else {
@@ -624,7 +622,7 @@ unsigned int Console::nchain() const
 
 bool Console::checkAdaptation(bool &status) 
 {
-    if (_model == 0) {
+    if (_model == nullptr) {
 	_err << "Can't update. No model!" << endl;
 	return false;
     }
@@ -643,7 +641,7 @@ bool Console::checkAdaptation(bool &status)
     
 bool Console::adaptOff(void) 
 {
-  if (_model == 0) {
+  if (_model == nullptr) {
     _err << "Cannot stop adaptation. No model!" << endl;
     return false;
   }
@@ -672,7 +670,7 @@ vector<string> const &Console::variableNames() const
 
 bool Console::dumpSamplers(vector<vector<string> > &sampler_names)
 {
-    if (_model == 0) {
+    if (_model == nullptr) {
 	_err << "Can't dump samplers. No model!" << endl;    
 	return false;
     }

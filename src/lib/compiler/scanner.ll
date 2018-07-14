@@ -11,7 +11,7 @@
 
 #include <stdexcept>
 
-void jags_scanner_error(const char *msg);
+[[noreturn]] void jags_scanner_error(const char *msg);
 #define YY_FATAL_ERROR(msg) jags_scanner_error (msg)
 
 %}
@@ -121,7 +121,7 @@ int yywrap()
   return 1;
 }
 
-void jags_scanner_error (char const *msg)
+[[noreturn]] void jags_scanner_error (char const *msg)
 {
     throw std::runtime_error(msg);
 }

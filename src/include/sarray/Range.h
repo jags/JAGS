@@ -50,9 +50,17 @@ class Range {
      */
     Range(std::vector<std::vector<unsigned long> > const &scope);
     /**
+     * Copy constructor
+     */
+    Range(Range const &range) = default;
+    /**
      * Virtual destructor
      */
     virtual ~Range();
+    /**
+     * Copy assignment
+     */
+    Range & operator=(Range const &) = default;
     /**
      * Equality operator
      */

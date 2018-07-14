@@ -93,7 +93,7 @@ static unsigned int sumChildrenLength(SingletonGraphView const *gv)
 }
 
 ConjugateMNormal::ConjugateMNormal(SingletonGraphView const *gv)
-    : ConjugateMethod(gv), _betas(0), 
+    : ConjugateMethod(gv), _betas(nullptr), 
       _length_betas(sumChildrenLength(gv) * gv->length())
 {
     if(!gv->deterministicChildren().empty() && checkLinear(gv, true))
@@ -206,8 +206,8 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
     }
     else {
 	
-	bool temp_beta = (_betas == 0);
-        double *betas = 0;
+	bool temp_beta = (_betas == nullptr);
+        double *betas = nullptr;
 	if (temp_beta) {
 	    betas = new double[_length_betas];
 	    calBeta(betas, _gv, chain);

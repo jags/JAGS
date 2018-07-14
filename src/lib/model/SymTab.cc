@@ -56,7 +56,7 @@ NodeArray* SymTab::getVariable(string const &name) const
   map<string, NodeArray*>::const_iterator p =  _varTable.find(name);
   
   if (p == _varTable.end()) {
-    return 0;
+    return nullptr;
   }
   else {
     return p->second;

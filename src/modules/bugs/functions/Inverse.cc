@@ -22,7 +22,7 @@ namespace bugs {
     void Inverse::evaluate (double *value, vector<double const *> const &args,
 			    vector<vector<unsigned long> > const &dims) const
     {
-	inverse_chol (value, args[0], asInteger(dims[0][0]));
+	inverse_chol (value, args[0], dims[0][0]);
     }
 
     bool 
@@ -33,7 +33,7 @@ namespace bugs {
 
     vector<unsigned long> 
     Inverse::dim (vector<vector<unsigned long> > const &dims,
-		  vector<double const *> const &values) const
+		  vector<double const *> const &) const
     {
 	return dims[0];
     }

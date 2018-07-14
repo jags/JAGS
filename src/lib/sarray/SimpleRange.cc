@@ -43,14 +43,7 @@ namespace jags {
 	: Range(makeScope(lower, upper))
     {
     }
-
-    /*
-    SimpleRange::SimpleRange(vector<long> const &index)
-	: Range(makeScope(index, index))
-    {
-    }
-    */
-    
+ 
     SimpleRange::SimpleRange(vector<unsigned long> const &dim)
 	: Range(makeScope(vector<unsigned long>(dim.size(), 1), dim))
     {

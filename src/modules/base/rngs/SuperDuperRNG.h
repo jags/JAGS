@@ -1,5 +1,5 @@
-#ifndef _SUPER_DUPER_RNG_H_
-#define _SUPER_DUPER_RNG_H_
+#ifndef SUPER_DUPER_RNG_H_
+#define SUPER_DUPER_RNG_H_
 
 #include <rng/RmathRNG.h>
 
@@ -20,4 +20,4 @@ namespace base {
 
 }}
 
-#endif /* _SUPER_DUPER_RNG_H_ */
+#endif /* SUPER_DUPER_RNG_H_ */

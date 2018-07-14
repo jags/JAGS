@@ -122,8 +122,8 @@ class ScalarDist : public Distribution
    * calculations. The default method returns JAGS_NA, indicating that
    * the method is not implemented.
    */
-  virtual double KL(std::vector<double const *> const &par1,
-		    std::vector<double const *> const &par2) const;
+  virtual double KL(std::vector<double const *> const &,
+		    std::vector<double const *> const &) const;
   
 };
 
