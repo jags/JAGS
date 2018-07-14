@@ -46,7 +46,7 @@ bool DCat::checkParameterValue(vector<double const *> const &par,
     return nz;
 }
 
-double DCat::logDensity(double const *x, unsigned long length, PDFType type,
+double DCat::logDensity(double const *x, PDFType type,
 			vector<double const *> const &par,
 			vector<unsigned long> const &lengths,
 			double const *, double const *) const
@@ -70,7 +70,7 @@ double DCat::logDensity(double const *x, unsigned long length, PDFType type,
     }
 }
 
-void DCat::randomSample(double *x, unsigned long length,
+void DCat::randomSample(double *x,
 			vector<double const *> const &par,
 			vector<unsigned long> const &lengths,
 			double const *, double const *,
@@ -92,13 +92,10 @@ void DCat::randomSample(double *x, unsigned long length,
     *x  = i;
 }
 
-void DCat::support(double *lower, double *upper, unsigned long length,
+void DCat::support(double *lower, double *upper,
 	           vector<double const *> const &,
 	           vector<unsigned long> const &lengths) const
 {
-    if (length != 1)
-	throwLogicError("Invalid length in DCat::support");
-
     *lower = 1;
     *upper = NCAT(lengths);
 }

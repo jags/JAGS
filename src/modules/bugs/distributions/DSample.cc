@@ -81,14 +81,14 @@ namespace jags {
 	}
 
 	double
-	DSample::logDensity(double const *x, unsigned long length, PDFType type,
+	DSample::logDensity(double const *x, PDFType type,
 			    vector<double const *> const &par,
 			    vector<unsigned long> const &parlen,
 			    double const *lower, double const *upper) const
 	{
 	    /* Basic sanity checks: is x consistent with parameters */
 
-	    unsigned long T = length; // Length of x
+	    unsigned long T = parlen[0]; // Length of x
 	    unsigned long K = 0; // Count number of sampled values
 	    for (unsigned long t = 0; t < T; ++t) {
 		if (x[t] == 1) {
@@ -166,7 +166,7 @@ namespace jags {
 	}
 
 
-	void DSample::randomSample(double *x, unsigned long length,
+	void DSample::randomSample(double *x,
 				   vector<double const *> const &par,
 				   vector<unsigned long> const &parlen,
 				   double const *, double const *,
@@ -207,11 +207,11 @@ namespace jags {
 	    }
 	}
 
-	void DSample::support(double *lower, double *upper, unsigned long length,
+	void DSample::support(double *lower, double *upper,
 			    vector<double const *> const &par,
-			    vector<unsigned long> const &len) const
+			    vector<unsigned long> const &parlen) const
 	{
-	    for (unsigned long i = 0; i < length; ++i) {
+	    for (unsigned long i = 0; i < parlen[0]; ++i) {
 		lower[i] = 0;
 		upper[i] = 1;
 	    }

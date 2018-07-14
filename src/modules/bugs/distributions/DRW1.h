@@ -16,11 +16,11 @@ namespace bugs {
 class DRW1 : public VectorDist {
 public:
     DRW1();
-    double logDensity(double const *x, unsigned long length, PDFType type,
+    double logDensity(double const *x, PDFType type,
 		      std::vector<double const *> const &parameters,
 		      std::vector<unsigned long> const &lengths,
 		      double const *lower, double const *upper) const;
-    void randomSample(double *x, unsigned long length,
+    void randomSample(double *x,
 		      std::vector<double const *> const &parameters,
 		      std::vector<unsigned long> const &lengths,
 		      double const *lower, double const *upper, RNG *rng) const;
@@ -29,7 +29,7 @@ public:
     bool checkParameterValue(std::vector<double const *> const &parameters,
 			     std::vector<unsigned long> const &lengths)
 	const;
-    void support(double *lower, double *upper, unsigned long length,
+    void support(double *lower, double *upper,
 		 std::vector<double const *> const &parameters,
 		 std::vector<unsigned long> const &lengths) const;
     bool isSupportFixed(std::vector<bool> const &fixmask) const;

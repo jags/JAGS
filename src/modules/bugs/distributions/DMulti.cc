@@ -62,14 +62,15 @@ DMulti::checkParameterValue(vector<double const *> const &par,
     return nz;
 }
 
-double DMulti::logDensity(double const *x, unsigned long length, PDFType type,
+double DMulti::logDensity(double const *x, PDFType type,
 			  vector<double const *> const &par,
 			  vector<unsigned long> const &len,
 			  double const *lower, double const *upper) const
 {
     double loglik = 0.0;
     double S = 0;
-    for (unsigned long i = 0; i < length; i++) {
+    unsigned long N = length(len);
+    for (unsigned long i = 0; i < N; i++) {
 	if (x[i] < 0 || floor(x[i]) != x[i]) {
 	    return JAGS_NEGINF;
 	}
@@ -91,7 +92,7 @@ double DMulti::logDensity(double const *x, unsigned long length, PDFType type,
     if (type != PDF_PRIOR) {
 	//Terms depending on parameters only
 	double sump = 0.0;
-	for (unsigned long i = 0; i < length; ++i) {
+	for (unsigned long i = 0; i < N; ++i) {
 	    sump += PROB(par)[i];
 	}
 	if (SIZE(par) != 0) {
@@ -101,7 +102,7 @@ double DMulti::logDensity(double const *x, unsigned long length, PDFType type,
 
     if (type != PDF_LIKELIHOOD) {
 	//Terms depending on sampled value only
-	for (unsigned long i = 0; i < length; ++i) {
+	for (unsigned long i = 0; i < N; ++i) {
 	    loglik -= lgammafn(x[i] + 1);
 	}
     }
@@ -115,7 +116,7 @@ double DMulti::logDensity(double const *x, unsigned long length, PDFType type,
     return loglik;
 }
 
-void DMulti::randomSample(double *x, unsigned long length,
+void DMulti::randomSample(double *x,
 			  vector<double const *> const &par,
 			  vector<unsigned long> const &len,
 			  double const *lower, double const *upper,
@@ -123,33 +124,35 @@ void DMulti::randomSample(double *x, unsigned long length,
 {
     /* Sample multinomial as a series of binomial distributions */
 
-    double N = SIZE(par);
+    double size = SIZE(par);
     double const *prob = PROB(par);
-
+    unsigned long N = length(len);
+    
     //Normalize probability
     double sump = 0;
-    for (unsigned long i = 0; i < length; ++i) {
+    for (unsigned long i = 0; i < N; ++i) {
 	sump += prob[i];
     }
 
-    for (unsigned long i = 0; i < length - 1; i++) {
-	if (N == 0) {
+    for (unsigned long i = 0; i < N - 1; i++) {
+	if (size == 0) {
 	    x[i] = 0;
 	}
 	else {
-	    x[i] = rbinom(N, prob[i]/sump, rng);
-	    N -= x[i];
+	    x[i] = rbinom(size, prob[i]/sump, rng);
+	    size -= x[i];
 	    sump -= prob[i];
 	}
     }
-    x[length - 1] = N;
+    x[N - 1] = size;
 }
 
-void DMulti::support(double *lower, double *upper, unsigned long length,
+void DMulti::support(double *lower, double *upper,
 	     vector<double const *> const &par,
 	     vector<unsigned long> const &len) const
 {
-    for (unsigned long i = 0; i < length; ++i) {
+    unsigned long N = length(len);
+    for (unsigned long i = 0; i < N; ++i) {
 	lower[i] = 0;
         if (PROB(par)[i] == 0) 
            upper[i] = 0;

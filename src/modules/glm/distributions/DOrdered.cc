@@ -62,8 +62,7 @@ namespace jags {
 	}
 	
 	double
-	DOrdered::logDensity(double const *x, unsigned long length,
-			     PDFType type,
+	DOrdered::logDensity(double const *x, PDFType type,
 			     vector<double const *> const &par,
 			     vector<unsigned long> const &lengths,
 			     double const *lower, double const *upper) const
@@ -71,7 +70,7 @@ namespace jags {
 	    return density(*x, MU(par), CUT(par), NCUT(lengths), true);
 	}
 
-	void DOrdered::randomSample(double *x, unsigned long length,
+	void DOrdered::randomSample(double *x,
 				    vector<double const *> const &par,
 				    vector<unsigned long> const &lengths,
 				    double const *lower, double const *upper,
@@ -88,31 +87,13 @@ namespace jags {
 	}
 
 	void DOrdered::support(double *lower, double *upper,
-			       unsigned long length,
 			       vector<double const *> const &par,
 			       vector<unsigned long> const &lengths) const
 	{
 	    *lower = 1;
 	    *upper = NCUT(lengths) + 1;
 	}
-	
-	void
-	DOrdered::typicalValue(double *x, unsigned long length,
-			       vector<double const *> const &par,
-			       vector<unsigned long> const &lengths,
-			       double const *lower, double const *upper) const
-	{
-
-	    double y = MU(par);
-	    for (unsigned int i = 0; i < NCUT(lengths); ++i) {
-		if (y <= CUT(par)[i]) {
-		    *x = i + 1;
-		    return;
-		}
-	    }
-	    *x = NCUT(lengths);
-	}
-	
+		
 	bool DOrdered::isSupportFixed(vector<bool> const &fixmask) const
 	{
 	    return true;

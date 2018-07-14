@@ -62,13 +62,14 @@ DDirch::checkParameterValue(vector<double const *> const &par,
     return has_nonzero_alpha;
 }
 
-double DDirch::logDensity(double const *x, unsigned long length, PDFType type,
+double DDirch::logDensity(double const *x, PDFType type,
 			  vector<double const *> const &par,
 			  vector<unsigned long> const &len,
 			  double const *lower, double const *upper) const
 {
     double const *alpha = ALPHA(par);
-
+    unsigned long length = LENGTH(len);
+    
     double loglik = 0.0;
     for (unsigned long i = 0; i < length; i++) {
 	if (alpha[i] == 0) {
@@ -95,14 +96,15 @@ double DDirch::logDensity(double const *x, unsigned long length, PDFType type,
     return loglik;
 }
 
-void DDirch::randomSample(double *x, unsigned long length,
+void DDirch::randomSample(double *x,
                           vector<double const *> const &par,
                           vector<unsigned long> const &len,
 			  double const *lower, double const *upper,
 			  RNG *rng) const
 {
     double const *alpha = ALPHA(par);
-
+    unsigned long length = LENGTH(len);
+    
     /* Generate independent gamma random variables, then normalize
        to create Dirichlet distribution.
     */
@@ -116,10 +118,11 @@ void DDirch::randomSample(double *x, unsigned long length,
     }
 }
 
-void DDirch::support(double *lower, double *upper, unsigned long length,
+void DDirch::support(double *lower, double *upper,
 		vector<double const *> const &par,
 		vector<unsigned long> const &len) const
 {
+    unsigned long length = LENGTH(len);
     for (unsigned long i = 0; i < length; ++i) {
 	lower[i] = 0;
 	if (ALPHA(par)[i] == 0)

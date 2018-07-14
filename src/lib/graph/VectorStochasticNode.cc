@@ -66,14 +66,14 @@ double VectorStochasticNode::logDensity(unsigned int chain, PDFType type) const
     if(!_dist->checkParameterValue(_parameters[chain], _lengths))
 	return JAGS_NEGINF;
     
-    return _dist->logDensity(_data + _length * chain, _length, type,
+    return _dist->logDensity(_data + _length * chain, type,
 			     _parameters[chain], _lengths,
 			     lowerLimit(chain), upperLimit(chain));
 }
 
 void VectorStochasticNode::randomSample(RNG *rng, unsigned int chain)
 {
-    _dist->randomSample(_data + _length * chain, _length, 
+    _dist->randomSample(_data + _length * chain, 
 			_parameters[chain], _lengths, 
 			lowerLimit(chain), upperLimit(chain), rng);
 }  
@@ -116,7 +116,7 @@ void VectorStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
 	    copy(upper, upper + _length, uv);
 	}
     }
-    _dist->randomSample(_data + _length * chain, _length, 
+    _dist->randomSample(_data + _length * chain, 
 			_parameters[chain], _lengths, lv, uv, rng);
 
     delete [] lv;
@@ -145,7 +145,7 @@ unsigned long VectorStochasticNode::df() const
 void VectorStochasticNode::sp(double *lower, double *upper, unsigned long length,
 			      unsigned int chain) const
 {
-    _dist->support(lower, upper, length, _parameters[chain], _lengths);
+    _dist->support(lower, upper, _parameters[chain], _lengths);
 }
 
     

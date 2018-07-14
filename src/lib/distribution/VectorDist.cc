@@ -28,9 +28,9 @@ unsigned long VectorDist::df(vector<unsigned long> const &par) const
 	unsigned long N = length(lengths);
 	vector<double> v(N);
 	for (unsigned int r = 0; r < nrep; ++r) {
-	    randomSample(&v[0], N, par1, lengths, lower, upper, rng);
-	    div += logDensity(&v[0], N, PDF_FULL, par1, lengths, lower, upper);
-	    div -= logDensity(&v[0], N, PDF_FULL, par2, lengths, lower, upper);
+	    randomSample(&v[0], par1, lengths, lower, upper, rng);
+	    div += logDensity(&v[0], PDF_FULL, par1, lengths, lower, upper);
+	    div -= logDensity(&v[0], PDF_FULL, par2, lengths, lower, upper);
 	}
 	return div / nrep;
     }

@@ -54,7 +54,7 @@ bool DInterval::checkParameterValue(vector<double const *> const &par,
 }
 
 double 
-DInterval::logDensity(double const *y, unsigned long length, PDFType type,
+DInterval::logDensity(double const *y, PDFType type,
 		      vector<double const *> const &par,
 		      vector<unsigned long> const &lengths,
 		      double const *lower, double const *upper) const
@@ -77,7 +77,7 @@ DInterval::logDensity(double const *y, unsigned long length, PDFType type,
     }
 }
 
-void DInterval::randomSample(double  *x, unsigned long length,
+void DInterval::randomSample(double  *x,
 			     vector<double const *> const &par,
 			     vector<unsigned long> const &lengths,
 			     double const *lower, double const *upper,
@@ -95,7 +95,7 @@ unsigned long DInterval::df(vector<unsigned long> const &lengths) const
     return 0;
 }
 
-void DInterval::support(double *lower, double *upper, unsigned long length,
+void DInterval::support(double *lower, double *upper,
 			vector<double const *> const &par,
 			vector<unsigned long> const &lengths) const
 {

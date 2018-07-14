@@ -36,7 +36,7 @@ namespace jags {
 	DRW1::checkParameterValue(vector<double const *> const &par,
 				  vector<unsigned long> const &len) const
 	{
-	    unsigned long N = len[1];
+	    unsigned long N = length(len);
 	    double const *xcoords = XCOORDS(par);
 	    double tau = TAU(par);
 
@@ -51,7 +51,7 @@ namespace jags {
 	    return true;
 	}
 
-	double DRW1::logDensity(double const *x, unsigned long length,
+	double DRW1::logDensity(double const *x,
 				PDFType ,
 				vector<double const *> const &par,
 				vector<unsigned long> const &len,
@@ -61,13 +61,14 @@ namespace jags {
 	    double sigma = 1/sqrt(tau);
 	    
 	    double loglik = 0.0;
-	    for (unsigned long i = 1; i < length; i++) {
+	    unsigned long N = length(len);
+	    for (unsigned long i = 1; i < N; i++) {
 		loglik += dnorm(x[i] - x[i-1], 0, sigma, true);
 	    }
 	    return loglik;
 	}
 
-	void DRW1::randomSample(double *x, unsigned long length,
+	void DRW1::randomSample(double *x,
 				vector<double const *> const &par,
 				vector<unsigned long> const &len,
 				double const *, double const *,
@@ -75,24 +76,26 @@ namespace jags {
 	{
 	    double tau = TAU(par);
 	    double sigma = 1/sqrt(tau);
-
+	    unsigned long N = length(len);
+	    
 	    double S = 0.0;
 	    x[0] = 0;
-	    for (unsigned long i = 1; i < length; i++) {
+	    for (unsigned long i = 1; i < N; i++) {
 		x[i] = x[i-1] + rnorm(0, sigma, rng);
 		S += x[i];
 	    }
-	    S /= length;
-	    for (unsigned long i = 0; i < length; i++) {
+	    S /= N;
+	    for (unsigned long i = 0; i < N; i++) {
 		x[i] -= S;
 	    }
 	}
 
-	void DRW1::support(double *lower, double *upper, unsigned long length,
+	void DRW1::support(double *lower, double *upper,
 			   vector<double const *> const &,
 			   vector<unsigned long> const &len) const
 	{
-	    for (unsigned long i = 0; i < length; ++i) {
+	    unsigned long N = length(len);
+	    for (unsigned long i = 0; i < N; ++i) {
 		lower[i] = JAGS_NEGINF;
 		upper[i] = JAGS_POSINF;
 	    }
@@ -105,7 +108,7 @@ namespace jags {
 
 	unsigned long DRW1::df(vector<unsigned long> const &len) const
 	{
-	    return len[1] - 1;
+	    return length(len) - 1;
 	}
 
     }

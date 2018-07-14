@@ -44,7 +44,7 @@ namespace mix {
 	return true;
     }
 
-    double DNormMix::logDensity(double const *x, unsigned long length, 
+    double DNormMix::logDensity(double const *x,
 				PDFType type,
 				vector<double const *> const &par,
 				vector<unsigned long> const &lengths,
@@ -62,7 +62,7 @@ namespace mix {
     }
 
     void 
-    DNormMix::randomSample(double *x, unsigned long length,
+    DNormMix::randomSample(double *x,
 			   vector<double const *> const &par, 
 			   vector<unsigned long> const &lengths, 
 			   double const *lower, double const *upper, RNG *rng) 
@@ -99,7 +99,7 @@ namespace mix {
     }
 
     void 
-    DNormMix::support(double *lower, double *upper, unsigned long length,
+    DNormMix::support(double *lower, double *upper,
 		      vector<double const *> const &parameters,
 		      vector<unsigned long> const &lengths) const
     {

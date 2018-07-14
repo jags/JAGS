@@ -26,9 +26,8 @@ class VectorDist : public Distribution
      */
     VectorDist(std::string const &name, unsigned int npar);
     /**
-     * @param x Value at which to evaluate the density.
-     *
-     * @param length Size of the array x.
+     * @param x Value at which to evaluate the density (assumed to
+     * be of the correct length).
      *
      * @param type Indicates whether the full probability density
      * function is required (PDF_FULL) or whether partial calculations
@@ -49,7 +48,7 @@ class VectorDist : public Distribution
      * 
      */
     virtual double 
-	logDensity(double const *x, unsigned long length, PDFType type,
+	logDensity(double const *x, PDFType type,
 		   std::vector<double const *> const &parameters,
 		   std::vector<unsigned long> const &lengths,
 		   double const *lbound, double const *ubound) const = 0;
@@ -57,8 +56,6 @@ class VectorDist : public Distribution
      * Draws a random sample from the distribution. 
      *
      * @param x Array to which the sample values are written
-     *
-     * @param length Size of the array x.
      *
      * @param parameters  Vector of parameter values at which
      * to evaluate the likelihood. This vector should be of length
@@ -71,7 +68,7 @@ class VectorDist : public Distribution
      *
      * @exception length_error 
      */
-    virtual void randomSample(double *x, unsigned long length,
+    virtual void randomSample(double *x,
 			      std::vector<double const *> const &parameters,
 			      std::vector<unsigned long> const &lengths, 
 			      double const *lbound, double const *ubound,
@@ -79,7 +76,7 @@ class VectorDist : public Distribution
     /**
      * Returns the support of an unbounded distribution
      */
-    virtual void support(double *lower, double *upper, unsigned long length,
+    virtual void support(double *lower, double *upper,
 			 std::vector<double const *> const &params, 
 			 std::vector<unsigned long> const &lengths) const = 0;
     /**

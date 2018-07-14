@@ -322,7 +322,7 @@ void MixDistTest::test_mean_normmix(vector<double const *> const &par,
     double x;
     double xmean = 0;
     for (unsigned int i = 0; i < N; ++i) {
-	_dnormmix->randomSample(&x, 1, par, len, 0, 0, _rng);
+	_dnormmix->randomSample(&x, par, len, 0, 0, _rng);
 	xmean += x;
     }
     xmean /= N;
@@ -345,14 +345,14 @@ void MixDistTest::test_var_normmix(vector<double const *> const &par,
     double x;
     double xmean = 0;
     for (unsigned int i = 0; i < N; ++i) {
-	_dnormmix->randomSample(&x, 1, par, len, 0, 0, _rng);
+	_dnormmix->randomSample(&x, par, len, 0, 0, _rng);
 	xmean += x;
     }
     xmean /= N;
 
     double xvar = 0;
     for (unsigned int i = 0; i < N; ++i) {
-	_dnormmix->randomSample(&x, 1, par, len, 0, 0, _rng);
+	_dnormmix->randomSample(&x, par, len, 0, 0, _rng);
 	xvar += (x - xmean) * (x - xmean);
     }
     xvar /= N;

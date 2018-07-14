@@ -13,11 +13,11 @@ class SumDist : public VectorDist {
 public:
     SumDist();
 
-    double logDensity(double const *x, unsigned long length, PDFType type,
+    double logDensity(double const *x, PDFType type,
 		      std::vector<double const *> const &parameters,
 		      std::vector<unsigned long> const &lengths,
 		      double const *lower, double const *upper) const;
-    void randomSample(double *x, unsigned long length,
+    void randomSample(double *x,
 		      std::vector<double const *> const &parameters,
 		      std::vector<unsigned long> const &lengths,
 		      double const *lower, double const *upper,
@@ -29,7 +29,7 @@ public:
 			     std::vector<unsigned long> const &lengths) const;
     bool checkParameterLength(std::vector<unsigned long> const &lengths) const;
     bool checkParameterDiscrete(std::vector<bool> const &mask) const;
-    void support(double *lower, double *upper, unsigned long length,
+    void support(double *lower, double *upper, 
 		 std::vector<double const *> const &parameters,
 		 std::vector<unsigned long> const &lengths) const;
     unsigned long length(std::vector <unsigned long> const &lengths) const;
