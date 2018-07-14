@@ -87,8 +87,7 @@ namespace glm {
     {}
 
     double
-    DScaledWishart::logDensity(double const *x, unsigned long length,
-			       PDFType type,
+    DScaledWishart::logDensity(double const *x, PDFType type,
 			       vector<double const *> const &par,
 			       vector<vector<unsigned long> > const &dims,
 			       double const *lower, double const *upper) const
@@ -117,7 +116,7 @@ namespace glm {
 	return loglik;
     }
 
-    void DScaledWishart::sampleWishart(double *x, unsigned long length,
+    void DScaledWishart::sampleWishart(double *x,
 				       double const *R, unsigned long nrow,
 				       double k, RNG *rng)
     {
@@ -128,10 +127,6 @@ namespace glm {
 	   The algorithm is adapted from bugs::DWish::randomSample but
 	   is considerably simpler.
 	*/
-
-	if (length != nrow * nrow) {
-	    throwLogicError("invalid length in DScaledWishart::sampleWishart");
-	}
 
 	/* Generate square root of Wishart random variable:
 	   - diagonal elements are square root of Chi square
@@ -165,7 +160,7 @@ namespace glm {
 	}
     }
 
-void DScaledWishart::randomSample(double *x, unsigned long length,
+void DScaledWishart::randomSample(double *x,
 				  vector<double const *> const &par,
 				  vector<vector<unsigned long> > const &dims,
 				  double const *lower, double const *upper,
@@ -182,7 +177,7 @@ void DScaledWishart::randomSample(double *x, unsigned long length,
 	//shape and scale, unlike BUGS which uses shape and rate
 	R[i] = 2 * df * rgamma(0.5, scale[i]*scale[i], rng);
     }
-    sampleWishart(x, length, &R[0], nrow, k, rng);
+    sampleWishart(x, &R[0], nrow, k, rng);
 }
 
 bool
@@ -217,10 +212,11 @@ DScaledWishart::checkParameterValue(vector<double const *> const &par,
 }
 
 
-void DScaledWishart::support(double *lower, double *upper, unsigned long length,
+void DScaledWishart::support(double *lower, double *upper,
 		    vector<double const *> const &par,
 		    vector<vector<unsigned long> > const &dims) const
 {
+    unsigned long length = dims[0][0] * dims[0][1];
     for (unsigned long i = 0; i < length; ++i) {
 	if (i % NROW(dims) == i / NROW(dims)) {
 	    //Diagonal elements
@@ -233,13 +229,14 @@ void DScaledWishart::support(double *lower, double *upper, unsigned long length,
     }
 }
 
-void DScaledWishart::typicalValue(double *x, unsigned long length,
+void DScaledWishart::typicalValue(double *x,
 			 vector<double const *> const &par,
 			 vector<vector<unsigned long> > const &dims,
 			 double const *lower, double const *upper) const
 {
     /* Returns the mean as a typical value. */
 
+    unsigned long length = dims[0][0] * dims[0][1];
     for (unsigned long i = 0; i < length; ++i) {
 	x[i] = 0;
     }

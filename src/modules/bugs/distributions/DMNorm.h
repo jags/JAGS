@@ -20,11 +20,11 @@ class DMNorm : public ArrayDist {
 public:
   DMNorm();
 
-  double logDensity(double const *x, unsigned long length, PDFType type,
+  double logDensity(double const *x, PDFType type,
 		    std::vector<double const *> const &parameters,
 		    std::vector<std::vector<unsigned long> > const &dims,
 		    double const *lower, double const *upper)  const;
-  void randomSample(double *x, unsigned long length,
+  void randomSample(double *x,
 		    std::vector<double const *> const &parameters,
 		    std::vector<std::vector<unsigned long> > const &dims,
 		    double const *lower, double const *upper, RNG *rng) const;
@@ -60,7 +60,7 @@ public:
    */
   static void randomsample(double *x, double const *mu, double const *tau,
 			   bool prec, unsigned long nrow, RNG *rng);
-  void support(double *lower, double *upper, unsigned long length,
+  void support(double *lower, double *upper,
 	       std::vector<double const *> const &parameters,
                std::vector<std::vector<unsigned long> > const &dims) const;
   bool isSupportFixed(std::vector<bool> const &fixmask) const;

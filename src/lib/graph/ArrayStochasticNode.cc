@@ -64,14 +64,14 @@ double ArrayStochasticNode::logDensity(unsigned int chain, PDFType type) const
     if(!_dist->checkParameterValue(_parameters[chain], _dims))
 	return JAGS_NEGINF;
     
-    return _dist->logDensity(_data + _length * chain, _length, type,
+    return _dist->logDensity(_data + _length * chain, type,
 			     _parameters[chain], _dims,
 			     lowerLimit(chain), upperLimit(chain));
 }
 
 void ArrayStochasticNode::randomSample(RNG *rng, unsigned int chain)
 {
-    _dist->randomSample(_data + _length * chain, _length,
+    _dist->randomSample(_data + _length * chain,
 			_parameters[chain], _dims, 
 			lowerLimit(chain), upperLimit(chain), rng);
 }  
@@ -120,7 +120,7 @@ void ArrayStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
 	    copy(upper, upper + _length, uv);
 	}
     }
-    _dist->randomSample(_data + _length * chain, _length,
+    _dist->randomSample(_data + _length * chain,
 			_parameters[chain], _dims, lv, uv, rng);
 
     delete [] lv;
@@ -149,7 +149,7 @@ unsigned long ArrayStochasticNode::df() const
 void ArrayStochasticNode::sp(double *lower, double *upper, unsigned long length,
 			     unsigned int chain) const
 {
-    _dist->support(lower, upper, length, _parameters[chain], _dims);
+    _dist->support(lower, upper, _parameters[chain], _dims);
 }
 
     double ArrayStochasticNode::KL(unsigned int ch1, unsigned int ch2,

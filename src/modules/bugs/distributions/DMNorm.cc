@@ -23,14 +23,15 @@ DMNorm::DMNorm()
   : ArrayDist("dmnorm", 2) 
 {}
 
-double DMNorm::logDensity(double const *x, unsigned long m, PDFType type,
+double DMNorm::logDensity(double const *x, PDFType type,
 			  vector<double const *> const &parameters,
 			  vector<vector<unsigned long> > const &dims,
 			  double const *lower, double const *upper) const
 {
     double const * mu = parameters[0];
     double const * T = parameters[1];
-
+    unsigned long m = dims[0][0];
+    
     double loglik = 0;
     vector<double> delta(m);
     for (unsigned long i = 0; i < m; ++i) {
@@ -55,7 +56,7 @@ double DMNorm::logDensity(double const *x, unsigned long m, PDFType type,
     return loglik;
 }
 
-void DMNorm::randomSample(double *x, unsigned long m,
+void DMNorm::randomSample(double *x,
 			  vector<double const *> const &parameters,
 			  vector<vector<unsigned long> > const &dims,
 			  double const *lower, double const *upper,
@@ -63,6 +64,7 @@ void DMNorm::randomSample(double *x, unsigned long m,
 {
     double const * mu = parameters[0];
     double const * T = parameters[1];
+    unsigned long m = dims[0][0];
     
     randomsample(x, mu, T, true, m, rng);
 }
@@ -137,10 +139,11 @@ vector<unsigned long> DMNorm::dim(vector<vector<unsigned long> > const &dims) co
     return dims[0];
 }
 
-void DMNorm::support(double *lower, double *upper, unsigned long length,
+void DMNorm::support(double *lower, double *upper,
 		     vector<double const *> const &parameters,
 		     vector<vector<unsigned long> > const &dims) const
 {
+    unsigned long length = dims[0][0];
     for (unsigned long i = 0; i < length; ++i) {
 	lower[i] = JAGS_NEGINF;
 	upper[i] = JAGS_POSINF;

@@ -35,8 +35,6 @@ public:
      * are permitted (PDF_PRIOR, PDF_LIKELIHOOD). See PDFType for
      * details.
      *
-     * @param length Size of the array x.
-     *
      * @param parameters Vector of parameter values of the
      * distribution.
      * 
@@ -49,7 +47,7 @@ public:
      * is undefined.
      */
     virtual double 
-	logDensity(double const *x, unsigned long length, PDFType type,
+	logDensity(double const *x, PDFType type,
 		   std::vector<double const *> const &parameters,
 		   std::vector<std::vector<unsigned long> > const &dims,
 		   double const *lbound, double const *ubound) const = 0;
@@ -58,8 +56,6 @@ public:
      *
      * @param x Array to which the sample values are written
      *
-     * @param length Size of the array x.
-     * 
      * @param parameters Parameters for the distribution. This vector
      * should be of length npar().  Each element is a pointer to the
      * start of an array containing the parameters. The size of the 
@@ -80,7 +76,7 @@ public:
      * @exception length_error 
      */
     virtual void 
-	randomSample(double *x, unsigned long length,
+	randomSample(double *x,
 		     std::vector<double const *> const &parameters,
 		     std::vector<std::vector<unsigned long> > const  &dims,
 		     double const *lbound, double const *ubound,
@@ -121,7 +117,7 @@ public:
      * Returns the support of an unbounded distribution
      */
     virtual void 
-	support(double *lower, double *upper, unsigned long length,
+	support(double *lower, double *upper,
 		std::vector<double const *> const &support,
 		std::vector<std::vector<unsigned long> > const &dims) const = 0;
     /**

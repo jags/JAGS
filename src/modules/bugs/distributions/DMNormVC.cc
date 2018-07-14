@@ -25,14 +25,15 @@ namespace jags {
 	{}
 
 	double
-	DMNormVC::logDensity(double const *x, unsigned long m, PDFType type,
+	DMNormVC::logDensity(double const *x, PDFType type,
 			     vector<double const *> const &parameters,
 			     vector<vector<unsigned long> > const &dims,
 			     double const *, double const *) const
 	{
 	    double const * mu = parameters[0];
 	    double const * V  = parameters[1];
-
+	    unsigned long m = dims[0][0];
+	    
 	    vector<double> T(m * m);
 	    inverse_chol (&T[0], V, m);
 
@@ -61,7 +62,7 @@ namespace jags {
 	}
 
 	void
-	DMNormVC::randomSample(double *x, unsigned long m,
+	DMNormVC::randomSample(double *x,
 			       vector<double const *> const &parameters,
 			       vector<vector<unsigned long> > const &dims,
 			       double const *, double const *,
@@ -69,7 +70,8 @@ namespace jags {
 	{
 	    double const * mu = parameters[0];
 	    double const * T = parameters[1];
-    
+	    unsigned long m = dims[0][0];
+	    
 	    DMNorm::randomsample(x, mu, T, false, m, rng);
 	}
 
@@ -95,10 +97,11 @@ namespace jags {
 	}
 	
 	void
-	DMNormVC::support(double *lower, double *upper, unsigned long length,
+	DMNormVC::support(double *lower, double *upper,
 			  vector<double const *> const &,
-			  vector<vector<unsigned long> > const &) const
+			  vector<vector<unsigned long> > const &dims) const
 	{
+	    unsigned length = dims[0][0];
 	    for (unsigned long i = 0; i < length; ++i) {
 		lower[i] = JAGS_NEGINF;
 		upper[i] = JAGS_POSINF;

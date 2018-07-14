@@ -21,7 +21,7 @@ DMT::DMT()
   : ArrayDist("dmt", 3) 
 {}
 
-double DMT::logDensity(double const *x, unsigned long m, PDFType type,
+double DMT::logDensity(double const *x, PDFType type,
 		       vector<double const *> const &parameters,
 		       vector<vector<unsigned long> > const &dims,
 		       double const *lower, double const *upper) const
@@ -29,6 +29,7 @@ double DMT::logDensity(double const *x, unsigned long m, PDFType type,
     double const * mu = parameters[0];
     double const * T = parameters[1];
     double k = parameters[2][0];
+    unsigned long m = dims[0][0];
 
     /* Calculate inner product ip = t(x - mu) %*% T %*% (x - mu) */
     double ip = 0;
@@ -55,7 +56,7 @@ double DMT::logDensity(double const *x, unsigned long m, PDFType type,
     }
 }
 
-void DMT::randomSample(double *x, unsigned long length,
+void DMT::randomSample(double *x,
 		       vector<double const *> const &parameters,
 		       vector<vector<unsigned long> > const &dims,
 		       double const *lower, double const *upper, RNG *rng) const
@@ -64,7 +65,8 @@ void DMT::randomSample(double *x, unsigned long length,
     double const * mu = parameters[0];
     double const * T = parameters[1];
     double k = *parameters[2];
-
+    unsigned long length = dims[0][0];
+    
     DMNorm::randomsample(x, mu, T, true, length, rng);
     double C = sqrt(rchisq(k, rng)/k);
     for (unsigned long i = 0; i < length; ++i) {
@@ -98,10 +100,11 @@ DMT::checkParameterValue(vector<double const *> const &parameters,
 }
 
 
-void DMT::support(double *lower, double *upper, unsigned long length,
+void DMT::support(double *lower, double *upper, 
 		     vector<double const *> const &parameters,
 		     vector<vector<unsigned long> > const &dims) const
 {
+    unsigned long length = dims[0][0];
     for (unsigned long i = 0; i < length; ++i) {
 	lower[i] = JAGS_NEGINF;
 	upper[i] = JAGS_POSINF;

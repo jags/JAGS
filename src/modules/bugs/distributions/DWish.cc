@@ -41,14 +41,15 @@ DWish::DWish()
   : ArrayDist("dwish", 2) 
 {}
 
-double DWish::logDensity(double const *x, unsigned long length, PDFType type,
+double DWish::logDensity(double const *x, PDFType type,
 			 vector<double const *> const &par,
 			 vector<vector<unsigned long> > const &dims,
 			 double const *lower, double const *upper) const
 {
     double const *scale = SCALE(par);
     unsigned long p = NROW(dims);
-
+    unsigned long length = p * p;
+    
     double loglik = (DF(par) - p - 1) * logdet(x, p);
     for (unsigned long i = 0; i < length; ++i) {
 	loglik -= scale[i] * x[i];
@@ -63,7 +64,7 @@ double DWish::logDensity(double const *x, unsigned long length, PDFType type,
     return loglik/2;
 }
 
-void DWish::randomSample(double *X, unsigned long length,
+void DWish::randomSample(double *X,
 			 double const *R, double k, unsigned long nrow,
 			 RNG *rng)
 {
@@ -71,10 +72,7 @@ void DWish::randomSample(double *X, unsigned long length,
        Generate random Wishart variable, using an algorithm proposed
        by Bill Venables and originally implemented in S.
     */
-
-    if (length != nrow*nrow) {
-	jags::throwLogicError("invalid length in DWish::randomSample");
-    }
+    unsigned long length = nrow * nrow;
 
     /* 
        Get Cholesky decomposition of the inverse of R. First we
@@ -130,13 +128,13 @@ void DWish::randomSample(double *X, unsigned long length,
     }
 }
 
-void DWish::randomSample(double *x, unsigned long length,
+void DWish::randomSample(double *x,
 			 vector<double const *> const &par,
 			 vector<vector<unsigned long> > const &dims,
 			 double const *lower, double const *upper,
 			 RNG *rng) const
 {
-    randomSample(x, length, SCALE(par), DF(par), NROW(dims), rng);
+    randomSample(x, SCALE(par), DF(par), NROW(dims), rng);
 }
 
 bool DWish::checkParameterDim (vector<vector<unsigned long> > const &dims) const
@@ -159,10 +157,11 @@ DWish::checkParameterValue(vector<double const *> const &par,
 }
 
 
-void DWish::support(double *lower, double *upper, unsigned long length,
+void DWish::support(double *lower, double *upper,
 		    vector<double const *> const &par,
 		    vector<vector<unsigned long> > const &dims) const
 {
+    unsigned long length = dims[0][0] * dims[0][1];
     for (unsigned long i = 0; i < length; ++i) {
 	if (i % NROW(dims) == i / NROW(dims)) {
 	    //Diagonal elements

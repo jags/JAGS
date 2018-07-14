@@ -87,7 +87,7 @@ DMState::checkParameterValue(vector<double const *> const &par,
 }
 
 
-double DMState::logDensity(double const *y, unsigned long length, PDFType type,
+double DMState::logDensity(double const *y, PDFType type,
 		    vector<double const *> const &par,
 		    vector<vector<unsigned long> > const &dims,
 		    double const *lower, double const *upper) const
@@ -150,7 +150,7 @@ static double q(double p, int initial, double time, unsigned int nstate,
     return nstate;
 }
 
-void DMState::randomSample(double *x, unsigned long length,
+void DMState::randomSample(double *x,
 			   vector<double const *> const &par,
 			   vector<vector<unsigned long> > const &dims,
 			   double const *lower, double const *upper,
@@ -165,7 +165,7 @@ bool DMState::isSupportFixed(vector<bool> const &fixmask) const
     return true;
 }
 
-void DMState::support(double *lower, double *upper, unsigned long length,
+void DMState::support(double *lower, double *upper,
 		      vector<double const *> const &par,
 		      vector<vector<unsigned long> > const &dims) const
 {
