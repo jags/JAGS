@@ -64,8 +64,7 @@ DDirch::checkParameterValue(vector<double const *> const &par,
 
 double DDirch::logDensity(double const *x, PDFType type,
 			  vector<double const *> const &par,
-			  vector<unsigned long> const &len,
-			  double const *, double const *) const
+			  vector<unsigned long> const &len) const
 {
     double const *alpha = ALPHA(par);
     unsigned long length = LENGTH(len);
@@ -99,7 +98,7 @@ double DDirch::logDensity(double const *x, PDFType type,
 void DDirch::randomSample(double *x,
                           vector<double const *> const &par,
                           vector<unsigned long> const &len,
-			  double const *, double const *, RNG *rng) const
+			  RNG *rng) const
 {
     double const *alpha = ALPHA(par);
     unsigned long length = LENGTH(len);

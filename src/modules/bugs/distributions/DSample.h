@@ -25,12 +25,10 @@ namespace jags {
 	    
 	    double logDensity(double const *x, PDFType type, 
 			      std::vector<double const *> const &parameters,
-			      std::vector<unsigned long> const &lengths,
-			      double const *lower, double const *upper) const;
+			      std::vector<unsigned long> const &lengths) const;
 	    void randomSample(double *x,
 			      std::vector<double const *> const &parameters,
 			      std::vector<unsigned long> const &lengths,
-			      double const *lower, double const *upper,
 			      RNG *rng) const;
 	    bool checkParameterValue(std::vector<double const *> const &par,
 				     std::vector<unsigned long> const &lengths)

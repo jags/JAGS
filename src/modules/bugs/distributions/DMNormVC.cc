@@ -27,8 +27,7 @@ namespace jags {
 	double
 	DMNormVC::logDensity(double const *x, PDFType type,
 			     vector<double const *> const &parameters,
-			     vector<vector<unsigned long> > const &dims,
-			     double const *, double const *) const
+			     vector<vector<unsigned long> > const &dims) const
 	{
 	    double const * mu = parameters[0];
 	    double const * V  = parameters[1];
@@ -65,7 +64,6 @@ namespace jags {
 	DMNormVC::randomSample(double *x,
 			       vector<double const *> const &parameters,
 			       vector<vector<unsigned long> > const &dims,
-			       double const *, double const *,
 			       RNG *rng) const
 	{
 	    double const * mu = parameters[0];

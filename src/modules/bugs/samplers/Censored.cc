@@ -30,7 +30,7 @@ static Node const *breaks(SingletonGraphView const *gv)
 
 Censored::Censored(SingletonGraphView const *gv)
     : ConjugateMethod(gv), 
-      _snode(dynamic_cast<StochasticNode*>(gv->node()))
+      _snode(dynamic_cast<ScalarStochasticNode*>(gv->node()))
 {
     unsigned long nbreaks = breaks(gv)->length();
     for (unsigned int ch = 0; ch < _snode->nchain(); ++ch) {
@@ -47,7 +47,10 @@ bool Censored::canSample(StochasticNode *snode, Graph const &graph)
     // single child: an observed stochastic node with a "dinterval"
     // distribution. 
   
-    if (snode->isDiscreteValued() || snode->length() != 1)
+    if (snode->isDiscreteValued())
+	return false;
+
+    if (dynamic_cast<ScalarStochasticNode*>(snode) == nullptr)
 	return false;
 
     // The sampler relies on the fact that boundable distributions can

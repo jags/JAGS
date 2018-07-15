@@ -43,8 +43,7 @@ DWish::DWish()
 
 double DWish::logDensity(double const *x, PDFType type,
 			 vector<double const *> const &par,
-			 vector<vector<unsigned long> > const &dims,
-			 double const *, double const *) const
+			 vector<vector<unsigned long> > const &dims) const
 {
     double const *scale = SCALE(par);
     unsigned long p = NROW(dims);
@@ -131,7 +130,6 @@ void DWish::randomSample(double *X,
 void DWish::randomSample(double *x,
 			 vector<double const *> const &par,
 			 vector<vector<unsigned long> > const &dims,
-			 double const *, double const *,
 			 RNG *rng) const
 {
     randomSample(x, SCALE(par), DF(par), NROW(dims), rng);

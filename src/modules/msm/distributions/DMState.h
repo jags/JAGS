@@ -21,12 +21,12 @@ public:
   
     double logDensity(double const *x, PDFType type,
 		      std::vector<double const *> const &parameters,
-		      std::vector<std::vector<unsigned long> > const &dims,
-		      double const *lower, double const *upper)	const;
+		      std::vector<std::vector<unsigned long> > const &dims)
+	const;
     void randomSample(double *x,
 		      std::vector<double const *> const &parameters,
 		      std::vector<std::vector<unsigned long> > const &dims,
-		      double const *lower, double const *upper, RNG *rng) const;
+		      RNG *rng) const;
     void support(double *lower, double *upper,
 		 std::vector<double const *> const &parameters,
 		 std::vector<std::vector<unsigned long> > const &dims) const;

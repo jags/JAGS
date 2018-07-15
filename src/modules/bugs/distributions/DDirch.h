@@ -24,12 +24,11 @@ public:
     std::string alias() const;
     double logDensity(double const *x, PDFType type,
 		      std::vector<double const *> const &parameters,
-		      std::vector<unsigned long> const &lengths,
-		      double const *lower, double const *upper) const;
+		      std::vector<unsigned long> const &lengths) const;
     void randomSample(double *x,
 		      std::vector<double const *> const &parameters,
-		      std::vector<unsigned long> const &lengths,
-		      double const *lower, double const *upper, RNG *rng) const;
+		      std::vector<unsigned long> const &lengths, RNG *rng)
+	const;
     unsigned long length(std::vector<unsigned long> const &lengths) const;
     /**
      * Checks that alpha is a vector of length at least 2

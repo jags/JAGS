@@ -43,8 +43,7 @@ namespace bugs {
     
     double SumDist::logDensity(double const *x, PDFType,
 			       vector<double const *> const &par,
-			       vector<unsigned long> const &lengths,
-			       double const *, double const *) const
+			       vector<unsigned long> const &lengths) const
     {
 	return fabs(*x - evaluate(par, lengths)) > TOL ? JAGS_NEGINF : 0;
     }
@@ -52,7 +51,7 @@ namespace bugs {
     void SumDist::randomSample(double *x,
 			       vector<double const *> const &par, 
 			       vector<unsigned long> const &lengths,
-			       double const *, double const *, RNG *) const
+			       RNG *) const
     {
 	*x = evaluate(par, lengths);
     }

@@ -28,8 +28,7 @@ bool DSum::isDiscreteValued(vector<bool> const &mask) const
 
 double DSum::logDensity(double const *x, PDFType,
 			vector<double const *> const &par,
-			vector<vector<unsigned long> > const &dims,
-			double const *, double const *) const
+			vector<vector<unsigned long> > const &dims) const
 {
     const double tol = sqrt(DBL_EPSILON);
     unsigned long length = product(dims[0]);
@@ -48,7 +47,7 @@ double DSum::logDensity(double const *x, PDFType,
 void DSum::randomSample(double *x,
 			vector<double const *> const &par, 
 			vector<vector<unsigned long> > const &dims,
-			double const *, double const *, RNG *) const
+			RNG *) const
 {
     unsigned long length = product(dims[0]);
     for (unsigned long i = 0; i < length; ++i) {

@@ -89,8 +89,7 @@ namespace glm {
     double
     DScaledWishart::logDensity(double const *x, PDFType type,
 			       vector<double const *> const &par,
-			       vector<vector<unsigned long> > const &dims,
-			       double const *lower, double const *upper) const
+			       vector<vector<unsigned long> > const &dims) const
     {
 	double const *A = SCALE(par);
 	unsigned long p = NROW(dims);
@@ -163,7 +162,6 @@ namespace glm {
 void DScaledWishart::randomSample(double *x,
 				  vector<double const *> const &par,
 				  vector<vector<unsigned long> > const &dims,
-				  double const *lower, double const *upper,
 				  RNG *rng) const
 {
     unsigned long nrow = NROW(dims);
@@ -228,24 +226,7 @@ void DScaledWishart::support(double *lower, double *upper,
 	upper[i] = JAGS_POSINF;
     }
 }
-
-void DScaledWishart::typicalValue(double *x,
-			 vector<double const *> const &par,
-			 vector<vector<unsigned long> > const &dims,
-			 double const *lower, double const *upper) const
-{
-    /* Returns the mean as a typical value. */
-
-    unsigned long length = dims[0][0] * dims[0][1];
-    for (unsigned long i = 0; i < length; ++i) {
-	x[i] = 0;
-    }
-    for (unsigned long i = 0; i < NROW(dims); ++i) {
-	unsigned long k = i * NROW(dims) + i;
-	x[k] = DF(par)/(SCALE(par)[i] * SCALE(par)[i]);
-    }
-}
-
+    
 bool DScaledWishart::isSupportFixed(vector<bool> const &fixmask) const
 {
     return true;

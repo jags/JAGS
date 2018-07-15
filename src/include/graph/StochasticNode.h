@@ -106,18 +106,6 @@ public:
      */
     virtual void randomSample(RNG *rng, unsigned int chain) = 0;
     /**
-     * Draws a truncated random sample from the prior distribution of
-     * the node. The lower and upper parameters are pointers to arrays
-     * that are assumed to be of the correct size, or NULL pointers if
-     * there is no bound
-     *
-     * @param lower Optional lower bound
-     * @param upper Optional upper bound
-     */
-    virtual void truncatedSample(RNG *rng, unsigned int chain,
-				 double const *lower=nullptr, 
-				 double const *upper=nullptr) = 0;
-    /**
      * Stochastic nodes always represent random variables in the model.
      */
     bool isRandomVariable() const;

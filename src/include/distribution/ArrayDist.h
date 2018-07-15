@@ -24,7 +24,7 @@ public:
     /**
      * Constructor.
      * @param name name of the distribution as used in the BUGS language
-     * @param npar number of parameters, excluding upper and lower bounds
+     * @param npar number of parameters
      */
     ArrayDist(std::string const &name, unsigned int npar);
     /**
@@ -49,8 +49,8 @@ public:
     virtual double 
 	logDensity(double const *x, PDFType type,
 		   std::vector<double const *> const &parameters,
-		   std::vector<std::vector<unsigned long> > const &dims,
-		   double const *lbound, double const *ubound) const = 0;
+		   std::vector<std::vector<unsigned long> > const &dims)
+	const = 0;
     /**
      * Draws a random sample from the distribution. 
      *
@@ -79,7 +79,6 @@ public:
 	randomSample(double *x,
 		     std::vector<double const *> const &parameters,
 		     std::vector<std::vector<unsigned long> > const  &dims,
-		     double const *lbound, double const *ubound,
 		     RNG *rng) 	const = 0;
     /**
      * Checks that dimensions of the parameters are correct.
@@ -141,7 +140,6 @@ public:
     double KL(std::vector<double const *> const &par1,
 	      std::vector<double const *> const &par2,
 	      std::vector<std::vector<unsigned long> > const &dims,
-	      double const *lower, double const *upper,
 	      RNG *rng, unsigned int nrep) const;
     /**
      * Returns the Kullback-Leibler divergence between distributions

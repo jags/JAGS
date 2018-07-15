@@ -64,8 +64,7 @@ namespace jags {
 	double
 	DOrdered::logDensity(double const *x, PDFType type,
 			     vector<double const *> const &par,
-			     vector<unsigned long> const &lengths,
-			     double const *lower, double const *upper) const
+			     vector<unsigned long> const &lengths) const
 	{
 	    return density(*x, MU(par), CUT(par), NCUT(lengths), true);
 	}
@@ -73,7 +72,6 @@ namespace jags {
 	void DOrdered::randomSample(double *x,
 				    vector<double const *> const &par,
 				    vector<unsigned long> const &lengths,
-				    double const *lower, double const *upper,
 				    RNG *rng) const
 	{
 	    double y = r(MU(par), rng);

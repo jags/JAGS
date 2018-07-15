@@ -48,8 +48,7 @@ bool DCat::checkParameterValue(vector<double const *> const &par,
 
 double DCat::logDensity(double const *x, PDFType type,
 			vector<double const *> const &par,
-			vector<unsigned long> const &lengths,
-			double const *, double const *) const
+			vector<unsigned long> const &lengths) const
 {
     unsigned long y = static_cast<unsigned long>(*x);
     if (y < 1 || y > NCAT(lengths)) {
@@ -73,7 +72,6 @@ double DCat::logDensity(double const *x, PDFType type,
 void DCat::randomSample(double *x,
 			vector<double const *> const &par,
 			vector<unsigned long> const &lengths,
-			double const *, double const *,
 			RNG *rng) const
 {
     double sump = 0;

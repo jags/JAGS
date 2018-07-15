@@ -845,14 +845,18 @@ Node * Compiler::allocateStochastic(ParseTree const *stoch_relation)
 					  lBound, uBound);
     }
     else if (VECTOR(dist)) {
+	if (lBound != nullptr || uBound != nullptr) {
+	    CompileError(stoch_relation, "Distribution cannot be truncated");
+	}
 	snode = new VectorStochasticNode(VECTOR(dist), _model.nchain(),
-					 parameters,
-					 lBound, uBound);
+					 parameters);
     }
     else if (ARRAY(dist)) {
+	if (lBound != nullptr || uBound != nullptr) {
+	    CompileError(stoch_relation, "Distribution cannot be truncated");
+	}
 	snode = new ArrayStochasticNode(ARRAY(dist), _model.nchain(),
-					parameters,
-					lBound, uBound);
+					parameters);
     }
     else {
 	throw logic_error("Unable to classify distribution");

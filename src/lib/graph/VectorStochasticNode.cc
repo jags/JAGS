@@ -50,10 +50,9 @@ mkParameterLengths(vector<Node const *> const &parameters) {
 
 VectorStochasticNode::VectorStochasticNode(VectorDist const *dist,
 					   unsigned int nchain,
-					   vector<Node const *> const &params,
-					   Node const *lower, Node const *upper)
+					   vector<Node const *> const &params)
     : StochasticNode(vector<unsigned long>(1,mkLength(dist, params)), 
-		     nchain, dist, params, lower, upper),
+		     nchain, dist, params, nullptr, nullptr),
       _dist(dist), _lengths(mkParameterLengths(params))
 {
     if (!dist->checkParameterLength(_lengths)) {
@@ -67,61 +66,14 @@ double VectorStochasticNode::logDensity(unsigned int chain, PDFType type) const
 	return JAGS_NEGINF;
     
     return _dist->logDensity(_data + _length * chain, type,
-			     _parameters[chain], _lengths,
-			     lowerLimit(chain), upperLimit(chain));
+			     _parameters[chain], _lengths);
 }
 
 void VectorStochasticNode::randomSample(RNG *rng, unsigned int chain)
 {
     _dist->randomSample(_data + _length * chain, 
-			_parameters[chain], _lengths, 
-			lowerLimit(chain), upperLimit(chain), rng);
-}  
-
-void VectorStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
-					   double const *lower,
-					   double const *upper)
-    
-{
-    double const *l = lowerLimit(chain);
-    double *lv = nullptr;
-    if (l || lower) {
-	lv = new double[_length];
-	if (l && lower) {
-	    for (unsigned long i = 0; i < _length; ++i) {
-		lv[i] = min(l[i], lower[i]);
-	    }
-	}
-	else if (l) {
-	    copy(l, l + _length, lv);
-	}
-	else if (lower) {
-	    copy(lower, lower + _length, lv);
-	}
-    }
-
-    double const *u = upperLimit(chain);
-    double *uv = nullptr;
-    if (u || upper) {
-	uv = new double[_length];
-	if (u && upper) {
-	    for (unsigned long i = 0; i < _length; ++i) {
-		uv[i] = max(u[i], upper[i]);
-	    }
-	}
-	else if (u) {
-	    copy(u, u + _length, uv);
-	}
-	else if (upper) {
-	    copy(upper, upper + _length, uv);
-	}
-    }
-    _dist->randomSample(_data + _length * chain, 
-			_parameters[chain], _lengths, lv, uv, rng);
-
-    delete [] lv;
-    delete [] uv;
-}  
+			_parameters[chain], _lengths, rng);
+}
 
 bool VectorStochasticNode::checkParentValues(unsigned int chain) const
 {
@@ -142,8 +94,8 @@ unsigned long VectorStochasticNode::df() const
     return _dist->df(_lengths);
 }
 
-void VectorStochasticNode::sp(double *lower, double *upper, unsigned long length,
-			      unsigned int chain) const
+void VectorStochasticNode::sp(double *lower, double *upper,
+			      unsigned long length, unsigned int chain) const
 {
     _dist->support(lower, upper, _parameters[chain], _lengths);
 }
@@ -152,29 +104,16 @@ void VectorStochasticNode::sp(double *lower, double *upper, unsigned long length
     double VectorStochasticNode::KL(unsigned int ch1, unsigned int ch2,
 				    RNG *rng, unsigned int nrep) const
     {
-	if (lowerBound() || upperBound()) {
-	    Node const *ll = lowerBound();
-	    Node const *uu = upperBound();
-	    if (ll && !ll->isFixed()) {
-		return JAGS_POSINF;
-	    }
-	    if (uu &&  !uu->isFixed()) {
-		return JAGS_POSINF;
-	    }
+	double kl =  _dist->KL(_parameters[ch1], _parameters[ch2],
+			       _lengths);
+	if (kl == JAGS_NA) {
 	    return _dist->KL(_parameters[ch1], _parameters[ch2], _lengths,
-			     lowerLimit(0), upperLimit(0), rng, nrep);
+			     rng, nrep);
 	}
 	else {
-	    double kl =  _dist->KL(_parameters[ch1], _parameters[ch2],
-				   _lengths);
-	    if (kl == JAGS_NA) {
-		return _dist->KL(_parameters[ch1], _parameters[ch2], _lengths,
-				 nullptr, nullptr, rng, nrep);
-	    }
-	    else {
-		return kl;
-	    }
+	    return kl;
 	}
     }
+
     
 } //namespace jags

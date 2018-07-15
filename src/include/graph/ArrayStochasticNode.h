@@ -22,12 +22,9 @@ public:
      * parameters to the distribution.
      */
     ArrayStochasticNode(ArrayDist const *dist, unsigned int nchain,
-			std::vector<Node const *> const &parameters,
-			Node const *lower, Node const *upper);
+			std::vector<Node const *> const &parameters);
     double logDensity(unsigned int chain, PDFType type) const;
     void randomSample(RNG *rng, unsigned int chain);
-    void truncatedSample(RNG *rng, unsigned int chain,
-			 double const *lower, double const *upper);
     bool checkParentValues(unsigned int chain) const;
     //StochasticNode *clone(std::vector<Node const *> const &parents,
     //Node const *lower, Node const *upper) const;

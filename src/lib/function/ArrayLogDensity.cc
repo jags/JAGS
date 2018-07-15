@@ -35,8 +35,7 @@ namespace jags {
 	    ddims[i] = dims[i+1];
 	}
 
-	value[0] = _dist->logDensity(args[0], PDF_FULL, 
-				     dargs, ddims, nullptr, nullptr);
+	value[0] = _dist->logDensity(args[0], PDF_FULL, dargs, ddims);
     }
 
     

@@ -18,16 +18,11 @@ public:
 
   double logDensity(double const *x, PDFType type,
 		    std::vector<double const *> const &parameters,
-		    std::vector<std::vector<unsigned long> > const &dims,
-		    double const *lower, double const *upper) const;
+		    std::vector<std::vector<unsigned long> > const &dims) const;
   void randomSample(double *x,
 		    std::vector<double const *> const &parameters,
 		    std::vector<std::vector<unsigned long> > const &dims,
-		    double const *lower, double const *upper, RNG *rng) const;
-  void typicalValue(double *x,
-		    std::vector<double const *> const &parameters,
-		    std::vector<std::vector<unsigned long> > const &dims,
-		    double const *lower, double const *upper) const;
+		    RNG *rng) const;
   static void sampleWishart(double *x,
 			    double const *scale, unsigned long nrow,
 			    double k, RNG *rng);

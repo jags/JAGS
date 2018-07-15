@@ -22,7 +22,6 @@ unsigned long ArrayDist::df(vector<vector<unsigned long> > const &pdims) const
     double ArrayDist::KL(vector<double const *> const &par1,
 			 vector<double const *> const &par2,
 			 vector<vector<unsigned long> > const &dims,
-			 double const *lower, double const *upper,
 			 RNG *rng, unsigned int nrep) const
     {
 	double div = 0;
@@ -31,9 +30,9 @@ unsigned long ArrayDist::df(vector<vector<unsigned long> > const &pdims) const
 	unsigned long N = product(d);
 	vector<double> v(N);
 	for (unsigned int r = 0; r < nrep; ++r) {
-	    randomSample(&v[0], par1, dims, lower, upper, rng);
-	    div += logDensity(&v[0], PDF_FULL, par1, dims, lower, upper);
-	    div -= logDensity(&v[0], PDF_FULL, par2, dims, lower, upper);
+	    randomSample(&v[0], par1, dims, rng);
+	    div += logDensity(&v[0], PDF_FULL, par1, dims);
+	    div -= logDensity(&v[0], PDF_FULL, par2, dims);
 	}
 	return div / nrep;
     }

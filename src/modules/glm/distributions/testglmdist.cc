@@ -429,7 +429,7 @@ void GLMDistTest::dkw_swish(vector<double> const &S,
 			   
     //Calculate maximum error for DKW test.
     for (unsigned int i = 0; i < N; ++i) {
-	_dscaled_wishart->randomSample(&x[0], par, dims, 0, 0, _rng);
+	_dscaled_wishart->randomSample(&x[0], par, dims, _rng);
 
 	inverse_spd(&x[0], ndim);
 	

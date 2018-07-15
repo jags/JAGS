@@ -3,6 +3,8 @@
 
 #include "ConjugateMethod.h"
 
+#include <graph/ScalarStochasticNode.h>
+
 namespace jags {
 
     class Graph;
@@ -13,7 +15,7 @@ namespace jags {
 	 * Update Method for censored real-valued distributions.
 	 */
 	class Censored : public ConjugateMethod {
-	    StochasticNode *_snode;
+	    ScalarStochasticNode *_snode;
 	public:
 	    Censored(SingletonGraphView const *gv);
 	    static bool canSample(StochasticNode *snode, Graph const &graph);

@@ -54,8 +54,7 @@ namespace jags {
 	double DRW1::logDensity(double const *x,
 				PDFType ,
 				vector<double const *> const &par,
-				vector<unsigned long> const &len,
-				double const *, double const *) const
+				vector<unsigned long> const &len) const
 	{
 	    double tau = TAU(par);
 	    double sigma = 1/sqrt(tau);
@@ -71,7 +70,6 @@ namespace jags {
 	void DRW1::randomSample(double *x,
 				vector<double const *> const &par,
 				vector<unsigned long> const &len,
-				double const *, double const *,
 				RNG *rng) const
 	{
 	    double tau = TAU(par);

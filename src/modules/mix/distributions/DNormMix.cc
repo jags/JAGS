@@ -47,9 +47,7 @@ namespace mix {
     double DNormMix::logDensity(double const *x,
 				PDFType type,
 				vector<double const *> const &par,
-				vector<unsigned long> const &lengths,
-				double const *lower, double const *upper) 
-	const
+				vector<unsigned long> const &lengths) const
     {
 	double density = 0.0;
 	double psum = 0.0;
@@ -64,9 +62,7 @@ namespace mix {
     void 
     DNormMix::randomSample(double *x,
 			   vector<double const *> const &par, 
-			   vector<unsigned long> const &lengths, 
-			   double const *lower, double const *upper, RNG *rng) 
-	const
+			   vector<unsigned long> const &lengths, RNG *rng) const
     {
 	unsigned long Ncat = NCAT(lengths);
 

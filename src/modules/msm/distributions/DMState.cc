@@ -88,9 +88,8 @@ DMState::checkParameterValue(vector<double const *> const &par,
 
 
 double DMState::logDensity(double const *y, PDFType type,
-		    vector<double const *> const &par,
-		    vector<vector<unsigned long> > const &dims,
-		    double const *lower, double const *upper) const
+			   vector<double const *> const &par,
+			   vector<vector<unsigned long> > const &dims) const
 {
     int initial = INITIAL(par);
     double time = TIME(par);
@@ -153,7 +152,6 @@ static double q(double p, int initial, double time, unsigned int nstate,
 void DMState::randomSample(double *x,
 			   vector<double const *> const &par,
 			   vector<vector<unsigned long> > const &dims,
-			   double const *lower, double const *upper,
 			   RNG *rng) const
 {
     *x = q(runif(0, 1, rng), INITIAL(par), TIME(par), NSTATE(dims),

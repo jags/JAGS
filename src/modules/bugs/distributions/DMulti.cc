@@ -64,8 +64,7 @@ DMulti::checkParameterValue(vector<double const *> const &par,
 
 double DMulti::logDensity(double const *x, PDFType type,
 			  vector<double const *> const &par,
-			  vector<unsigned long> const &len,
-			  double const *, double const *) const
+			  vector<unsigned long> const &len) const
 {
     double loglik = 0.0;
     double S = 0;
@@ -119,7 +118,6 @@ double DMulti::logDensity(double const *x, PDFType type,
 void DMulti::randomSample(double *x,
 			  vector<double const *> const &par,
 			  vector<unsigned long> const &len,
-			  double const *, double const *,
 			  RNG *rng) const
 {
     /* Sample multinomial as a series of binomial distributions */

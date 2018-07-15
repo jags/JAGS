@@ -49,9 +49,9 @@ mkParameterDims(vector<Node const *> const &parameters) {
 
 ArrayStochasticNode::ArrayStochasticNode(ArrayDist const *dist,
 					 unsigned int nchain,
-					 vector<Node const *> const &params,
-					 Node const *lower, Node const *upper)
-    : StochasticNode(mkDim(dist, params), nchain, dist, params, lower, upper),
+					 vector<Node const *> const &params)
+    : StochasticNode(mkDim(dist, params), nchain, dist, params,
+		     nullptr, nullptr),
       _dist(dist), _dims(mkParameterDims(params))
 {
     if (!dist->checkParameterDim(_dims)) {
@@ -65,66 +65,13 @@ double ArrayStochasticNode::logDensity(unsigned int chain, PDFType type) const
 	return JAGS_NEGINF;
     
     return _dist->logDensity(_data + _length * chain, type,
-			     _parameters[chain], _dims,
-			     lowerLimit(chain), upperLimit(chain));
+			     _parameters[chain], _dims);
 }
 
 void ArrayStochasticNode::randomSample(RNG *rng, unsigned int chain)
 {
     _dist->randomSample(_data + _length * chain,
-			_parameters[chain], _dims, 
-			lowerLimit(chain), upperLimit(chain), rng);
-}  
-
-void ArrayStochasticNode::truncatedSample(RNG *rng, unsigned int chain,
-					  double const *lower, 
-					  double const *upper)
-{
-    /*
-      Some complexity required to deal with case where node is already
-      truncated. Note that this code is identical to that in
-      VectorStochasticNode
-    */
-    
-    double const *l = lowerLimit(chain);
-    double *lv = nullptr;
-
-    if (l || lower) {
-	lv = new double[_length];
-	if (l && lower) {
-	    for (unsigned long i = 0; i < _length; ++i) {
-		lv[i] = min(l[i], lower[i]);
-	    }
-	}
-	else if (l) {
-	    copy(l, l + _length, lv);
-	}
-	else if (lower) {
-	    copy(lower, lower + _length, lv);
-	}
-    }
-
-    double const *u = upperLimit(chain);
-    double *uv = nullptr;
-    if (u || upper) {
-	uv = new double[_length];
-	if (u && upper) {
-	    for (unsigned long i = 0; i < _length; ++i) {
-		uv[i] = max(u[i], upper[i]);
-	    }
-	}
-	else if (u) {
-	    copy(u, u + _length, uv);
-	}
-	else if (upper) {
-	    copy(upper, upper + _length, uv);
-	}
-    }
-    _dist->randomSample(_data + _length * chain,
-			_parameters[chain], _dims, lv, uv, rng);
-
-    delete [] lv;
-    delete [] uv;
+			_parameters[chain], _dims, rng);
 }  
 
 bool ArrayStochasticNode::checkParentValues(unsigned int chain) const
@@ -155,15 +102,16 @@ void ArrayStochasticNode::sp(double *lower, double *upper, unsigned long length,
     double ArrayStochasticNode::KL(unsigned int ch1, unsigned int ch2,
 				   RNG *rng, unsigned int nrep) const
     {
-	if (lowerBound() && !lowerBound()->isFixed()) {
-	    return JAGS_POSINF;
+	double kl = _dist->KL(_parameters[ch1], _parameters[ch2], _dims);
+
+	if (kl == JAGS_NA) {
+	    return _dist->KL(_parameters[ch1], _parameters[ch2], _dims,
+			     rng, nrep);
 	}
-	if (upperBound() && !upperBound()->isFixed()) {
-	    return JAGS_POSINF;
+	else {
+	    return kl;
 	}
-	return _dist->KL(_parameters[ch1], _parameters[ch2], _dims,
-			 lowerLimit(ch1), upperLimit(ch1),
-			 rng, nrep);
+
     }
     
 } //namespace jags

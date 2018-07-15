@@ -15,12 +15,10 @@ public:
 
     double logDensity(double const *x, PDFType type,
 		      std::vector<double const *> const &parameters,
-		      std::vector<unsigned long> const &lengths,
-		      double const *lower, double const *upper) const;
+		      std::vector<unsigned long> const &lengths) const;
     void randomSample(double *x,
 		      std::vector<double const *> const &parameters,
 		      std::vector<unsigned long> const &lengths,
-		      double const *lower, double const *upper,
 		      RNG *rng) const;
     bool isSupportFixed(std::vector<bool> const &fixmask) const;
     bool isDiscreteValued(std::vector<bool> const &mask) const;

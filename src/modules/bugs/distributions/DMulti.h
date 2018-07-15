@@ -21,12 +21,11 @@ public:
 
   double logDensity(double const *x, PDFType tpye, 
 		    std::vector<double const *> const &parameters,
-		    std::vector<unsigned long> const &lengths,
-		    double const *lower, double const *upper) const;
+		    std::vector<unsigned long> const &lengths) const;
   void randomSample(double *x,
 		    std::vector<double const *> const &parameters,
 		    std::vector<unsigned long> const &lengths,
-		    double const *lower, double const *upper, RNG *rng) const;
+		    RNG *rng) const;
   /**
    * Checks that elements of p lie in range (0,1) and 
    * and sum to 1. Checks that N >= 1

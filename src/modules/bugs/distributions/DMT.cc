@@ -23,8 +23,7 @@ DMT::DMT()
 
 double DMT::logDensity(double const *x, PDFType type,
 		       vector<double const *> const &parameters,
-		       vector<vector<unsigned long> > const &dims,
-		       double const *, double const *) const
+		       vector<vector<unsigned long> > const &dims) const
 {
     double const * mu = parameters[0];
     double const * T = parameters[1];
@@ -59,7 +58,7 @@ double DMT::logDensity(double const *x, PDFType type,
 void DMT::randomSample(double *x,
 		       vector<double const *> const &parameters,
 		       vector<vector<unsigned long> > const &dims,
-		       double const *, double const *, RNG *rng) const
+		       RNG *rng) const
 {
 
     double const * mu = parameters[0];

@@ -83,8 +83,7 @@ namespace jags {
 	double
 	DSample::logDensity(double const *x, PDFType type,
 			    vector<double const *> const &par,
-			    vector<unsigned long> const &parlen,
-			    double const *, double const *) const
+			    vector<unsigned long> const &parlen) const
 	{
 	    /* Basic sanity checks: is x consistent with parameters */
 
@@ -169,7 +168,6 @@ namespace jags {
 	void DSample::randomSample(double *x,
 				   vector<double const *> const &par,
 				   vector<unsigned long> const &parlen,
-				   double const *, double const *,
 				   RNG *rng) const
 	{
 	    double const * const probs = par[0];

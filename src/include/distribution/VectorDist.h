@@ -50,8 +50,7 @@ class VectorDist : public Distribution
     virtual double 
 	logDensity(double const *x, PDFType type,
 		   std::vector<double const *> const &parameters,
-		   std::vector<unsigned long> const &lengths,
-		   double const *lbound, double const *ubound) const = 0;
+		   std::vector<unsigned long> const &lengths) const = 0;
     /**
      * Draws a random sample from the distribution. 
      *
@@ -71,7 +70,6 @@ class VectorDist : public Distribution
     virtual void randomSample(double *x,
 			      std::vector<double const *> const &parameters,
 			      std::vector<unsigned long> const &lengths, 
-			      double const *lbound, double const *ubound,
 			      RNG *rng) const = 0;
     /**
      * Returns the support of an unbounded distribution
@@ -135,15 +133,12 @@ class VectorDist : public Distribution
      * @param par1 First set of parameters
      * @param par2 Second set of parameter values
      * @param lengths Vector of parameter lengths, common to both par1 and par2
-     * @param lower Pointer to lower bound (NULL if unbounded)
-     * @param upper Pointer to upper bound (NULL if unbounded)
      * @param rng Random number generator
      * @param nrep Number of replicates on which to base the estimate
      */
     double KL(std::vector<double const *> const &par1,
 	      std::vector<double const *> const &par2,
 	      std::vector<unsigned long> const &lengths,
-	      double const *lower, double const *upper,
 	      RNG *rng, unsigned int nrep) const;
     /**
    * Returns the Kullback-Leibler divergence between distributions

@@ -56,8 +56,7 @@ bool DInterval::checkParameterValue(vector<double const *> const &par,
 double 
 DInterval::logDensity(double const *y, PDFType,
 		      vector<double const *> const &par,
-		      vector<unsigned long> const &lengths,
-		      double const *, double const *) const
+		      vector<unsigned long> const &lengths) const
 {
     if (*y < 0)
 	return JAGS_NEGINF;
@@ -79,8 +78,7 @@ DInterval::logDensity(double const *y, PDFType,
 
 void DInterval::randomSample(double  *x,
 			     vector<double const *> const &par,
-			     vector<unsigned long> const &lengths,
-			     double const *, double const *, RNG *) const
+			     vector<unsigned long> const &lengths, RNG *) const
 {
     /* 
        The random sample from DInterval is not random at all,
