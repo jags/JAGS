@@ -32,7 +32,7 @@ DInterval::DInterval()
 {
 }
 
-bool DInterval::isDiscreteValued(vector<bool> const &mask) const
+bool DInterval::isDiscreteValued(vector<bool> const &) const
 {
     return true;
 }
@@ -54,10 +54,10 @@ bool DInterval::checkParameterValue(vector<double const *> const &par,
 }
 
 double 
-DInterval::logDensity(double const *y, PDFType type,
+DInterval::logDensity(double const *y, PDFType,
 		      vector<double const *> const &par,
 		      vector<unsigned long> const &lengths,
-		      double const *lower, double const *upper) const
+		      double const *, double const *) const
 {
     if (*y < 0)
 	return JAGS_NEGINF;
@@ -80,8 +80,7 @@ DInterval::logDensity(double const *y, PDFType type,
 void DInterval::randomSample(double  *x,
 			     vector<double const *> const &par,
 			     vector<unsigned long> const &lengths,
-			     double const *lower, double const *upper,
-			     RNG *rng) const
+			     double const *, double const *, RNG *) const
 {
     /* 
        The random sample from DInterval is not random at all,
@@ -90,7 +89,7 @@ void DInterval::randomSample(double  *x,
     *x = static_cast<double>(value(par, NCUT(lengths)));
 }
 
-unsigned long DInterval::df(vector<unsigned long> const &lengths) const
+unsigned long DInterval::df(vector<unsigned long> const &) const
 {
     return 0;
 }
@@ -110,7 +109,7 @@ bool DInterval::isSupportFixed(vector<bool> const &fixmask) const
     return fixmask[0] && fixmask[1];
 }
 
-unsigned long DInterval::length(vector<unsigned long> const &params) const
+unsigned long DInterval::length(vector<unsigned long> const &) const
 {
     return 1;
 }

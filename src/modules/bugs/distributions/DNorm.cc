@@ -27,7 +27,7 @@ bool DNorm::checkParameterValue (vector<double const *> const &par) const
 }
 
 double
-DNorm::d(double x, PDFType type,
+DNorm::d(double x, PDFType,
          vector<double const *> const &par, bool give_log) const
 {
     return dnorm(x, MU(par), SIGMA(par), give_log);

@@ -33,7 +33,7 @@ namespace bugs {
 	return SHAPE(par) >= 0 && RATE(par) >  0;
     }
     
-    double DWeib::d(double x, PDFType type,
+    double DWeib::d(double x, PDFType,
 		    vector<double const *> const &par, bool give_log) const
 	
     {

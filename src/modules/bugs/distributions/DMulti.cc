@@ -26,7 +26,7 @@ string DMulti::alias() const
     return "dmultinom";
 }
     
-bool DMulti::isDiscreteValued(vector<bool> const &mask) const
+bool DMulti::isDiscreteValued(vector<bool> const &) const
 {
     return true;
 }
@@ -65,7 +65,7 @@ DMulti::checkParameterValue(vector<double const *> const &par,
 double DMulti::logDensity(double const *x, PDFType type,
 			  vector<double const *> const &par,
 			  vector<unsigned long> const &len,
-			  double const *lower, double const *upper) const
+			  double const *, double const *) const
 {
     double loglik = 0.0;
     double S = 0;
@@ -119,7 +119,7 @@ double DMulti::logDensity(double const *x, PDFType type,
 void DMulti::randomSample(double *x,
 			  vector<double const *> const &par,
 			  vector<unsigned long> const &len,
-			  double const *lower, double const *upper,
+			  double const *, double const *,
 			  RNG *rng) const
 {
     /* Sample multinomial as a series of binomial distributions */

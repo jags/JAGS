@@ -35,7 +35,7 @@ DNegBin::checkParameterValue (vector<double const *> const &par) const
 }
 
 double
-DNegBin::d(double x, PDFType type,
+DNegBin::d(double x, PDFType,
 	   vector<double const *> const &par, bool give_log) 
     const
 {

@@ -41,11 +41,10 @@ namespace bugs {
 	return allTrue(mask);
     }
     
-    double SumDist::logDensity(double const *x,
-			       PDFType type,
+    double SumDist::logDensity(double const *x, PDFType,
 			       vector<double const *> const &par,
 			       vector<unsigned long> const &lengths,
-			       double const *lower, double const *upper) const
+			       double const *, double const *) const
     {
 	return fabs(*x - evaluate(par, lengths)) > TOL ? JAGS_NEGINF : 0;
     }
@@ -53,8 +52,7 @@ namespace bugs {
     void SumDist::randomSample(double *x,
 			       vector<double const *> const &par, 
 			       vector<unsigned long> const &lengths,
-			       double const *lower, double const *upper,
-			       RNG *rng) const
+			       double const *, double const *, RNG *) const
     {
 	*x = evaluate(par, lengths);
     }
@@ -64,13 +62,13 @@ namespace bugs {
 	return allTrue(fixmask);
     }
 
-    unsigned long SumDist::df(vector<unsigned long> const &lengths) const
+    unsigned long SumDist::df(vector<unsigned long> const &) const
     {
 	return 0;
     }
 
-    bool SumDist::checkParameterValue(vector<double const *> const &params,
-				      vector<unsigned long> const &lengths) const
+    bool SumDist::checkParameterValue(vector<double const *> const &,
+				      vector<unsigned long> const &) const
     {
 	return true;
     }
@@ -102,7 +100,7 @@ namespace bugs {
 	*lower = *upper = evaluate(par, lengths);
     }
 
-    unsigned long SumDist::length(vector<unsigned long> const &lengths) const
+    unsigned long SumDist::length(vector<unsigned long> const &) const
     {
 	return 1;
     }

@@ -26,7 +26,7 @@ DMNorm::DMNorm()
 double DMNorm::logDensity(double const *x, PDFType type,
 			  vector<double const *> const &parameters,
 			  vector<vector<unsigned long> > const &dims,
-			  double const *lower, double const *upper) const
+			  double const *, double const *) const
 {
     double const * mu = parameters[0];
     double const * T = parameters[1];
@@ -59,7 +59,7 @@ double DMNorm::logDensity(double const *x, PDFType type,
 void DMNorm::randomSample(double *x,
 			  vector<double const *> const &parameters,
 			  vector<vector<unsigned long> > const &dims,
-			  double const *lower, double const *upper,
+			  double const *, double const *,
 			  RNG *rng) const
 {
     double const * mu = parameters[0];
@@ -127,8 +127,8 @@ bool DMNorm::checkParameterDim(vector<vector<unsigned long> > const &dims) const
     return true;
 }
 
-bool DMNorm::checkParameterValue(vector<double const *> const &parameters,
-				 vector<vector<unsigned long> > const &dims)
+bool DMNorm::checkParameterValue(vector<double const *> const &,
+				 vector<vector<unsigned long> > const &)
     const
 {
     return true; //FIXME: Define default in base clase
@@ -140,7 +140,7 @@ vector<unsigned long> DMNorm::dim(vector<vector<unsigned long> > const &dims) co
 }
 
 void DMNorm::support(double *lower, double *upper,
-		     vector<double const *> const &parameters,
+		     vector<double const *> const &,
 		     vector<vector<unsigned long> > const &dims) const
 {
     unsigned long length = dims[0][0];
@@ -150,7 +150,7 @@ void DMNorm::support(double *lower, double *upper,
     }
 }
 
-bool DMNorm::isSupportFixed(vector<bool> const &fixmask) const
+bool DMNorm::isSupportFixed(vector<bool> const &) const
 {
     return true;
 }

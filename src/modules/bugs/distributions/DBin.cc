@@ -40,7 +40,7 @@ bool DBin::checkParameterValue (vector<double const *> const &par) const
     return (SIZE(par) >= 0 && PROB(par) >= 0.0 && PROB(par) <= 1.0);
 }
 
-double DBin::d(double x, PDFType type, vector<double const *> const &par, 
+double DBin::d(double x, PDFType, vector<double const *> const &par, 
 	       bool give_log) const
 {
     return dbinom(x, SIZE(par), PROB(par), give_log);
@@ -64,7 +64,7 @@ double DBin::r(vector<double const *> const &par, RNG *rng) const
 }
 
 double 
-DBin::l(vector<double const *> const &par) const
+DBin::l(vector<double const *> const &) const
 {
     return 0;
 }

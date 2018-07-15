@@ -32,7 +32,7 @@ namespace jags {
 	    return (TAU(par) > 0 && DF(par) > 0 && fabs(DELTA(par)) <= 37.62);
 	}
 
-	double DNT::d(double x, PDFType type,
+	double DNT::d(double x, PDFType,
 		      vector<double const *> const &par, bool give_log) const
 	{
 	    x /= SIGMA(par);

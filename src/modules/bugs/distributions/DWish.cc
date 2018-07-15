@@ -44,7 +44,7 @@ DWish::DWish()
 double DWish::logDensity(double const *x, PDFType type,
 			 vector<double const *> const &par,
 			 vector<vector<unsigned long> > const &dims,
-			 double const *lower, double const *upper) const
+			 double const *, double const *) const
 {
     double const *scale = SCALE(par);
     unsigned long p = NROW(dims);
@@ -131,7 +131,7 @@ void DWish::randomSample(double *X,
 void DWish::randomSample(double *x,
 			 vector<double const *> const &par,
 			 vector<vector<unsigned long> > const &dims,
-			 double const *lower, double const *upper,
+			 double const *, double const *,
 			 RNG *rng) const
 {
     randomSample(x, SCALE(par), DF(par), NROW(dims), rng);
@@ -158,7 +158,7 @@ DWish::checkParameterValue(vector<double const *> const &par,
 
 
 void DWish::support(double *lower, double *upper,
-		    vector<double const *> const &par,
+		    vector<double const *> const &,
 		    vector<vector<unsigned long> > const &dims) const
 {
     unsigned long length = dims[0][0] * dims[0][1];
@@ -174,7 +174,7 @@ void DWish::support(double *lower, double *upper,
     }
 }
 
-bool DWish::isSupportFixed(vector<bool> const &fixmask) const
+bool DWish::isSupportFixed(vector<bool> const &) const
 {
     return true;
 }

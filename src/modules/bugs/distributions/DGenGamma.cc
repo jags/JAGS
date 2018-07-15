@@ -43,7 +43,7 @@ bool DGenGamma::checkParameterValue (vector<double const *> const &par) const
 }
 
 double
-DGenGamma::d(double x, PDFType type,
+DGenGamma::d(double x, PDFType,
 vector<double const *> const &par, bool give_log) 
     const
 {

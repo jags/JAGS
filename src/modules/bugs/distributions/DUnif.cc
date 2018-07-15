@@ -26,7 +26,7 @@ bool  DUnif::checkParameterValue (vector<double const *> const &par) const
 
 double DUnif::logDensity(double x, PDFType type,
 			 vector<double const *> const &par,
-			 double const *lower, double const *upper) const
+			 double const *, double const *) const
 {
     if (x < LOWER(par) || x > UPPER(par))
 	return JAGS_NEGINF;
@@ -37,7 +37,7 @@ double DUnif::logDensity(double x, PDFType type,
 }
 
 double DUnif::randomSample(vector<double const *> const &par, 
-			   double const *lower, double const *upper,
+			   double const *, double const *,
 			   RNG *rng) const
 {
     return LOWER(par) + rng->uniform() * (UPPER(par) - LOWER(par));

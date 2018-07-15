@@ -24,7 +24,7 @@ DMT::DMT()
 double DMT::logDensity(double const *x, PDFType type,
 		       vector<double const *> const &parameters,
 		       vector<vector<unsigned long> > const &dims,
-		       double const *lower, double const *upper) const
+		       double const *, double const *) const
 {
     double const * mu = parameters[0];
     double const * T = parameters[1];
@@ -59,7 +59,7 @@ double DMT::logDensity(double const *x, PDFType type,
 void DMT::randomSample(double *x,
 		       vector<double const *> const &parameters,
 		       vector<vector<unsigned long> > const &dims,
-		       double const *lower, double const *upper, RNG *rng) const
+		       double const *, double const *, RNG *rng) const
 {
 
     double const * mu = parameters[0];
@@ -94,14 +94,14 @@ vector<unsigned long> DMT::dim(vector<vector<unsigned long> > const &dims) const
 
 bool
 DMT::checkParameterValue(vector<double const *> const &parameters,
-			    vector<vector<unsigned long> > const &dims) const
+			 vector<vector<unsigned long> > const &) const
 {
     return *parameters[2] >= 2;
 }
 
 
 void DMT::support(double *lower, double *upper, 
-		     vector<double const *> const &parameters,
+		     vector<double const *> const &,
 		     vector<vector<unsigned long> > const &dims) const
 {
     unsigned long length = dims[0][0];
@@ -111,7 +111,7 @@ void DMT::support(double *lower, double *upper,
     }
 }
 
-bool DMT::isSupportFixed(vector<bool> const &fixmask) const
+bool DMT::isSupportFixed(vector<bool> const &) const
 {
     return true;
 }
