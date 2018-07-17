@@ -9,6 +9,7 @@
 #include <sampler/SingletonGraphView.h>
 #include <sampler/Linear.h>
 #include <module/ModuleError.h>
+#include <DBeta.h>
 
 #include <set>
 #include <vector>
@@ -16,6 +17,8 @@
 #include <algorithm>
 
 #include <JRmath.h>
+
+#include <iostream>
 
 using std::vector;
 using std::set;
@@ -30,15 +33,7 @@ namespace bugs {
 bool ConjugateBeta::canSample(StochasticNode *snode, Graph const &graph)
 {
     ConjugateDist dist = getDist(snode);
-    if (dist ==  UNIF) {
-	// dunif(0,1) is equivalent to dbeta(1,1) 
-	if(!(*snode->parents()[0]->value(0) == 0 &&
-	     *snode->parents()[1]->value(0) == 1 &&
-	     snode->parents()[0]->isFixed() &&
-	     snode->parents()[1]->isFixed()))
-	    return false;
-    }
-    else if (dist != BETA) {
+    if (dist !=  UNIF && dist != BETA) {
 	return false;
     }
 
@@ -58,14 +53,14 @@ bool ConjugateBeta::canSample(StochasticNode *snode, Graph const &graph)
     }
 
     // Check stochastic children
-    for (unsigned int i = 0; i < schild.size(); ++i) {
+    for (unsigned long i = 0; i < schild.size(); ++i) {
 	if (isBounded(schild[i])) {
-	    return false; //Bounded
+	    return false; //Bounded child
 	}
 	switch(getDist(schild[i])) {
 	case BIN: case NEGBIN:
 	    if (gv.isDependent(schild[i]->parents()[1])) {
-		return false; //n depends on snode
+		return false; //size parameter depends on snode
 	    }      
 	    break;
 	case BERN:
@@ -111,18 +106,28 @@ void ConjugateBeta::update(unsigned int chain, RNG *rng) const
     }
     unsigned long Nchild = stoch_children.size();
 
+    /* Get bounds */
+    double lower = 0, upper = 1;
+    snode->support(&lower, &upper, 1, chain);
+    /* Clamp bounds to (0,1) */
+    lower = max(lower, 0.0);
+    upper = min(upper, 1.0);
+    if (lower >= upper) {
+	throwNodeError(snode, "Invalid bounds in ConjugateBeta");
+    }
+    
     /* For mixture models, we count only stochastic children that
        depend on snode */
-    double *C = nullptr;
     bool is_mix = !_gv->deterministicChildren().empty();
+    vector<double> C(Nchild, 1);
     if (is_mix) {
-	C = new double[Nchild];
 	for (unsigned long i = 0; i < Nchild; ++i) {
 	    C[i] = *stoch_children[i]->parents()[0]->value(chain);
 	}
-	// Perturb current value, keeping in the legal range [0,1]
+	// Perturb current value, keeping in the legal range
+	double midpoint = (lower + upper)/2;
 	double x = *snode->value(chain);
-	x = x > 0.5 ? x - 0.4 : x + 0.4;
+	x = x > midpoint ? x - (x - lower)/2 : x + (upper - x)/2;
 	_gv->setValue(&x, 1, chain);
 	// C[i] == 1 if parameter of child i has changed (so depends on snode)
 	// C[i] == 0 otherwise
@@ -131,8 +136,7 @@ void ConjugateBeta::update(unsigned int chain, RNG *rng) const
 	}
     }
 
-
-    for (unsigned int i = 0; i < stoch_children.size(); ++i) {
+    for (unsigned long i = 0; i < stoch_children.size(); ++i) {
 	if (!(is_mix && C[i] == 0)) {
 	    double y = *stoch_children[i]->value(chain);
 	    double n;
@@ -161,38 +165,10 @@ void ConjugateBeta::update(unsigned int chain, RNG *rng) const
     }
 
     // Draw the sample
-    double xnew = rbeta(a, b, rng);
-    if (isBounded(snode)) {
-	double lower = 0;
-	Node const *lb = snode->lowerBound();
-	if (lb) {
-	    lower = max(lower, *lb->value(chain));
-	}
-	double upper = 1;
-	Node const *ub = snode->upperBound();
-	if (ub) {
-	    upper = min(upper, *ub->value(chain));
-	}
-	/* Try 4 more attempts to get random sample within the bounds */
-	for (int i = 0; i < 4; i++) {
-	    if (xnew >= lower && xnew <= upper) {
-		_gv->setValue(&xnew, 1, chain);
-                if (is_mix) delete [] C;
-		return;
-	    }
-	    xnew = rbeta(a, b, rng);
-	}
-	/* Failure! Use inversion */
-	double plower = lb ? pbeta(lower, a, b, 1, 0) : 0;
-	double pupper = ub ? pbeta(upper, a, b, 1, 0) : 1;
-	double p = runif(plower, pupper, rng);
-	xnew = qbeta(p, a, b, 1, 0);   
-    }
+    DBeta dbeta;
+    vector<double const *> par = { &a, &b };
+    double xnew = dbeta.randomSample(par, &lower, &upper, rng);
     _gv->setValue(&xnew, 1, chain);
-
-    if (is_mix) {
-	delete [] C;
-    }
 }
 
 }}
