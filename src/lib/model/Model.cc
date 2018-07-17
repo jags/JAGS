@@ -43,6 +43,10 @@ using std::max;
 using std::reverse;
 using std::find;
 
+using std::exception_ptr;
+using std::current_exception;
+using std::rethrow_exception;
+
 namespace jags {
 
 static bool checkClosure(vector<Node*> const &nodes) 
@@ -358,25 +362,41 @@ void Model::update(unsigned int niter)
     if (!_is_initialized) {
 	throw logic_error("Attempt to update uninitialized model");
     }
-
+    
+    /* 
+       We must catch and rethrow exceptions that are thrown from
+       indivual threads so they can be handled by the Console.
+    */
+    exception_ptr teptr = nullptr;
+    
     for (unsigned int iter = 0; iter < niter; ++iter) {    
 
         #pragma omp parallel for num_threads(_nchain)
 	for (unsigned int n = 0; n < _nchain; ++n) {
-	    for (vector<Sampler*>::iterator i = _samplers.begin(); 
-		 i != _samplers.end(); ++i) 
-	    {
-		(*i)->update(n, _rng[n]);
+	    try {
+		for (vector<Sampler*>::iterator i = _samplers.begin(); 
+		     i != _samplers.end(); ++i) 
+		{
+		    (*i)->update(n, _rng[n]);
+		}
+		
+		for (vector<Node*>::const_iterator k = _sampled_extra.begin();
+		     k != _sampled_extra.end(); ++k)
+		{
+		    if (!(*k)->checkParentValues(n)) {
+			throw NodeError(*k, "Invalid parent values");
+		    }
+		    (*k)->randomSample(_rng[n], n);
+		}
+	    }
+	    catch(...) {
+		teptr = current_exception();
 	    }
 	    
-	    for (vector<Node*>::const_iterator k = _sampled_extra.begin();
-		 k != _sampled_extra.end(); ++k)
-	    {
-		if (!(*k)->checkParentValues(n)) {
-		    throw NodeError(*k, "Invalid parent values");
-		}
-		(*k)->randomSample(_rng[n], n);
-	    }
+	}
+
+	if (teptr) {
+	    rethrow_exception(teptr);
 	}
 	
 	_iteration++;
