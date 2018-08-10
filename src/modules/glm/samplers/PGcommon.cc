@@ -4,28 +4,28 @@
 #include <rng/RNG.h>
 #include <JRmath.h>
 
-
 using jags::RNG;
 
-static double rigauss_body(double mu, double lambda, double t, RNG *rng)
+static double rigauss_body(double imu, double lambda, double t, RNG *rng)
 {
     // Sample truncated IG(mu, lambda) I(0,t) using accept-reject sampling
     // with a truncated inverse chi-square as proposal. This is efficient
     // when the truncation point t is in the body of the distribution.
-
+    // Here mu = 1/imu
+    
     // Rescale the problem to sample Z ~ IG(mu/lambda, 1) I(0, t/lambda)
-    mu /= lambda;
+    imu *= lambda;
     t /= lambda;
     
     double alpha, Z;
     do {
-	Z = lnormal(1/sqrt(t), rng);
-	Z = 1/(Z*Z); //Chi-square truncated to (0,t)
-	alpha = exp(-Z / (2 * mu * mu)); //acceptance probability
+	Z = lnormal(1/sqrt(t), rng); 
+	Z = 1/(Z*Z); // Z ~ 1/dchisq(1) truncated to (0,t)
+	alpha = exp(- imu * imu * Z / 2.0); //acceptance probability
     }
-    while (rng->uniform() > alpha);
-
-    return Z * lambda; // Rescale the problem to sample X ~ IG(mu, lambda)
+    while (rng->uniform() >= alpha);
+    
+    return Z * lambda; // Rescale the problem to sample X ~ IG(mu, lambda) I(0,t)
 }
 
 static double rigauss_tail(double mu, double lambda, double t, RNG *rng)
@@ -46,7 +46,8 @@ static double rigauss_tail(double mu, double lambda, double t, RNG *rng)
 	if (rng->uniform() > mu / (mu + X)) {
 	    X = mu * mu / X;
 	}
-    } while (X > t);
+    }
+    while (X >= t);
 
     return X;
 }
@@ -54,16 +55,16 @@ static double rigauss_tail(double mu, double lambda, double t, RNG *rng)
 namespace jags {
     namespace glm {
 	
-	double rigauss(double mu, double lambda, double t, RNG *rng)
+	double rigauss(double imu, double lambda, double t, RNG *rng)
 	{
 	    // Sample from the inverse Gaussian distribution with
-	    // mean mu and shape lambda, truncated to the interval (0, t)
-	    
-	    if (mu > t) {
-		return rigauss_body(mu, lambda, t, rng);
+	    // mean mu=1/imu and shape lambda, truncated to the interval (0, t)
+
+	    if (imu * t < 1.0) {
+		return rigauss_body(imu, lambda, t, rng);
 	    }
 	    else {
-		return rigauss_tail(mu, lambda, t, rng);
+		return rigauss_tail(1/imu, lambda, t, rng);
 	    }
 	}
 	

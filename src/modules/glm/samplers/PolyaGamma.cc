@@ -14,7 +14,7 @@ using std::log;
 using std::sqrt;
 using std::abs;
 
-static double one = 1;
+static const double one = 1;
 
 namespace jags {
     namespace glm {
@@ -83,8 +83,7 @@ namespace jags {
 		}
 		else {
 		    // Sample from the body with a truncated IG proposal
-		    double mu = 1/z;
-		    X = rigauss(mu, 1, TRUNC, rng);
+		    X = rigauss(z, 1, TRUNC, rng);
 		}
 		double S = a(0, X);
 		double Y = rng->uniform() * S;
@@ -93,7 +92,7 @@ namespace jags {
 		    if (n % 2 == 1) {
 			// odd terms
 			S -= a(n, X);
-			if (Y <= S) return X/4;
+			if (Y < S) return X/4;
 		    }
 		    else {
 			// even terms
@@ -116,8 +115,7 @@ namespace jags {
 		return one;
 	    }
 	    else if (getFamily(snode) == GLM_BINOMIAL) {
-		Node const *N = snode->parents()[1];
-		return N->value(chain)[0];
+		return *snode->parents()[1]->value(chain);
 	    }
 	    else {
 		throwLogicError("Invalid outcome for PolyaGamma");
@@ -150,6 +148,9 @@ namespace jags {
 	    for (unsigned int i = 0; i < N; ++i) {
 		_tau += rpolya_gamma(_lp, rng);
 	    }
+	    if (_tau == 0.0) {
+		throwLogicError("Bad Polya Gamma update");
+	    }
 	}
 
 	bool PolyaGamma::canRepresent(StochasticNode const *snode)
@@ -171,9 +172,6 @@ namespace jags {
 		       mixture components used by AuxMixBinomial drops
 		       from 9 to 4 (See LGMix.cc), so this may be a
 		       good choice.
-
-		       FIXME: This means we only use PolyaGamma for
-		       small *fixed* N.
 		    */
 		    return false;
 		}
