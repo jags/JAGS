@@ -148,7 +148,7 @@ namespace jags {
 	    for (unsigned int i = 0; i < N; ++i) {
 		_tau += rpolya_gamma(_lp, rng);
 	    }
-	    if (_tau == 0.0) {
+	    if (_tau <= 0.0) {
 		throwLogicError("Bad Polya Gamma update");
 	    }
 	}

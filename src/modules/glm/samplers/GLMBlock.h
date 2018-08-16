@@ -19,6 +19,7 @@ namespace glm {
      * @short Block sampler for generalized linear models.
      */
     class GLMBlock : public GLMMethod {
+	bool update0(RNG*);
     public:
 	/**
 	 * Constructor.

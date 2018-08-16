@@ -71,16 +71,17 @@ namespace glm {
 	//the design matrix to the corresponding outcome. Note that this
 	//is only need when we have multivariate outcomes; with only
 	//scalar outcomes the mapping is trivial
-	vector<Outcome*> outcome_ptr(nrow);
+	vector<double const*> outcome_ptr(nrow);
 	vector<unsigned int> outcome_idx(nrow);
 	unsigned int r = 0; //row counter
 	for (unsigned int i = 0; i < _outcomes.size(); ++i) {
+	    double const *vm = _outcomes[i]->vmean();
 	    for (unsigned int j = 0; j < _outcomes[i]->length(); ++j, ++r) {
-		outcome_ptr[r] = _outcomes[i];
+		outcome_ptr[r] = vm;
 		outcome_idx[r] = j;
 	    }
 	}
-	
+ 	
 	for (unsigned int i = 0; i < snodes.size(); ++i) {
 
 	    unsigned int length = snodes[i]->length();
@@ -89,8 +90,8 @@ namespace glm {
 
 		for (unsigned int j = 0; j < length; ++j) {
 		    for (int r = Xp[c+j]; r < Xp[c+j+1]; ++r) {
-			unsigned int row = Xi[r];
-			Xx[r] = - outcome_ptr[row]->vmean()[outcome_idx[row]];
+ 			unsigned int row = Xi[r];
+			Xx[r] = - outcome_ptr[row][outcome_idx[row]];
 		    }
 		}
 		
@@ -98,13 +99,14 @@ namespace glm {
 		copy(xold, xold + length, xnew.begin());
 		
 		for (unsigned int j = 0; j < length; ++j) {
+		    double xsave = xnew[j];
 		    xnew[j] += 1;
 		    _sub_views[i]->setValue(&xnew[0], length, _chain);
 		    for (int r = Xp[c+j]; r < Xp[c+j+1]; ++r) {
 			unsigned int row = Xi[r];
-			Xx[r] += outcome_ptr[row]->vmean()[outcome_idx[row]];
+			Xx[r] += outcome_ptr[row][outcome_idx[row]];
 		    }
-		    xnew[j] -= 1;
+		    xnew[j] = xsave;
 		}
 		_sub_views[i]->setValue(&xnew[0], length, _chain);
 	    }
@@ -404,6 +406,7 @@ namespace glm {
 			    TxTau[j] += Tx[r + k*nzrow] * tau[m*j+k];
 			}
 		    }
+		    
 		    for (unsigned int j = 0; j < m; ++j) {
 			Tx[r + j*nzrow] = TxTau[j];
 		    }
