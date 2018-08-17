@@ -38,13 +38,20 @@ void CounterTab::popCounter()
 
 Counter *CounterTab::getCounter(string const &name) const
 {
-  vector<pair<string, Counter *> >::const_iterator p(_table.begin());
-
-  for (; p != _table.end(); ++p) {
+  for (auto p = _table.begin(); p != _table.end(); ++p) {
     if (name == p->first)
       return p->second;
   }
   return nullptr;
 }
 
+    vector<unsigned long> CounterTab::counterValues() const
+    {
+	vector<unsigned long> indices;
+	for (auto p = _table.begin(); p != _table.end(); ++p) {
+	    indices.push_back(p->second->front());
+	}
+	return indices;
+    }
+    
 } //namespace jags

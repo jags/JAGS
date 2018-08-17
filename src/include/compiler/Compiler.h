@@ -39,8 +39,8 @@ class Compiler {
   CounterTab _countertab;
   std::map<std::string, SArray> const &_data_table;
   std::map<std::string, std::vector<bool> > _constant_mask;
-  unsigned int _n_resolved, _n_relations;
-  std::vector<bool> _is_resolved;
+  unsigned int _n_resolved, _n_unresolved;
+  std::set<std::pair<ParseTree const *, std::vector<unsigned long> > > _is_resolved;
   CompilerMode _compiler_mode;
   int _index_expression;
   std::vector<Node*> _index_nodes;

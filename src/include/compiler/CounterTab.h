@@ -42,6 +42,10 @@ public:
    * pointer if there is no such Counter
    */
   Counter *getCounter(std::string const &name) const;
+  /**
+   * Returns the current values of the counters.
+   */
+  std::vector<unsigned long> counterValues() const;
 };
 
 } /* namespace jags */

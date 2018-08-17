@@ -915,8 +915,17 @@ Node * Compiler::allocateLogical(ParseTree const *rel)
 
 void Compiler::allocate(ParseTree const *rel)
 {
-    if (_is_resolved[_n_relations])
-	return;
+    /* 
+       A relation is uniquely identified by the combination of 
+       - address of the ParseTree element that encodes it, and 
+       - the current values on counters on the counter stack 
+       This pair is used by the set _is_resolved to denote relations
+       that already have an allocated node.
+    */
+    pair<ParseTree const*, vector<unsigned long> >
+	relindex(rel, _countertab.counterValues());
+
+    if (_is_resolved.count(relindex) != 0) return;
 
     ParseTree const * const var = rel->parameters()[0];
     SimpleRange target_range = VariableSubsetRange(var);
@@ -932,8 +941,21 @@ void Compiler::allocate(ParseTree const *rel)
 	}
     }
     
+    /* 
+       Before the node is constructed, We have to ensure that we can
+       insert into an array. Deterministic nodes are cached and are
+       reusable, but stochastic nodes are not and should only be
+       created once for each relation.
+    */
+
+    SimpleRange range = VariableSubsetRange(var);
+    if (isNULL(range) && !emptyRange(var)) {
+	_n_unresolved++; //At least one relation is unresolved
+	return;
+    }
+
     Node *node = nullptr;
-    
+
     if (rel->treeClass() == P_STOCHREL) {
 	node = allocateStochastic(rel);
     }
@@ -945,13 +967,12 @@ void Compiler::allocate(ParseTree const *rel)
     }
     
     SymTab &symtab = _model.symtab();
-    if (node) {
+    if (node != nullptr) {
 	NodeArray *array = symtab.getVariable(var->name());
 	if (!array) {
 	    //Undeclared array. Create a new array big enough to
 	    //contain the node
 	    vector<unsigned long> dim = node->dim();
-	    SimpleRange range = VariableSubsetRange(var);
 	    bool lock = false;
 	    if (emptyRange(var)) {
 		//No range given on LHS. New node fills the whole array
@@ -970,7 +991,7 @@ void Compiler::allocate(ParseTree const *rel)
 		}
 	    }
 	    symtab.addVariable(var->name(), dim);
-	    array = symtab.getVariable(var->name());
+	    array = symtab.getVariable(var->name()); //FIXME: addVariable should return the array
 	    array->insert(node, range);
 	    if (lock) {
 		array->lock();
@@ -978,15 +999,14 @@ void Compiler::allocate(ParseTree const *rel)
 	}
 	else {
 	    // Check if a node is already inserted into this range
-	    SimpleRange range = VariableSubsetRange(var);
-	    if (array->getSubset(range, _model)) {
+	    if (array->getSubset(range, _model)) { //FIXME: why is _model an argument here?
 		CompileError(var, "Attempt to redefine node",
 			     var->name() + printRange(range));
 	    }
 	    array->insert(node, range);
 	}
 	_n_resolved++;
-	_is_resolved[_n_relations] = true;
+	_is_resolved.insert(relindex);
     }
     else if (_compiler_mode == CLEAN_UNRESOLVED) {
 	/* 
@@ -1011,6 +1031,9 @@ void Compiler::allocate(ParseTree const *rel)
 		p++;
 	    }
 	}
+    }
+    else {
+	_n_unresolved++;
     }
 }
     
@@ -1124,10 +1147,11 @@ void Compiler::writeRelations(ParseTree const *relations)
 {
     writeConstantData(relations);
 
-    _is_resolved = vector<bool>(_n_relations, false);
-    bool noresolve = false;
-    for (unsigned long N = _n_relations; N > 0; N -= _n_resolved) {
+    _is_resolved.clear();
+    bool lock = false;
+    for(;;) {
 	_n_resolved = 0;
+	_n_unresolved = 0;
 	/* 
 	   Here we use the abilitiy to sweep forwards and backwards
 	   through the relations, allowing rapid compilation of models
@@ -1137,23 +1161,23 @@ void Compiler::writeRelations(ParseTree const *relations)
 	*/
 	traverseTree(relations, &Compiler::allocate, true, true);
 	if (_n_resolved == 0) {
-	    if (noresolve) {
+	    if (_n_unresolved == 0) {
+		break;
+	    }
+	    else if (lock) {
 		break;
 	    }
 	    else {
 		_model.symtab().lock();
-		noresolve = true;
+		lock = true;
 	    }
-	}
-	else {
-	    noresolve = false;
 	}
     }
     _is_resolved.clear(); //Why?
     _model.symtab().lock();
 
     
-    if (_n_resolved == 0) {
+    if (_n_resolved == 0 && _n_unresolved > 0) {
 	_compiler_mode = ENFORCING; //See getArraySubset
 	traverseTree(relations, &Compiler::allocate);
 	
@@ -1247,10 +1271,6 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
        writeRelations for more details.
     */
 
-    if (resetcounter) {
-	_n_relations = 0;
-    }
-
     vector<ParseTree*> const &relation_list = relations->parameters();
     for (vector<ParseTree*>::const_reverse_iterator p = relation_list.rbegin(); 
 	 p != relation_list.rend(); ++p) 
@@ -1258,26 +1278,19 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
 	TreeClass tc = (*p)->treeClass();
 	if (tc == P_STOCHREL || tc == P_DETRMREL) {
 	    (this->*fun)(*p);
-	    _n_relations++;
 	}
     }
 
     if (reverse) {
-
-	unsigned int nrel = _n_relations; //Save current relation number
-      
 	for (vector<ParseTree*>::const_iterator p = relation_list.begin(); 
 	     p != relation_list.end(); ++p) 
 	{
 	    //Reverse sweep through relations
 	    TreeClass tc = (*p)->treeClass();
 	    if (tc == P_STOCHREL || tc == P_DETRMREL) {
-		_n_relations--;
 		(this->*fun)(*p);
 	    }
 	}
-
-	_n_relations = nrel; //Restore current relation number
     }
       
     for (vector<ParseTree*>::const_reverse_iterator p = relation_list.rbegin(); 
@@ -1302,8 +1315,8 @@ void Compiler::traverseTree(ParseTree const *relations, CompilerMemFn fun,
 
 Compiler::Compiler(BUGSModel &model, map<string, SArray> const &data_table)
     : _model(model), _countertab(), 
-      _data_table(data_table), _n_resolved(0), 
-      _n_relations(0), _is_resolved(0), _compiler_mode(PERMISSIVE),
+      _data_table(data_table), _n_resolved(0), _n_unresolved(0), 
+      _is_resolved(), _compiler_mode(PERMISSIVE),
       _index_expression(0), _index_nodes()
 {
     if (_model.nodes().size() != 0)
