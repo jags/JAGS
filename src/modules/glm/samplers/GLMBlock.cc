@@ -49,7 +49,9 @@ namespace glm {
 	double *b = 0;
 	cholmod_sparse *A = 0;
 	calCoef(b, A);
-	
+
+	unsigned int nrow = _view->length();
+
 	// Get LDL' decomposition of posterior precision
 	A->stype = -1;
 	int ok = 1;
@@ -57,19 +59,29 @@ namespace glm {
 	{
 	    ok = cholmod_factorize(A, _factor, glm_wk);
 	    cholmod_free_sparse(&A, glm_wk);
-	    if (!ok) {
-		cholmod_free_sparse(&A, glm_wk);
-		delete [] b;
+	}
+	if (ok && _factor->is_ll == 0) {
+	    //LDL' decomposition
+	    int *fp = static_cast<int*>(_factor->p);
+	    double *fx = static_cast<double*>(_factor->x);
+	    for (unsigned int r = 0; r < nrow; ++r) {
+		//Check that diagonal D is positive.
+		if (fx[fp[r]] <= 0.0) {
+		    ok = false;
+		    break;
+		}
 	    }
 	}
 	if (!ok) {
+	    #pragma omp critical
+	    cholmod_free_sparse(&A, glm_wk);
+	    delete [] b;
 	    return false;
 	}
 
 	// Use the LDL' decomposition to generate a new sample
 	// with mean mu such that A %*% mu = b and precision A. 
 	
-	unsigned int nrow = _view->length();
 	cholmod_dense *w = 0;
 	#pragma omp critical
 	w = cholmod_allocate_dense(nrow, 1, nrow, CHOLMOD_REAL, glm_wk);
@@ -90,7 +102,6 @@ namespace glm {
 	
 	updateAuxiliary(u1, _factor, rng);
 
-	bool posdef = true;
 	double *u1x = static_cast<double*>(u1->x);
 	if (_factor->is_ll) {
 	    // LL' decomposition
@@ -104,14 +115,8 @@ namespace glm {
 	    int *fp = static_cast<int*>(_factor->p);
 	    double *fx = static_cast<double*>(_factor->x);
 	    for (unsigned int r = 0; r < nrow; ++r) {
-		bool variance = fx[fp[r]];
-		if (variance < 0.0) {
-		    cholmod_free_dense(&u1, glm_wk);
-		    return false;
-		}
-		else {
-		    u1x[r] += rng->normal() * sqrt(variance);
-		}
+		double D_r = fx[fp[r]];
+		u1x[r] += rng->normal() * sqrt(D_r);
 	    }
 	}
     
@@ -127,7 +132,6 @@ namespace glm {
 	for (unsigned int i = 0; i < nrow; ++i) {
 	    b[perm[i]] = u2x[i];
 	}
-
         #pragma omp critical
         cholmod_free_dense(&u2, glm_wk);
 
@@ -143,11 +147,20 @@ namespace glm {
 
         _view->setValue(b, nrow, _chain);
 	delete [] b;
-	return posdef;
+	return true;
     }
 
     void GLMBlock::update(RNG *rng)
     {
+	/* 
+	   In one large complex model we found that the posterior
+	   precision matrix could (rarely) be non-positive definite
+	   due to numerical error. So we allow a second attempt with
+	   different Outcome weights to see if this gives a
+	   positive-definite precision matrix. We throw an exception
+	   if both attempts fail.
+	*/
+
 	if (update0(rng)) return;
 	if (!update0(rng)) {
 	    throwRuntimeError("Invalid posterior variance in GLMBlock::update");
