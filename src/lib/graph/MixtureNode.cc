@@ -5,6 +5,9 @@
 #include <graph/MixTab.h>
 #include <graph/NodeError.h>
 
+//Debugging only
+//#include <util/nainf.h>
+
 #include <utility>
 #include <vector>
 #include <stdexcept>
@@ -198,14 +201,14 @@ void MixtureNode::updateActive(unsigned int chain)
     _active_parents[chain] = _table->getNode(i);
     if (_active_parents[chain] == nullptr) {
 	/*
-	std::cout << "Got " << print(SimpleRange(i)) << "\nOriginally\n";
+	std::cout << "Got " << printIndex(i) << "\nOriginally\n";
 	for (unsigned int j = 0; j < _Nindex; ++j) {
 	    std::cout << par[j]->value(chain)[0] << "\n";
 	    if (par[j]->value(chain)[0] == JAGS_NA)
 		std::cout << "(which is  missing)\n";
 	}
 	*/
-	string msg = string("Invalid index ") + print(SimpleRange(i)) +
+	string msg = string("Invalid index") + printIndex(i) +
 	    " in mixture node";
 	throw NodeError(this, msg);
     }
