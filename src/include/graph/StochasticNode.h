@@ -46,7 +46,7 @@ class StochasticNode : public Node {
     Distribution const * const _dist;
     Node const * const _lower;
     Node const * const _upper;
-    bool _observed;
+    std::vector<bool> const * _observed;
     const bool _discrete;
     const std::array<int, 2> _depth;
     virtual void sp(double *lower, double *upper, unsigned long length,
@@ -82,21 +82,6 @@ public:
      */
     Distribution const *distribution() const;
     /**
-     * Returns the log of the prior density of the StochasticNode
-     * given the current parameter values.
-     *
-     * @param chain Number of chain (starting from zero) for which
-     * to evaluate log density.
-     *
-     * @param type Indicates whether the full probability density
-     * function is required (PDF_FULL) or whether partial calculations
-     * are permitted (PDF_PRIOR, PDF_LIKELIHOOD). See PDFType for
-     * details.
-     *
-	 * NOTE: This is now done in Node.h so can be removed from here
-     */
-    // virtual double logDensity(unsigned int chain, PDFType type) const = 0;
-    /**
      * Draws a random sample from the prior distribution of the node
      * given the current values of it's parents, and sets the Node
      * to that value.
@@ -106,9 +91,20 @@ public:
      */
     virtual void randomSample(RNG *rng, unsigned int chain) = 0;
     /**
-     * Stochastic nodes always represent random variables in the model.
+     * Stochastic nodes always represent random variables.
      */
     bool isRandomVariable() const;
+    /**
+     * Returns a pointer to a logical vector indicating whether each
+     * element of the StochasticNode is observed (true) or unobserved
+     * (false).
+     */
+    std::vector<bool> const *observedMask() const;
+    /**
+     * Returns the corresponding element of the boolean vector
+     * returned by observedMask.
+     */
+    bool isObserved(unsigned long index) const;
     /**
      * Writes the lower and upper limits of the support of a given
      * stochastic node to the supplied arrays. If the node has upper and
@@ -148,11 +144,8 @@ public:
      * @see Node#setValue
      */
     void setData(double const *value, unsigned long length);
-    /**
-     * A stochastic node is always a random variable, and is observed
-     * if its value has been set with setData.
-     */
-    RVStatus randomVariableStatus() const;
+
+    
     Node const *lowerBound() const;
     Node const *upperBound() const;
     /*
@@ -194,9 +187,20 @@ bool isSupportFixed(StochasticNode const *snode);
 bool isBounded(StochasticNode const *node);
 
 /**
- * For stochastic nodes, this is a synonym of isFixed
+ * Returns true if any element of the observedMask is true.  
+ *
+ * Note that for a partially observed stochastic node, both isObserved
+ * and isParameter return true.
  */
-inline bool isObserved(StochasticNode const *s) { return s->isFixed(); }
+bool isObserved(StochasticNode const *node);
+
+/**
+ * Returns true if any element of the observedMask is false.
+ * 
+ * Note that for a partially observed stochastic node, both isObserved
+ * and isParameter return true.
+ */
+bool isParameter(StochasticNode const *node);
 
 } /* namespace jags */
 

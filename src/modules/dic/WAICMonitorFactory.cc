@@ -31,7 +31,13 @@ namespace jags {
 		 p != snodes.end(); ++p)
 	    {
 		if (isObserved(*p)) {
-		    observed_nodes.push_back(*p);
+		    if (isParameter(*p)) {
+			msg = "There are partly observed stochastic nodes";
+			return 0;
+		    }
+		    else {
+			observed_nodes.push_back(*p);
+		    }
 		}
 	    }
 	    if (observed_nodes.empty()) {

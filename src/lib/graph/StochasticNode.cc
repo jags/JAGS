@@ -6,6 +6,7 @@
 #include <distribution/Distribution.h>
 #include <util/nainf.h>
 #include <util/dim.h>
+#include <util/logical.h>
 
 #include <vector>
 #include <stdexcept>
@@ -70,7 +71,7 @@ StochasticNode::StochasticNode(vector<unsigned long> const &dim,
 			       Node const *lower, Node const *upper)
     : Node(dim, nchain, mkParents(parameters, lower, upper)), 
       _dist(dist), _lower(lower), _upper(upper), 
-      _observed(false), 
+      _observed(getUnique(vector<bool>(_length, false))), 
       _discrete(mkDiscrete(dist, parameters)),
       _depth(mkDepth(parameters)),
       _parameters(nchain)
@@ -130,14 +131,24 @@ bool StochasticNode::isDiscreteValued() const
 
 bool StochasticNode::isFixed() const
 {
-    return _observed;
+    return allTrue(*_observed);
 }
 
-RVStatus StochasticNode::randomVariableStatus() const
-{
-    return _observed ? RV_TRUE_OBSERVED : RV_TRUE_UNOBSERVED;    
-}	
+    bool StochasticNode::isRandomVariable() const
+    {
+	return true;
+    }
 
+    bool StochasticNode::isObserved(unsigned long i) const
+    {
+	return i < _length && _observed->at(i);
+    }
+
+    vector<bool> const * StochasticNode::observedMask() const
+    {
+	return _observed;
+    }
+    
 string StochasticNode::deparse(vector<string> const &parnames) const
 {
     unsigned long npar = parnames.size();
@@ -214,7 +225,6 @@ double const *StochasticNode::upperLimit(unsigned int chain) const
     return _upper ? _upper->value(chain) : nullptr;
 }
 
-
 bool isSupportFixed(StochasticNode const *node)
 {
     if (node->lowerBound() && !node->lowerBound()->isFixed())
@@ -270,12 +280,27 @@ bool isBounded(StochasticNode const *node)
     return node->lowerBound() || node->upperBound();
 }
 
+bool isObserved(StochasticNode const *node)
+{
+    return anyTrue(*node->observedMask());
+}
+
+bool isParameter(StochasticNode const *node)
+{
+    return anyFalse(*node->observedMask());
+}
+
     void StochasticNode::setData(double const *value, unsigned long length)
     {
 	for (unsigned int n = 0; n < _nchain; ++n) {
 	    setValue(value, length, n);
 	}
-	_observed = true;
+	
+	vector<bool> mask(length);
+	for (unsigned long i = 0; i < length; ++i) {
+	    mask[i] = (value[i] != JAGS_NA);
+	}
+	_observed = getUnique(mask);
     }
 
     void StochasticNode::unlinkParents()

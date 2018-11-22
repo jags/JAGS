@@ -242,17 +242,15 @@ namespace jags {
 		    string msg = "Attempt to set value of undefined node ";
 		    throw runtime_error(msg + name() + printIndex(p));
 		}
-		switch(node->randomVariableStatus()) {
-		case RV_FALSE:
+		if (!node->isRandomVariable()) {
 		    throw NodeError(node, 
 				    "Cannot set value of non-variable node");
-		case RV_TRUE_OBSERVED:
+		}
+		if (node->isObserved(_offsets[k])) {
 		    throw NodeError(node,
 				    "Cannot overwrite value of observed node");
-		case RV_TRUE_UNOBSERVED:
-		    setnodes.insert(node);		
-		    break;
 		}
+		setnodes.insert(node);		
 	    }
 	}
   
@@ -291,8 +289,8 @@ namespace jags {
 	}
     }
 
-    void NodeArray::getValue(SArray &value, unsigned int chain, 
-			     bool (*condition)(Node const *)) const
+    void
+    NodeArray::getValue(SArray &value, unsigned int chain, ValueType type) const
     {
 	if (_range != value.range()) {
 	    string msg("Dimension mismatch when getting value of node array ");
@@ -305,12 +303,22 @@ namespace jags {
 	    unsigned long j = _range.leftOffset(p);
 	    unsigned long k = _true_range.leftOffset(p);
 	    Node const *node = _node_pointers[k];
-	    if (node && condition(node)) {
-		array_value[j] = node->value(chain)[_offsets[k]];
+	    unsigned long offset = _offsets[k];
+	    bool condition = false;
+	    if (node != nullptr) {
+		switch(type) {
+		case DATA_VALUES:
+		    condition = node->isRandomVariable() && node->isObserved(offset);
+		break;
+		case PARAMETER_VALUES:
+		    condition = node->isRandomVariable() && !node->isObserved(offset);
+		    break;
+		case ALL_VALUES:
+		    condition = true;
+		    break;
+		}
 	    }
-	    else {
-		array_value[j] = JAGS_NA;
-	    }
+	    array_value[j] = condition ? node->value(chain)[offset] : JAGS_NA;
 	}
 
 	value.setValue(array_value);

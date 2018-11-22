@@ -112,19 +112,16 @@ static bool allMissing(SArray const &sarray)
 }
 
 void SymTab::readValues(map<string, SArray> &data_table, 
-		        unsigned int chain,
-                        bool (*condition)(Node const *)) const
+		        unsigned int chain, ValueType type) const
 {
     if (chain > _model->nchain()) 
 	throw logic_error("Invalid chain in SymTab::readValues");
-    if (!condition) 
-	throw logic_error("NULL condition in Symtab::readValues");
 
     map<string, NodeArray*>::const_iterator p;
     for (p = _varTable.begin(); p != _varTable.end(); ++p) {
 	/* Create a new SArray to hold the values from the symbol table */
 	SArray read_values(p->second->range().dim(false));
-	p->second->getValue(read_values, chain, condition);
+	p->second->getValue(read_values, chain, type);
 	/* Only write to the data table if we can find at least one
 	   non-missing value */
 	if (!allMissing(read_values)) {

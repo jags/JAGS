@@ -77,9 +77,9 @@ namespace jags {
 	return true;
     }
 
-    RVStatus ConstantNode::randomVariableStatus() const
+    bool ConstantNode::isRandomVariable() const
     {
-	return _observed ? RV_TRUE_OBSERVED :  RV_FALSE;
+	return _observed;
     }
 
     void ConstantNode::unlinkParents()
@@ -101,6 +101,11 @@ namespace jags {
 			    RNG *, unsigned int) const
     {
 	return 0.0;
+    }
+
+    bool ConstantNode::isObserved(unsigned long index) const
+    {
+	return index==0 && _observed;
     }
     
 } //namespace jags

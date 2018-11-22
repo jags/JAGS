@@ -229,7 +229,7 @@ namespace glm {
 	    if (!checkOutcome(stoch_nodes[i])) {
 		return false; //Invalid outcome or link
 	    }
-	    if (fixedOutcome() && !isObserved(stoch_nodes[i])) {
+	    if (fixedOutcome() && isParameter(stoch_nodes[i])) {
 		return false; //Unobserved outcome not allowed by sampler
 	    }
 	    //Check that other parameters do not depend on snode	    

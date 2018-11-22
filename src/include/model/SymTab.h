@@ -88,8 +88,7 @@ public:
    * Node are to be read, and false otherwise.
    */
   void readValues(std::map<std::string, SArray> &data_table, 
-                  unsigned int chain,
-		  bool (*condition)(Node const *)) const;
+                  unsigned int chain, ValueType type) const;
   /**
    * Returns the number of variables in the symbol table
    */

@@ -7,6 +7,8 @@
 using jags::ScalarFunction;
 using jags::VectorFunction;
 using jags::Function;
+using jags::anyTrue;
+using jags::allTrue;
 
 #include <climits>
 #include <cmath>

@@ -20,7 +20,7 @@ namespace jags {
  * implicitly defined (i.e. they only appear on the left hand side of
  * any relation and their values are determined by the user-supplied
  * data) are constructed with the parameter observed=true and are
- * considered to represent observed randmo variables.
+ * considered to represent observed random variables.
  */
 class ConstantNode : public Node {
     const bool _observed;
@@ -63,10 +63,16 @@ public:
      */
     bool isFixed() const;
     /**
-     * The RVStatus of a ConstantNode is determined by the parameter
-     * "observed" passed to the constructor.
+     * A ConstantNode is a random variable if the parameter "observed"
+     * passed to the constructor is true.
      */
-    RVStatus randomVariableStatus() const;
+    bool isRandomVariable() const;
+    /**
+     * A ConstantNode is observed if and only if it is a random
+     * variable.
+     */
+    bool isObserved(unsigned long offset) const;
+    
     void unlinkParents();
 	
     double logDensity(unsigned int chain, PDFType type) const;

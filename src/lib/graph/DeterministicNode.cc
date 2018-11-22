@@ -70,11 +70,16 @@ void DeterministicNode::randomSample(RNG*, unsigned int chain) {
     deterministicSample(chain);
 }
 
-RVStatus DeterministicNode::randomVariableStatus() const 
-{ 
-    return RV_FALSE; 
-}
+    bool DeterministicNode::isRandomVariable() const
+    {
+	return false;
+    }
 
+    bool DeterministicNode::isObserved(unsigned long i) const
+    {
+	return false;
+    }
+    
 bool DeterministicNode::isFixed() const
 {
     return _fixed;

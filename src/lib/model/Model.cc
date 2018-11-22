@@ -258,19 +258,13 @@ void Model::chooseSamplers()
     }
     marks.markAncestors(informative, 1);
 
-    for (p = _stochastic_nodes.begin(); p != _stochastic_nodes.end(); ++p) {
-	if (isObserved(*p)) {
-	    marks.mark(*p, 2);
-	}
-    }
-
     //Triage on marked nodes. We do this twice: once for stochastic
     //nodes and once for all nodes.
 
     list<StochasticNode*> slist; //List of nodes to be sampled
     for(p = _stochastic_nodes.begin(); p != _stochastic_nodes.end(); ++p) {
-	if (marks.mark(*p) == 1) {
-	    //Unobserved stochastic nodes: to be sampled
+	if (marks.mark(*p) == 1 && isParameter(*p)) {
+	    //Unobserved or partially observed stochastic nodes: to be sampled
 	    slist.push_back(*p); 
 	}
     }
@@ -278,13 +272,12 @@ void Model::chooseSamplers()
     for (vector<Node*>::const_iterator j = _nodes.begin();
 	 j != _nodes.end(); ++j) 
     {
-	switch(marks.mark(*j)) {
-	case 0:
-	    _extra_nodes.push_back(*j);
-	    break;
-	case 1: case 2:
+	if (marks.mark(*j)) {
+	    //Informative nodes
 	    sample_graph.insert(*j);
-	    break;
+	}
+	else {
+	    _extra_nodes.push_back(*j);
 	}
     }
 

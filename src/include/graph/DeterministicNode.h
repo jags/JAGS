@@ -74,7 +74,11 @@ public:
     /**
      * Deterministic nodes are not random variables. 
      */
-    RVStatus randomVariableStatus() const;
+    bool isRandomVariable() const;
+    /**
+     * A deterministic node is never observed.
+     */
+    bool isObserved(unsigned long offset) const;
     /**
      * A deterministic node is fixed if all its parents are fixed.
      */

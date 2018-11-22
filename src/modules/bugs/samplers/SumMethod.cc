@@ -85,9 +85,9 @@ namespace jags {
 	    for (unsigned int i = 0; i < schildren.size(); ++i) {
 		if (schildren[i]->distribution()->name() == "sum") {
 		    /* There should be only one sum node and it must be
-		       observed */
+		       fully observed */
 		    if (sumchild) return nullptr;
-		    if(!isObserved(schildren[i])) return nullptr;
+		    if(isParameter(schildren[i])) return nullptr;
 		    sumchild = schildren[i];
 		}
 	    }

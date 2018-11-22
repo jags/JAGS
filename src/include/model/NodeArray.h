@@ -9,6 +9,8 @@
 
 namespace jags {
 
+        enum ValueType {DATA_VALUES, PARAMETER_VALUES, ALL_VALUES};
+
 class SArray;
 class Model;
 class AggNode;
@@ -93,18 +95,18 @@ public:
    */
   void setValue(SArray const &value, unsigned int chain);
   /**
-   * Gets the values of selected nodes that have been inserted into
-   * the array.
+   * Gets the values of nodes that have been inserted into the array.
    *
    * @param value SArray to which values should be written.
    *
    * @param chain Index number of chain to read.
    *
-   * @param condition  Boolean function that returns true for nodes
-   * whose values are to be read.
+   * @param type which values are to be read. DATA_VALUES gets values
+   * previously set with the setData function. PARAMETER_VALUES gets
+   * the unobserved values of stochastic nodes. ALL_VALUES reads all
+   * values from all nodes inserted into the array.
    */
-  void getValue(SArray &value, unsigned int chain,
-		bool (*condition)(Node const *)) const;
+  void getValue(SArray &value, unsigned int chain, ValueType type) const;
   /**
    * Set data, creating a constant node for any non-missing value.  An
    * exception is thrown if any of the non-missing values corresponds

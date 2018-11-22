@@ -27,8 +27,16 @@ static StochasticNode const *getDSumChild(StochasticNode *node)
 	 p != node->stochasticChildren()->end(); ++p) 
     {
 	//Skip unobserved nodes
-	if (isObserved(*p) && (*p)->distribution()->name() == "dsum") 
-	    return *p;
+	if (isObserved(*p) && (*p)->distribution()->name() == "dsum") {
+	    if (isParameter(*p)) {
+		//Node is only partly observed. We can't handle this case
+		return nullptr;
+	    }
+	    else {
+		return *p;
+	    }
+	}
+	    
     }
     return nullptr;
 }

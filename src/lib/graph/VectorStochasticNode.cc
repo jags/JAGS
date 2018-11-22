@@ -114,6 +114,5 @@ void VectorStochasticNode::sp(double *lower, double *upper,
 	    return kl;
 	}
     }
-
     
 } //namespace jags

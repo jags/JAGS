@@ -78,21 +78,6 @@ using std::FILE;
 
 namespace jags {
 
-static bool isData(Node const *node)
-{
-    return node->randomVariableStatus() == RV_TRUE_OBSERVED;
-}
-
-static bool isParameter(Node const *node)
-{
-    return node->randomVariableStatus() == RV_TRUE_UNOBSERVED;
-}
-
-static bool alwaysTrue(Node const *)
-{
-  return true;
-}
-
 Console::Console(ostream &out, ostream &err)
   : _out(out), _err(err), _model(nullptr),
     _pdata(nullptr), _prelations(nullptr),  _pvariables(nullptr)
@@ -231,16 +216,16 @@ bool Console::compile(map<string, SArray> &data_table, unsigned int nchain,
 	    compiler.writeRelations(_pdata);
       
 	    /* Check validity of data generating model */
-	    for (vector<Node*>::const_iterator r = _model->nodes().begin();
-		 r != _model->nodes().end(); ++r)
+	    for (vector<StochasticNode*>::const_iterator r = _model->stochasticNodes().begin();
+		 r != _model->stochasticNodes().end(); ++r)
 	    {
-		if ((*r)->randomVariableStatus() == RV_TRUE_OBSERVED) {
+		if (isObserved(*r)) {
 		    vector<Node const*> const &parents = (*r)->parents();
 		    for (vector<Node const*>::const_iterator p = parents.begin();
 			 p != parents.end(); ++p)
 		    {
 			if (!((*p)->isFixed())) {
-			    _err << "Invalid data graph: observed node " 
+			    _err << "Invalid data graph: observed stochastic node " 
 				 << _model->symtab().getName(*r) 
 				 << " has non-fixed parent " 
 				 << _model->symtab().getName(*p)
@@ -259,7 +244,7 @@ bool Console::compile(map<string, SArray> &data_table, unsigned int nchain,
 	    //RNGFactory, not the model.
 	    datagen_rng = _model->rng(0);
 	    _out << "   Reading data back into data table" << endl;
-	    _model->symtab().readValues(data_table, 0, alwaysTrue);
+	    _model->symtab().readValues(data_table, 0, ALL_VALUES);
 	    delete _model;
 	    _model = nullptr;
 	}
@@ -286,18 +271,26 @@ bool Console::compile(map<string, SArray> &data_table, unsigned int nchain,
 	    return false;
 	}
 	if (_model) {
-	    unsigned int nobs = 0, nparam = 0;
+	    unsigned int nobs = 0, npart = 0, nparam = 0;
 	    vector<StochasticNode*> const &snodes =  _model->stochasticNodes();
 	    for (unsigned int i = 0; i < snodes.size(); ++i) {
 		if (isObserved(snodes[i])) {
-		    ++nobs;
+		    if (isParameter(snodes[i])) {
+			++npart;
+		    }
+		    else {
+			++nobs;
+		    }
 		}
 		else {
 		    ++nparam;
 		}
 	    }
             _out << "Graph information:\n";
-	    _out << "   Observed stochastic nodes: " << nobs << "\n";
+	    _out << "   Fully observed stochastic nodes: " << nobs << "\n";
+	    if (nobs > 0) {
+		_out << "   Partly observed stochastic nodes: " << nobs << "\n";
+	    }
 	    _out << "   Unobserved stochastic nodes: " << nparam << "\n";
 	    _out << "   Total graph size: " << _model->nodes().size() << endl;
 	    if (datagen_rng) {
@@ -485,22 +478,26 @@ bool Console::dumpState(map<string,SArray> &data_table,
     _err << "Invalid chain number" << endl;
     return false;
   }
-  bool (*selection)(Node const *) = nullptr;
+
+  /* Slightly awkward translation here from DumpType defined in Console.h
+     to ValueType defined in NodeArray.h.
+  */
+  ValueType vtype;
   switch (type) {
   case DUMP_PARAMETERS:
-    selection = isParameter;
-    break;
+      vtype = PARAMETER_VALUES;
+      break;
   case DUMP_DATA:
-    selection = isData;
-    break;
+      vtype = DATA_VALUES;
+      break;
   case DUMP_ALL:
-    selection = alwaysTrue;
-    break;
+      vtype = ALL_VALUES;
+      break;
   }
-
+  
   try {
-    _model->symtab().readValues(data_table, chain - 1, selection);
-    
+      _model->symtab().readValues(data_table, chain - 1, vtype);
+      
     if (type == DUMP_PARAMETERS || type == DUMP_ALL) {
       
       vector<int> rngstate;

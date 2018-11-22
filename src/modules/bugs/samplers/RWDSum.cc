@@ -187,10 +187,10 @@ bool RWDSum::canSample(vector<StochasticNode *> const &nodes,
 	return false;
     }
     else {
-	//It must be an observed direct descendent of sampled nodes
+	//It must be a fully observed direct descendent of sampled nodes
 	//and have no other parents
-	if (!isObserved(dschild))
-	    return false;
+	if (isParameter(dschild))
+	    return false; //Not fully observed
 	if (dschild->parents().size() != nodes.size())
 	    return false;
 	for (unsigned long j = 0; j < dschild->parents().size(); ++j) {

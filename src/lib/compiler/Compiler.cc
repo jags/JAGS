@@ -673,11 +673,8 @@ Node * Compiler::getParameter(ParseTree const *t)
     if (!node)
         return nullptr;
 
-    if (_index_expression) {
-	//Random variables in index expressions must be observed
-	if (node->randomVariableStatus() == RV_TRUE_UNOBSERVED)
-	    return nullptr;
-    }
+    if (_index_expression && !node->isFixed())
+	return nullptr;
 
     return node;
 }

@@ -34,6 +34,7 @@ namespace jags {
 	    vector<StochasticNode *> const &eps = tau->stochasticChildren();
 	    for (unsigned int i = 0; i < eps.size(); ++i) {
 		if (isObserved(eps[i])) {
+		    //Need to marginalize over eps, so must be unobserved
 		    return false;
 		}
 		if (isBounded(eps[i])) {

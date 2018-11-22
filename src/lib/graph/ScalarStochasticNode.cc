@@ -134,6 +134,5 @@ unsigned long ScalarStochasticNode::df() const
 	    }
 	}
     }
-    
 
 } //namespace jags
