@@ -70,11 +70,6 @@ bool ScalarDist::isSupportFixed(vector<bool> const &) const
     }
 }
 
-unsigned long ScalarDist::df() const
-{
-    return 1;
-}
-
     double ScalarDist::KL(vector<double const *> const &par1,
 			  vector<double const *> const &par2,
 			  double const *lower, double const *upper,

@@ -50,6 +50,9 @@ bool Censored::canSample(StochasticNode *snode, Graph const &graph)
     if (snode->isDiscreteValued())
 	return false;
 
+    if (!snode->fullRank())
+	return false;
+    
     if (dynamic_cast<ScalarStochasticNode*>(snode) == nullptr)
 	return false;
 

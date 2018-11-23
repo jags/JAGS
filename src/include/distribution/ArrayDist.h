@@ -103,16 +103,6 @@ public:
     virtual std::vector<unsigned long> 
 	dim (std::vector <std::vector<unsigned long> > const &args) const = 0;
     /**
-     * Returns the number of degrees of freedom of the distribution
-     * given the dimensions of the parameters. By default this is the
-     * product of the elements of the dimension vector returned by
-     * ArrayDist#dim. However, some distributions are constrained: and
-     * the support occupies a lower dimensional subspace. In this
-     * case, the df member function must be overrideen.
-     */
-    virtual unsigned long df(std::vector<std::vector<unsigned long> > const &dims)
-	const;
-    /**
      * Returns the support of an unbounded distribution
      */
     virtual void 

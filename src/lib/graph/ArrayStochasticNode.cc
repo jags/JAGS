@@ -88,11 +88,6 @@ ArrayStochasticNode::clone(vector<Node const *> const &parameters,
 }
     */
     
-unsigned long ArrayStochasticNode::df() const
-{
-    return _dist->df(_dims);
-}
-
 void ArrayStochasticNode::sp(double *lower, double *upper, unsigned long length,
 			     unsigned int chain) const
 {

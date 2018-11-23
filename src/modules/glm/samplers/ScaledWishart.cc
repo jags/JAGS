@@ -140,7 +140,10 @@ namespace jags {
 
 	    if (isBounded(snode))
 		return false;
-  
+
+	    if (isObserved(snode))
+		return false;
+	    
 	    SingletonGraphView gv(snode, graph);
 	    vector<StochasticNode *> const &schild = gv.stochasticChildren();
 

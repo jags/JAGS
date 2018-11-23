@@ -278,10 +278,13 @@ namespace jags {
     
 	    if (getDist(snode) != DIRCH)
 		return false;
-	    
+
 	    if (isBounded(snode))
 		return false;
-    
+
+	    if (isObserved(snode))
+		return false; //Must be fully unobserved
+	    
 	    SingletonGraphView gv(snode, graph);
 	    vector<DeterministicNode*> const &dchild = gv.deterministicChildren();
 	    vector<StochasticNode *> const &schild = gv.stochasticChildren();

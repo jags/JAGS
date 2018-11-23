@@ -181,7 +181,7 @@ namespace mix {
 		    }
 		}
 	    }
-	    else if (snodes[i]->length() != snodes[i]->df()) {
+	    else if (!snodes[i]->fullRank()) {
 		return false;
 	    }
 	}

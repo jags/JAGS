@@ -143,7 +143,7 @@ namespace mix {
 		return false;
 	    }
 	    //Check that all nodes are of full rank
-	    if (snodes[i]->length() != df(snodes[i]))
+	    if (!snodes[i]->fullRank())
 		return false;
 	}
 	return true;

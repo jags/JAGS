@@ -13,12 +13,6 @@ ArrayDist::ArrayDist(string const &name, unsigned int npar)
 {
 }
 
-unsigned long ArrayDist::df(vector<vector<unsigned long> > const &pdims) const
-{
-    return product(dim(pdims));
-}
-
-    
     double ArrayDist::KL(vector<double const *> const &par1,
 			 vector<double const *> const &par2,
 			 vector<vector<unsigned long> > const &dims,

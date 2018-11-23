@@ -139,6 +139,17 @@ public:
      * implementation returns false.
      */
     virtual bool canBound() const;
+    /**
+     * Indicates whether the distribution is of full rank.  Most
+     * distributions are of full rank so the default method returns
+     * true. Distributions that have constraint on the supported
+     * values (e.g. multinomial, Dirichlet, Wishart) must override
+     * this method. In addition, observable functions (e.g. sum,
+     * dinterval) must also override it.
+     *
+     * This function is used by StochasticNode#fullRank
+     */
+    virtual bool fullRank() const;
 };
 
 /**

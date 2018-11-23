@@ -38,7 +38,7 @@ namespace jags {
 	    if (node->isDiscreteValued() || node->length() <= 1)
 		return false;
 
-	    if (node->df() < node->length())
+	    if (!node->fullRank())
 		return false; 
 
 	    return true;

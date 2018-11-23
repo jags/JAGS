@@ -97,11 +97,6 @@ bool DeterministicNode::isFixed() const
 	return 0.0;
     }
 
-    unsigned int DeterministicNode::df() const
-    {
-	return 0;
-    }
-
     double DeterministicNode::KL(unsigned int, unsigned int,
 				 RNG *, unsigned int) const
     {

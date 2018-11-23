@@ -166,7 +166,7 @@ bool RWDSum::canSample(vector<StochasticNode *> const &nodes,
 		return false;
 	}
 	else {
-	    if (nodes[i]->df() != nodes[i]->length())
+	    if (!nodes[i]->fullRank())
 		return false;
 	}
 

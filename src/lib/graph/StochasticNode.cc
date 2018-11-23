@@ -309,5 +309,10 @@ bool isParameter(StochasticNode const *node)
 	    parents()[i]->removeChild(this);
 	}
     }
+
+bool StochasticNode::fullRank() const
+{
+    return _dist->fullRank() && allFalse(*_observed);
+}
     
 } //namespace jags

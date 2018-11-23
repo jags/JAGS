@@ -28,8 +28,8 @@ namespace jags {
 	if (node->isDiscreteValued() || node->length() != 1)
 	    return false;
 
-	if (node->df() == 0)
-	    return false; 
+	if (!node->fullRank())
+	    return false;
 
 	SingletonGraphView gv(node, graph);
 	vector<StochasticNode *> const &schild = gv.stochasticChildren();

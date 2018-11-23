@@ -89,11 +89,6 @@ VectorStochasticNode::clone(vector<Node const *> const &parameters,
 }
     */
     
-unsigned long VectorStochasticNode::df() const
-{
-    return _dist->df(_lengths);
-}
-
 void VectorStochasticNode::sp(double *lower, double *upper,
 			      unsigned long length, unsigned int chain) const
 {

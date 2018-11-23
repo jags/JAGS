@@ -63,6 +63,9 @@ namespace jags {
 		if (isBounded(snodes[i])) return false;
 		if (snodes[i]->distribution()->name() != "ddirch")
 		    return false;
+		//Sampled nodes must be completely unobserved
+		if (isObserved(snodes[i]))
+		    return false;
 	    }
 
 	    set<Node const *> sset;

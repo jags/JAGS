@@ -262,12 +262,16 @@ namespace glm {
 	if (dname != "dnorm" && dname != "dmnorm")
 	    return 0; //Must have normal prior
 
+	if (isObserved(snode))
+	    return 0; //Must be fully unobserved
+	
 	if (gibbs && snode->length() != 1) {
 	    return 0;
 	}
 	if (!gibbs && isBounded(snode)) {
 	    return 0;
 	}
+	
 
 	SingletonGraphView *view = new SingletonGraphView(snode, graph);
 	if (!checkDescendants(view)) {

@@ -58,4 +58,9 @@ bool Distribution::checkParameterDiscrete(vector<bool> const &) const
     return true;
 }
 
+    bool Distribution::fullRank() const
+    {
+	return true;
+    }
+    
 } //namespace jags

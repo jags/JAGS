@@ -103,6 +103,8 @@ bool TruncatedGamma::canSample(StochasticNode *snode, Graph const &graph)
     // non-negative lower bound.
     if (getDist(snode) != UNIF)
 	return false;
+    if (!snode->fullRank())
+	return false;
     if (!snode->parents()[0]->isFixed())
 	return false;
     if (snode->parents()[0]->value(0)[0] < 0)

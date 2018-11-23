@@ -159,7 +159,6 @@ public:
 	clone(std::vector<Node const *> const &parameters,
 	      Node const *lower, Node const *upper) const = 0;
     */
-    virtual unsigned long df() const = 0;
     virtual double KL(unsigned int chain1, unsigned int chain2, RNG *rng,
 		      unsigned int nrep) const = 0;
     void unlinkParents();
@@ -170,7 +169,16 @@ public:
     inline bool isConstant() const { return false; }
     inline bool isDeterministic() const { return false; }
     inline bool isStochastic() const { return true; }
-	
+
+    /**
+     * Returns true if the stochastic node is fully unobserved and
+     * its distribution is of full rank. Most sampling methods will
+     * assume the node is full rank so this needs to be checked
+     * by the sample factory.
+     *
+     * @see Distribution#fullRank
+     */
+    bool fullRank() const;
 };
 
 /**

@@ -91,7 +91,7 @@ namespace base {
 	if (node->length() != 1)
 	    return false;
 
-	if (node->df() == 0)
+	if (!node->fullRank())
 	    return false;
 
 	//Support must be fixed

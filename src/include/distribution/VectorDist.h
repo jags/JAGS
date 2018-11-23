@@ -110,14 +110,6 @@ class VectorDist : public Distribution
     virtual unsigned long 
 	length (std::vector<unsigned long> const &par) const = 0;
     /**
-     * Returns the number of degrees of freedom of the distribution
-     * given the parameter lengths. By default this is the same as
-     * VectorDist#length. However, some distributions are constrained:
-     * and the support occupies a lower dimensional subspace. In this
-     * case, the df member function must be overrideen.
-     */
-    virtual unsigned long df(std::vector<unsigned long> const &lengths) const;
-    /**
      * Returns a Monte Carlo estimate of the Kullback-Leibler
      * divergence between distributions with two different parameter
      * values. This is done by drawing random samples from the

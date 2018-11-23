@@ -31,7 +31,7 @@ namespace base {
 	if (node->isDiscreteValued() || node->length() != 1)
 	    return false;
 
-	if (node->df() == 0)
+	if (!node->fullRank())
 	    return false; 
 
 	return true;

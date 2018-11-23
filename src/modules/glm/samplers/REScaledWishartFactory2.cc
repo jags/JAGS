@@ -19,7 +19,13 @@ namespace jags {
 
 	bool REScaledWishartFactory2::canSample(StochasticNode *snode) const
 	{
-	    return snode->distribution()->name() == "dscaled.wishart";
+	    if (snode->distribution()->name() != "dscaled.wishart")
+		return false;
+
+	    if (isObserved(snode))
+		return false;
+
+	    return true;
 	}
 
 	REMethod2 *

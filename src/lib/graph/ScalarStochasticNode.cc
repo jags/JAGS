@@ -102,11 +102,6 @@ ScalarStochasticNode::clone(vector<Node const *> const &parameters,
 }
     */
     
-unsigned long ScalarStochasticNode::df() const
-{
-    return _dist->df();
-}
-
     double ScalarStochasticNode::KL(unsigned int ch1, unsigned int ch2,
 				    RNG *rng, unsigned int nrep) const
     {

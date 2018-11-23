@@ -76,7 +76,6 @@ public:
     void unlinkParents();
 	
     double logDensity(unsigned int chain, PDFType type) const;
-    unsigned int df() const;
     double KL(unsigned int chain1, unsigned int chain2, RNG *rng,
 	      unsigned int nrep) const;
     /**

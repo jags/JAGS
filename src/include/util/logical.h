@@ -21,7 +21,12 @@ namespace jags {
     {
 	return std::find(mask.begin(), mask.end(), true) != mask.end();
     }
-    
+
+    inline bool allFalse (std::vector<bool> const &mask)
+    {
+	return std::find(mask.begin(), mask.end(), true) == mask.end();
+    }
+
     /**
      * Tests whether any elements of the boolean vector "mask" are true.
      */

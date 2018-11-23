@@ -85,12 +85,6 @@ class ScalarDist : public Distribution
   virtual bool checkParameterValue(std::vector<double const *> const &params) 
       const = 0;
   /**
-   * Returns the number of degrees of freedom of the distribution.
-   * By default this is 1. For scalar distributions that are
-   * deterministic functions of the parameters, this must be overridden.
-   */
-  virtual unsigned long df() const;
-  /**
    * Returns a Monte Carlo estimate of the Kullback-Leibler divergence
    * between distributions with two different parameter values. This
    * is done by drawing random samples from the distribution with the

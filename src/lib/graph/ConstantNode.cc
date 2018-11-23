@@ -92,11 +92,6 @@ namespace jags {
 	return 0.0;
     }
 
-    unsigned int ConstantNode::df() const
-    {
-	return 0;
-    }
-
     double ConstantNode::KL(unsigned int, unsigned int,
 			    RNG *, unsigned int) const
     {

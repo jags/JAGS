@@ -12,11 +12,6 @@ VectorDist::VectorDist(string const &name, unsigned int npar)
 {
 }
 
-unsigned long VectorDist::df(vector<unsigned long> const &par) const
-{
-    return length(par);
-}
-
     double VectorDist::KL(vector<double const *> const &par1,
 			  vector<double const *> const &par2,
 			  vector<unsigned long> const &lengths,
