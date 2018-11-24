@@ -220,9 +220,9 @@ namespace jags {
 	    return true;
 	}
 	
-	unsigned long DSample::df(vector<unsigned long> const &parlen) const
+	bool DSample::fullRank() const
 	{
-	    return parlen[0];
+	    return false;
 	} 
 
     }

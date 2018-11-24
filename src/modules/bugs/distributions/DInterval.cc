@@ -87,10 +87,10 @@ void DInterval::randomSample(double  *x,
     *x = static_cast<double>(value(par, NCUT(lengths)));
 }
 
-unsigned long DInterval::df(vector<unsigned long> const &) const
-{
-    return 0;
-}
+    bool DInterval::fullRank() const
+    {
+	return false;
+    }
 
 void DInterval::support(double *lower, double *upper,
 			vector<double const *> const &par,

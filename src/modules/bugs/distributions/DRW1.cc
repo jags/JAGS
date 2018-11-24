@@ -104,9 +104,9 @@ namespace jags {
 	    return true;
 	}
 
-	unsigned long DRW1::df(vector<unsigned long> const &len) const
+	bool DRW1::fullRank() const
 	{
-	    return length(len) - 1;
+	    return false;
 	}
 
     }

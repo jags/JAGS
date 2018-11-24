@@ -63,10 +63,10 @@ bool DSum::isSupportFixed(vector<bool> const &fixmask) const
     return allTrue(fixmask);
 }
 
-unsigned long DSum::df(vector<vector<unsigned long> > const &) const
-{
-    return 0;
-}
+    bool DSum::fullRank() const
+    {
+	return false;
+    }
 
 bool DSum::checkParameterValue(vector<double const *> const &,
 			       vector<vector<unsigned long> > const &) const

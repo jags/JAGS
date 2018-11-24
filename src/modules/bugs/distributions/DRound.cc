@@ -60,9 +60,9 @@ namespace bugs {
 	return value(par);
     }
     
-    unsigned long DRound::df() const
+    bool DRound::fullRank() const
     {
-	return 0;
+	return false;
     }
 
     double DRound::l(vector<double const *> const &par) const

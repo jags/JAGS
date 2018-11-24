@@ -41,7 +41,7 @@ namespace jags {
 			 std::vector<double const *> const &parameters,
 			 std::vector<unsigned long> const &lengths) const;
 	    bool isSupportFixed(std::vector<bool> const &fixmask) const;
-	    unsigned long df(std::vector<unsigned long> const &lengths) const;
+	    bool fullRank() const;
 	    bool isDiscreteValued(std::vector<bool> const &mask) const;
 	};
 	

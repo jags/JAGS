@@ -61,9 +61,9 @@ namespace bugs {
 	return allTrue(fixmask);
     }
 
-    unsigned long SumDist::df(vector<unsigned long> const &) const
+    bool SumDist::fullRank() const
     {
-	return 0;
+	return false;
     }
 
     bool SumDist::checkParameterValue(vector<double const *> const &,

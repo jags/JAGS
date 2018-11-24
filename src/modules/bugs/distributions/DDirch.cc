@@ -135,10 +135,10 @@ bool DDirch::isSupportFixed(vector<bool> const &fixmask) const
     return fixmask[0];
 }
 
-unsigned long DDirch::df(vector<unsigned long> const &len) const
-{
-    return LENGTH(len) - 1;
-}
+    bool DDirch::fullRank() const
+    {
+	return false;
+    }
 
 double DDirch::KL(vector<double const *> const &par0,
 		  vector<double const *> const &par1,

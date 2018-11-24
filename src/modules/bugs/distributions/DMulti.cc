@@ -169,10 +169,10 @@ bool DMulti::isSupportFixed(vector<bool> const &fixmask) const
     return fixmask[1];
 }
 
-unsigned long DMulti::df(vector<unsigned long> const &len) const
-{
-    return len[0] - 1;
-} 
+    bool DMulti::fullRank() const
+    {
+	return false;
+    } 
 
 double DMulti::KL(vector<double const *> const &par1,
 		  vector<double const *> const &par2,

@@ -22,7 +22,7 @@ public:
 		      RNG *rng) const;
     bool isSupportFixed(std::vector<bool> const &fixmask) const;
     bool isDiscreteValued(std::vector<bool> const &mask) const;
-    unsigned long df(std::vector<unsigned long> const &lengths) const;
+    bool fullRank() const;
     bool checkParameterValue(std::vector<double const *> const &params,
 			     std::vector<unsigned long> const &lengths) const;
     bool checkParameterLength(std::vector<unsigned long> const &lengths) const;

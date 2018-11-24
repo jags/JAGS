@@ -177,9 +177,9 @@ bool DWish::isSupportFixed(vector<bool> const &) const
     return true;
 }
 
-unsigned long DWish::df(vector<vector<unsigned long> > const &dims) const
-{   
-  return dims[0][0] * (dims[0][0] + 1) / 2;
-}
+    bool DWish::fullRank() const
+    {   
+	return false;
+    }
 
 }}

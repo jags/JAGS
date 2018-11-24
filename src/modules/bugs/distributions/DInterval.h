@@ -35,7 +35,7 @@ public:
 		 std::vector<double const *> const &parameters,
 		 std::vector<unsigned long> const &lengths) const;
     bool isSupportFixed(std::vector<bool> const &fixmask) const;
-    unsigned long df(std::vector<unsigned long> const &lengths) const;
+    bool fullRank() const;
     bool isDiscreteValued(std::vector<bool> const &mask) const;
     unsigned long length(std::vector<unsigned long> const &params) const;
     double KL(std::vector<double const *> const &par0,

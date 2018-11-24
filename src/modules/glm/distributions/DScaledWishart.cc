@@ -232,9 +232,9 @@ bool DScaledWishart::isSupportFixed(vector<bool> const &fixmask) const
     return true;
 }
 
-unsigned long DScaledWishart::df(vector<vector<unsigned long> > const &dims) const
-{   
-  return dims[0][0] * (dims[0][0] + 1) / 2;
-}
+    bool DScaledWishart::fullRank() const
+    {   
+	return false;
+    }
 
 }}

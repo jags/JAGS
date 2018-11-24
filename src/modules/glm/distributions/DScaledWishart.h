@@ -43,7 +43,7 @@ public:
 	       std::vector<double const *> const &parameters,
 	       std::vector<std::vector<unsigned long> > const &dims) const;
   bool isSupportFixed(std::vector<bool> const &fixmask) const;
-  unsigned long df(std::vector<std::vector<unsigned long> > const &dims) const;
+  bool fullRank() const;
 };
 
 }}

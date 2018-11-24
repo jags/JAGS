@@ -29,7 +29,7 @@ public:
     double l(std::vector<double const *> const &parameters) const;
     double u(std::vector<double const *> const &parameters) const;
     bool isSupportFixed(std::vector<bool> const &fixmask) const;
-    unsigned long df() const;
+    bool fullRank() const;
     double KL(std::vector<double const *> const &par0,
 	      std::vector<double const *> const &par1) const;
 };
