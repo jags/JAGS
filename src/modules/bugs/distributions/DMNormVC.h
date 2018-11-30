@@ -67,6 +67,12 @@ public:
 	       std::vector<double const *> const &parameters,
                std::vector<std::vector<unsigned long> > const &dims) const;
   bool isSupportFixed(std::vector<bool> const &fixmask) const;
+
+  static void randomsample(double *x, double const *mu, double const *Sigma,
+			   unsigned long nrow,
+			   std::vector<bool> const &observed,
+			   unsigned long nobs,
+			   RNG *rng);
 };
 
 }}

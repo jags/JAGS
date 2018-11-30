@@ -31,6 +31,67 @@ using std::string;
 namespace jags {
 namespace bugs {
 
+    /* Sample partially observed multivariate normal */
+    int randomsample(double *x, double const *b, double const *A, unsigned long nrow,
+		     vector<bool> const &observed, unsigned long nobs, RNG *rng)
+    {
+	unsigned long nfree = nrow - nobs;
+	unsigned long N = nfree*nfree;
+
+	// Copy Af = A[f,f], bf = b[f] where f represents indices of
+	// free (unobserved) elements
+	vector<double> Af(N), bf(nfree);
+	if (nobs == 0) {
+	    //Completely free
+	    copy(b, b + nrow, bf.begin());
+	    copy(A, A + N, Af.begin());
+	}
+	else {
+	    //Partly observed, use boolean vector "observed" to find
+	    //free elements
+	    unsigned long p = 0;
+	    for (unsigned long i = 0; i < nrow; ++i) {
+		if (!observed[i]) {
+		    unsigned long q = 0;
+		    for (unsigned long j = 0; j < nrow; ++j) {
+			if (!observed[j]) {
+			    Af[p * nfree + q++] = A[i * nrow + j];
+			}
+		    }
+		    bf[p++] = b[i];
+		}
+	    }
+	}
+
+	int one = 1;
+	int info = 0;
+	int nf = asInteger(nfree);
+
+	//solve Af %*% x = bf to get posterior mean. The solution will
+	//be in bf after the call to dpotrs.
+//	F77_DPOTRS("L", &nf, &one, Af.data(), &nf, bf.data(), &nf, &info);
+	if (info != 0) return info;
+	
+	//Af now holds the Cholesky factorization of Af. Use
+	//this to generate a multivariate normal random vector with
+	//mean 0 and precision Af.
+	vector<double> eps(nfree);
+	for (unsigned int i = 0; i < nfree; ++i) {
+	    eps[i] = rng->normal();
+	}
+//	F77_DTRSV("L", "T", "N", &nfree, Af.data(), eps.data(), &one);
+		  
+	// Copy back sampled values
+	unsigned long p = 0;
+	for (unsigned int i = 0; i < nrow; ++i) {
+	    if (!observed[i]) {
+		x[i] += bf[p] + eps[p];
+		++p;
+	    }
+	}
+	return info;
+    }
+    
 static void calBeta(double *betas, SingletonGraphView const *gv,
                     unsigned int chain)
 {
@@ -38,10 +99,8 @@ static void calBeta(double *betas, SingletonGraphView const *gv,
     double const *xold = snode->value(chain);
     unsigned long nrow = snode->length();
 
-    double *xnew = new double[nrow];
-    for (unsigned long i = 0; i < nrow; ++i) {
-	xnew[i] = xold[i];
-    }
+    vector<double> xnew(nrow);
+    copy(xold, xold + nrow, xnew.begin());
 
     vector<StochasticNode *> const &stoch_children = 
         gv->stochasticChildren();
@@ -62,7 +121,7 @@ static void calBeta(double *betas, SingletonGraphView const *gv,
 
     for (unsigned int i = 0; i < nrow; ++i) {
 	xnew[i] += 1;
-	gv->setValue(xnew, nrow, chain);
+	gv->setValue(xnew, chain);
 	beta_j = betas;
 	for (unsigned long j = 0; j < nchildren; ++j) {
 	    StochasticNode const *schild = stoch_children[j];
@@ -75,9 +134,7 @@ static void calBeta(double *betas, SingletonGraphView const *gv,
 	}
 	xnew[i] -= 1;
     }
-    gv->setValue(xnew, nrow, chain);
-
-    delete [] xnew;
+    gv->setValue(xnew, chain);
 }
 
 static unsigned int sumChildrenLength(SingletonGraphView const *gv)
@@ -96,8 +153,7 @@ ConjugateMNormal::ConjugateMNormal(SingletonGraphView const *gv)
     : ConjugateMethod(gv), _betas(nullptr), 
       _length_betas(sumChildrenLength(gv) * gv->length())
 {
-    if(!gv->deterministicChildren().empty() && checkLinear(gv, true))
-    {
+    if(checkLinear(gv, true)) {
 	_betas = new double[_length_betas];
 	calBeta(_betas, gv, 0);
     }
@@ -158,16 +214,14 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
        the current value of the node.
     */
     unsigned long N = nrow * nrow;
-    double *b = new double[nrow];
-    double *A = new double[N];
+    vector<double> A(N);
+    copy(priorprec, priorprec + N, A.begin());
+
+    vector<double> b(nrow, 0);
     for (unsigned long i = 0; i < nrow; ++i) {
-	b[i] = 0;
-	for (unsigned long i2 = 0; i2 < nrow; ++i2) {
-	    b[i] += priorprec[i * nrow + i2] * (priormean[i2] - xold[i2]);
+	for (unsigned long j = 0; j < nrow; ++j) {
+	    b[i] += priorprec[i * nrow + j] * (priormean[j] - xold[j]);
 	}
-    }
-    for (unsigned long i = 0; i < N; ++i) {
-	A[i] = priorprec[i];
     }
     
     /* FORTRAN routines are all call-by-reference, so we need to create
@@ -175,7 +229,6 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
     double zero = 0;
     double d1 = 1;
     int i1 = 1;
-
     
     if (_gv->deterministicChildren().empty()) {
       
@@ -183,7 +236,7 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
 	// multivariate normal with the same number of rows and 
 	// columns. We know alpha = 0, beta = I.
 
-	double *delta = new double[nrow]; 
+	vector<double> delta(nrow);
 
 	int Ni = asInteger(N);
 	int ni = asInteger(nrow);
@@ -193,16 +246,13 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
 	    double const *tau = stoch_children[j]->parents()[1]->value(chain);
 	    double alpha = 1;
 
-	    F77_DAXPY (&Ni, &alpha, tau, &i1, A, &i1);
+	    F77_DAXPY (&Ni, &alpha, tau, &i1, A.data(), &i1);
 	    for (unsigned long i = 0; i < nrow; ++i) {
 		delta[i] = Y[i] - xold[i];
 	    }
-	    F77_DGEMV ("N", &ni, &ni, &alpha, tau, &ni, delta, &i1,
-		       &d1, b, &i1);
+	    F77_DGEMV ("N", &ni, &ni, &alpha, tau, &ni, delta.data(), &i1,
+		       &d1, b.data(), &i1);
 	}
-
-	delete [] delta;
-	
     }
     else {
 	
@@ -222,12 +272,12 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
 	    unsigned long nrow_j = stoch_children[j]->length();
 	    if (nrow_j > max_nrow_child) max_nrow_child = nrow_j;
 	}
-	double *C = new double[nrow * max_nrow_child];
-	double *delta = new double[max_nrow_child];
+	vector<double> C(nrow * max_nrow_child);
+	vector<double> delta(max_nrow_child);
 	
 	/* Now add the contribution of each term to A, b 
 	   
-	   b += N_j * beta_j %*% tau_j (Y_j - mu_j)
+	   b += N_j * beta_j %*% tau_j %*% (Y_j - mu_j)
 	   A += N_j * beta_j %*% tau_j %*% t(beta_j)
 
 	   where 
@@ -252,36 +302,31 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
 	    int ni = asInteger(nrow);
 	    
 	    if (nrow_child == 1) {
-
+		// Scalar children: normal
 		double alpha = tau[0];
-		F77_DSYR("L", &ni, &alpha, beta_j, &i1, A, &ni);
+		F77_DSYR("L", &ni, &alpha, beta_j, &i1, A.data(), &ni);
 		alpha *= (Y[0] - mu[0]);
-		F77_DAXPY(&ni, &alpha, beta_j, &i1, b, &i1);
-
+		F77_DAXPY(&ni, &alpha, beta_j, &i1, b.data(), &i1);
 	    }
 	    else {
-
+		// Vector children: multivariate normal
 		double alpha = 1;
 		int nc = asInteger(nrow_child);
-			    
 
 		F77_DSYMM("R", "L", &ni, &nc, &alpha, tau,
-                          &nc, beta_j, &ni, &zero, C, &ni);
+                          &nc, beta_j, &ni, &zero, C.data(), &ni);
 
 		for (unsigned int i = 0; i < nrow_child; ++i) {
 		    delta[i] = Y[i] - mu[i];
 		}
-		F77_DGEMV("N", &ni, &nc, &d1, C, &ni,
-			  delta, &i1, &d1, b, &i1);
+		F77_DGEMV("N", &ni, &nc, &d1, C.data(), &ni,
+			  delta.data(), &i1, &d1, b.data(), &i1);
 		F77_DGEMM("N","T", &ni, &ni, &nc,
-			  &d1, C, &ni, beta_j, &ni, &d1, A, &ni);
+			  &d1, C.data(), &ni, beta_j, &ni, &d1, A.data(), &ni);
 	    }
 	       
 	    beta_j += nrow_child * nrow;
 	}
-
-	delete [] C;
-	delete [] delta;
 
 	if (temp_beta) {
 	    delete [] betas;
@@ -294,19 +339,14 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
        We have to take a copy of A as it is overwritten during
        the call to DPOSV. The result is stored in b
     */
-    double * Acopy = new double[N];
-    for (unsigned long i = 0; i < N; ++i) {
-	Acopy[i] = A[i];
-    }
+    vector<double> F(A);
+
     int one = 1;
     int info;
     int ni = asInteger(nrow);
     
-    F77_DPOSV ("L", &ni, &one, Acopy, &ni, b, &ni, &info);
+    F77_DPOSV ("L", &ni, &one, F.data(), &ni, b.data(), &ni, &info);
     if (info != 0) {
-	delete [] Acopy;
-	delete [] A;
-	delete [] b;
 	throwNodeError(snode,
 		       "unable to solve linear equations in ConjugateMNormal");
     }
@@ -315,15 +355,10 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
     for (unsigned long i = 0; i < nrow; ++i) {
 	b[i] += xold[i];
     }
-    double *xnew = new double[nrow];
+    vector<double> xnew(nrow);
     //NB. This uses the lower triangle of A
-    DMNorm::randomsample(xnew, b, A, true, nrow, rng);
-    _gv->setValue(xnew, nrow, chain);
-
-    delete [] A;
-    delete [] Acopy;
-    delete [] b;
-    delete [] xnew;
+    DMNorm::randomsample(xnew.data(), b.data(), A.data(), true, nrow, rng);
+    _gv->setValue(xnew, chain);
 }
 
 }}
