@@ -27,4 +27,11 @@ VectorFunction::checkParameterLength(vector<unsigned long> const &arglen) const
     return true;
 }
 
+    void
+    VectorFunction::gradient(double *grad, vector<double const *> const &args,
+			     vector<unsigned long> const &dims,
+			     unsigned long i) const
+    {
+    }
+
 } //namespace jags

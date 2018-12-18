@@ -24,4 +24,15 @@ namespace bugs {
 	return *args[0] >= 0;
     }
 
+    bool Log::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double Log::gradient(vector<double const *> const &args,
+			 unsigned long i) const
+    {
+	return 1/(*args[0]);
+    }
+
 }}

@@ -21,6 +21,11 @@ namespace jags {
 	    void evaluate(double *value, 
 			  std::vector <double const *> const &args,
 			  std::vector <unsigned long> const &lengths) const;
+	    bool isDifferentiable(unsigned long i) const;
+	    void gradient(double *grad,
+			  std::vector <double const *> const &args,
+			  std::vector <unsigned long> const &lengths,
+			  unsigned long i) const;
 	    unsigned long 
 		length(std::vector<unsigned long> const &parlengths,
 		       std::vector<double const *> const &parvalues) const;

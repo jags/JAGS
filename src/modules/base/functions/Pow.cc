@@ -46,4 +46,23 @@ bool Pow::checkParameterValue(vector<double const *> const &args) const
             return fix.empty() || fix[1];
     }
 
+    bool Pow::isDifferentiable(unsigned long i) const
+    {
+	return i < 2;
+    }
+    
+    double Pow::gradient(vector<double const *> const &args,
+			 unsigned long i) const
+    {
+	double x = *args[0];
+	double y = *args[1];
+	
+	if (i == 1) {
+	    return log(x) * pow(x, y);
+	}
+	else {
+	    return (y-1) * pow(x, y-1);
+	}
+    }
+
 }}

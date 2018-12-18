@@ -15,6 +15,24 @@ namespace base {
 	return *args[0] / *args[1];
     }
 
+    bool Divide::isDifferentiable(unsigned long i) const
+    {
+	return i < 2;
+    }
+    
+    double Divide::gradient(vector<double const *> const &args,
+			    unsigned long i) const
+    {
+	if (i == 1) {
+	    double x = *args[1];
+	    return -1/(x*x);
+	}
+	else {
+	    //i == 0
+	    return *args[0];
+	}
+    }
+    
     bool Divide::checkParameterValue(vector<double const*> const &args) const
     {
 	return *args[1] != 0;

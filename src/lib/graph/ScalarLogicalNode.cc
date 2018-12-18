@@ -53,6 +53,19 @@ bool ScalarLogicalNode::checkParentValues(unsigned int chain) const
     return _func->checkParameterValue(_parameters[chain]);
 }
 
+
+
+    void ScalarLogicalNode::gradient(double *grad, Node const *arg,
+				     unsigned int chain) const
+    {
+	auto par = parents();
+	for (unsigned int i = 0; i < par.size(); ++i) {
+	    if (par[i] == arg) {
+		*grad += _func->gradient(_parameters[chain], i);
+	    }
+	}
+    }
+    
     /*
 DeterministicNode *
 ScalarLogicalNode::clone(vector<Node const*> const &parents) const

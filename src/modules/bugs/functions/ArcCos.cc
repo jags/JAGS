@@ -30,4 +30,16 @@ namespace bugs {
 	return *args[0] >= -1 && *args[0] <= 1;
     }
 
+    bool ArcCos::isDifferentiable(unsigned long i)
+    {
+	return i == 0;
+    }
+    
+    double ArcCos::gradient(vector<double const *> const &args,
+			    unsigned long i) const
+    {
+	double z = *args[0];
+	return -1/sqrt(1 - z*z);
+    }
+
 }}

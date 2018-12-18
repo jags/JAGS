@@ -3,10 +3,12 @@
 #include <util/integer.h>
 
 #include "InProd.h"
-
 #include "lapack.h"
 
+#include <algorithm>
+
 using std::vector;
+using std::copy;
 
 namespace jags {
 namespace bugs {
@@ -20,6 +22,23 @@ namespace bugs {
     {
         int one = 1, N = asInteger(lengths[0]);
         return F77_DDOT(&N, args[0], &one, args[1], &one);
+    }
+
+    bool InProd::isDifferentiable(unsigned long i) const
+    {
+	return i < 2;
+    }
+    
+    void InProd::gradient(double *grad,
+			  vector <double const *> const &args,
+			  vector<unsigned long> const &lengths,
+			  unsigned long i) const
+    {
+	unsigned long k = (i == 0) ? 1 : 0;
+
+	for (unsigned long j = 0; j < lengths[k]; ++j) {
+	    grad[j] += args[k][j];
+	}
     }
 
     bool 

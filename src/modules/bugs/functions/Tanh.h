@@ -18,6 +18,9 @@ namespace bugs {
     public:
 	Tanh ();
 	double evaluate(std::vector<double const *> const &args) const;
+	bool isDifferentiable(unsigned long i) const;
+	bool gradient(double &grad, std::vector<double const *> const &args,
+		      unsigned long i) const;
     };
 
 }}

@@ -19,4 +19,15 @@ namespace bugs {
 	return cos(*args[0]);
     }
 
+    bool Cos::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double Cos::gradient(vector<double const *> const &args,
+			 unsigned long index) const
+    {
+	return -sin(*args[0]);
+    }
+
 }}

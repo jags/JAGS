@@ -25,4 +25,16 @@ namespace bugs {
 	return (arg >= 0 && arg <= 1);
     }
 
+    bool Logit::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double Logit::gradient(vector <double const *> const &args,
+			   unsigned long i) const
+    {
+	double x = *args[0];
+	return 1/(x*(1 - x));
+    }
+
 }}

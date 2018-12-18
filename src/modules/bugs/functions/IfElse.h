@@ -22,6 +22,9 @@ class IfElse : public ScalarFunction
 public:
     IfElse ();
     double evaluate(std::vector<double const *> const &args) const;
+    bool isDifferentiable(unsigned long i) const;
+    double gradient(std::vector<double const *> const &args,
+		    unsigned long i) const;
     bool isDiscreteValued(std::vector<bool> const &mask) const;
     bool isAdditive(std::vector<bool> const &mask, 
 		    std::vector<bool> const &fixed) const;

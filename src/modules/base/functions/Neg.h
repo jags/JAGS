@@ -20,6 +20,9 @@ public:
     bool isScale(std::vector<bool> const &mask, 
 		 std::vector<bool> const &fix) const;
     std::string deparse(std::vector<std::string> const &par) const;
+    bool isDifferentiable(unsigned long i) const;
+    double gradient(std::vector<double const *> const &args,
+		    unsigned long i) const;
 
 };
 

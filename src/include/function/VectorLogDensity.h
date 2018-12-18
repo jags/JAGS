@@ -23,6 +23,7 @@ namespace jags {
 	void evaluate(double *value,
 		      std::vector <double const *> const &args,
 		      std::vector<unsigned long> const &lens) const;
+	bool isDifferentiable(unsigned long i) const;
     };
 
 }

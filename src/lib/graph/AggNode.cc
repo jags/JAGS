@@ -123,6 +123,28 @@ void AggNode::deterministicSample(unsigned int chain)
     }
 }
 
+    bool AggNode::isDifferentiable(Node const *arg) const
+    {
+	return true;
+    }
+    
+    void AggNode::gradient(double *grad, Node const *arg,
+			   unsigned int chain) const
+    {
+	//FIXME put in some check code here...
+	
+	unsigned long P = _length;
+
+	auto par = parents();
+	for (unsigned int p = 0; p < P; ++p) {
+	    if (par[p] == arg) {
+		unsigned long q = _offsets[p];
+		grad[p + P * q] += 1;
+	    }
+	}
+    }
+
+    
 /*
 bool AggNode::isLinear(GraphMarks const &linear_marks, bool fixed) const
 {

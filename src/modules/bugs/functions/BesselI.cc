@@ -25,6 +25,5 @@ namespace jags {
 	{
 	    return *args[0] >= 0;
 	}
-
     }
 }

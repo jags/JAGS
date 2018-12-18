@@ -44,6 +44,52 @@ namespace bugs {
 		   args[0], &d1, args[1], &d2, &zero, value, &d1);
     }
 
+    bool MatMult::isDifferentiable(unsigned long i) const
+    {
+	return i < 2;
+    }
+    
+    void MatMult::gradient(double *grad, vector<double const *> const &args,
+			   vector<vector<unsigned long> > const &dims,
+			   unsigned long i) const
+    {
+	/*
+	  A = B %*% C
+	  where dimensions of matrices are
+	  A: P x Q
+	  B: P x R
+	  C: R x Q
+	*/
+
+	double const *B = args[0];
+	double const *C = args[1];
+	
+	unsigned long P = dims[0][0];
+	unsigned long R = dims[1][0];
+	unsigned long Q = dims[1].size() == 2 ? dims[1][1] : 1;
+
+	unsigned long PQ = P * Q; //length of A
+
+	for (unsigned long p = 0; p < P; ++p) {
+	    for (unsigned long q = 0; q < Q; ++q) {
+		unsigned long pq = p + P * q; //[p,q]
+		for (unsigned long r = 0; r < R; ++r) {
+		    unsigned long rq = r + R * q; //[r,q]
+		    unsigned long pr = p + P * r; //[p,r]
+		    if (i == 1) {
+			//dA[p,q]/dC[r,q] = B[p,r]
+			grad[pq + PQ * rq] += B[pr]; 
+		    }
+		    else {
+			//i == 0
+			//dA[p,q]/dB[p,r] = C[r,q]
+			grad[pq + PQ * pr] += C[rq];
+		    }
+		}
+	    }
+	}
+    }
+
     vector<unsigned long> 
     MatMult::dim (vector <vector<unsigned long> > const &dims,
 		  vector<double const *> const &) const

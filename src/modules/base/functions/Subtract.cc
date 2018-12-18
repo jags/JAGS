@@ -16,6 +16,17 @@ namespace base {
     {
 	return *args[0] - *args[1];
     }
+
+    bool Subtract::isDifferentiable(unsigned long i) const
+    {
+	return i < 2;
+    }
+    
+    double Subtract::gradient(vector<double const *> const &args,
+			      unsigned long i) const
+    {
+	return (i == 1) ? -1 : 1;
+    }
     
     bool Subtract::isDiscreteValued(vector<bool> const &mask) const
     {

@@ -80,6 +80,25 @@ bool VSLogicalNode::checkParentValues(unsigned int chain) const
     return true;
 }
 
+    void VSLogicalNode::gradient(double *grad, Node const *arg,
+				 unsigned int chain) const
+    {
+	vector<double const *> param(_parameters[chain]);
+
+	auto par = parents();
+	for (unsigned long i = 0; i < par.size(); ++i) {
+	    if (par[i] != arg) continue;
+	    
+	    for (unsigned int l = 0; l < _length; ++l) {
+		grad[l] += _func->gradient(param, i);
+		for (unsigned int k = 0; k < param.size(); ++k) {
+		    if (_isvector[k]) ++param[k];
+		}
+	    }  
+	}
+    }
+
+    
     /*
 DeterministicNode *
 VSLogicalNode::clone(vector<Node const*> const &parents) const

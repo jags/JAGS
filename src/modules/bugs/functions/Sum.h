@@ -20,6 +20,10 @@ namespace bugs {
 	Sum ();
 	double scalarEval(std::vector <double const *> const &args,
 			  std::vector<unsigned long> const &lengths) const;
+	bool isDifferentiable(unsigned long i) const;
+	void gradient(double *grad, std::vector<double const *> const &args,
+		      std::vector<unsigned long> const &lengths,
+		      unsigned long i) const;
 	bool isDiscreteValued(std::vector<bool> const &mask) const;
 	bool isAdditive(std::vector<bool> const &mask,
 			std::vector<bool> const &isfixed) const;

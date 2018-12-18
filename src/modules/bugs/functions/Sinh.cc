@@ -19,4 +19,15 @@ namespace bugs {
 	return sinh(*args[0]);
     }
 
+    bool Sinh::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double Sinh::gradient(vector<double const *> const &args,
+			  unsigned long i) const
+    {
+	return cosh(*args[0]);
+    }
+
 }}

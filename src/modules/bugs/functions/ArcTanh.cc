@@ -29,7 +29,18 @@ namespace bugs {
         
     bool ArcTanh::checkParameterValue(vector<double const *> const &args) const
     {
-	return *args[0] >= -1 && *args[0] <=  1;
+	return *args[0] >= -1 && *args[0] <= 1;
     }
 
+    bool ArcTanh::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double ArcTanh::gradient(vector<double const *> const &args,
+			     unsigned long i) const
+    {
+	double x = *args[0];
+	return 1/(1 - x*x);
+    }
 }}

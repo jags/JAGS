@@ -28,4 +28,15 @@ namespace bugs {
         return true;
     }
 
+    bool Sqrt::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double Sqrt::gradient(vector<double const *> const &args,
+			 unsigned long i) const
+    {
+	return 1/(2*sqrt(*args[0]));
+    }
+
 }}

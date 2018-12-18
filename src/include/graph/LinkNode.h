@@ -43,6 +43,8 @@ public:
      */
     std::string const &linkName() const;
     //DeterministicNode *clone(std::vector<Node const *> const &parents) const;
+    bool isDifferentiable(Node const *arg) const;
+    void gradient(double *grad, Node const *arg, unsigned int chain) const;
 };
 
 } /* namespace jags */

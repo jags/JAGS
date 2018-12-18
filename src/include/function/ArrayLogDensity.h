@@ -27,6 +27,7 @@ namespace jags {
 	    double *value,
 	    std::vector <double const *> const &args,
 	    std::vector<std::vector<unsigned long> > const &dims) const;
+	bool isDifferentiable(unsigned long i) const;
     };
 
 }

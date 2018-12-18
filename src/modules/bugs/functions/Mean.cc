@@ -22,6 +22,22 @@ namespace bugs {
 	return svalue;
     }
 
+    bool Mean::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    void Mean::gradient(double *grad, vector<double const *> const &args,
+			vector<unsigned long> const &lengths,
+			unsigned long i) const
+    {
+	unsigned long N = lengths[0];
+	double y = 1.0/N;
+	for (unsigned long j = 0; j < N; ++j) {
+	    grad[j] += y;
+	}
+    }
+
     bool Mean::isScale(vector<bool> const &, vector<bool> const &) const
     {
 	return true;

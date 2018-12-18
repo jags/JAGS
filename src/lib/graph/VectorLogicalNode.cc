@@ -85,6 +85,17 @@ bool VectorLogicalNode::checkParentValues(unsigned int chain) const
     return _func->checkParameterValue(_parameters[chain], _lengths);
 }
 
+    void VectorLogicalNode::gradient(double *grad, Node const *arg,
+				     unsigned int chain) const
+    {
+	auto par = parents();
+	for (unsigned int i = 0; i < par.size(); ++i) {
+	    if (par[i] == arg) {
+		_func->gradient(grad, _parameters[chain], _lengths, i);
+	    }
+	}
+    }
+
     /*
 DeterministicNode *
 VectorLogicalNode::clone(vector<Node const*> const &parents) const

@@ -24,4 +24,16 @@ namespace bugs {
 	return (p >= 0 && p <= 1);
     }
 
+    bool CLogLog::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double CLogLog::gradient(vector<double const *> const &args,
+			   unsigned long i) const
+    {
+	double p = *args[0];
+	return -1/((1 - p) * log(1 - p));
+    }
+
 }}

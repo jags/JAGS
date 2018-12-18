@@ -16,6 +16,10 @@ namespace bugs {
 		      std::vector <double const *> const &args,
 		      std::vector<std::vector<unsigned long> > const &dims) 
 	    const;
+	bool isDifferentiable(unsigned long i) const;
+	void gradient(double *x, std::vector <double const *> const &args,
+		      std::vector<std::vector<unsigned long> > const &dims,
+		      unsigned long i) const;
 	bool checkParameterDim(std::vector<std::vector<unsigned long> > const 
 			       &dims) const;
 	std::vector<unsigned long> 

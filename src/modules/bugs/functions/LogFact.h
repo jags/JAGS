@@ -21,6 +21,9 @@ namespace bugs {
 	LogFact ();
 	double evaluate(std::vector<double const *> const &args) const;
 	bool checkParameterValue(std::vector<double const *> const &args) const;
+	bool isDifferentiable(unsigned long i) const;
+	double gradient(std::vector<double const *> const &args,
+			unsigned long i) const;
     };
 
 }}

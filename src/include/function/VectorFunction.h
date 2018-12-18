@@ -58,6 +58,12 @@ public:
     virtual bool 
 	checkParameterValue(std::vector<double const *> const &args,
 			    std::vector<unsigned long> const &lengths) const;  
+    /**
+     * FIXME
+     */
+    virtual void gradient(double *grad, std::vector<double const *> const &args,
+			  std::vector<unsigned long> const &lengths,
+			  unsigned long i) const;
 };
 
 } /* namespace jags */

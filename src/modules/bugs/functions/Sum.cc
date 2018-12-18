@@ -23,6 +23,22 @@ namespace bugs {
 	return value;
     }
 
+    bool Sum::isDifferentiable(unsigned long i) const
+    {
+	return true;
+    }
+    
+    void Sum::gradient(double *grad, vector<double const *> const &args,
+		       vector<unsigned long> const &lengths,
+		       unsigned long i) const
+    {
+	if (i >= args.size()) return;
+	
+	for (unsigned long j = 0; j < lengths[i]; ++j) {
+	    grad[j] += 1.0;
+	}
+    }
+    
     bool Sum::isDiscreteValued(vector<bool> const &mask) const
     {
 	return allTrue(mask);

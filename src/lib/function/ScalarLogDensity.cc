@@ -49,5 +49,13 @@ namespace jags {
 	}
 	return _dist->checkParameterValue(param);
     }
+    
+    bool ScalarLogDensity::isDifferentiable(unsigned long i) const {
+	/* 
+	   FIXME: If we had a score function for distributions then we
+	   could pass it on.
+	*/
+	return false;
+    }
 
 }

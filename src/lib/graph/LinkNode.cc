@@ -63,6 +63,19 @@ double LinkNode::grad(unsigned int chain) const
     return _func->grad(*_parameters[chain][0]);
 }
 
+    bool LinkNode::isDifferentiable(Node const *arg) const
+    {
+	return true;
+    }
+    
+    void
+    LinkNode::gradient(double *grad, Node const *arg, unsigned int chain) const
+    {
+	if (parents()[0] == arg) {
+	    *grad += _func->grad(chain);
+	}
+    }
+       
 string const &LinkNode::linkName() const
 {
     return _func->linkName();

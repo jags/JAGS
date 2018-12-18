@@ -73,6 +73,17 @@ void ArrayLogicalNode::deterministicSample(unsigned int chain)
     _func->evaluate(_data + chain * _length, _parameters[chain], _dims);
 }
 
+    void ArrayLogicalNode::gradient(double *grad, Node const *arg,
+				    unsigned int chain) const
+    {
+	auto par = parents();
+	for (unsigned int i = 0; i < par.size(); ++i) {
+	    if (par[i] == arg) {
+		_func->gradient(grad, _parameters[chain], _dims, i);
+	    }
+	}
+    }
+    
 bool ArrayLogicalNode::checkParentValues(unsigned int chain) const
 {
     return _func->checkParameterValue(_parameters[chain], _dims);

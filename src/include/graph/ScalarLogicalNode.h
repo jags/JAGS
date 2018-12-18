@@ -33,6 +33,7 @@ public:
      */
     bool checkParentValues(unsigned int chain) const;
     //DeterministicNode *clone(std::vector<Node const *> const &parents) const;
+    void gradient(double *grad, Node const *arg, unsigned int chain) const;
 };
 
 } /* namespace jags */ 

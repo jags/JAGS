@@ -23,4 +23,15 @@ namespace bugs {
 	return *args[0] > 0;
     }
 
+    bool LogGam::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double LogGam::gradient(vector<double const *> const &args,
+			    unsigned long i) const
+    {
+	return digamma(*args[0]);
+    }
+
 }}

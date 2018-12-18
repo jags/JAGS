@@ -24,4 +24,15 @@ namespace bugs {
 	return (p >= 0 && p <= 1);
     }
 
+    bool Probit::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double Probit::gradient(vector<double const *> const &args,
+			    unsigned long i) const
+    {
+	return 1/dnorm(qnorm(*args[0], 0, 1, 1, 0), 0, 1, 0);
+    }
+
 }}

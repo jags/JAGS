@@ -32,6 +32,24 @@ namespace base {
 	return val;
     }
 
+    bool Multiply::isDifferentiable(unsigned long i) const
+    {
+	return true;
+    }
+    
+    double Multiply::gradient(vector<double const *>const &args,
+			      unsigned long i) const
+    {
+	if (i >= args.size()) return 0;
+	
+	double grad = 1.0;
+	for (unsigned int j = 0; j < args.size(); ++j) {
+	    if (j == i) continue;
+	    grad *= *args[j];
+	}
+	return grad;
+    }
+    
     bool Multiply::isDiscreteValued(vector<bool> const &mask) const
     {
 	return allTrue(mask);

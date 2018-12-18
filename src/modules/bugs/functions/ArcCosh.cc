@@ -32,4 +32,16 @@ namespace bugs {
 	return *args[0] >= 1;
     }
 
+    bool ArcCosh::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double ArcCosh::gradient(vector<double const *> const &args,
+			     unsigned long i) const
+    {
+	double x = *args[0];
+	return 1/sqrt(x*x - 1);
+    }
+
 }}

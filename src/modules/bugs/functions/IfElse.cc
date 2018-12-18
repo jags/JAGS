@@ -1,5 +1,6 @@
 #include <config.h>
 #include "IfElse.h"
+#include <util/nainf.h>
 
 using std::vector;
 
@@ -14,7 +15,26 @@ namespace bugs {
     {
 	return *args[0] ? *args[1] : *args[2];
     }
+
+    bool IfElse::isDifferentiable(unsigned long i) const
+    {
+	return i == 1 || i == 2;
+    }
     
+    double IfElse::gradient(vector<double const *> const &args,
+			    unsigned long i) const
+    {
+	if (i == 1) {
+	    return *args[0] ? 1 : 0;
+	}
+	else if (i == 2) {
+	    return *args[0] ? 0 : 1;
+	}
+	else {
+	    return 0;
+	}
+    }
+
     bool IfElse::isDiscreteValued(vector<bool> const &mask) const
     {
 	return mask[1] && mask[2];

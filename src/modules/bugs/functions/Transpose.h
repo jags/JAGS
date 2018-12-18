@@ -22,6 +22,11 @@ namespace bugs {
 	bool isScale(std::vector<bool> const &mask,
 		     std::vector<bool> const &isfixed) const;
 	bool isDiscreteValued(std::vector<bool> const &mask) const;
+	bool isDifferentiable(unsigned long i) const;
+	void gradient(double *value, std::vector<double const *> const &args,
+		      std::vector<std::vector<unsigned long> > const &dims,
+		      unsigned long i) const;
+	
     };
 
 }}

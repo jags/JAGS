@@ -35,4 +35,16 @@ namespace bugs {
 	return log(x + sqrt(1 + x*x));
     }
 
+    bool ArcSinh::isDifferentiable(unsigned long i) const
+    {
+	return i == 0;
+    }
+    
+    double ArcSinh::gradient(vector<double const *> const &args,
+			     unsigned long i) const
+    {
+	double x = *args[0];
+	return 1/sqrt(x*x + 1);
+    }
+
 }}

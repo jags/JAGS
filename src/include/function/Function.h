@@ -147,6 +147,24 @@ public:
      * fixed values
      */
     virtual bool checkParameterFixed(std::vector<bool> const &mask) const;
+    /**
+     * Returns true if the function is differentiable with respect to
+     * its ith argument. The default implementation returns false.
+     * Differentiable functions must override this member function.
+     *
+     * If this function returns true then it guarantees that the
+     * functions ScalarFunction#gradient, VectorFunction#gradient, and
+     * ArrayFunction#gradient will correctly calculate the gradient of
+     * the function.
+     *
+     * False negatives are allowed, i.e. the function may return false
+     * even if it is differentiable. This means that the corresponding
+     * gradient function is not correctly implemented.
+     *
+     * @param i Index of the parameter to take the derivative
+     * (starting from zero).
+     */
+    virtual bool isDifferentiable(unsigned long i) const;
 };
 
 /**

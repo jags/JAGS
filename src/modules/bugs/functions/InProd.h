@@ -20,6 +20,11 @@ namespace bugs {
 	InProd ();
 	double scalarEval(std::vector <double const *> const &args,
 			  std::vector<unsigned long> const &lengths) const;
+	bool isDifferentiable(unsigned long i) const;
+	void gradient(double *x,
+		      std::vector <double const *> const &args,
+		      std::vector<unsigned long> const &lengths,
+		      unsigned long i) const;
 	bool checkParameterLength (std::vector<unsigned long> const &len) const;
 	bool isDiscreteValued(std::vector<bool> const &mask) const;
 	bool isScale(std::vector<bool> const &mask,

@@ -17,6 +17,7 @@ namespace jags {
 	ScalarLogDensity(ScalarDist const *dist);
 	bool checkParameterValue(std::vector<double const *> const &args) const;
 	double evaluate(std::vector <double const *> const &args) const;
+	bool isDifferentiable(unsigned long i) const;
     };
 
 }

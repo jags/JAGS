@@ -19,15 +19,39 @@ namespace jags {
 	{
 	}
 
-	void Combine::evaluate (double *value, 
-				vector <double const *> const &args,
-				vector<unsigned long> const &lengths) const
+	void Combine::evaluate(double *value, 
+			       vector <double const *> const &args,
+			       vector<unsigned long> const &lengths) const
 	{
 	    for (unsigned long i = 0; i < args.size(); ++i) {
 		value = copy(args[i], args[i] + lengths[i], value);
 	    }
 	}
 
+	bool Combine::isDifferentiable(unsigned long i) const
+	{
+	    return true;
+	}
+	
+	void Combine::gradient(double *grad,
+			       vector <double const *> const &args,
+			       vector<unsigned long> const &lengths,
+			       unsigned long i) const
+	{
+	    if (i >= args.size()) return;
+	    
+	    unsigned long P = accumulate(lengths.begin(), lengths.end(), 0U);
+	    unsigned long Q = lengths[i];
+	    
+	    unsigned long p = 0;
+	    for (unsigned long j = 0; j < i; ++j) {
+		p += lengths[j];
+	    }
+	    for (unsigned long q = 0; q < Q; ++q, ++p) {
+		grad[p + P * q] += 1;
+	    }
+	}
+	
 	unsigned long Combine::length (vector<unsigned long> const &lens,
 				       vector<double const *> const &) const
 	{

@@ -268,6 +268,24 @@ bool isMixture(Node const *node)
   return dynamic_cast<MixtureNode const*>(node);
 }
 
+bool MixtureNode::isDifferentiable(Node const *arg) const
+{
+    auto par = parents();
+    for (unsigned long i = _Nindex; i < par.size(); ++i) {
+	if (par[i]==arg) return false;
+    }
+    return true;
+}
+
+void MixtureNode::gradient(double *grad, Node const *arg,
+			   unsigned int chain) const
+{
+    if (arg == _active_parents[chain]) {
+	for (unsigned int i = 0; i < _length; ++i) {
+	    grad += 1;
+	}
+    }
+}
 
 bool MixtureNode::isClosed(set<Node const *> const &ancestors, 
 			   ClosedFuncClass fc, bool fixed) const

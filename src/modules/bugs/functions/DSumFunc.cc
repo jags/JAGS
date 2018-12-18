@@ -26,6 +26,23 @@ namespace bugs {
 	    }
 	}
     }
+
+    bool DSumFunc::isDifferentiable(unsigned long i) const
+    {
+	return true;
+    }
+    
+    void DSumFunc::gradient(double *grad, vector <double const *> const &args,
+			    vector<vector<unsigned long> > const &dims,
+			    unsigned long i) const
+    {
+	if (i >= args.size()) return;
+	
+	unsigned long P = product(dims[0]);
+	for (unsigned long p = 0; p < P; ++p) {
+	    grad[p + P * p] += 1;
+	}
+    }
     
     bool DSumFunc::isDiscreteValued(vector<bool> const &mask) const
     {

@@ -43,6 +43,10 @@ public:
      */
     bool isClosed(std::set<Node const *> const &ancestors, 
 		  ClosedFuncClass fc, bool fixed) const;
+    /**
+     *
+     */
+    bool isDifferentiable(Node const *arg) const;
     std::string deparse(std::vector<std::string> const &) const;
 };
 

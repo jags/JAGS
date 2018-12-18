@@ -137,12 +137,21 @@ bool LogicalNode::isClosed(set<Node const *> const &ancestors,
 
     return isclosed;
 }
-
-
     
     bool LogicalNode::isDiscreteValued() const
     {
 	return _discrete;
+    }
+
+    bool LogicalNode::isDifferentiable(Node const *arg) const
+    {
+	auto par = parents();
+	for (unsigned int i = 0; i < par.size(); ++i) {
+	    if (par[i] == arg) {
+		if (!_func->isDifferentiable(i)) return false;
+	    }
+	}
+	return true;
     }
 
 } //namespace jags
