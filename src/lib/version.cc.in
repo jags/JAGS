@@ -4,7 +4,7 @@ extern "C" {
     
     const char * jags_version()
     {
-	const char * version = "@PACKAGE_VERSION@";
+	const char * version = "@JAGS_MAJOR@.@JAGS_MINOR@.@JAGS_PATCH@";
 	return version;
     }
 

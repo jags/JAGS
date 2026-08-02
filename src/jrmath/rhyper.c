@@ -114,16 +114,11 @@ double rhyper(double nn1in, double nn2in, double kkin, JRNG *rng)
 	nn2 = (int)nn2in,
 	kk  = (int)kkin;
 
-    /* These should become 'thread_local globals' : */
-    static int ks = -1, n1s = -1, n2s = -1;
-    static int m, minjx, maxjx;
-    static int k, n1, n2; // <- not allowing larger integer par
-    static double N;
-
-    #pragma omp threadprivate(ks, n1s, n2s)
-    #pragma omp threadprivate(m, minjx, maxjx)
-    #pragma omp threadprivate(k, n1, n2)
-    #pragma omp threadprivate(N)    
+    /* These should become '_Thread_local globals' : */
+    _Thread_local static int ks = -1, n1s = -1, n2s = -1;
+    _Thread_local static int m, minjx, maxjx;
+    _Thread_local static int k, n1, n2; // <- not allowing larger integer par
+    _Thread_local static double N;
     
     bool setup1, setup2;
     /* if new parameter values, initialize */
@@ -172,10 +167,8 @@ double rhyper(double nn1in, double nn2in, double kkin, JRNG *rng)
 	const static double scale = 1e25; // scaling factor against (early) underflow
 	const static double con = 57.5646273248511421;
 	          // 25*log(10) = log(scale) { <==> exp(con) == scale }
-	static double w,
+	_Thread_local static double w,
 	    lw; // = log(w);  w = exp(lw) * scale = exp(lw + log(scale)) = exp(lw + con)
-
-        #pragma omp threadprivate(w, lw)
 
 	if (setup1 || setup2) {
 	    // NB:  n1 <= n2  here
@@ -210,9 +203,7 @@ double rhyper(double nn1in, double nn2in, double kkin, JRNG *rng)
 
     } else { /* III : H2PE Algorithm --------------------------------------- */
 
-	static double a, xl, xr, lamdl, lamdr, p1, p2, p3;
-
-        #pragma omp threadprivate(a, xl, xr, lamdl, lamdr, p1, p2, p3)
+	_Thread_local static double a, xl, xr, lamdl, lamdr, p1, p2, p3;
 	
 	if (setup1 || setup2) {
 	    double

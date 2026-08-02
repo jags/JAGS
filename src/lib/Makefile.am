@@ -21,7 +21,7 @@ libjags_la_LIBADD = model/libmodel.la		\
 	module/libmodule.la			\
 	matrix/libmatrix.la			\
 	SSparse/ssparse.la                      \
-        @LAPACK_LIBS@ @BLAS_LIBS@ @FCLIBS@
+	@GCD_LIBS@ @LAPACK_LIBS@ @BLAS_LIBS@ @FCLIBS@ 
 
 libjags_la_LDFLAGS = -version-info $(JAGS_MAJOR):$(JAGS_MINOR):0
 if WINDOWS

@@ -16,7 +16,7 @@ namespace jags {
 class RWMetropolis : public Metropolis
 {
     StepAdapter _step_adapter;
-    double _psum[2];
+    double _pmean;
     unsigned int _niter;
 public:
     /**

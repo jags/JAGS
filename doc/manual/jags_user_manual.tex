@@ -3832,16 +3832,17 @@ Dirichlet prior distribution when the posterior distribution is {\em
   not} conjugate. It does this by modelling the Dirichlet distribution
 as a set of normalized gamma distributions. (See page~\pageref{bugs:ddirch})
 
+\subsubsection{\texttt{bugs::EllipticalSlice}}
+
+The \texttt{bugs::EllipticalSlice} factory creates an eliptical slice
+sampler for nodes with a multivariate normal distribution.
+
 \subsubsection{\texttt{bugs::MNormal}}
 
-The \texttt{bugs::MNormal} factory creates samplers for nodes with a
-multivariate normal prior distribution when the posterior distribution
-is {\em not} conjugate.
-
-The \texttt{bugs::MNormal} sampler uses an adaptive random walk
-Metropolis algorithm. It can be very inefficient. In particular, it
-may require an extremely long adaptation period.
-
+The \texttt{bugs::MNormal} factory creates an adaptive random walk
+Metropolis-Hastings sampler using a multivariate normal distribution
+for the steps. It works for any vector-valued node with an
+unconstrained distribution.
 
 \chapter{The glm module}
 \label{chapter:glm}

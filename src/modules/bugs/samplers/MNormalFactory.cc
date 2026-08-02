@@ -19,7 +19,7 @@ namespace bugs {
 bool 
 MNormalFactory::canSample(StochasticNode * snode, Graph const &) const
 {
-    return snode->distribution()->name() == "dmnorm" && !isBounded(snode);
+    return snode->length() > 1 && snode->fullRank() && !isBounded(snode);
 }
 
 Sampler *

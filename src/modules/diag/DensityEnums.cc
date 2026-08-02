@@ -53,7 +53,7 @@ namespace jags {
 		return false;
 	    }
 	    //starts with "loo_"
-	    return stat.compare(0, 4, "loo_") == 0;
+	    return stat.length() >= 4 && stat.compare(0, 4, "loo_") == 0;
 	}
 
 	bool isTotal(string const &stat)
@@ -61,12 +61,8 @@ namespace jags {
 	    if (getDensityType(stat) == DTUNSET) {
 		return false;
 	    }
-	    //terminates with "_total"
-	    unsigned long pos = stat.find_last_of("_");
-	    if (pos == string::npos) {
-		return false;
-	    }
-	    return stat.compare(pos, string::npos, "_total") == 0;
+	    //ends with "_total"
+	    return stat.length() >= 6 && stat.compare(stat.length() - 6, 6, "_total") == 0;
 	}
 
     }

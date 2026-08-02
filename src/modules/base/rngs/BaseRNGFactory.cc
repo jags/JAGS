@@ -31,6 +31,7 @@ namespace base {
     void BaseRNGFactory::setSeed(unsigned int seed)
     {
 	_seed = seed;
+	_index = 0;
     }
 
     vector<RNG *> BaseRNGFactory::makeRNGs(unsigned int n)

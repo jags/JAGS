@@ -12,13 +12,33 @@ using std::isfinite;
 using std::min;
 
 namespace jags {
+    
+    /* FIXME: Utility functions copied from src/modules/bugs/samplers/MNormal.cc */
+    
+    // Target effective sample size 
+    static double ESS(unsigned long t, double b, double n0) {
+	if (t <= 1) {
+	    return n0 + t;
+	} else {
+	    return n0 + 1 + b*(t-1);
+	}
+    }
+    
+    // Returns learning rate for the sample mean and variance for
+    // a given sample size t.
+    static double solve_lambda(unsigned long t, double b, double n0) {
+	double S0 = ESS(t-1, b, n0);
+	double S1 = ESS(t, b, n0);
+	double delta = S1 - S0;
+	
+	return (1 + sqrt(S0*(1-delta)/S1))/(1 + S0);
+    }
+
 
 RWMetropolis::RWMetropolis(vector<double> const &value, double step,
 			   double a, double delta, double nstart, double min_step)
-    : Metropolis(value), _step_adapter(step, a, delta, nstart, min_step), _niter(0)
+    : Metropolis(value), _step_adapter(step, a, delta, nstart, min_step), _niter(0), _pmean(0)
 {
-    _psum[0] = 0.0;
-    _psum[1] = 0.0;
 }
 
 RWMetropolis::~RWMetropolis()
@@ -30,18 +50,8 @@ void RWMetropolis::rescale(double p)
     p = min(p, 1.0);
     _step_adapter.rescale(p);
 
-    /* The array _psum[2] holds a running total of the acceptance
-       probabilities for the last 100-200 iterations. Every 100
-       iterations we put the sum of the last 100 iterations in
-       _psum[1] and start the sum again in _psum[0].
-    */
-    if (_niter / 100 > 0 && _niter % 100 == 0) {
-	_psum[1] = _psum[0];
-	_psum[0] = 0.0;
-
-    }
-    _psum[0] += p;
     _niter++;
+    _pmean += solve_lambda(_niter, 0.5, 100) * (p - _pmean);
 }
 
 void RWMetropolis::update(RNG *rng)
@@ -63,10 +73,7 @@ bool RWMetropolis::checkAdaptation() const
 {
     if (_niter < 100) return false;
 
-    /* Average acceptance probability over the last 100-200 iterations */
-    double pmean = (_psum[0] + _psum[1])/(100 + (_niter % 100));
-    
-    return fabs(_step_adapter.logitDeviation(pmean)) < 0.5;
+    return fabs(_step_adapter.logitDeviation(_pmean)) < 0.5;
 }
 
 void RWMetropolis::step(vector<double> &value, double s, RNG *rng) const

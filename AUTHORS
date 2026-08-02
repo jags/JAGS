@@ -1,8 +1,8 @@
-This code is copyright (C) 2002-10 Martyn Plummer, with the following
+This code is copyright (C) 2002-26 Martyn Plummer, with the following
 exceptions:
 
 The library JRmath is a version of the R math library from R version
-2.10.1., copyright (C), 1998-2000 Ross Ihaka, Robert Gentleman, The
+2.10.1., copyright (C), 1998-2026 Ross Ihaka, Robert Gentleman, The
 R Core Development Team, The R Foundation, and Morten Welinder (see
 individual source files for details).  Part of the R math library is
 also found in the file src/lib/rng/RmathRNG.cc
@@ -29,3 +29,6 @@ The file LGMix.cc in the glm module contains code to approximate the
 negative log-gamma distribution by a mixture of normals, originally
 written by Rudolf Fruewirth and taken from the GMRFLib library by
 Havard Rue.
+
+The elliptical slice sampler for the multivarate normal distribution
+in the bugs module was contributed by Marcel Jonker

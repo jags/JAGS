@@ -1,4 +1,3 @@
-
 #include <config.h>
 #include <model/Model.h>
 #include <model/MonitorFactory.h>
@@ -15,6 +14,7 @@
 #include <graph/NodeError.h>
 #include <graph/Node.h>
 #include <util/nainf.h>
+#include <util/parallel.h>
 
 #include <fstream>
 #include <sstream>
@@ -25,6 +25,7 @@
 #include <functional>
 #include <map>
 #include <cmath>
+#include <atomic>
 
 using std::map;
 using std::pair;
@@ -45,10 +46,6 @@ using std::reverse;
 using std::find;
 using std::isfinite;
 using std::max;
-
-using std::exception_ptr;
-using std::current_exception;
-using std::rethrow_exception;
 
 namespace jags {
 
@@ -401,44 +398,31 @@ void Model::update(unsigned int niter)
     if (!_is_initialized) {
 	throw logic_error("Attempt to update uninitialized model");
     }
-    
-    /* 
-       We must catch and rethrow exceptions that are thrown from
-       individual threads so they can be handled by the Console.
-    */
-    exception_ptr teptr = nullptr;
-    
-    for (unsigned int iter = 0; iter < niter; ++iter) {    
+      
+    for (unsigned int iter = 0; iter < niter; ++iter) {
 
-#ifdef _OPENMP	
-        #pragma omp parallel for num_threads(_nthread)
-#endif
-	for (unsigned int n = 0; n < _nchain; ++n) {
-	    try {
-		for (vector<Sampler*>::iterator i = _samplers.begin(); 
-		     i != _samplers.end(); ++i) 
-		{
+	/*
+	  parallel_for is defined in <util/parallel.h>. Here it is used to run
+	  chains in parallel using either an OpenMP backend (Linux, Windows) or
+	  GCD (macOS). The parallel_for function is exception safe and will
+	  rethrow exceptions caught by individual threads.
+	*/
+	parallel_for(
+	    0,
+	    _nchain,
+	    [&](size_t n) {
+		for (auto i = _samplers.begin(); i != _samplers.end(); ++i) {
 		    (*i)->update(n, _rng[n]);
 		}
 		
-		for (vector<Node*>::const_iterator k = _sampled_extra.begin();
-		     k != _sampled_extra.end(); ++k)
-		{
+		for (auto k = _sampled_extra.begin(); k != _sampled_extra.end(); ++k) {
 		    if (!(*k)->checkParentValues(n)) {
 			throw NodeError(*k, "Invalid parent values");
 		    }
 		    (*k)->randomSample(_rng[n], n);
 		}
-	    }
-	    catch(...) {
-		teptr = current_exception();
-	    }
-	    
-	}
-
-	if (teptr) {
-	    rethrow_exception(teptr);
-	}
+	    },
+	    _nthread);
 	
 	_iteration++;
 
@@ -447,8 +431,8 @@ void Model::update(unsigned int niter)
 	{
 	    k->update(_iteration);
 	}
-    }
 
+    }
 }
 
 unsigned int Model::iteration() const

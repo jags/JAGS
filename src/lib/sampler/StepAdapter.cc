@@ -15,6 +15,9 @@ using std::min;
 
 namespace jags {
 
+
+
+
     StepAdapter::StepAdapter(double step, double a, double delta, double nstart, double min_step)
 	: _a(a), _delta(delta), _theta0(log(step)), _theta(_theta0), _min_step(min_step),
 	  _n(0), _nstart0(nstart), _nstart(nstart)

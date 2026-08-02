@@ -94,6 +94,8 @@ if test "${win}" = "true"; then
 FCFLAGS="$FCFLAGS -fopenmp"
 fi
 
+JAGS_GCD
+
 ## Mixed C++ and Fortran libraries must be linked with C++, but
 ## the C++ compiler knows nothing about the runtime Fortran
 ## libraries. This macros finds  the appropriate libraries and

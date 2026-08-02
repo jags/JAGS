@@ -96,13 +96,16 @@ namespace jags {
 	    for (unsigned long i = 1; i < stage; ++i) {
 		double pf = pforward(xlist, logdensity, sigma_chol, ss, end, end+i);
 		double pb = pbackward(xlist, logdensity, sigma_chol, ss, start, start-i);
-		if (pf == 1 || pb == 1 || pf == -1 || pb == -1) {
-		    return -1;
+		if (pb == 1) {
+		    /* The reverse path is invalid because we should have accepted a previous
+		       proposal with probability 1. */
+		    return 0.0;
 		}
 		double N = (1 - pf) * dstep(xlist[end+i], xlist[end], sigma_chol, ss[i-1]);
 		double D = (1 - pb) * dstep(xlist[start-i], xlist[start], sigma_chol, ss[i-1]);
 		alpha *= N / D;
 	    }
+	    
 	    return min(1.0, alpha);
 	}
 
@@ -117,8 +120,10 @@ namespace jags {
 	    for (unsigned long i = 1; i < stage; ++i) {
 		double pb = pbackward(xlist, logdensity, sigma_chol, ss, end, end-i);
 		double pf = pforward(xlist, logdensity, sigma_chol, ss, start, start+i);
-		if (pf == 1 || pb == 1 || pf == -1 || pb == -1) {
-		    return -1;
+		if (pf == 1) {
+		    /* The forward path is invalid because we should have accepted a previous
+		       proposal with probability 1. NB This should never happen in practice. */
+		    return 0.0;
 		}
 		double N = (1 - pb) * dstep(xlist[end-i], xlist[end], sigma_chol, ss[i-1]);
 		double D = (1 - pf) * dstep(xlist[start+i], xlist[start], sigma_chol, ss[i-1]);
@@ -137,8 +142,7 @@ namespace jags {
 					vector<double> const &ss,
 					unsigned long ntry)
 	{
-	    double alpha = pforward(xlist, logdensity, sigma_chol, ss, 0, ntry);
-	    return max(0.0, alpha);
+	    return pforward(xlist, logdensity, sigma_chol, ss, 0, ntry);
 	}
 
 	
@@ -166,7 +170,7 @@ namespace jags {
 	static vector<double> initSigma(SingletonGraphView const *gv,
 					double prior_scale)
 	{
-	    /* Initialzies Variance matrix to be a diagonal matrix
+	    /* Initializes Variance matrix to be a diagonal matrix
 	     * with diagonal elements equal to prior_scale */
 	    unsigned long d = gv->length();
 	    vector<double> Sigma(d*d, 0);
