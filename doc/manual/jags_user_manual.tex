@@ -2503,7 +2503,7 @@ array arguments with conforming dimensions.
 %Cross-reference to language chapter on functions
 
 
-\begin{table}
+\begin{table}[p]
 \begin{center}
 \begin{tabular}{llll}
 \hline
@@ -2561,34 +2561,72 @@ overflow. Following the convention for logical arguments in JAGS, zero
 is considered FALSE and any non-zero value is true. The Bessel functions
 \texttt{BesselJ} and \texttt{BesselY} take only two arguments.
 
+\clearpage
+
 \subsection{Scalar-valued functions with array arguments}
 
 Table \ref{table:bugs:scalar2} lists the scalar-valued functions in the
-\texttt{bugs} module that take general arguments. Unless otherwise
-stated in table \ref{table:bugs:scalar2}, the arguments to these functions
-may be scalar, vector, or higher-dimensional arrays.
+\texttt{bugs} module that take general arguments.
 
-\begin{table}
+\begin{table}[h]
+  \centering
 \begin{tabular}{lll}
 \hline
-Function & Description & Restrictions \\
+Function & Description \\
 \hline
-\verb+inprod(x1,x2)+ & Inner product & Dimensions of $x1$, $x2$ conform \\
-\verb+interp.lin(e,v1,v2)+ & Linear Interpolation & $e$ scalar, \\
-                          &                     & $v1,v2$ conforming vectors \\
-\verb+max(x1,x2,...)+ & Maximum element among all arguments & \\
-\verb+mean(x)+  & Mean of elements of $x$ & \\
-\verb+min(x1,x2,...)+ & Minimum element among all arguments & \\
-\verb+prod(x)+  & Product of elements of $x$ & \\
-\verb+sd(x)+    & Standard deviation of elements of $x$ & \\
-\verb+sum(x1,x2,...)+   & Sum of elements of all arguments & \\
+\verb+inprod(x1,x2)+ & Inner product \\
+\verb+max(x1,x2,...)+ & Maximum element among all arguments \\
+\verb+mean(x)+  & Mean of elements of $x$ \\
+\verb+min(x1,x2,...)+ & Minimum element among all arguments \\
+\verb+prod(x)+  & Product of elements of $x$ \\
+\verb+sd(x)+    & Standard deviation of elements of $x$ \\
+\verb+sum(x1,x2,...)+   & Sum of elements of all arguments \\
 \hline
 \end{tabular}
 \caption{Scalar-valued functions with general
-  arguments in the \texttt{bugs} module \label{table:bugs:scalar2},
+  arguments in the \texttt{bugs} module \label{table:bugs:scalar2}.
   Ellipses ($\ldots$) mean that the function takes a variable number of
   arguments}
 \end{table}
+
+\subsection{Linear interpolation functions}
+
+\begin{table}[h]
+  \centering
+\begin{tabular}{lll}
+\hline
+Function & Description \\
+\hline
+\verb+interp.lin(p, gx, v)+    & Linear Interpolation \\
+\verb+interp.lin2d(p, gx, gy, v)+ & Bilinear Interpolation \\
+\verb+interp.lin3d(p, gx, gy, gz, v)+ & Trilinear Interpolation \\
+\hline
+\end{tabular}
+\caption{Linear interpolation functions in the \texttt{bugs} module \label{table:bugs:interplin}}
+\end{table}
+
+\JAGS\ can carry out function approximation by linear interpolation in
+up to 3 dimensions using the \texttt{interp.lin*} functions shown in
+table~\ref{table:bugs:interplin}. The arguments are:
+\begin{itemize}
+\item A point in space $p$ at which the function is to be
+  approximated. For \texttt{interp.lin} $p$ is a scalar. For
+  \texttt{interp.lin2d} and \texttt{interp.lin3d} it is a vector of
+  length 2 and 3 respectively.
+\item A sequence of up to 3 grid vectors $gx,gy,gz$, one for each
+  dimension, showing the coordinates at which the target function has
+  been evaluated. All grid vectors must be strictly increasing and of
+  length at least 2.
+\item An array $v$ giving the values of the target function evaluated
+  on a grid defined by the outer product of the grid vectors. For
+  \texttt{interp.lin}, $v$ is a vector, for \texttt{interp.lin2d} it
+  is a matrix, and for \texttt{interp.lin3d} it is a 3-dimensional
+  array.
+\end{itemize}
+If a point $p$ is outside of the grid in any dimension then it takes
+the value of nearest boundary point.  For example, the output of
+\texttt{interp.lin} is constant below the lowest grid value and above
+the highest grid value.
 
 \subsection{Vector constructor functions}
 
