@@ -77,7 +77,7 @@ namespace jags {
 	InterpLin2D::checkParameterDim(vector<vector<unsigned long>> const &dims) const
 	{
 	    // Check that the coordinate parameter is a vector of length 2
-	    if (!isVector(dims[0]) || dims[0].size() != 2) {
+	    if (dims[0].size() != 1 || dims[0][0] != 2UL) {
 		return false;
 	    }
 	    
@@ -87,12 +87,12 @@ namespace jags {
 	    if (!isVector(dims[1]) || !isVector(dims[2]) || !isMatrix(dims[3])) {
 		return false;
 	    }
+
 	    // Check that the lengths of the grid parameters conform
 	    // with the value dimensions
 	    if (dims[3][0] != dims[1][0] || dims[3][1] != dims[2][0]) {
 		return false;
 	    }
-	    
 	    return true;
 	}
 	

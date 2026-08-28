@@ -101,16 +101,21 @@ namespace jags {
 	InterpLin3D::checkParameterDim (vector<vector<unsigned long>> const &dims) const
 	{
 	    // Check that the coordinate parameter is a vector of length 3
-	    if (!isVector(dims[0]) || dims[0].size() != 3) {
+	    if (dims[0].size() != 1 || dims[0][0] != 3UL) {
 		return false;
 	    }
 
-	    // Check that grid parameters are vectors and value parameter is an array
+	    // Check that grid parameters are vectors
 	    // NB This enforces grid lengths >= 2 which is required by find_grid_index.
 	    if (!isVector(dims[1]) || !isVector(dims[2]) || !isVector(dims[3]) || !isArray(dims[4])) {
 		return false;
 	    }
 
+	    // Check that value array has 3 dimensions
+	    if (dims[4].size() != 3) {
+		return false;
+	    }
+	    
 	    // Check that the lengths of the grid parameters conform with the value dimensions
 	    if (dims[4][0] != dims[1][0] || dims[4][1] != dims[2][0] || dims[4][2] != dims[3][0]) {
 		return false;
