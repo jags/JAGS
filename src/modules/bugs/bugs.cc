@@ -64,6 +64,8 @@
 #include <functions/ILogit.h>
 #include <functions/InProd.h>
 #include <functions/InterpLin.h>
+#include <functions/InterpLin2D.h>
+#include <functions/InterpLin3D.h>
 #include <functions/Inverse.h>
 #include <functions/InverseLU.h>
 #include <functions/LogDet.h>
@@ -180,6 +182,8 @@ namespace bugs {
 	insert(new ILogit);
 	insert(new InProd);
 	insert(new InterpLin);
+	insert(new InterpLin2D);
+	insert(new InterpLin3D);
 	insert(new Inverse);
 	insert(new InverseLU);
 	insert(new Log);
