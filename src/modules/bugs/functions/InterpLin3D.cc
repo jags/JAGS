@@ -61,7 +61,7 @@ namespace jags {
 	}
 
 	InterpLin3D::InterpLin3D()
-	    : ArrayFunction("interp.lin2d", 5)
+	    : ArrayFunction("interp.lin3d", 5)
 	{
 	}
 
