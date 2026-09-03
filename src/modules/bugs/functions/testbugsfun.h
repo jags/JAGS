@@ -38,6 +38,7 @@ class BugsFunTest : public CppUnit::TestFixture, public JAGSFixture
     //CPPUNIT_TEST( inprod );
     CPPUNIT_TEST( ifelse );
     CPPUNIT_TEST( interplin );
+    CPPUNIT_TEST( interplinCube );
     CPPUNIT_TEST( discrete );
     CPPUNIT_TEST( combine );
     CPPUNIT_TEST( rep );
@@ -64,6 +65,8 @@ class BugsFunTest : public CppUnit::TestFixture, public JAGSFixture
     jags::LinkFunction   *_ilogit;
     jags::VectorFunction *_inprod;
     jags::VectorFunction *_interplin;
+    jags::ArrayFunction  *_interplin2d;
+    jags::ArrayFunction  *_interplin3d;
     jags::ArrayFunction  *_inverse;
     jags::ArrayFunction  *_inverse_lu;
     jags::ArrayFunction  *_logdet;
@@ -159,6 +162,7 @@ class BugsFunTest : public CppUnit::TestFixture, public JAGSFixture
     void ifelse();
     void discrete();
     void interplin();
+    void interplinCube();
     void combine();
     void rep();
     void grad();

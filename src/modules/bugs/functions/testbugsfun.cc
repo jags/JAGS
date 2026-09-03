@@ -25,6 +25,8 @@
 #include "ILogit.h"
 #include "InProd.h"
 #include "InterpLin.h"
+#include "InterpLin2D.h"
+#include "InterpLin3D.h"
 #include "Inverse.h"
 #include "InverseLU.h"
 #include "LogDet.h"
@@ -75,6 +77,8 @@ using std::string;
 using std::equal;
 using std::copy;
 using std::pair;
+using std::min;
+using std::max;
 
 #include <climits>
 #include <cmath>
@@ -148,6 +152,8 @@ void BugsFunTest::setUp()
     //Odds and sods
     _ifelse = new jags::bugs::IfElse;
     _interplin = new jags::bugs::InterpLin;
+    _interplin2d = new jags::bugs::InterpLin2D;
+    _interplin3d = new jags::bugs::InterpLin3D;
     _combine = new jags::bugs::Combine;
     _rep = new jags::bugs::Rep;
 }
@@ -221,6 +227,8 @@ void BugsFunTest::tearDown()
     //Odds and sods
     delete _ifelse;
     delete _interplin;
+    delete _interplin2d;
+    delete _interplin3d;
     delete _combine;
     delete _rep;
 }
@@ -293,6 +301,8 @@ void BugsFunTest::npar()
     //Odds and sods
     CPPUNIT_ASSERT_EQUAL(_ifelse->npar(), 3UL);
     CPPUNIT_ASSERT_EQUAL(_interplin->npar(), 3UL);
+    CPPUNIT_ASSERT_EQUAL(_interplin2d->npar(), 4UL);
+    CPPUNIT_ASSERT_EQUAL(_interplin3d->npar(), 5UL);
     CPPUNIT_ASSERT(checkNPar(_combine, 1));
     CPPUNIT_ASSERT(checkNPar(_combine, 2));
     CPPUNIT_ASSERT(checkNPar(_combine, 3));
@@ -367,6 +377,8 @@ void BugsFunTest::name()
     CPPUNIT_ASSERT_EQUAL(string("ifelse"), _ifelse->name());
     CPPUNIT_ASSERT_EQUAL(string("inprod"), _inprod->name());
     CPPUNIT_ASSERT_EQUAL(string("interp.lin"), _interplin->name());
+    CPPUNIT_ASSERT_EQUAL(string("interp.lin2d"), _interplin2d->name());
+    CPPUNIT_ASSERT_EQUAL(string("interp.lin3d"), _interplin3d->name());
     CPPUNIT_ASSERT_EQUAL(string("c"), _combine->name());
     CPPUNIT_ASSERT_EQUAL(string("rep"), _rep->name());
 }
@@ -439,6 +451,8 @@ void BugsFunTest::alias()
     CPPUNIT_ASSERT_EQUAL(string(""), _ifelse->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _inprod->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _interplin->alias());
+    CPPUNIT_ASSERT_EQUAL(string(""), _interplin2d->alias());
+    CPPUNIT_ASSERT_EQUAL(string(""), _interplin3d->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _combine->alias());
     CPPUNIT_ASSERT_EQUAL(string(""), _rep->alias());
 }
@@ -988,6 +1002,8 @@ void BugsFunTest::slap()
     CPPUNIT_ASSERT(neverclosed(_logdet, 1));
 
     CPPUNIT_ASSERT(neverclosed(_interplin, 3));
+    CPPUNIT_ASSERT(neverclosed(_interplin2d, 4));
+    CPPUNIT_ASSERT(neverclosed(_interplin3d, 5));
     CPPUNIT_ASSERT(neverclosed(_rep, 2));
 }
 
@@ -1262,6 +1278,7 @@ void BugsFunTest::inprod()
     CPPUNIT_ASSERT(!checkargs(_inprod, x4, y3));
 }
 
+
 void BugsFunTest::interplin()
 {
     double x[6] = {-10, -0.5, 0, 1.2, 3.8, 77};
@@ -1287,6 +1304,88 @@ void BugsFunTest::interplin()
     //Extrapolation beyond break points
     CPPUNIT_ASSERT_EQUAL(y[5], eval(_interplin, JAGS_POSINF, x, y));
     CPPUNIT_ASSERT_EQUAL(y[0], eval(_interplin, JAGS_NEGINF, x, y));
+}
+
+void BugsFunTest::interplinCube()
+{
+    /* Test 2D and 3D interpolation functions using a linear function
+       defined on a cuboid */
+    
+    //Define the corners of the cuboid
+    const vector<double> cx = {-1.0, 1.2};
+    const vector<double> cy = {-2.0, -1.7};
+    const vector<double> cz = {0.0, 0.73};
+
+    //Test function
+    auto F = [&](double x, double y, double z) {
+	// Clamp arguments to the corners of a cube
+	x = max(cx[0], min(x, cx[1]));
+	y = max(cy[0], min(y, cy[1]));
+	z = max(cz[0], min(z, cz[1]));
+	// Function is linear inside the cube
+	return -2.0 + 0.2 *x + 0.3 * y - 0.4 * z;
+    };
+
+    //Evaluate test function at the corners of the cuboid
+    vector<double> f2(4), f3(8);
+    for (unsigned int i = 0; i < 2; ++i) {
+	for (unsigned int j = 0; j < 2; ++j) {
+	    f2[i + 2*j] = F(cx[i], cy[j], cz[0]);
+	    for (unsigned int k = 0; k < 2; ++k) {
+		f3[i + 2*(j + 2*k)] = F(cx[i], cy[j], cz[k]);
+	    }
+	}
+    }
+
+    // Set limits for x,y,z outside the original cuboid
+    auto pad = [](vector<double> const &x, double delta) {
+	vector<double> y(2);
+	y[0] = x[0] - delta;
+	y[1] = x[1] + delta;
+	return y;
+    };
+	
+    const vector<double> xlim = pad(cx, 0.1);
+    const vector<double> ylim = pad(cy, 0.12);
+    const vector<double> zlim = pad(cz, 0.07);
+
+    //Number of interpolation points in each direction is N+1
+    unsigned int N = 15;
+
+    // Prepare arguments for passing to aeval
+    array_value acx(cx, vector<unsigned long>(1, 2UL));
+    array_value acy(cy, vector<unsigned long>(1, 2UL));
+    array_value v2(f2, vector<unsigned long>(2, 2UL));
+
+    // Check 2D interpolation
+    vector<double> p2(2);
+    for (unsigned int i = 0; i <= N; ++i) {
+	p2[0] = ((N - i) * xlim[0] + i * xlim[1])/ N;
+	for (unsigned int j = 0; j <= N; ++j) {
+	    p2[1] = ((N - j) * ylim[0] + j * ylim[1])/ N;
+	    array_value ap(p2, {2UL});
+	    double ans = eval(_interplin2d, ap, acx, acy, v2);
+	    CPPUNIT_ASSERT_DOUBLES_EQUAL(F(p2[0], p2[1], cz[0]), ans, tol);
+	}
+    }
+
+    array_value acz(cz, vector<unsigned long>(1, 2UL));
+    array_value v3(f3, vector<unsigned long>(3, 2UL));
+    
+    // Check 3D interpolation
+    vector<double> p3(3);
+    for (unsigned int i = 0; i <= N; ++i) {
+	p3[0] = ((N - i) * xlim[0] + i * xlim[1])/ N;
+	for (unsigned int j = 0; j <= N; ++j) {
+	    p3[1] = ((N - j) * ylim[0] + j * ylim[1])/ N;
+	    for (unsigned int k = 0; k <= N; ++k) {
+		p3[2] = ((N - k) * zlim[0] + k * zlim[1])/ N;
+		array_value ap(p3, {3UL});
+		double ans = eval(_interplin3d, ap, acx, acy, acz, v3);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(F(p3[0], p3[1], p3[2]), ans, tol);
+	    }
+	}
+    }
 }
 
 void BugsFunTest::ifelse()
