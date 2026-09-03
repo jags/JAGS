@@ -353,4 +353,51 @@ array_value aeval(jags::ArrayFunction const *f, array_value const &x,
 bool checkargs(jags::ArrayFunction const *f, array_value const &x,
 	       array_value const &y);
 
+
+// Array function taking 3 arguments
+
+array_value aeval(jags::ArrayFunction const *f, array_value const &x,
+		  array_value const &y, array_value const &z);
+
+bool checkargs(jags::ArrayFunction const *f, array_value const &x,
+	       array_value const &y, array_value const &z);
+
+// Array function taking 4 arguments
+
+array_value aeval(jags::ArrayFunction const *f, array_value const &x,
+		  array_value const &y, array_value const &z,
+		  array_value const &u);
+
+bool checkargs(jags::ArrayFunction const *f, array_value const &x,
+	       array_value const &y, array_value const &z,
+	       array_value const &u);
+
+// Array function taking 5 arguments
+
+array_value aeval(jags::ArrayFunction const *f, array_value const &x,
+		  array_value const &y, array_value const &z,
+		  array_value const &u, array_value const &v);
+
+bool checkargs(jags::ArrayFunction const *f, array_value const &x,
+	       array_value const &y, array_value const &z,
+	       array_value const &u, array_value const &v);
+
+/* Array functions returning a scalar */
+
+double eval(jags::ArrayFunction const *f, array_value const &x);
+
+double eval(jags::ArrayFunction const *f, array_value const &x,
+	    array_value const &y);
+
+double eval(jags::ArrayFunction const *f, array_value const &x,
+	    array_value const &y, array_value const &z);
+
+double eval(jags::ArrayFunction const *f, array_value const &x,
+	    array_value const &y, array_value const &z,
+	    array_value const &u);
+
+double eval(jags::ArrayFunction const *f, array_value const &x,
+	    array_value const &y, array_value const &z,
+	    array_value const &u, array_value const &v);
+
 #endif /* FUNC_TEST_H_ */

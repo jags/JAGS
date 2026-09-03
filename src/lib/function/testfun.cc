@@ -16,7 +16,6 @@ using jags::product;
 #include <climits>
 #include <cmath>
 #include <algorithm>
-#include <list> //debuggin
 
 using std::vector;
 using std::string;
@@ -25,7 +24,6 @@ using std::floor;
 using std::isfinite;
 using std::isnan;
 using std::pair;
-using std::list;
 
 /* All functions */
 
@@ -674,7 +672,6 @@ double eval(VectorFunction const *f, vector<double> const &x,
   Array functions
 */
 
-
 static vector<bool> discreteMask(vector<double const *> const &args,
 				 vector<vector<unsigned long>> const &dims)
 {
@@ -699,7 +696,7 @@ static bool checkAArgs(ArrayFunction const *f,
 		       vector<vector<unsigned long>> const &dims)
 {
     return args.size() == dims.size() &&
-	checkNPar(f, args.size()) &&
+	checkNPar(f, args.size())  &&
 	f->checkParameterDim(dims) &&
 	f->checkParameterDiscrete(discreteMask(args, dims)) &&
 	f->checkParameterValue(args, dims);
@@ -710,7 +707,7 @@ checkAEval(ArrayFunction const *f,
 	   vector<double const *> const &args,
 	   vector<vector<unsigned long>> const &argdims)
 {
-    // Evaluate vector function with checks
+    // Evaluate array function with checks
     CPPUNIT_ASSERT_MESSAGE(string("Valid arguments for ") + f->name(),
 			   checkAArgs(f, args, argdims));
     vector<unsigned long> dim = f->dim(argdims, args);
@@ -721,29 +718,51 @@ checkAEval(ArrayFunction const *f,
     return pair<vector<double>, vector<unsigned long>> (value, dim);
 }
 
-vector<double const *> mkArgs()
+static double const *getData(array_value const &a)
 {
-    return vector<double const*>();
+    return a.first.data();
 }
 
-template<typename T, typename... Args>
-vector<double const *> mkArgs(T const &arg1, Args... args)
+static vector<unsigned long> const &getDims(array_value const &a)
 {
-    vector<double const *> v = mkArgs(args...);
-    v.insert(v.begin(), arg1.first.data());
+    return a.second;
+}
+
+void addArgs(vector<double const *> const &v)
+{
+}
+
+template<typename... Args>
+void addArgs(vector<double const *> &v, array_value const &arg1, Args&... args)
+{
+    v.push_back(getData(arg1));
+    addArgs(v, args...);
+}
+
+template<typename... Args>
+vector<double const *> mkArgs(Args&... args)
+{
+    vector<double const *> v;
+    addArgs(v, args...);
     return v;
 }
 
-vector<vector<unsigned long>> mkDims()
+void addDims(vector<vector<unsigned long>> const &v)
 {
-    return vector<vector<unsigned long>>();
 }
 
-template<typename T, typename... Args>
-vector<vector<unsigned long>> mkDims(T const &arg1, Args... args)
+template<typename... Args>
+void addDims(vector<vector<unsigned long>> &v, array_value const &arg1, Args&... args)
 {
-    vector<vector<unsigned long>> v = mkDims(args...);
-    v.insert(v.begin(), arg1.second);
+    v.push_back(getDims(arg1));
+    addDims(v, args...);
+}
+
+template<typename... Args>
+vector<vector<unsigned long>> mkDims(Args&... args)
+{
+    vector<vector<unsigned long>> v;
+    addDims(v, args...);
     return v;
 }
 
@@ -773,8 +792,10 @@ bool checkargs(ArrayFunction const *f, array_value const &x)
     return checkAArgs(f, mkArgs(x), mkDims(x));
 }
 
+// Array function taking 2 arguments
+
 array_value aeval(ArrayFunction const *f, array_value const &x,
-    array_value const &y)
+		  array_value const &y)
 {
     return checkAEval(f, mkArgs(x,y), mkDims(x,y));
 }
@@ -784,4 +805,101 @@ bool checkargs(ArrayFunction const *f, array_value const &x,
 	       array_value const &y)
 {
     return checkAArgs(f, mkArgs(x,y), mkDims(x,y));
+}
+
+// Array function taking 3 arguments
+
+array_value aeval(ArrayFunction const *f, array_value const &x,
+		  array_value const &y, array_value const &z)
+{
+    return checkAEval(f, mkArgs(x,y,z), mkDims(x,y,z));
+}
+
+
+bool checkargs(ArrayFunction const *f, array_value const &x,
+	       array_value const &y, array_value const &z)
+{
+    return checkAArgs(f, mkArgs(x,y,z), mkDims(x,y,z));
+}
+
+// Array function taking 4 arguments
+
+array_value aeval(ArrayFunction const *f, array_value const &x,
+		  array_value const &y, array_value const &z,
+		  array_value const &u)
+{
+    return checkAEval(f, mkArgs(x,y,z,u), mkDims(x,y,z,u));
+}
+
+
+bool checkargs(ArrayFunction const *f, array_value const &x,
+	       array_value const &y, array_value const &z,
+	       array_value const &u)
+{
+    return checkAArgs(f, mkArgs(x,y,z,u), mkDims(x,y,z,u));
+}
+
+// Array function taking 5 arguments
+
+array_value aeval(ArrayFunction const *f, array_value const &x,
+		  array_value const &y, array_value const &z,
+		  array_value const &u, array_value const &v)
+{
+    return checkAEval(f, mkArgs(x,y,z,u,v), mkDims(x,y,z,u,v));
+}
+
+
+bool checkargs(ArrayFunction const *f, array_value const &x,
+	       array_value const &y, array_value const &z,
+	       array_value const &u, array_value const &v)
+{
+    return checkAArgs(f, mkArgs(x,y,z,u,v), mkDims(x,y,z,u,v));
+}
+
+/* Array functions returning a scalar */
+
+double eval(ArrayFunction const *f, array_value const &x)
+{
+    array_value ans = checkAEval(f, mkArgs(x), mkDims(x));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
+    CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
+    return ans.first[0];
+}
+
+double eval(ArrayFunction const *f, array_value const &x,
+	    array_value const &y)
+{
+    array_value ans = checkAEval(f, mkArgs(x,y), mkDims(x,y));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
+    CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
+    return ans.first[0];
+}
+
+double eval(ArrayFunction const *f, array_value const &x,
+	    array_value const &y, array_value const &z)
+{
+    array_value ans = checkAEval(f, mkArgs(x,y,z), mkDims(x,y,z));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
+    CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
+    return ans.first[0];
+}
+
+double eval(ArrayFunction const *f, array_value const &x,
+	    array_value const &y, array_value const &z,
+	    array_value const &u)
+{
+    array_value ans = checkAEval(f, mkArgs(x,y,z,u), mkDims(x,y,z,u));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
+    CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
+    return ans.first[0];
+}
+
+double eval(ArrayFunction const *f, array_value const &x,
+	    array_value const &y, array_value const &z,
+	    array_value const &u, array_value const &v)
+{
+    array_value ans = checkAEval(f, mkArgs(x,y,z,u,v), mkDims(x,y,z,u,v));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
+    CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
+    return ans.first[0];
 }
