@@ -23,34 +23,6 @@ using std::copy;
 using std::floor;
 using std::isfinite;
 using std::isnan;
-using std::pair;
-
-/* All functions */
-
-bool isdiscrete(Function const *f, bool mask1)
-{
-    CPPUNIT_ASSERT(checkNPar(f, 1));
-    return f->isDiscreteValued(vector<bool>(1, mask1));
-}
-
-bool isdiscrete(Function const *f, bool mask1, bool mask2)
-{
-    CPPUNIT_ASSERT(checkNPar(f, 2));
-    vector<bool> arg(2);
-    arg[0] = mask1;
-    arg[1] = mask2;
-    return f->isDiscreteValued(arg);
-}
-
-bool isdiscrete(Function const *f, bool mask1, bool mask2, bool mask3)
-{
-    CPPUNIT_ASSERT(checkNPar(f, 3));
-    vector<bool> arg(3);
-    arg[0] = mask1;
-    arg[1] = mask2;
-    arg[2] = mask3;
-    return f->isDiscreteValued(arg);
-}
 
 class BoolIterator : public std::vector<bool>
 {
@@ -150,6 +122,27 @@ bool neverclosed(Function const *f, unsigned long npar)
 	neverpow(f, npar) && neveradditive(f, npar);
 }
 
+/* Link functions */
+
+double eval(LinkFunction const *f, double x)
+{
+    return f->inverseLink(x);
+}
+
+double gradient(LinkFunction const *f, double x)
+{
+    return f->grad(x);
+}
+
+double numgradient(LinkFunction const *f, double x, double delta)
+{
+    double y1 = eval(f, x - delta);
+    double y2 = eval(f, x + delta);
+	
+    return (y2 - y1)/(2*delta);
+}
+
+
 /* Scalar functions */
 
 static bool checkval(ScalarFunction const *f, double x)
@@ -193,7 +186,6 @@ void checkLimits(ScalarFunction const *f, double lower, double upper)
 	CPPUNIT_ASSERT_MESSAGE(f->name(), !checkval(f, lower));
     }
 }
-
     
 static vector<bool> discreteMask(vector<double const *> const &args)
 {
@@ -209,8 +201,8 @@ static vector<bool> discreteMask(vector<double const *> const &args)
     return out;
 }
 
-static bool checkArgs(ScalarFunction const *f,
-		      vector<double const *> const &args)
+bool checkArgs(ScalarFunction const *f,
+	       vector<double const *> const &args)
 {
     //Check that arguments are valid
     return checkNPar(f, args.size()) &&
@@ -218,17 +210,17 @@ static bool checkArgs(ScalarFunction const *f,
 	f->checkParameterValue(args);
 }
 
-static double checkEval(ScalarFunction const *f,
-			vector<double const *> const &args)
+double Eval(ScalarFunction const *f,
+	    vector<double const *> const &args)
 {
     //Evaluate scalar function with checks
     CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args));
     return f->evaluate(args);
 }
 
-static double checkGradient(ScalarFunction const *f,
-			    vector<double const *> const &args,
-			    unsigned long i)
+double Gradient(ScalarFunction const *f,
+		vector<double const *> const &args,
+		unsigned long i)
 {
     //Evaluate gradient with checks
     CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args));
@@ -236,9 +228,9 @@ static double checkGradient(ScalarFunction const *f,
     return f->gradient(args, i);
 }
 
-static double numericGradient(ScalarFunction const *f,
-			      vector<double const*> const &args,
-			      unsigned long i, double delta)
+double NumGradient(ScalarFunction const *f,
+		   vector<double const*> const &args,
+		   unsigned long i, double delta)
 {
     CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args));
     CPPUNIT_ASSERT_MESSAGE(f->name(), f->hasGradient(i));
@@ -253,133 +245,14 @@ static double numericGradient(ScalarFunction const *f,
     }
 
     args0[i] = *args[i] - delta;
-    double y1 = checkEval(f, args1);
+    double y1 = Eval(f, args1);
     args0[i] = *args[i] + delta;
-    double y2 = checkEval(f, args1);
+    double y2 = Eval(f, args1);
 	
     return (y2 - y1)/(2*delta);
 }
 
-/* 
-   Evaluate a scalar function that takes a single argument
-*/
-
-static vector<double const *> mkArgs(double const *x)
-{
-    return vector<double const *>(1, x);
-}
-
-double eval(ScalarFunction const *f, const double x)
-{
-    return checkEval(f, mkArgs(&x));
-}
-
-bool checkargs(ScalarFunction const *f, const double x)
-{
-    return checkArgs(f, mkArgs(&x));
-}
-
-double gradient(ScalarFunction const *f, const double x)
-{
-    return checkGradient(f, mkArgs(&x), 0);
-}
-
-double numgradient(ScalarFunction const *f, const double x, double delta)
-{
-    return numericGradient(f, mkArgs(&x), 0, delta);
-}
-
-/* Link functions */
-
-double eval(LinkFunction const *f, double x)
-{
-    return f->inverseLink(x);
-}
-
-double gradient(LinkFunction const *f, double x)
-{
-    return f->grad(x);
-}
-
-double numgradient(LinkFunction const *f, double x, double delta)
-{
-    double y1 = eval(f, x - delta);
-    double y2 = eval(f, x + delta);
-	
-    return (y2 - y1)/(2*delta);
-}
-
-/* 
-   Evaluate a scalar function that takes two arguments
-*/
-vector<double const *> mkArgs(double const *x, double const *y)
-{
-    vector<double const *> args(2);
-    args[0] = x;
-    args[1] = y;
-    return args;
-}
-
-double eval(ScalarFunction const *f, double x, double y)
-{
-    return checkEval(f, mkArgs(&x, &y));
-}
-
-bool checkargs(ScalarFunction const *f, double x, double y)
-{
-    return checkArgs(f, mkArgs(&x, &y));
-}
-
-double gradient(ScalarFunction const *f, const double x, double y,
-		unsigned long i)
-{
-    CPPUNIT_ASSERT(i < 2UL);
-    return checkGradient(f, mkArgs(&x, &y), i);
-}
-
-double numgradient(ScalarFunction const *f, const double x, double y,
-		   unsigned long i, double delta)
-{
-    CPPUNIT_ASSERT(i < 2UL);
-    return numericGradient(f, mkArgs(&x, &y), i, delta);
-}
-
-/* 
-   Evaluate a scalar function that takes three arguments
-*/
-
-vector<double const *> mkArgs(double const *x, double const *y, double const *z)
-{
-    vector<double const *> args(3);
-    args[0] = x;
-    args[1] = y;
-    args[2] = z;
-    return args;
-}
-
-double eval(ScalarFunction const *f, double x, double y, double z)
-{
-    return checkEval(f, mkArgs(&x, &y, &z));
-}
-
-bool checkargs(ScalarFunction const *f, double x, double y, double z)
-{
-    return checkArgs(f, mkArgs(&x, &y, &z));
-}
-
-double gradient(ScalarFunction const *f, const double x, double y, double z,
-		unsigned long i)
-{
-    CPPUNIT_ASSERT(i < 3UL);
-    return checkGradient(f, mkArgs(&x, &y, &z), i);
-}
-
-double numgradient(ScalarFunction const *f, const double x, double y, double z,
-		   unsigned long i, double delta)
-{
-    CPPUNIT_ASSERT(i < 3UL);
-    return numericGradient(f, mkArgs(&x, &y, &z), i, delta);
-}
+/* Vector functions */
 
 static vector<bool> discreteMask(vector<double const *> const &args,
 				 vector<unsigned long> const &arglen)
@@ -399,9 +272,9 @@ static vector<bool> discreteMask(vector<double const *> const &args,
     return out;
 }
 			   
-static bool checkVArgs(VectorFunction const *f,
-		       vector<double const *> const &args,
-		       vector<unsigned long> const &arglen)
+bool checkArgs(VectorFunction const *f,
+		vector<double const *> const &args,
+		vector<unsigned long> const &arglen)
 {
     return args.size() == arglen.size() &&
 	checkNPar(f, args.size()) &&
@@ -410,26 +283,35 @@ static bool checkVArgs(VectorFunction const *f,
 	f->checkParameterValue(args, arglen);
 }
 
-static vector<double> checkVEval(VectorFunction const *f,
-				 vector<double const *> const &args,
-				 vector<unsigned long> const &arglen)
+vector<double> VEval(VectorFunction const *f,
+		     vector<double const *> const &args,
+		     vector<unsigned long> const &arglen)
 {
     // Evaluate vector function with checks
     CPPUNIT_ASSERT_MESSAGE(string("Valid arguments for ") + f->name(),
-			   checkVArgs(f, args, arglen));
+			   checkArgs(f, args, arglen));
     vector<double> ans(f->length(arglen, args));
     f->evaluate(&ans[0], args, arglen);
     return ans;
 }
 
-static vector<double> checkVGrad(VectorFunction const *f,
-				 vector<double const *> const &args,
-				 vector<unsigned long> const &arglen,
-				 unsigned long i)
+double Eval(VectorFunction const *f,
+	    vector<double const *> const &args,
+	    vector<unsigned long> const &arglen)
+{
+    vector<double> ans = VEval(f, args, arglen);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.size());
+    return ans[0];
+}
+
+vector<double> VGradient(VectorFunction const *f,
+			 vector<double const *> const &args,
+			 vector<unsigned long> const &arglen,
+			 unsigned long i)
 {
     //Evaluate gradient with checks
     CPPUNIT_ASSERT_MESSAGE(f->name(), f->hasGradient(i));
-    CPPUNIT_ASSERT_MESSAGE(f->name(), checkVArgs(f, args, arglen));
+    CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args, arglen));
     unsigned long n = f->length(arglen, args);
     unsigned long m = arglen[i];
     vector<double> ans(n * m, 0);
@@ -438,12 +320,12 @@ static vector<double> checkVGrad(VectorFunction const *f,
     return ans;
 }
 
-static vector<double> numericVGrad(VectorFunction const *f,
-				   vector<double const *> const &args,
-				   vector<unsigned long> const &arglen,
-				   unsigned long i, double delta)
+vector<double> VNumGradient(VectorFunction const *f,
+			    vector<double const *> const &args,
+			    vector<unsigned long> const &arglen,
+			    unsigned long i, double delta)
 {
-    CPPUNIT_ASSERT_MESSAGE(f->name(), checkVArgs(f, args, arglen));
+    CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args, arglen));
     CPPUNIT_ASSERT_MESSAGE(f->name(), f->hasGradient(i));
 
     //Create mutable copy of the arguments
@@ -463,9 +345,9 @@ static vector<double> numericVGrad(VectorFunction const *f,
     vector<double> ans(n * m, 0);
     for (unsigned long j = 0; j < arglen[i]; ++j) {
 	args0[i][j] = args[i][j] - delta;
-	vector<double> y1 = checkVEval(f, args, arglen);
+	vector<double> y1 = VEval(f, args, arglen);
 	args0[i][j] = args[i][j] + delta;
-	vector<double> y2 = checkVEval(f, args, arglen);
+	vector<double> y2 = VEval(f, args, arglen);
 	args0[i][j] = args[i][j];
 	for (unsigned long k = 0; k < n; ++k) {
 	    ans[j*m + k] = (y2[k] - y1[k])/(2*delta);
@@ -476,201 +358,22 @@ static vector<double> numericVGrad(VectorFunction const *f,
     return ans;
 }
 
-/* Evaluate a VectorFunction that takes a single argument */
-static vector<double const *> mkArgs(vector<double> const &x)
-{
-    return vector<double const *>(1, &x[0]);
-}
-
-static vector<unsigned long> mkLens(vector<double> const &x)
-{
-    return vector<unsigned long>(1, x.size());
-}
-
-vector<double> veval(VectorFunction const *f, vector<double> const &x)
-{
-    return checkVEval(f, mkArgs(x), mkLens(x));
-}
-
-bool checkargs(VectorFunction const *f, vector<double> const &x)
-{
-    return checkVArgs(f, mkArgs(x), mkLens(x));
-}
-
-vector<double> vgradient(VectorFunction const *f, vector<double> const &x,
-			unsigned long i)
-{
-    CPPUNIT_ASSERT(i == 0);
-    return checkVGrad(f, mkArgs(x), mkLens(x), i);
-}
-
-vector<double> vnumgradient(VectorFunction const *f, vector<double> const &x,
-			   unsigned long i, double delta)
-{
-    CPPUNIT_ASSERT(i == 0);
-    return numericVGrad(f, mkArgs(x), mkLens(x), i, delta);
-}
-
-/* Evaluate a VectorFunction that takes two arguments */
-
-static vector<double const *>
-mkArgs(vector<double> const &x, vector<double> const &y)
-{
-    vector<double const *> arg(2);
-    arg[0] = &x[0];
-    arg[1] = &y[0];
-    return arg;
-}
-
-static vector<unsigned long>
-mkLens(vector<double> const &x, vector<double> const &y)
-{
-    vector<unsigned long> arglen(2);
-    arglen[0] = x.size();
-    arglen[1] = y.size();
-    return arglen;
-}
-
-vector<double>
-veval(VectorFunction const *f, vector<double> const &x, vector<double> const &y)
-{
-    return checkVEval(f, mkArgs(x,y), mkLens(x,y));
-}
-
-bool checkargs(VectorFunction const *f, vector<double> const &x,
-	       vector<double> const &y)
-{
-    return checkVArgs(f, mkArgs(x,y), mkLens(x,y));
-}
-
-vector<double> vgradient(VectorFunction const *f, vector<double> const &x,
-			 vector<double> const &y, unsigned long i)
-{
-    CPPUNIT_ASSERT(i < 2UL);
-    return checkVGrad(f, mkArgs(x, y), mkLens(x, y), i);
-}
-
-vector<double> vnumgradient(VectorFunction const *f, vector<double> const &x,
-			    vector<double> const &y,
-			    unsigned long i, double delta)
-{
-    CPPUNIT_ASSERT(i < 2UL);
-    return numericVGrad(f, mkArgs(x, y), mkLens(x, y), i, delta);
-}
-
-
-static vector<double const *> mkArgs(vector<double> const &x,
-				     vector<double> const &y,
-				     vector<double> const &z)
-{
-    vector<double const *> arg(3);
-    arg[0] = &x[0];
-    arg[1] = &y[0];
-    arg[2] = &z[0];
-    return arg;
-}
-
-static vector<unsigned long> mkLens(vector<double> const &x,
-				   vector<double> const &y,
-				   vector<double> const &z)
-{
-    vector<unsigned long> arglen(3);
-    arglen[0] = x.size();
-    arglen[1] = y.size();
-    arglen[2] = z.size();
-    return arglen;
-}
-
-//Evaluate a VectorFunction that takes three arguments
-
-vector<double>
-veval(VectorFunction const *f, vector<double> const &x,
-      vector<double> const &y, vector<double> const &z)
-{
-    return checkVEval(f, mkArgs(x,y,z), mkLens(x,y,z));
-}
-
-//Evaluate a VectorFunction that takes four arguments
-
-static vector<double const *> mkArgs(vector<double> const &x,
-				     vector<double> const &y,
-				     vector<double> const &z,
-				     vector<double> const &w)
-{
-    vector<double const *> arg(4);
-    arg[0] = &x[0];
-    arg[1] = &y[0];
-    arg[2] = &z[0];
-    arg[3] = &w[0];
-    return arg;
-}
-
-static vector<unsigned long> mkLens(vector<double> const &x,
-				    vector<double> const &y,
-				    vector<double> const &z,
-				    vector<double> const &w)
-{
-    vector<unsigned long> arglen(4);
-    arglen[0] = x.size();
-    arglen[1] = y.size();
-    arglen[2] = z.size();
-    arglen[3] = w.size();
-    return arglen;
-}
-
-vector<double>
-veval(VectorFunction const *f,
-      vector<double> const &x, vector<double> const &y,
-      vector<double> const &z, vector<double> const &w)
-{
-    return checkVEval(f, mkArgs(x,y,z,w), mkLens(x,y,z,w));
-}
-
-bool checkargs(VectorFunction const *f,
-	       vector<double> const &x, vector<double> const &y,
-	       vector<double> const &z, vector<double> const &w)
-{
-    return checkVArgs(f, mkArgs(x,y,z,w), mkLens(x,y,z,w));
-}
-
-
-/*
-  Evaluate a VectorFunction that takes a single argument and returns a
-  scalar
-*/
-double eval(VectorFunction const *f, vector<double> const &x)
-{
-    vector<double> ans = veval(f, x);
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.size());
-    return ans[0];
-}
-
-/*
-  Evaluate a VectorFunction that takes two arguments and returns a scalar
-*/
-double eval(VectorFunction const *f, vector<double> const &x, 
-	    vector<double> const &y)
-{
-    vector<double> ans = veval(f, x, y);
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.size());
-    return ans[0];
-}
-
-/*
-  Evaluate a VectorFunction that takes three arguments and returns a scalar
-*/
-double eval(VectorFunction const *f, vector<double> const &x, 
-	    vector<double> const &y, vector<double> const &z)
-{
-    vector<double> ans = veval(f, x, y, z);
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.size());
-    return ans[0];
-}
-
-
 /*
   Array functions
 */
+
+bool all_equal(array_value const &A, array_value const &B, double tol)
+{
+    if (A.second.size() != B.second.size()) return false;
+    for (unsigned long j = 0; j < A.second.size(); ++j) {
+	if (A.second[j] != B.second[j]) return false;
+    }
+    if (A.first.size() != B.first.size()) return false;
+    for (unsigned long i = 0; i < A.first.size(); ++i) {
+	if (abs(A.first[i] - B.first[i]) > tol) return false;
+    }
+    return true;
+}
 
 static vector<bool> discreteMask(vector<double const *> const &args,
 				 vector<vector<unsigned long>> const &dims)
@@ -691,9 +394,9 @@ static vector<bool> discreteMask(vector<double const *> const &args,
     return out;
 }
 
-static bool checkAArgs(ArrayFunction const *f,
-		       vector<double const *> const &args,
-		       vector<vector<unsigned long>> const &dims)
+bool checkArgs(ArrayFunction const *f,
+	       vector<double const *> const &args,
+	       vector<vector<unsigned long>> const &dims)
 {
     return args.size() == dims.size() &&
 	checkNPar(f, args.size())  &&
@@ -702,204 +405,30 @@ static bool checkAArgs(ArrayFunction const *f,
 	f->checkParameterValue(args, dims);
 }
 
-pair<vector<double>, vector<unsigned long>>
-checkAEval(ArrayFunction const *f,
-	   vector<double const *> const &args,
-	   vector<vector<unsigned long>> const &argdims)
+array_value AEval(ArrayFunction const *f,
+		  vector<double const *> const &args,
+		  vector<vector<unsigned long>> const &argdims)
 {
     // Evaluate array function with checks
     CPPUNIT_ASSERT_MESSAGE(string("Valid arguments for ") + f->name(),
-			   checkAArgs(f, args, argdims));
+			   checkArgs(f, args, argdims));
     vector<unsigned long> dim = f->dim(argdims, args);
 
     vector<double> value(product(dim));
     f->evaluate(value.data(), args, argdims);
 
-    return pair<vector<double>, vector<unsigned long>> (value, dim);
+    return array_value(value, dim);
 }
 
-static double const *getData(array_value const &a)
+double Eval(ArrayFunction const *f,
+	    vector<double const *> const &args,
+	    vector<vector<unsigned long>> const &argdims)
 {
-    return a.first.data();
-}
-
-static vector<unsigned long> const &getDims(array_value const &a)
-{
-    return a.second;
-}
-
-void addArgs(vector<double const *> const &v)
-{
-}
-
-template<typename... Args>
-void addArgs(vector<double const *> &v, array_value const &arg1, Args&... args)
-{
-    v.push_back(getData(arg1));
-    addArgs(v, args...);
-}
-
-template<typename... Args>
-vector<double const *> mkArgs(Args&... args)
-{
-    vector<double const *> v;
-    addArgs(v, args...);
-    return v;
-}
-
-void addDims(vector<vector<unsigned long>> const &v)
-{
-}
-
-template<typename... Args>
-void addDims(vector<vector<unsigned long>> &v, array_value const &arg1, Args&... args)
-{
-    v.push_back(getDims(arg1));
-    addDims(v, args...);
-}
-
-template<typename... Args>
-vector<vector<unsigned long>> mkDims(Args&... args)
-{
-    vector<vector<unsigned long>> v;
-    addDims(v, args...);
-    return v;
-}
-
-bool all_equal(array_value const &A, array_value const &B, double tol)
-{
-    if (A.second.size() != B.second.size()) return false;
-    for (unsigned long j = 0; j < A.second.size(); ++j) {
-	if (A.second[j] != B.second[j]) return false;
-    }
-    if (A.first.size() != B.first.size()) return false;
-    for (unsigned long i = 0; i < A.first.size(); ++i) {
-	if (abs(A.first[i] - B.first[i]) > tol) return false;
-    }
-    return true;
-}
-
-// Array function taking a single argument
-
-array_value aeval(ArrayFunction const *f, array_value const &x)
-{
-    return checkAEval(f, mkArgs(x), mkDims(x));
-}
-
-
-bool checkargs(ArrayFunction const *f, array_value const &x)
-{
-    return checkAArgs(f, mkArgs(x), mkDims(x));
-}
-
-// Array function taking 2 arguments
-
-array_value aeval(ArrayFunction const *f, array_value const &x,
-		  array_value const &y)
-{
-    return checkAEval(f, mkArgs(x,y), mkDims(x,y));
-}
-
-
-bool checkargs(ArrayFunction const *f, array_value const &x,
-	       array_value const &y)
-{
-    return checkAArgs(f, mkArgs(x,y), mkDims(x,y));
-}
-
-// Array function taking 3 arguments
-
-array_value aeval(ArrayFunction const *f, array_value const &x,
-		  array_value const &y, array_value const &z)
-{
-    return checkAEval(f, mkArgs(x,y,z), mkDims(x,y,z));
-}
-
-
-bool checkargs(ArrayFunction const *f, array_value const &x,
-	       array_value const &y, array_value const &z)
-{
-    return checkAArgs(f, mkArgs(x,y,z), mkDims(x,y,z));
-}
-
-// Array function taking 4 arguments
-
-array_value aeval(ArrayFunction const *f, array_value const &x,
-		  array_value const &y, array_value const &z,
-		  array_value const &u)
-{
-    return checkAEval(f, mkArgs(x,y,z,u), mkDims(x,y,z,u));
-}
-
-
-bool checkargs(ArrayFunction const *f, array_value const &x,
-	       array_value const &y, array_value const &z,
-	       array_value const &u)
-{
-    return checkAArgs(f, mkArgs(x,y,z,u), mkDims(x,y,z,u));
-}
-
-// Array function taking 5 arguments
-
-array_value aeval(ArrayFunction const *f, array_value const &x,
-		  array_value const &y, array_value const &z,
-		  array_value const &u, array_value const &v)
-{
-    return checkAEval(f, mkArgs(x,y,z,u,v), mkDims(x,y,z,u,v));
-}
-
-
-bool checkargs(ArrayFunction const *f, array_value const &x,
-	       array_value const &y, array_value const &z,
-	       array_value const &u, array_value const &v)
-{
-    return checkAArgs(f, mkArgs(x,y,z,u,v), mkDims(x,y,z,u,v));
-}
-
-/* Array functions returning a scalar */
-
-double eval(ArrayFunction const *f, array_value const &x)
-{
-    array_value ans = checkAEval(f, mkArgs(x), mkDims(x));
+    array_value ans = AEval(f, args, argdims);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.first.size());
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
     CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
+
     return ans.first[0];
 }
 
-double eval(ArrayFunction const *f, array_value const &x,
-	    array_value const &y)
-{
-    array_value ans = checkAEval(f, mkArgs(x,y), mkDims(x,y));
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
-    CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
-    return ans.first[0];
-}
-
-double eval(ArrayFunction const *f, array_value const &x,
-	    array_value const &y, array_value const &z)
-{
-    array_value ans = checkAEval(f, mkArgs(x,y,z), mkDims(x,y,z));
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
-    CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
-    return ans.first[0];
-}
-
-double eval(ArrayFunction const *f, array_value const &x,
-	    array_value const &y, array_value const &z,
-	    array_value const &u)
-{
-    array_value ans = checkAEval(f, mkArgs(x,y,z,u), mkDims(x,y,z,u));
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
-    CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
-    return ans.first[0];
-}
-
-double eval(ArrayFunction const *f, array_value const &x,
-	    array_value const &y, array_value const &z,
-	    array_value const &u, array_value const &v)
-{
-    array_value ans = checkAEval(f, mkArgs(x,y,z,u,v), mkDims(x,y,z,u,v));
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), ans.second.size());
-    CPPUNIT_ASSERT_EQUAL(1UL, ans.second[0]);
-    return ans.first[0];
-}

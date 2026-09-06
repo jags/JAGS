@@ -400,12 +400,12 @@ void BaseFunTest::gradient1(double v)
     double delta = 1e-4;
     double eps = 1e-3;
     
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_neg, v),
-				 numgradient(_neg, v, delta), eps);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_add, v),
-				 numgradient(_add, v, delta), eps);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_multiply, v),
-				 numgradient(_multiply, v, delta), eps);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_neg, 0, v),
+				 numgradient(_neg, 0, delta, v), eps);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_add, 0, v),
+				 numgradient(_add, 0, delta, v), eps);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_multiply, 0, v),
+				 numgradient(_multiply, 0, delta, v), eps);
 }
 
 void BaseFunTest::gradient2(double v1, double v2)
@@ -415,22 +415,22 @@ void BaseFunTest::gradient2(double v1, double v2)
 
     for (unsigned long i = 0; i < 2; ++i) {
 	
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_add, v1, v2, i),
-				     numgradient(_add, v1, v2, i, delta), eps);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_subtract, v1, v2, i),
-				     numgradient(_subtract, v1, v2, i, delta),
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_add, i, v1, v2),
+				     numgradient(_add, i, delta, v1, v2), eps);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_subtract, i, v1, v2),
+				     numgradient(_subtract, i, delta, v1, v2),
 				     eps);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_multiply, v1, v2, i),
-				     numgradient(_multiply, v1, v2, i, delta),
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_multiply, i, v1, v2),
+				     numgradient(_multiply, i, delta, v1, v2),
 				     eps);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_divide, v1, v2, i),
-				     numgradient(_divide, v1, v2, i, delta),
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_divide, i, v1, v2),
+				     numgradient(_divide, i, delta, v1, v2),
 				     eps);
     }
     // Pow only differentiable on first argument
     if (v1 >= 0 || checkInteger(v2)) {
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_pow, v1, v2, 0),
-				     numgradient(_pow, v1, v2, 0, delta), eps);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_pow, 0, v1, v2),
+				     numgradient(_pow, 0, delta, v1, v2), eps);
     }
 }
 
@@ -446,12 +446,12 @@ void BaseFunTest::gradient3(double v1, double v2, double v3)
 
     for (unsigned long i = 0; i < 3; ++i) {
 	
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_add, v1, v2, v3, i),
-				     numgradient(_add, v1, v2, v3, i, delta),
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_add, i, v1, v2, v3),
+				     numgradient(_add, i, delta, v1, v2, v3),
 				     eps);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_multiply, v1, v2, v3, i),
-				     numgradient(_multiply, v1, v2, v3, i,
-						 delta),
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_multiply, i, v1, v2, v3),
+				     numgradient(_multiply, i, delta,
+						 v1, v2, v3),
 				     eps);
     }
 }

@@ -541,7 +541,7 @@ void BugsFunTest::hyper(const double v)
     CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, coshv*coshv - sinhv*sinhv, tol);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(tanhv, sinhv/coshv, tol);
 
-    //Test consistency of inverse functions 
+    //Test consistency of inverse functions
     CPPUNIT_ASSERT_DOUBLES_EQUAL(v, eval(_arcsinh, sinhv), tol);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(fabs(v), eval(_arccosh, coshv), tol);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(v, eval(_arctanh, tanhv), tol);
@@ -650,7 +650,6 @@ void BugsFunTest::link(ScalarFunction const *f, LinkFunction const *l,
 					 numgradient(f, y, 1e-4)/gradient(f,y),
 					 1e-3);
 	}
-	    
     }
 }
 
@@ -737,14 +736,14 @@ void BugsFunTest::summary(vector<double> const &v)
     CPPUNIT_ASSERT_DOUBLES_EQUAL(vsum, log(eval(_prod, vexp)), tol);
 
     //Check gradients
-    vector<double> vgrad = vgradient(_sum, v, 0UL);
-    vector<double> vngrad = vnumgradient(_sum, v, 0UL, 1e-4);
+    vector<double> vgrad = vgradient(_sum, 0UL, v);
+    vector<double> vngrad = vnumgradient(_sum, 0UL, 1e-4, v);
     CPPUNIT_ASSERT_EQUAL(vgrad.size(), vngrad.size());
     for (unsigned long i = 0; i < vgrad.size(); ++i) {
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(vgrad[i], vngrad[i], 1e-3);
     }
-    vgrad = vgradient(_prod, v, 0UL);
-    vngrad = vnumgradient(_prod, v, 0UL, 1e-4);
+    vgrad = vgradient(_prod, 0UL, v);
+    vngrad = vnumgradient(_prod, 0UL, 1e-4, v);
     CPPUNIT_ASSERT_EQUAL(vgrad.size(), vngrad.size());
     for (unsigned long i = 0; i < vgrad.size(); ++i) {
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(vgrad[i], vngrad[i], 1e-3);
@@ -782,8 +781,8 @@ void BugsFunTest::summary(vector<double> const &v1,
 
     //Check gradient (_sum only)
     for (unsigned long j = 0; j < 2; ++j) {
-	vector<double> vgrad = vgradient(_sum, v1, v2, j);
-	vector<double> vngrad = vnumgradient(_sum, v1, v2, j, 1e-4);
+	vector<double> vgrad = vgradient(_sum, j, v1, v2);
+	vector<double> vngrad = vnumgradient(_sum, j, 1e-4, v1, v2);
 	CPPUNIT_ASSERT_EQUAL(vgrad.size(), vngrad.size());
 	for (unsigned long i = 0; i < vgrad.size(); ++i) {
 	    CPPUNIT_ASSERT_DOUBLES_EQUAL(vgrad[i], vngrad[i], 1e-3);
