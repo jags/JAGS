@@ -1214,9 +1214,8 @@ void BugsFunTest::matrix()
 	array_value invLU = aeval(_inverse_lu, A);
 	CPPUNIT_ASSERT(all_equal(A, invLU, tol));
 	
-	array_value logdetA = aeval(_logdet, A);
-	const array_value logdetA_ref({0.0}, {1UL});
-	CPPUNIT_ASSERT(all_equal(logdetA_ref, logdetA, tol));
+	double logdetA = eval(_logdet, A);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, logdetA, tol);
     }
 	
     //Asymmetric 3x3 matrix
@@ -1352,24 +1351,19 @@ void BugsFunTest::interplinCube()
     unsigned int N = 15;
 
     // Prepare arguments for passing to aeval
-    array_value acx(cx, vector<unsigned long>(1, 2UL));
-    array_value acy(cy, vector<unsigned long>(1, 2UL));
-    array_value v2(f2, vector<unsigned long>(2, 2UL));
-
+    array_value v2(f2, {2UL, 2UL});
+    array_value v3(f3, {2UL, 2UL, 2UL});
+    
     // Check 2D interpolation
     vector<double> p2(2);
     for (unsigned int i = 0; i <= N; ++i) {
 	p2[0] = ((N - i) * xlim[0] + i * xlim[1])/ N;
 	for (unsigned int j = 0; j <= N; ++j) {
 	    p2[1] = ((N - j) * ylim[0] + j * ylim[1])/ N;
-	    array_value ap(p2, {2UL});
-	    double ans = eval(_interplin2d, ap, acx, acy, v2);
+	    double ans = eval(_interplin2d, p2, cx, cy, v2);
 	    CPPUNIT_ASSERT_DOUBLES_EQUAL(F(p2[0], p2[1], cz[0]), ans, tol);
 	}
     }
-
-    array_value acz(cz, vector<unsigned long>(1, 2UL));
-    array_value v3(f3, vector<unsigned long>(3, 2UL));
     
     // Check 3D interpolation
     vector<double> p3(3);
@@ -1379,8 +1373,7 @@ void BugsFunTest::interplinCube()
 	    p3[1] = ((N - j) * ylim[0] + j * ylim[1])/ N;
 	    for (unsigned int k = 0; k <= N; ++k) {
 		p3[2] = ((N - k) * zlim[0] + k * zlim[1])/ N;
-		array_value ap(p3, {3UL});
-		double ans = eval(_interplin3d, ap, acx, acy, acz, v3);
+		double ans = eval(_interplin3d, p3, cx, cy, cz, v3);
 		CPPUNIT_ASSERT_DOUBLES_EQUAL(F(p3[0], p3[1], p3[2]), ans, tol);
 	    }
 	}
