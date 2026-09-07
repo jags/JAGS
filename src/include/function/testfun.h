@@ -289,17 +289,6 @@ double NumGradient(jags::ScalarFunction const *f,
 		   std::vector<double const*> const &args,
 		   unsigned long i, double delta);
 
-inline double gradient(jags::ScalarFunction const *f, double x)
-{
-    return Gradient(f, std::vector<double const *>(1, &x), 0UL);
-}
-
-inline double numgradient(jags::ScalarFunction const *f, double x, double delta)
-{
-    return NumGradient(f, std::vector<double const *>(1, &x), 0UL, delta);
-}
-
-
 template<typename... Args>
 double gradient(jags::ScalarFunction const *f, unsigned long i, Args&&... args)
 {
@@ -312,6 +301,18 @@ double numgradient(jags::ScalarFunction const *f, unsigned long i, double delta,
 {
     std::vector<std::vector<double>> vargs{mkVec(std::forward<Args>(args))...};
     return NumGradient(f, getValues(vargs), i, delta);
+}
+
+/* Convenience wrappers for scalar functions with one argument */
+
+inline double gradient(jags::ScalarFunction const *f, double x)
+{
+    return gradient(f, 0UL, x);
+}
+
+inline double numgradient(jags::ScalarFunction const *f, double x, double delta)
+{
+    return numgradient(f, 0UL, delta, x);
 }
 
 /* Vector functions */
@@ -334,14 +335,12 @@ std::vector<double> VNumGradient(jags::VectorFunction const *f,
 				 std::vector<unsigned long> const &arglen,
 				 unsigned long i, double delta);
 
-
 template<typename... Args>
 std::vector<double> vnumgradient(jags::VectorFunction const *f, unsigned long i, double delta, Args&&... args)
 {
     std::vector<std::vector<double>> vargs{mkVec(std::forward<Args>(args))...};
     return VNumGradient(f, getValues(vargs), getLengths(vargs), i, delta);
 }
-
 
 //Test approximate equality of two array_values
 bool all_equal(array_value const &A, array_value const &B, double tol);
