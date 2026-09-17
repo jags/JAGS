@@ -432,3 +432,56 @@ double Eval(ArrayFunction const *f,
     return ans.first[0];
 }
 
+vector<double> VGradient(ArrayFunction const *f,
+			 vector<double const *> const &args,
+			 vector<vector<unsigned long>> const &argdims,
+			 unsigned long i)
+{
+    //Evaluate gradient with checks
+    CPPUNIT_ASSERT_MESSAGE(f->name(), f->hasGradient(i));
+    CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args, argdims));
+    unsigned long n = product(f->dim(argdims, args));
+    unsigned long m = product(argdims[i]);
+    vector<double> ans(n * m, 0);
+
+    f->gradient(ans.data(), args, argdims, i);
+    return ans;
+}
+
+vector<double> VNumGradient(ArrayFunction const *f,
+			    vector<double const *> const &args,
+			    vector<vector<unsigned long>> const &argdims,
+			    unsigned long i, double delta)
+{
+    CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args, argdims));
+    CPPUNIT_ASSERT_MESSAGE(f->name(), f->hasGradient(i));
+
+    //Create mutable copy of the arguments
+    unsigned long N = args.size();
+    vector<vector<double>> args0(N);
+    vector<double const *> args1(N);
+    for  (unsigned long i = 0; i < args.size(); ++i) {
+	unsigned long arglen = product(argdims[i]);
+	args0[i] = vector<double>(arglen);
+	copy(args[i], args[i] + arglen, args0[i].begin());
+	args1[i] = args0[i].data();
+    }
+
+    //Dimensions of answer matrix
+    unsigned long n = product(f->dim(argdims, args));
+    unsigned long m = product(argdims[i]);
+
+    vector<double> ans(n * m, 0);
+    for (unsigned long j = 0; j < m; ++j) {
+	args0[i][j] = args[i][j] - delta;
+	vector<double> y1 = AEval(f, args, argdims).first;
+	args0[i][j] = args[i][j] + delta;
+	vector<double> y2 = AEval(f, args, argdims).first;
+	args0[i][j] = args[i][j];
+	for (unsigned long k = 0; k < n; ++k) {
+	    ans[j*m + k] = (y2[k] - y1[k])/(2*delta);
+	}
+    }
+
+    return ans;
+}

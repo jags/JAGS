@@ -342,6 +342,34 @@ std::vector<double> vnumgradient(jags::VectorFunction const *f, unsigned long i,
     return VNumGradient(f, getValues(vargs), getLengths(vargs), i, delta);
 }
 
+// Array functions
+
+std::vector<double> VGradient(jags::ArrayFunction const *f,
+			      std::vector<double const *> const &args,
+			      std::vector<std::vector<unsigned long>> const &arglens,
+			      unsigned long i);
+
+template<typename... Args>
+std::vector<double> vgradient(jags::ArrayFunction const *f, unsigned long i, Args&&... args)
+{
+    std::vector<array_value> aargs{mkArray(std::forward<Args>(args))...};
+    return VGradient(f, getValues(aargs), getDimensions(aargs), i);
+}
+
+
+std::vector<double> VNumGradient(jags::ArrayFunction const *f,
+				 std::vector<double const*> const &args,
+				 std::vector<std::vector<unsigned long>> const &arglen,
+				 unsigned long i, double delta);
+
+template<typename... Args>
+std::vector<double> vnumgradient(jags::ArrayFunction const *f, unsigned long i, double delta, Args&&... args)
+{
+    std::vector<array_value> aargs{mkArray(std::forward<Args>(args))...};
+    return VNumGradient(f, getValues(aargs), getDimensions(aargs), i, delta);
+}
+
+
 //Test approximate equality of two array_values
 bool all_equal(array_value const &A, array_value const &B, double tol);
 
