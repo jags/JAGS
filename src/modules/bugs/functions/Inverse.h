@@ -11,6 +11,7 @@ namespace bugs {
      * decomposition
      * <pre>
      * y <- inverse.chol(x[,])
+     * y <- inverse(x)
      * </pre>
      */
     class Inverse: public ArrayFunction
@@ -25,6 +26,10 @@ namespace bugs {
 		std::vector<double const *> const &values) const override;
 	bool checkParameterDim(std::vector<std::vector<unsigned long>> const &dims) const override;
 	std::string alias() const override;
+	bool hasGradient(unsigned long i) const override;
+	void gradient(double *grad, std::vector<double const *> const &args,
+		      std::vector<std::vector<unsigned long> > const &dims,
+		      unsigned long i) const override;
     };
 
 }}
