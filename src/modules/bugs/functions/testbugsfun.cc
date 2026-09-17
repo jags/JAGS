@@ -1217,8 +1217,18 @@ void BugsFunTest::matrix()
 	double logdetA = eval(_logdet, A);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, logdetA, tol);
     }
-	
-    //Asymmetric 3x3 matrix
+
+    /* Symmetric 3x3 positive definite matrix */
+    const array_value A({4,2,1,2,3,2,1,2,2}, {3UL, 3UL});
+    //Check inverse of A
+    const array_value invA_ref({0.4, -0.4, 0.2, -0.4, 1.4, -1.2, 0.2, -1.2, 1.6}, {3UL, 3UL});
+    array_value invA = aeval(_inverse, A);
+    CPPUNIT_ASSERT(all_equal(invA_ref, invA, 1e-6));
+    //Invert again and check against A
+    array_value invinvA = aeval(_inverse, invA);
+    CPPUNIT_ASSERT(all_equal(A, invinvA, 1.0e-6));
+    
+    /* Asymmetric 3x3 matrix */
     const array_value B({1,1,0,0,2,0,0,3,3}, {3UL,3UL});
 
     //Check inverse of B
@@ -1231,7 +1241,7 @@ void BugsFunTest::matrix()
     array_value invinvB = aeval(_inverse_lu, invB);
     CPPUNIT_ASSERT(all_equal(B, invinvB, tol));
 
-    //3x2 matrix
+    /* 3x2 matrix */
     const array_value C({1,2,3,4,5,6}, {3UL, 2UL});
 
     //Check transpose
@@ -1243,7 +1253,7 @@ void BugsFunTest::matrix()
     array_value Ctranstrans = aeval(_transpose, Ctrans);
     CPPUNIT_ASSERT(all_equal(C, Ctranstrans, tol));
 
-    //Check matrix multiplication
+    /* Check matrix multiplication */
     const array_value D({1,0,0,2,3,-1}, {2UL, 3UL});
     const array_value CxD_ref({1, 2, 3, 8, 10, 12, -1, 1, 3}, {3UL, 3UL});
     const array_value DxC_ref({10, 1, 22, 4}, {2UL, 2UL});
@@ -1620,7 +1630,7 @@ void BugsFunTest::grad()
     CPPUNIT_ASSERT(!_sort->hasGradient(0));
 
     //Matrix functions
-    //CPPUNIT_ASSERT(_inverse->hasGradient(0)); //FIXME
+    CPPUNIT_ASSERT(_inverse->hasGradient(0));
     //CPPUNIT_ASSERT(_logdet->hasGradient(0)); //FIXME
     CPPUNIT_ASSERT(_transpose->hasGradient(0));
     for (unsigned long i = 0; i < 2; ++i) {
