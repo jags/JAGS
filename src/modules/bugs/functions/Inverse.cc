@@ -61,20 +61,25 @@ namespace bugs {
 	    throwFuncError(this, "Cannot invert matrix. It may not be positive definite");
 	}
 
+	/* The gradient for the Cholesky inverse is complicated by two factors
+	   1) JAGS only uses the lower triangle of the input matrix. Hence the gradient with
+	   respect to the upper triangle (l > k) is zero.
+	   2) In order to preserve symmetry, the perturbation being tested is symmetric for
+	   the off diagonal elements.
+	*/
 	for (unsigned int i = 0; i < n; ++i) {
 	    for (unsigned int j = 0; j <= i; ++j) {
 		for (unsigned int k = 0; k < n; ++k) {
-		    double delta = y[i + n*k] * y[j + n*k];
-		    grad[i + n*(j + n*(k + n*k))] -= delta; 
-		    if (i != j) {
-			grad[j + n*(i + n*(k + n*k))] -= delta;
-		    }
-		    for (unsigned int l = 0; l < k; ++l) {
-			delta = y[i + n*k] * y[j + n*l] + y[i + n*l] * y[j + n*k];
-			grad[i + n*(j + n*(k + n*l))] -= delta;
-			if (i != j) {
-			    grad[j + n*(i + n*(k + n*l))] -= delta;
+		    for (unsigned int l = 0; l <= k; ++l) {
+			double delta = y[i + n*k] * y[j + n*l] + y[i + n*l] * y[j + n*k];
+			if (i == j) {
+			    delta /= 2;
 			}
+			if (l == k) {
+			    delta /= 2;
+			}
+			grad[i + n*(j + n*(k + n*l))] -= delta;
+			grad[j + n*(i + n*(k + n*l))] -= delta;
 		    }
 		}
 	    }
