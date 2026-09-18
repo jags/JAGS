@@ -738,16 +738,11 @@ void BugsFunTest::summary(vector<double> const &v)
     //Check gradients
     vector<double> vgrad = vgradient(_sum, 0UL, v);
     vector<double> vngrad = vnumgradient(_sum, 0UL, 1e-4, v);
-    CPPUNIT_ASSERT_EQUAL(vgrad.size(), vngrad.size());
-    for (unsigned long i = 0; i < vgrad.size(); ++i) {
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(vgrad[i], vngrad[i], 1e-3);
-    }
+    CPPUNIT_ASSERT(all_equal(vgrad, vngrad, 1e-3));
+
     vgrad = vgradient(_prod, 0UL, v);
     vngrad = vnumgradient(_prod, 0UL, 1e-4, v);
-    CPPUNIT_ASSERT_EQUAL(vgrad.size(), vngrad.size());
-    for (unsigned long i = 0; i < vgrad.size(); ++i) {
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(vgrad[i], vngrad[i], 1e-3);
-    }
+    CPPUNIT_ASSERT(all_equal(vgrad, vngrad, 1e-3));
 }
 
 
@@ -783,10 +778,7 @@ void BugsFunTest::summary(vector<double> const &v1,
     for (unsigned long j = 0; j < 2; ++j) {
 	vector<double> vgrad = vgradient(_sum, j, v1, v2);
 	vector<double> vngrad = vnumgradient(_sum, j, 1e-4, v1, v2);
-	CPPUNIT_ASSERT_EQUAL(vgrad.size(), vngrad.size());
-	for (unsigned long i = 0; i < vgrad.size(); ++i) {
-	    CPPUNIT_ASSERT_DOUBLES_EQUAL(vgrad[i], vngrad[i], 1e-3);
-	}
+	CPPUNIT_ASSERT(all_equal(vgrad, vngrad, 1e-3));
     }
 }
 

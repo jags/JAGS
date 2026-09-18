@@ -254,6 +254,16 @@ double NumGradient(ScalarFunction const *f,
 
 /* Vector functions */
 
+bool all_equal(vector<double> const &u, vector<double> const &v, double tol)
+{
+    if (u.size() != v.size()) return false;
+    for (unsigned long i = 0; i < u.size(); ++i) {
+	if (abs(u[i] - v[i]) > tol) return false;
+    }
+    return true;
+}
+
+
 static vector<bool> discreteMask(vector<double const *> const &args,
 				 vector<unsigned long> const &arglen)
 {

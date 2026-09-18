@@ -369,6 +369,9 @@ std::vector<double> vnumgradient(jags::ArrayFunction const *f, unsigned long i, 
     return VNumGradient(f, getValues(aargs), getDimensions(aargs), i, delta);
 }
 
+//Test approximate equality of two vectors
+bool all_equal(std::vector<double> const &u, std::vector<double> const &v,
+	       double tol);
 
 //Test approximate equality of two array_values
 bool all_equal(array_value const &A, array_value const &B, double tol);
