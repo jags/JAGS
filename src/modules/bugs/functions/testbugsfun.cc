@@ -1190,6 +1190,7 @@ void BugsFunTest::sort()
     //CPPUNIT_FAIL("sort");
 }
 
+
 void BugsFunTest::matrix()
 {
     for (unsigned int n = 1; n < 6; ++n) {
@@ -1260,6 +1261,10 @@ void BugsFunTest::matrix()
 				 {2UL,2UL});
     array_value invDxC = aeval(_inverse_lu, DxC);
     CPPUNIT_ASSERT(all_equal(invDxC_ref, invDxC, 1e-6));
+
+    /* Check gradients */
+    CPPUNIT_ASSERT(all_equal(vgradient(_inverse, 0UL, A),
+			     vnumgradient(_inverse, 0UL, 1e-4, A), 1e-3));
 }
 
 void BugsFunTest::inprod()

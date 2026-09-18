@@ -50,23 +50,36 @@ namespace bugs {
     }
 
     void Inverse::gradient(double *grad, vector<double const *> const &args,
-			   vector<vector<unsigned long> > const &dims,
+			   vector<vector<unsigned long>> const &dims,
 			   unsigned long i) const
     {
-	unsigned long N = dims[0][0] * dims[0][1];
-	vector<double> y(N);
+	unsigned long n = dims[0][0];
+	vector<double> y(n*n);
 	
-	bool can_invert = inverse_chol (y.data(), args[0], dims[0][0]);
+	bool can_invert = inverse_chol (y.data(), args[0], n);
 	if (!can_invert) {
 	    throwFuncError(this, "Cannot invert matrix. It may not be positive definite");
 	}
-	
-	for (unsigned int i = 0; i < N; ++i) {
-	    for (unsigned int j = 0; j < N; ++j) {
-		grad[i + j*N] = y[i] * y[j];
+
+	for (unsigned int i = 0; i < n; ++i) {
+	    for (unsigned int j = 0; j <= i; ++j) {
+		for (unsigned int k = 0; k < n; ++k) {
+		    double delta = y[i + n*k] * y[j + n*k];
+		    grad[i + n*(j + n*(k + n*k))] -= delta; 
+		    if (i != j) {
+			grad[j + n*(i + n*(k + n*k))] -= delta;
+		    }
+		    for (unsigned int l = 0; l < k; ++l) {
+			delta = y[i + n*k] * y[j + n*l] + y[i + n*l] * y[j + n*k];
+			grad[i + n*(j + n*(k + n*l))] -= delta;
+			if (i != j) {
+			    grad[j + n*(i + n*(k + n*l))] -= delta;
+			}
+		    }
+		}
 	    }
 	}
-    }
 
+    }
 
 }}
