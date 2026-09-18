@@ -1265,6 +1265,10 @@ void BugsFunTest::matrix()
     /* Check gradients */
     CPPUNIT_ASSERT(all_equal(vgradient(_inverse, 0UL, A),
 			     vnumgradient(_inverse, 0UL, 1e-4, A), 1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_inverse_lu, 0UL, A),
+			     vnumgradient(_inverse_lu, 0UL, 1e-4, A), 1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_inverse_lu, 0UL, B),
+			     vnumgradient(_inverse_lu, 0UL, 1e-4, B), 1e-3));
 }
 
 void BugsFunTest::inprod()
