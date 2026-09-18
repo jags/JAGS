@@ -38,7 +38,7 @@ namespace bugs {
 
     bool Transpose::hasGradient(unsigned long i) const
     {
-	return true;
+	return i == 0;
     }
     
     void Transpose::gradient(double *grad, vector<double const *> const &args,
@@ -53,14 +53,11 @@ namespace bugs {
 	
 	unsigned long Q = NROW(dims[0]);
 	unsigned long P = NCOL(dims[0]);
-	unsigned long PQ = P * Q;
-	
-	for (unsigned long p = 0; p < P; ++p) {
-	    for (unsigned long q = 0; q < Q; ++q) {
-		unsigned long pq = p + P*q;
-		unsigned long qp = q + Q*p;
-		//dA[p,q]/dB[q,p] = 1
-		grad[pq + PQ * qp] += 1;
+
+	for (unsigned long i = 0; i < P; ++i) {
+	    for (unsigned long j = 0; j < Q; ++j) {
+		// Coordinates [i,j,k.l] with l==i, k==j
+		grad[i + P*(j + Q*(j + Q*i))] += 1;
 	    }
 	}
     }
