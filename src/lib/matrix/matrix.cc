@@ -89,7 +89,7 @@ bool check_symmetric_ispd(double const *a, unsigned long n)
 
 double det(double const *a, int n)
 {
-   // Log determinant of n x n matrix a via the QR decomposition
+   // Determinant of n x n matrix a via the QR decomposition
   
   int N = n*n;
   vector<double> acopy(N);
