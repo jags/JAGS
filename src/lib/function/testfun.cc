@@ -338,27 +338,26 @@ vector<double> VNumGradient(VectorFunction const *f,
     CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args, arglen));
     CPPUNIT_ASSERT_MESSAGE(f->name(), f->hasGradient(i));
 
-    //Create mutable copy of the ith argument
-    vector<double const *> args1(args);
-    unsigned long ilen = arglen[i];
-    vector<double> argi(ilen);
-    copy(args[i], args[i] + ilen, argi.begin());
-    args1[i] = argi.data();
-
     //Dimensions of answer matrix
     unsigned long n = f->length(arglen, args);
     unsigned long m = arglen[i];
 
+    //Create mutable copy of the ith argument
+    vector<double const *> args1(args);
+    vector<double> argi(m);
+    copy(args[i], args[i] + m, argi.begin());
+    args1[i] = argi.data();
+
+
     vector<double> ans(n * m, 0);
-    for (unsigned long j = 0; j < ilen; ++j) {
+    for (unsigned long j = 0; j < m; ++j) {
 	argi[j] = args[i][j] - delta;
 	vector<double> y1 = VEval(f, args1, arglen);
 	argi[j] = args[i][j] + delta;
 	vector<double> y2 = VEval(f, args1, arglen);
 	argi[j] = args[i][j];
 	for (unsigned long k = 0; k < n; ++k) {
-	    ans[j*m + k] = (y2[k] - y1[k])/(2*delta);
-	    //ans[k*n + j] = (y2[k] - y1[k])/(2*delta); ??
+	    ans[j*n + k] = (y2[k] - y1[k])/(2*delta);
 	}
     }
 
@@ -463,16 +462,16 @@ vector<double> VNumGradient(ArrayFunction const *f,
     CPPUNIT_ASSERT_MESSAGE(f->name(), checkArgs(f, args, argdims));
     CPPUNIT_ASSERT_MESSAGE(f->name(), f->hasGradient(i));
 
-    //Create mutable copy of the ith argument
-    vector<double const *> args1(args);
-    unsigned long ilen = product(argdims[i]);
-    vector<double> argi(ilen);
-    copy(args[i], args[i] + ilen, argi.begin());
-    args1[i] = argi.data();
-
     //Dimensions of answer matrix
     unsigned long n = product(f->dim(argdims, args));
     unsigned long m = product(argdims[i]);
+
+    //Create mutable copy of the ith argument
+    vector<double const *> args1(args);
+    vector<double> argi(m);
+    copy(args[i], args[i] + m, argi.begin());
+    args1[i] = argi.data();
+
 
     vector<double> ans(n * m, 0);
     for (unsigned long j = 0; j < m; ++j) {
@@ -482,7 +481,7 @@ vector<double> VNumGradient(ArrayFunction const *f,
 	vector<double> y2 = AEval(f, args1, argdims).first;
 	argi[j] = args[i][j];
 	for (unsigned long k = 0; k < n; ++k) {
-	    ans[j*m + k] = (y2[k] - y1[k])/(2*delta);
+	    ans[j*n + k] = (y2[k] - y1[k])/(2*delta);
 	}
     }
     
