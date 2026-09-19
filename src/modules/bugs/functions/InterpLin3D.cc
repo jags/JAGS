@@ -5,9 +5,6 @@
 
 #include <util/dim.h>
 
-//debuggin
-#include <iostream>
-
 using std::vector;
 
 namespace jags {
@@ -57,7 +54,6 @@ namespace jags {
 
 	    // Interpolate over z
 	    double f = interplin(gz.t, f0, f1);
-	    std::cout << f << std::endl;
 	    return f;
 	}
 
