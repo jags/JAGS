@@ -37,22 +37,26 @@ namespace bugs {
 	return vector<unsigned long>(1,1);
     }
 
+    bool LogDet::hasGradient(unsigned long i) const
+    {
+	return i == 0;
+    }
+
     
     void LogDet::gradient(double *grad, vector<double const *> const &args,
 			  vector<vector<unsigned long>> const &dims,
 			  unsigned long i) const
     {
-	//FIXME Needs testing
 	unsigned long nrow = dims[0][0];
 	vector<double> work(nrow * nrow);
 	bool can_invert = inverse_chol (work.data(), args[0], nrow);
 	if (!can_invert) {
 	    throwFuncError(this, "Cannot calculate gradient. Matrix may not be positive definite.");
 	}
-	for (unsigned long j = 0; j < nrow; ++j) {
-	    grad[j*nrow + j] += work[j*nrow + j];
-	    for (unsigned long k = 0; k < j; ++k) {
-		grad[k*nrow + j] += 2 * work[k*nrow + j];
+	for (unsigned long k = 0; k < nrow; ++k) {
+	    grad[k*nrow + k] += work[k*nrow + k];
+	    for (unsigned long l = 0; l < k; ++l) {
+		grad[l*nrow + k] += 2 * work[l*nrow + k];
 	    }
 	}
     }

@@ -35,10 +35,10 @@ namespace bugs {
 			  vector<unsigned long> const &lengths,
 			  unsigned long i) const
     {
-	unsigned long k = (i == 0) ? 1 : 0;
-
-	for (unsigned long j = 0; j < lengths[k]; ++j) {
-	    grad[j] += args[k][j];
+	if (i >= 2) return;
+	
+	for (unsigned long j = 0; j < lengths[1 - i]; ++j) {
+	    grad[j] += args[1 - i][j];
 	}
     }
 

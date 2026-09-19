@@ -68,22 +68,27 @@ namespace bugs {
 	unsigned long R = dims[1][0];
 	unsigned long Q = dims[1].size() == 2 ? dims[1][1] : 1;
 
-	unsigned long PQ = P * Q; //length of A
 
-	for (unsigned long p = 0; p < P; ++p) {
-	    for (unsigned long q = 0; q < Q; ++q) {
-		unsigned long pq = p + P * q; //[p,q]
-		for (unsigned long r = 0; r < R; ++r) {
-		    unsigned long rq = r + R * q; //[r,q]
-		    unsigned long pr = p + P * r; //[p,r]
-		    if (i == 1) {
-			//dA[p,q]/dC[r,q] = B[p,r]
-			grad[pq + PQ * rq] += B[pr]; 
+	if (i == 0) {
+	    //Dimensions of output array are [P,Q,P,R]
+	    for (unsigned long i = 0; i < P; ++i) {
+		for (unsigned long j = 0; j < Q; ++j) {
+		    unsigned long k = i;
+		    for (unsigned long l = 0; l < R; ++l) {
+			//dA[i,j]/dC[i,l] = C[l,j]
+			grad[i + P*(j + Q*(k + P*l))] += C[l + R*j];
 		    }
-		    else {
-			//i == 0
-			//dA[p,q]/dB[p,r] = C[r,q]
-			grad[pq + PQ * pr] += C[rq];
+		}
+	    }
+	}
+	else if (i == 1) {
+	    //Dimensions of output array are [P,Q,R,Q]
+	    for (unsigned long i = 0; i < P; ++i) {
+		for (unsigned long j = 0; j < Q; ++j) {
+		    for (unsigned long k = 0; k < R; ++k) {
+			unsigned long l = j;
+			//dA[i,j]/dC[k,j] = B[i,k]
+			grad[i + P*(j + Q*(k + R*l))] += B[i + P*k];
 		    }
 		}
 	    }

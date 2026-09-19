@@ -567,6 +567,11 @@ void BugsFunTest::hyper(const double v)
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_arccosh, v),
 				     numgradient(_arccosh, v, delta), eps);
     }
+    for (double v = -10.00; v <= 10.00; v = v + 0.01) {
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_arcsinh, v),
+				     numgradient(_arcsinh, v, delta), eps);
+    }
+
 
 }
 
@@ -1213,6 +1218,7 @@ void BugsFunTest::matrix()
 
     /* Symmetric 3x3 positive definite matrix */
     const array_value A({4,2,1,2,3,2,1,2,2}, {3UL, 3UL});
+
     //Check inverse of A
     const array_value invA_ref({0.4, -0.4, 0.2, -0.4, 1.4, -1.2, 0.2, -1.2, 1.6}, {3UL, 3UL});
     array_value invA = aeval(_inverse, A);
@@ -1263,12 +1269,34 @@ void BugsFunTest::matrix()
     CPPUNIT_ASSERT(all_equal(invDxC_ref, invDxC, 1e-6));
 
     /* Check gradients */
+
+    // Cholesky inverse (for symmetric positive definite matrix)
     CPPUNIT_ASSERT(all_equal(vgradient(_inverse, 0UL, A),
 			     vnumgradient(_inverse, 0UL, 1e-4, A), 1e-3));
+    // LU inverse
     CPPUNIT_ASSERT(all_equal(vgradient(_inverse_lu, 0UL, A),
 			     vnumgradient(_inverse_lu, 0UL, 1e-4, A), 1e-3));
     CPPUNIT_ASSERT(all_equal(vgradient(_inverse_lu, 0UL, B),
 			     vnumgradient(_inverse_lu, 0UL, 1e-4, B), 1e-3));
+    // Transpose
+    CPPUNIT_ASSERT(all_equal(vgradient(_transpose, 0UL, B),
+			     vnumgradient(_transpose, 0UL, 1e-4, B), 1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_transpose, 0UL, C),
+			     vnumgradient(_transpose, 0UL, 1e-4, C), 1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_transpose, 0UL, D),
+			     vnumgradient(_transpose, 0UL, 1e-4, D), 1e-3));
+    // Log determinant (for symmetric positive definite matrix)
+    CPPUNIT_ASSERT(all_equal(vgradient(_logdet, 0UL, A),
+			     vnumgradient(_logdet, 0UL, 1e-4, A), 1e-3));
+    // Matrix multiplication
+    CPPUNIT_ASSERT(all_equal(vgradient(_matmult, 0UL, C, D),
+			     vnumgradient(_matmult, 0UL, 1e-4, C, D), 1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_matmult, 1UL, C, D),
+			     vnumgradient(_matmult, 1UL, 1e-4, C, D), 1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_matmult, 0UL, D, C),
+			     vnumgradient(_matmult, 0UL, 1e-4, D, C), 1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_matmult, 1UL, D, C),
+			     vnumgradient(_matmult, 1UL, 1e-4, D, C), 1e-3));
 }
 
 void BugsFunTest::inprod()
@@ -1285,6 +1313,11 @@ void BugsFunTest::inprod()
 
     CPPUNIT_ASSERT(!checkargs(_inprod, x3, y4));
     CPPUNIT_ASSERT(!checkargs(_inprod, x4, y3));
+
+    CPPUNIT_ASSERT(all_equal(vgradient(_matmult, 0UL, x3, y3),
+			     vnumgradient(_matmult, 0UL, 1e-4, x3, y3), 1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_matmult, 1UL, x4, y4),
+			     vnumgradient(_matmult, 1UL, 1e-4, x4, y4), 1e-3));
 }
 
 
@@ -1503,6 +1536,21 @@ void BugsFunTest::combine() {
     vector<double> out3 = veval(_combine, x1, x3, x0, x3);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(7), out3.size());
     CPPUNIT_ASSERT(equal(out3.begin(), out3.end(), y3));
+
+    //Check gradients
+    CPPUNIT_ASSERT(all_equal(vgradient(_combine, 0UL, x1, x3, x0, x6),
+			     vnumgradient(_combine, 0UL, 1e-4, x1, x3, x0, x6),
+			     1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_combine, 1UL, x1, x3, x0, x6),
+			     vnumgradient(_combine, 1UL, 1e-4, x1, x3, x0, x6),
+			     1e-3));
+    CPPUNIT_ASSERT(all_equal(vgradient(_combine, 3UL, x1, x3, x0, x6),
+			     vnumgradient(_combine, 3UL, 1e-4, x1, x3, x0, x6),
+			     1e-3));
+    //Gradient of length 0 argument has length zero
+    //I'm sure this won't come back to bite me.
+    vector<double> grad0 = vgradient(_combine, 2UL, x1, x3, x0, x6);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), grad0.size());
 }
 
 void BugsFunTest::rep() {
@@ -1632,7 +1680,7 @@ void BugsFunTest::grad()
 
     //Matrix functions
     CPPUNIT_ASSERT(_inverse->hasGradient(0));
-    //CPPUNIT_ASSERT(_logdet->hasGradient(0)); //FIXME
+    CPPUNIT_ASSERT(_logdet->hasGradient(0)); //FIXME
     CPPUNIT_ASSERT(_transpose->hasGradient(0));
     for (unsigned long i = 0; i < 2; ++i) {
 	CPPUNIT_ASSERT(_matmult->hasGradient(i));
