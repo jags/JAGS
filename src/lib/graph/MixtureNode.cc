@@ -187,7 +187,7 @@ bool isMixture(Node const *node)
 
 bool MixtureNode::hasGradient(Node const *arg) const
 {
-    //A Mixture nodes is not differentiable with respect to the indices.
+    //A Mixture node is not differentiable with respect to the indices.
     auto par = parents();
     for (unsigned long i = 0; i < _nindex; ++i) {
 	if (arg == par[i]) {
@@ -200,10 +200,10 @@ bool MixtureNode::hasGradient(Node const *arg) const
 void MixtureNode::gradient(double *grad, Node const *arg,
 			   unsigned int chain) const
 {
-    //Gradient is trivially 1 with respect to the active node only
+    //Gradient is identity matrix with respect to the active node only
     if (arg == _active_parents[chain]) {
 	for (unsigned int i = 0; i < _length; ++i) {
-	    grad[i] += 1;
+	    grad[i + _length * i] += 1;
 	}
     }
 }

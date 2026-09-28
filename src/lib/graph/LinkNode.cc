@@ -72,7 +72,7 @@ double LinkNode::grad(unsigned int chain) const
     LinkNode::gradient(double *grad, Node const *arg, unsigned int chain) const
     {
 	if (parents()[0] == arg) {
-	    grad[0] += _func->grad(chain);
+	    grad[0] += _func->grad(*_parameters[chain][0]);
 	}
     }
        
