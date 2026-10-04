@@ -63,11 +63,11 @@ namespace bugs {
 
 	double const *B = args[0];
 	double const *C = args[1];
-	
-	unsigned long P = dims[0][0];
-	unsigned long R = dims[1][0];
-	unsigned long Q = dims[1].size() == 2 ? dims[1][1] : 1;
 
+	// Vector arguments are converted to matrices of appropriate dimension
+	unsigned long P = dims[0].size() == 2UL ? dims[0][0] : 1UL;
+	unsigned long R = dims[1][0];
+	unsigned long Q = dims[1].size() == 2UL ? dims[1][1] : 1UL;
 
 	if (i == 0) {
 	    //Dimensions of output array are [P,Q,P,R]
