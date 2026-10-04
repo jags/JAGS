@@ -95,6 +95,7 @@ FCFLAGS="$FCFLAGS -fopenmp"
 fi
 
 JAGS_GCD
+JAGS_DEBUG
 
 ## Mixed C++ and Fortran libraries must be linked with C++, but
 ## the C++ compiler knows nothing about the runtime Fortran
