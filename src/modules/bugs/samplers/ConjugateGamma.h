@@ -9,7 +9,10 @@ namespace jags {
 
 namespace bugs {
 
+    class SingletonForwardDiff;
+    
 class ConjugateGamma : public ConjugateMethod {
+    SingletonForwardDiff *_fd;
     double *_coef;
 public:
     ConjugateGamma(SingletonGraphView const *gv);

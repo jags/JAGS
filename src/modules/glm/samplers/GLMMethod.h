@@ -19,6 +19,7 @@ namespace jags {
 namespace glm {
 
     class Outcome;
+    class GLMDesign;
 
     /**
      * @short Abstract class for sampling generalized linear models.
@@ -47,8 +48,10 @@ namespace glm {
 	cholmod_factor *_factor; //???
 	void symbolic();
 	void calDesign() const;
+	void calDesignNumeric() const;
     private:
 	std::vector<bool> _fixed;
+	std::vector<GLMDesign *> _fdiff;
 	unsigned int _length_max;
 	unsigned _nz_prior;
 	friend class REMethod2;

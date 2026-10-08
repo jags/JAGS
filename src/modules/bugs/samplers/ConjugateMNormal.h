@@ -9,6 +9,8 @@ namespace jags {
 
 namespace bugs {
 
+    class LMDesign;
+
 /**
  * Conjugate sampler for multivariate normal distribution
  *
@@ -24,6 +26,7 @@ namespace bugs {
  */
 class ConjugateMNormal : public ConjugateMethod {
   double *_betas;
+  LMDesign *_design;  
   const unsigned int _length_betas;
  public:
   ConjugateMNormal(SingletonGraphView const *gv);

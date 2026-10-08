@@ -14,6 +14,8 @@ namespace jags {
 
     static vector<unsigned long>
     child_indices(Node *node, map<Node const *, unsigned long> const &dmap) {
+	/* Convert deterministic children of node to a vector of
+	 * numeric indices using the supplied map */
 	vector<unsigned long> ans;
 	list<DeterministicNode *> const *children = node->deterministicChildren();
 	for (auto p = children->begin(); p != children->end(); ++p) {
@@ -27,7 +29,8 @@ namespace jags {
     
     namespace bugs {
 
-	SingletonForwardDiff::SingletonForwardDiff(SingletonGraphView const *gv)
+	SingletonForwardDiff::SingletonForwardDiff(SingletonGraphView const *gv,
+						   vector<Node const *> const &dependent_nodes)
 	    : _gv(gv)
 	{
 	    // Access data from gv
@@ -46,46 +49,31 @@ namespace jags {
 	       deterministic children. We keep separate records of these edges
 	       as they are handled differently in calCoef */
 	    _edges1 = child_indices(snode, dmap);
-	    for (auto p = dn.begin(); p != dn.end(); ++p) {
-		_edges2.push_back(child_indices(*p, dmap));
+	    _edges2 = vector<vector<unsigned long>>(dn.size());
+	    for (unsigned int p = 0; p < dn.size(); ++p) {
+		vector<unsigned long> children = child_indices(dn[p], dmap);
+		for (auto c = children.begin(); c != children.end(); ++c) {
+		    _edges2[*c].push_back(p);
+		}
 	    }
-
-	    /*
-	    //vector<vector<unsigned long>> _edges2;
-	    _offsets.reserve(dn.size() + 1);
-	    unsigned long L = 0;
-	    _offsets.push_back(L);
-	    for (auto p = dn.begin(); p != dn.end(); ++p) {
-		L += (*p)->length();
-		_offsets.push_back(L);
-	    }
-	    */
 	    
-	    /* Terminal nodes are the parents of the the stochastic children
-	       in the GraphView. The sampled node may also be a terminal node.
-	       In this case we use the index 0 and for deterministic nodes
-	       we offset the index by 1 */
-	    vector<StochasticNode *> const &sn = gv->stochasticChildren();
 	    _nrow = 0;
-	    for (auto p = sn.begin(); p != sn.end(); ++p) {
-		vector<Node const *> const &parents = (*p)->parents();
-		for (auto q = parents.begin(); q != parents.end(); ++q) {
-		    if (*q == snode) {
-			_terminal_nodes.push_back(0);
-			_nrow += snode->length();
-		    }
-		    else {
-			auto r = dmap.find(*q);
-			if (r != dmap.end()) {
-			    _terminal_nodes.push_back(r->second + 1);
-			    _nrow += (*q)->length();
-			}
+	    for (auto p = dependent_nodes.begin(); p != dependent_nodes.end(); ++p) {
+		if (*p == snode) {
+		    _dependent_nodes.push_back(0);
+		    _nrow += snode->length();
+		}
+		else {
+		    auto r = dmap.find(*p);
+		    if (r != dmap.end()) {
+			_dependent_nodes.push_back(r->second + 1);
+			_nrow += (*p)->length();
 		    }
 		}
 	    }
 	}
 
-	void SingletonForwardDiff::calCoef(double *coef, unsigned int chain) const
+	void SingletonForwardDiff::calCoef(double *coef, unsigned int chain, bool transpose) const
 	{
 	    StochasticNode *snode = _gv->node();
 	    unsigned long nparam = snode->length();
@@ -96,117 +84,72 @@ namespace jags {
 		grad[i] = vector<double>(nparam * dn[i]->length());
 	    }
 
-	    /*
-	    for (unsigned long i = 0; i < _edges1.size(); ++i) {
-		unsigned long j = _edges1[i];
-		DeterministicNode const *c = dn[j];
-	    }
-	    for (auto r = _map.begin(); r != _map.end(); ++r) {
-		vector<double> &v = r->second;
-		fill(v.begin(), v.end(), 0.0);
-	    }
-	    */
-
 	    // Edges from sampled node to its deterministic children
 	    for (auto c = _edges1.begin(); c != _edges1.end(); ++c) {
 		dn[*c]->gradient(grad[*c].data(), snode, chain);
 	    }
 
 	    // Edges between deterministic children
-	    for (unsigned long p = 0; p < _edges2.size(); ++p) {
-		for (auto c = _edges2[p].begin(); c != _edges2[p].end(); ++c) {
+	    for (unsigned long c = 0; c < _edges2.size(); ++c) {
+		for (auto p = _edges2[c].begin(); p != _edges2[c].end(); ++p) {
 		
-		    unsigned long nchild = dn[*c]->length();
-		    unsigned long nparent = dn[p]->length();
+		    unsigned long nchild = dn[c]->length();
+		    unsigned long nparent = dn[*p]->length();
 		    vector<double> wk(nchild * nparent);
-		    dn[*c]->gradient(wk.data(), dn[p], chain);
-
-		    vector<double> &gc = grad[*c];
-		    vector<double> &gp = grad[p];
+		    dn[c]->gradient(wk.data(), dn[*p], chain);
+		    
+		    //FIXME Replace this with a call to dgemm
+		    vector<double> &gc = grad[c]; // nchild x nparam
+		    vector<double> &gp = grad[*p]; // nparent x nparam
 		    for (unsigned long i = 0; i < nchild; ++i) {
-			for (unsigned long j = 0; j < nparent; ++j) {
-			    for (unsigned long k = 0; k < nparam; ++k) {
-				gc[i + nchild*k] += wk[i + nchild*j] * gp[j + nparent*k];
+			for (unsigned long j = 0; j < nparam; ++j) {
+			    for (unsigned long k = 0; k < nparent; ++k) {
+				gc[i + nchild*j] += wk[i + nchild*k] * gp[k + nparent*j];
 			    }
 			}
 		    }
 		}
 	    }
-
-	    /********
 	    
-	    list<DeterministicNode *> const *children = snode->deterministicChildren();
-	    for (auto c = children->begin(); c != children->end(); ++c) {
-		auto r = _map.find(*c);
-		if (r != node_map.end()) {
-		    (*c)->gradient(r->second, snode, chain);
-		}
-	    }
+	    /* Stack gradient matrices for dependent nodes form coefficient matrix
+	      Some attention is required here as the gradient matrices cannot
+	      simply be concatenated.
 	    */
-
-	    /*
-	    // Edges between deterministic nodes
-	    vector<DeterministicNode *> const &dn = _gv->deterministicChildren();
-	    for (auto p = dn.begin(); p != dn.end(); ++p) {
-		unsigned long n = (*p)->length();
-		vector<Node *> const &children = (*p)->deterministicChildren();
-		//vector<double> &v = _map.find(*p).second;
-		for (auto c = children.begin(); c != children.end(); ++c) {
-		    r = _map.find(*c);
-		    if (r != node_map.end()) {
-			vector<double> &v = r-second;
-			unsigned long m = (*c)->length();
-			vector<double> wk(m*n);
-			(*c)->gradient(wk.data(), *p, chain);
-			for (unsigned int i = 0; i < m; ++i) {
-			    for (unsigned long j = 0; j < n; ++j) {
-				for (unsigned long k = 0; k < n; ++k);
-				r.second[i + n * j] += wk[i + m*k] * v[k + n*j]; //fixme
-			    }
-			}
-		    }
-		}
-	    }
-	    */
-
-	    for (unsigned long i = 0; i < _terminal_nodes.size(); ++i) {
-		unsigned long t = _terminal_nodes[i];
+	    unsigned long j0 = 0;
+	    for (unsigned long i = 0; i < _dependent_nodes.size(); ++i) {
+		unsigned long t = _dependent_nodes[i];
 		if (t == 0) {
-		    for (unsigned j = 0; j < nparam; ++j) {
-			for (unsigned k = 0; k < nparam; ++k) {
-			    coef[j + nparam*k] = (j==k) ? 1.0 : 0.0;
+		    //Dependent node is the sampled node
+		    for (unsigned long j = 0; j < nparam; ++j) {
+			for (unsigned long k = 0; k < nparam; ++k) {
+			    coef[j0 + j + _nrow*k] = (j==k) ? 1.0 : 0.0;
 			}
 		    }
-		    coef += nparam * nparam;
+		    j0 += nparam;
 		}
 		else {
-		    copy(grad[t-1].begin(), grad[t-1].end(), coef);
-		    coef += dn[t-1]->length() * nparam;
+		    //Dependent node is deterministic node dn[t-1]
+		    unsigned long L = dn[t-1]->length();
+		    for (unsigned long j = 0; j < L; ++j) {
+			for (unsigned long k = 0; k < nparam; ++k) {
+			    coef[j0 + j + _nrow*k] = grad[t-1][j + L*k];
+			}
+		    }
+		    j0 += L;
 		}
-	    }
-
-	    /*
-		DeterministicNode *tnode = [_terminal_indices[i]];
-		
 	    }
 	    
-	    //Read off the gradients at the terminal nodes and concatenate them
-	    vector<StochasticNode*> const &sc = _gv->stochasticChildren();
-	    unsigned long L = 0;
-	    for (auto p = sc.begin(); p != sc.end(); ++p) {
-		for(auto q = (*p)->parents().begin(); q != (*p)->parents().end(); ++q) {
-		    auto r = _map.find(*q);
-		    if (r != _map.end()) {
-			vector<double> const &v = r.second;
-			copy(v.begin(), v.end(), grad + L);
-			L += v.size();
+	    if (transpose) {
+		vector<double> tcoef(_nrow * nparam);
+		unsigned long nparam = _gv->length();
+		for (unsigned long j = 0; j < nparam; ++j) {
+		    for (unsigned long k = 0; k < _nrow; ++k) {
+			tcoef[j + nparam*k] = coef[k + _nrow *j];
 		    }
 		}
+		copy(tcoef.begin(), tcoef.end(), coef);
 	    }
 
-	    r = _map.find(_gv->node());
-	    r.second[i] = 0;
-	    */
 	}
 
 	unsigned long SingletonForwardDiff::nrow() const

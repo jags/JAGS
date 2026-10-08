@@ -14,7 +14,8 @@ DiscreteDSum.cc MNormal.cc MNormalFactory.cc ConjugateMethod.cc		\
 Dirichlet.cc DirichletFactory.cc TruncatedGamma.cc DMultiDSum.cc	\
 ShiftedCount.cc ShiftedMultinomial.cc SumMethod.cc SumFactory.cc 	\
 RW1.cc RW1Factory.cc BinomSlicer.cc BinomSliceFactory.cc		\
-EllipticalSlice.cc EllipticalSliceFactory.cc SingletonForwardDiff.cc
+EllipticalSlice.cc EllipticalSliceFactory.cc 				\
+SingletonForwardDiff.cc LMDesign.cc
 
 noinst_HEADERS = Censored.h CensoredFactory.h ConjugateFactory.h	\
 ConjugateNormal.h ConjugateBeta.h ConjugateGamma.h DSumFactory.h	\
@@ -23,5 +24,6 @@ RealDSum.h DiscreteDSum.h MNormal.h MNormalFactory.h			\
 ConjugateMethod.h Dirichlet.h DirichletFactory.h TruncatedGamma.h	\
 DMultiDSum.h ShiftedCount.h ShiftedMultinomial.h SumMethod.h		\
 SumFactory.h RW1.h RW1Factory.h BinomSlicer.h BinomSliceFactory.h	\
-EllipticalSlice.h EllipticalSliceFactory.h SingletonForwardDiff.h
+EllipticalSlice.h EllipticalSliceFactory.h 				\
+SingletonForwardDiff.h LMDesign.h
 

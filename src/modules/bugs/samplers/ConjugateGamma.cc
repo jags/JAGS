@@ -26,20 +26,25 @@ using std::max;
 using std::sort;
 using std::string;
 
+//debuggin
+#include <stdexcept>
+#include "SingletonForwardDiff.h"
+#include <iostream>
+
 namespace jags {
 namespace bugs {
 
-static double 
-getScale(StochasticNode const *snode, ConjugateDist d, unsigned int chain)
+static Node const * 
+getScale(StochasticNode const *snode, ConjugateDist d)
 {
     //Get scale parameter of snode
-    double scale = JAGS_NAN;
+    Node const * scale = nullptr;
     switch(d) {
     case GAMMA: case NORM: case DEXP: case WEIB: case LNORM:
-	scale = *snode->parents()[1]->value(chain);
+	scale = snode->parents()[1];
 	break;
     case EXP: case POIS:
-	scale = *snode->parents()[0]->value(chain);
+	scale = snode->parents()[0];
 	break;
     case BERN: case BETA: case BIN: case CAT: case CHISQ: case DIRCH:
     case LOGIS: case MNORM: case MULTI: case NEGBIN: case PAR: case T:
@@ -50,9 +55,9 @@ getScale(StochasticNode const *snode, ConjugateDist d, unsigned int chain)
     return scale;
 }
 
-
-static void calCoef(double *coef, SingletonGraphView const *gv,
-		    vector<ConjugateDist> const &child_dist, unsigned int chain)
+#ifdef DEBUG
+static void calCoefNumeric(vector<double> &coef, SingletonGraphView const *gv,
+			   vector<ConjugateDist> const &child_dist, unsigned int chain)
 {   
     const double xold = gv->node()->value(chain)[0];
     vector<StochasticNode *> const &stoch_children =
@@ -60,25 +65,47 @@ static void calCoef(double *coef, SingletonGraphView const *gv,
     unsigned long nchildren = stoch_children.size();
     
     for (unsigned long i = 0; i < nchildren; ++i) {
-        coef[i] = -getScale(stoch_children[i], child_dist[i], chain);
+        coef[i] = -getScale(stoch_children[i], child_dist[i])->value(chain)[0];
     }
     double val = xold + 1;
     gv->setValue(&val, 1, chain);
     for (unsigned long i = 0; i < nchildren; ++i) {
-        coef[i] += getScale(stoch_children[i], child_dist[i], chain);
+        coef[i] += getScale(stoch_children[i], child_dist[i])->value(chain)[0];
     }
     gv->setValue(&xold, 1, chain);
 }
-
+#endif
 
 ConjugateGamma::ConjugateGamma(SingletonGraphView const *gv)
-    : ConjugateMethod(gv), _coef(nullptr)
+    : ConjugateMethod(gv), _fd(nullptr), _coef(nullptr)
 {
+    vector<StochasticNode *> const &stoch_children = gv->stochasticChildren();
+    unsigned long nchildren = stoch_children.size();
+    vector<Node const *> dependent_nodes(nchildren);
+    
+    for (unsigned long i = 0; i < nchildren; ++i) {
+	dependent_nodes.push_back(getScale(stoch_children[i], _child_dist[i]));
+    }
+    _fd = new SingletonForwardDiff(gv, dependent_nodes);
+    
     if(!gv->deterministicChildren().empty() && checkScale(gv, true)) 
     {
 	//One-off calculation of fixed scale transformation
 	_coef = new double[gv->stochasticChildren().size()];
-	calCoef(_coef, gv, _child_dist, 0);
+	_fd->calCoef(_coef, 0);
+	delete _fd;
+	_fd = nullptr;
+
+#ifdef DEBUG
+	vector<double> betas_num(gv->length());
+	calCoefNumeric(betas_num, gv, _child_dist, 0);
+
+	for (unsigned int i = 0; i < betas_num.size(); ++i) {
+	    if (fabs(_coef[i] - betas_num[i]) > 1.0E-6) {
+		throw std::logic_error("ConjugateGamma: Error in scale calculation");
+	    }
+	}
+#endif
     }
 
 }
@@ -86,6 +113,7 @@ ConjugateGamma::ConjugateGamma(SingletonGraphView const *gv)
 ConjugateGamma::~ConjugateGamma()
 {
     delete [] _coef;
+    delete _fd;
 }
 
 
@@ -173,9 +201,19 @@ void ConjugateGamma::update(unsigned int chain, RNG *rng) const
     bool empty = _gv->deterministicChildren().empty();
     bool temp_coef = false;
     if (!empty && _coef == nullptr) {
-	    temp_coef = true;
-	    coef = new double[nchildren];
-	    calCoef(coef, _gv, _child_dist, chain);
+	temp_coef = true;
+	coef = new double[nchildren];
+	_fd->calCoef(coef, chain);
+	    
+#ifdef DEBUG
+	vector<double> coef_num(nchildren);
+	calCoefNumeric(coef_num, _gv, _child_dist, chain);
+	for (unsigned int i = 0; i < coef_num.size(); ++i) {
+	    if (fabs(coef[i] - coef_num[i]) > 1.0E-6) {
+		throwLogicError("ConjugateGamma: Error in scale calculation");
+	    }
+	}
+#endif
     }
     else {
 	coef = _coef;

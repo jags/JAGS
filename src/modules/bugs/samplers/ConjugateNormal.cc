@@ -15,6 +15,7 @@
 #include <cmath>
 
 #include "ConjugateNormal.h"
+#include "LMDesign.h"
 
 #include <JRmath.h>
 
@@ -22,11 +23,13 @@ using std::vector;
 using std::set;
 using std::sqrt;
 
+
 namespace jags {
 namespace bugs {
 
-static void calBeta(double *beta, SingletonGraphView const *gv, 
-		    unsigned int chain)
+#ifdef DEBUG    
+static void calBetaNumeric(double *beta, SingletonGraphView const *gv, 
+			   unsigned int chain)
 {
     StochasticNode *snode = gv->node();
 
@@ -61,12 +64,15 @@ static void calBeta(double *beta, SingletonGraphView const *gv,
 	bp += nrow;
     }
 }
-
+#endif
+    
 ConjugateNormal::ConjugateNormal(SingletonGraphView const *gv)
-    : ConjugateMethod(gv), _betas(nullptr), _length_betas(0)
+    : ConjugateMethod(gv), _design(nullptr), _betas(nullptr), _length_betas(0)
 {
     if (!gv->deterministicChildren().empty()) {
 
+	_design = new LMDesign(gv);
+	
 	//Need to allocate vector of coefficients
 	vector<StochasticNode *> const &children = 
 	    gv->stochasticChildren();
@@ -77,7 +83,20 @@ ConjugateNormal::ConjugateNormal(SingletonGraphView const *gv)
 	if (checkLinear(gv, true)) {
 	    //One-time calculation of fixed coefficients
 	    _betas = new double[_length_betas];
-	    calBeta(_betas, gv, 0);
+	    _design->calCoef(_betas, 0);
+	    delete _design;
+	    _design = nullptr;
+
+#ifdef DEBUG
+	    vector<double> betas_num(_length_betas);
+	    copy(_betas, _betas + _length_betas, betas_num.begin());
+	    calBetaNumeric(_betas, gv, 0);
+	    for (unsigned int i = 0; i < _length_betas; ++i) {
+		if (fabs(_betas[i] - betas_num[i]) > 1.0E-6) {
+		    throwLogicError("ConjugateNormal: Error calculating linear predictor");
+		}
+	    }
+#endif 	    
 	}
     }
 }
@@ -85,6 +104,7 @@ ConjugateNormal::ConjugateNormal(SingletonGraphView const *gv)
 ConjugateNormal::~ConjugateNormal()
 {
     delete [] _betas;
+    delete _design;
 }
 
 bool ConjugateNormal::canSample(StochasticNode *snode, Graph const &graph)
@@ -177,7 +197,18 @@ void ConjugateNormal::update(unsigned int chain, RNG *rng) const
 	bool temp_beta = (_betas == nullptr);
 	if (temp_beta) {
 	    beta = new double[_length_betas];
-	    calBeta(beta, _gv, chain);
+	    _design->calCoef(beta, chain);
+
+#ifdef DEBUG
+	    vector<double> betas_num(_length_betas);
+	    copy(beta, beta + _length_betas, betas_num.begin());
+	    calBetaNumeric(beta, _gv, chain);
+	    for (unsigned int i = 0; i < _length_betas; ++i) {
+		if (fabs(beta[i] - betas_num[i]) > 1.0E-6) {
+		    throwLogicError("ConjugateNormal: Error calculating linear predictor");
+		}
+	    }
+#endif	    
 	}
 	else {
 	    beta = _betas;

@@ -9,6 +9,8 @@ namespace jags {
 
 namespace bugs {
 
+    class LMDesign;
+
 /**
  * Conjugate sampler for the normal distribution.
  * A conjugate sampler can be created for a stochastic node "snode"
@@ -18,6 +20,7 @@ namespace bugs {
  * snode.
  */
 class ConjugateNormal : public ConjugateMethod {
+    LMDesign *_design;
     double *_betas;
     unsigned long _length_betas;
 public:

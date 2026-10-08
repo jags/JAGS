@@ -20,6 +20,7 @@
 
 #include "ConjugateMNormal.h"
 #include "DMNorm.h"
+#include "LMDesign.h"
 
 #include <JRmath.h>
 
@@ -29,6 +30,10 @@ using std::set;
 using std::sqrt;
 using std::string;
 using std::count;
+
+#ifdef DEBUG
+#include <module/ModuleError.h>
+#endif
 
 namespace jags {
 namespace bugs {
@@ -86,14 +91,15 @@ namespace bugs {
 	}
 	return info;
     }
-    
-static void calBeta(double *betas, SingletonGraphView const *gv,
-                    unsigned int chain)
+
+#ifdef DEBUG    
+static void calBetaNumeric(double *betas, SingletonGraphView const *gv,
+			   unsigned int chain)
 {
     StochasticNode *snode = gv->node();
     double const *xold = snode->value(chain);
     unsigned long nrow = snode->length();
-
+    
     vector<double> xnew(nrow);
     copy(xold, xold + nrow, xnew.begin());
 
@@ -131,12 +137,13 @@ static void calBeta(double *betas, SingletonGraphView const *gv,
     }
     gv->setValue(xnew, chain);
 }
-
+#endif
+    
 static unsigned int sumChildrenLength(SingletonGraphView const *gv)
 {
     vector<StochasticNode *> const &children = 
 	gv->stochasticChildren(); 
-
+    
     unsigned int N = 0;
     for (unsigned int i = 0; i < children.size(); ++i) {
 	N += children[i]->length();
@@ -145,20 +152,37 @@ static unsigned int sumChildrenLength(SingletonGraphView const *gv)
 }
 
 ConjugateMNormal::ConjugateMNormal(SingletonGraphView const *gv)
-    : ConjugateMethod(gv), _betas(nullptr), 
+    : ConjugateMethod(gv), _betas(nullptr), _design(nullptr), 
       _length_betas(sumChildrenLength(gv) * gv->length())
 {
+    _design = new LMDesign(gv);
+
     if(checkLinear(gv, true)) {
+	//Fixed design matrix
 	_betas = new double[_length_betas];
-	calBeta(_betas, gv, 0);
+	_design->calCoef(_betas, 0, true);
+	delete _design;
+	_design = nullptr;
+	
+#ifdef DEBUG
+	vector<double> betas_num(_length_betas);
+	calBetaNumeric(betas_num.data(), gv, 0);
+	for (unsigned int i = 0; i < _length_betas; ++i) {
+	    if (fabs(_betas[i] - betas_num[i]) > 1.0E-6) {
+		throwLogicError("ConjugateMNormal::Error calculating design matrix");
+	    }
+	}
+#endif
+	
     }
 }
 
 ConjugateMNormal::~ConjugateMNormal()
 {
     delete [] _betas;
+    delete _design;
 }
-
+   
 bool ConjugateMNormal::canSample(StochasticNode *snode, Graph const &graph)
 {
     if (getDist(snode) != MNORM)
@@ -254,10 +278,22 @@ void ConjugateMNormal::update(unsigned int chain, RNG *rng) const
 	bool temp_beta = (_betas == nullptr);
         double *betas = nullptr;
 	if (temp_beta) {
+	    /* Design matrix is not fixed and therefore different
+	     * between chains and iterations */
 	    betas = new double[_length_betas];
-	    calBeta(betas, _gv, chain);
+	    _design->calCoef(betas, chain, true);
+#ifdef DEBUG
+	    vector<double> betas_num(_length_betas);
+	    calBetaNumeric(betas_num.data(), _gv, chain);
+	    for (unsigned int i = 0; i < _length_betas; ++i) {
+		if (fabs(betas[i] - betas_num[i]) > 1.0E-6) {
+		    throwLogicError("ConjugateMNormal::Error calculating design matrix");
+		}
+	    }
+#endif
 	}
-        else {
+	else {
+	    /* Fixed design matrix calculated in the constructor */
             betas = _betas;
         }
 

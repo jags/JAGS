@@ -7,6 +7,7 @@
 
 #include "GLMMethod.h"
 #include "Outcome.h"
+#include "GLMDesign.h"
 
 #include <sampler/SingletonGraphView.h>
 #include <sampler/Linear.h>
@@ -46,7 +47,7 @@ static void getIndices(set<StochasticNode *> const &schildren,
 
 namespace glm {
 
-    void GLMMethod::calDesign() const
+    void GLMMethod::calDesignNumeric() const
     {
 	if (allTrue(_fixed)) return; //Move along, nothing to see here
 	
@@ -59,16 +60,16 @@ namespace glm {
 	unsigned int nrow = _x->nrow;
 	unsigned int ncol = _view->length();
 	if (ncol != _x->ncol) {
-	    throwLogicError("Dimension mismatch in GLMMethod::calDesign");
+	    throwLogicError("Dimension mismatch in GLMMethod::calDesignNumeric");
 	}
-
+	
 	int c = 0; //column counter
 	vector<double> xnew(_length_max);
 
 	//Need to set up these vectors so we can map back from a row of
-	//the design matrix to the corresponding outcome. Note that this
-	//is only need when we have multivariate outcomes; with only
-	//scalar outcomes the mapping is trivial
+	//the design matrix to the corresponding outcome. This is always
+	//required because the stochastic children of the sub-views are
+	//not necessarily in the same order.
 	vector<double const*> outcome_ptr(nrow);
 	vector<unsigned int> outcome_idx(nrow);
 	unsigned int r = 0; //row counter
@@ -111,15 +112,34 @@ namespace glm {
 	    
 	    c += length;
 	}
+
     }
-    
+
+    void GLMMethod::calDesign() const
+    {
+	if (allTrue(_fixed)) return; //Move along, nothing to see here
+	
+	int *Xp = static_cast<int*>(_x->p);
+	double *Xx = static_cast<double*>(_x->x);
+
+	int c = 0; //column counter
+	for (unsigned int i = 0; i < _sub_views.size(); ++i) {
+	    if (!_fixed[i]) {
+		double *coef = Xx + Xp[c];
+		_fdiff[i]->calCoef(coef, _chain);
+	    }
+	    c += _sub_views[i]->length();
+	}
+    }
+
     GLMMethod::GLMMethod(GraphView const *view, 
 			 vector<SingletonGraphView const *> const &sub_views,
 			 vector<Outcome *> const &outcomes,
 			 unsigned int chain, cholmod_common *wk)
 	: _view(view), _chain(chain), _sub_views(sub_views),
 	  _outcomes(outcomes),
-	  _wk(wk), _x(nullptr), _factor(nullptr), _fixed(sub_views.size(), false), 
+	  _wk(wk), _x(nullptr), _factor(nullptr), _fixed(sub_views.size(), false),
+	  _fdiff(sub_views.size(), nullptr), 
 	  _length_max(0), _nz_prior(0)
     {
 	view->checkFinite(chain); //Check validity of initial values
@@ -175,7 +195,24 @@ namespace glm {
 
 	// At this point, all elements of _fixed are set to false, so
 	// a call to calDesign calculates the whole design matrix
+	for (unsigned int i = 0; i < sub_views.size(); ++i) {
+	    _fdiff[i] = new GLMDesign(_sub_views[i], schildren);
+	}
 	calDesign();
+
+#ifdef DEBUG	
+	//Check autodiff vs numeric gradient calculations for design matrix
+	unsigned long nzmax = _x->nzmax;
+	vector<double> Xx_save(nzmax);
+	double *Xx = static_cast<double*>(_x->x);
+	copy(Xx, Xx + nzmax, Xx_save.begin());
+	calDesignNumeric();
+	for (unsigned long i = 0; i < nzmax; ++i) {
+	    if (abs(Xx[i] - Xx_save[i]) > 1.0E-6) {
+		throwLogicError("GLMMethod::Error calculating design matrix");
+	    }
+	}
+#endif
 	
 	// In future calls to calDesign, we do not want to recalculate
 	// fixed linear terms.
@@ -183,6 +220,7 @@ namespace glm {
 	    // FIXME: For future reference, we will need to make sure this
 	    // still works correctly for log-linear models.
 	    _fixed[i] = checkLinear(sub_views[i], true, true);
+	    // FIXME If fixed then delete fdiff[i]
 	}
     }
 
@@ -405,7 +443,7 @@ namespace glm {
 		}
 	    }
 	    c += m;
-	}
+}
 
 	cholmod_sparse *Alik = cholmod_ssmult(t_x, _x, CHOLMOD_REAL, 1, 0,
 						  _wk);
