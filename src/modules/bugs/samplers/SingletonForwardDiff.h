@@ -12,10 +12,9 @@ namespace jags {
 	class SingletonForwardDiff {
 	private:
 	    SingletonGraphView const *_gv;
-	    std::vector<unsigned long> _edges1;
-	    std::vector<std::vector<unsigned long>> _edges2;
-	    std::vector<unsigned long> _dependent_nodes, _gindex;
-	    unsigned long _nrow;
+	    std::vector<std::vector<unsigned long>> _edges;
+	    std::vector<unsigned long> _dependent_nodes;
+	    unsigned long _nrow, _workspace_nrow;
 	public:
 	    /**
 	     * Constructor.
