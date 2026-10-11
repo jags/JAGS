@@ -71,6 +71,14 @@ namespace jags {
 		    }
 		}
 	    }
+
+	    unsigned long gnrow = 0;
+	    _gindex.reserve(dn.size() + 1);
+	    _gindex.push_back(0);
+	    for (auto p = dn.begin(); p != dn.end(); ++p) {
+		gnrow += (*p)->length();
+		_gindex.push_back(gnrow);
+	    }
 	}
 
 	void SingletonForwardDiff::calCoef(double *coef, unsigned int chain, bool transpose) const
@@ -78,29 +86,38 @@ namespace jags {
 	    StochasticNode *snode = _gv->node();
 	    unsigned long nparam = snode->length();
 	    vector<DeterministicNode *> const &dn = _gv->deterministicChildren();
-	    
-	    vector<vector<double>> grad(dn.size());
-	    for (unsigned long i = 0; i < grad.size(); ++i) {
-		grad[i] = vector<double>(nparam * dn[i]->length());
-	    }
 
-	    // Edges from sampled node to its deterministic children
+	    // A common workspace hods the gradient matrices for each deterministic node
+	    vector<double> gradient_workspace(_gindex.back() * nparam);
+	    auto get_gradmat = [&](unsigned long i) {
+		// Returns a pointer to the start of the gradient
+		// array for the deterministic node with index i
+		return gradient_workspace.data() + _gindex[i] * nparam;
+	    };
+	    
+	    // Edges from sampled node to deterministic children
 	    for (auto c = _edges1.begin(); c != _edges1.end(); ++c) {
-		dn[*c]->gradient(grad[*c].data(), snode, chain);
+		dn[*c]->gradient(get_gradmat(*c), snode, chain);
 	    }
 
 	    // Edges between deterministic children
-	    for (unsigned long c = 0; c < _edges2.size(); ++c) {
+	    vector<double> wk; // Reusable workspace for edges
+	    for (unsigned long c = 0; c < dn.size(); ++c) {
+
+		unsigned long nchild = dn[c]->length();
+		double *gc = get_gradmat(c); // nchild x nparam
+
 		for (auto p = _edges2[c].begin(); p != _edges2[c].end(); ++p) {
-		
-		    unsigned long nchild = dn[c]->length();
+
 		    unsigned long nparent = dn[*p]->length();
-		    vector<double> wk(nchild * nparent);
+		    // Reset workspace
+		    wk.resize(nchild * nparent);
+		    fill(wk.begin(), wk.end(), 0);
+		    // Get the gradient for the edge p -> c
 		    dn[c]->gradient(wk.data(), dn[*p], chain);
-		    
+		    // Apply chain rule to get gradient wrt sampled node
+		    double *gp = get_gradmat(*p); // nparent x nparam
 		    //FIXME Replace this with a call to dgemm
-		    vector<double> &gc = grad[c]; // nchild x nparam
-		    vector<double> &gp = grad[*p]; // nparent x nparam
 		    for (unsigned long i = 0; i < nchild; ++i) {
 			for (unsigned long j = 0; j < nparam; ++j) {
 			    for (unsigned long k = 0; k < nparent; ++k) {
@@ -110,10 +127,10 @@ namespace jags {
 		    }
 		}
 	    }
-	    
-	    /* Stack gradient matrices for dependent nodes form coefficient matrix
-	      Some attention is required here as the gradient matrices cannot
-	      simply be concatenated.
+    
+	    /* Stack gradient matrices for dependent nodes to form coefficient matrix
+	       Some attention is required here as the gradient matrices cannot
+	       simply be concatenated.
 	    */
 	    unsigned long j0 = 0;
 	    for (unsigned long i = 0; i < _dependent_nodes.size(); ++i) {
@@ -130,9 +147,10 @@ namespace jags {
 		else {
 		    //Dependent node is deterministic node dn[t-1]
 		    unsigned long L = dn[t-1]->length();
+		    double *gt = get_gradmat(t-1);
 		    for (unsigned long j = 0; j < L; ++j) {
 			for (unsigned long k = 0; k < nparam; ++k) {
-			    coef[j0 + j + _nrow*k] = grad[t-1][j + L*k];
+			    coef[j0 + j + _nrow*k] = gt[j + L*k];
 			}
 		    }
 		    j0 += L;

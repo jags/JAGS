@@ -14,7 +14,7 @@ namespace jags {
 	    SingletonGraphView const *_gv;
 	    std::vector<unsigned long> _edges1;
 	    std::vector<std::vector<unsigned long>> _edges2;
-	    std::vector<unsigned long> _dependent_nodes;
+	    std::vector<unsigned long> _dependent_nodes, _gindex;
 	    unsigned long _nrow;
 	public:
 	    /**
