@@ -12,28 +12,34 @@ using std::list;
 
 namespace jags {
 
-    static vector<unsigned long>
-    child_indices(Node *node, map<Node const *, unsigned long> const &dmap) {
-	/* Convert deterministic children of node to a vector of
-	 * numeric indices using the supplied map */
-	vector<unsigned long> ans;
+    static void
+    push_child_indices(Node *node, map<Node const *, unsigned long> const &dmap,
+		       vector<vector<unsigned long>> &edges, unsigned long i) {
 	list<DeterministicNode *> const *children = node->deterministicChildren();
 	for (auto p = children->begin(); p != children->end(); ++p) {
 	    auto r = dmap.find(*p);
 	    if (r != dmap.end()) {
-		ans.push_back(r->second);
+		edges[r->second].push_back(i);
 	    }
 	}
-	return ans;
+    }
+
+    unsigned long length(Node const *node) { return node->length(); }
+    
+    template<typename T> unsigned long sumLengths(vector<T> const &v) {
+	unsigned long L = 0;
+	for (auto p = v.begin(); p != v.end(); ++p) {
+	    L += length(*p);
+	}
+	return L;
     }
     
     namespace bugs {
 
 	SingletonForwardDiff::SingletonForwardDiff(SingletonGraphView const *gv,
 						   vector<Node const *> const &dependent_nodes)
-	    : _gv(gv)
+	    : _gv(gv), _nrow(0), _workspace_nrow(sumLengths(gv->deterministicChildren()))
 	{
-	    // Access data from gv
 	    StochasticNode *snode = gv->node();
 	    vector<DeterministicNode *> const &dn = gv->deterministicChildren();
 
@@ -44,24 +50,14 @@ namespace jags {
 		dmap.insert({dn[i], i});
 	    }
 
-	    /* There are two kinds of edge. The first is from the sampled node
-	       (snode) into the deterministic children(dn). The second is between
-	       deterministic children. We keep separate records of these edges
-	       as they are handled differently in calCoef */
-	    //FIXME: Can simplify this by pushing more code into child_indicesx
+	    /* Create edge matrix */
 	    _edges = vector<vector<unsigned long>>(dn.size());
-	    vector<unsigned long> children = child_indices(snode, dmap);
-	    for (auto c = children.begin(); c != children.end(); ++c) {
-		_edges[*c].push_back(0);
-	    }
+	    push_child_indices(snode, dmap, _edges, 0);
 	    for (unsigned int p = 0; p < dn.size(); ++p) {
-		children = child_indices(dn[p], dmap);
-		for (auto c = children.begin(); c != children.end(); ++c) {
-		    _edges[*c].push_back(p+1);
-		}
+		push_child_indices(dn[p], dmap, _edges, p+1);
 	    }
-	    
-	    _nrow = 0;
+
+	    /* Convert dependent nodes to indices, dropping nodes with trivial zero gradient  */
 	    for (auto p = dependent_nodes.begin(); p != dependent_nodes.end(); ++p) {
 		if (*p == snode) {
 		    _dependent_nodes.push_back(0);
@@ -73,12 +69,8 @@ namespace jags {
 			_dependent_nodes.push_back(r->second + 1);
 			_nrow += (*p)->length();
 		    }
+		    // Else dropped due to zero gradient
 		}
-	    }
-
-	    _workspace_nrow = 0;
-	    for (auto p = dn.begin(); p != dn.end(); ++p) {
-		_workspace_nrow += (*p)->length();
 	    }
 	}
 
@@ -89,14 +81,13 @@ namespace jags {
 	    vector<DeterministicNode *> const &dn = _gv->deterministicChildren();
 
 	    // A common workspace hods the gradient matrices for each deterministic node
-	    vector<double> gradient_workspace(_workspace_nrow * nparam);
-	    /* Vector of pointers to the start of the gradient array for each node.
-	       The pointers are constructed on the fly */
+	    vector<double> dnode_workspace(_workspace_nrow * nparam);
+	    // Vector of pointers to the start of the gradient array for each deterministic node.
 	    vector<double *> gradient_start(dn.size() + 1);
-	    gradient_start[0] = gradient_workspace.data();
+	    gradient_start[0] = dnode_workspace.data();
 	       
 	    // Calculate gradient for each edge
-	    vector<double> wk; // Reusable workspace for edges
+	    vector<double> edge_workspace; // Reusable workspace for edges
 	    for (unsigned long c = 0; c < dn.size(); ++c) {
 
 		unsigned long nchild = dn[c]->length();
@@ -113,23 +104,23 @@ namespace jags {
 			unsigned long p = *r - 1;
 			unsigned long nparent = dn[p]->length();
 			// Reset workspace
-			wk.resize(nchild * nparent);
-			fill(wk.begin(), wk.end(), 0);
+			edge_workspace.resize(nchild * nparent); // nchild x nparent
+			fill(edge_workspace.begin(), edge_workspace.end(), 0);
 			// Get the gradient for the edge p -> c
-			dn[c]->gradient(wk.data(), dn[p], chain);
+			dn[c]->gradient(edge_workspace.data(), dn[p], chain);
 			// Apply chain rule to get gradient wrt sampled node
 			double *gp = gradient_start[p]; // nparent x nparam
 			//FIXME Replace this with a call to dgemm
 			for (unsigned long i = 0; i < nchild; ++i) {
 			    for (unsigned long j = 0; j < nparam; ++j) {
 				for (unsigned long k = 0; k < nparent; ++k) {
-				    gc[i + nchild*j] += wk[i + nchild*k] * gp[k + nparent*j];
+				    gc[i + nchild*j] += edge_workspace[i + nchild*k] * gp[k + nparent*j];
 				}
 			    }
 			}
 		    }
 		}
-		//Define start of gradient matrix for dn[c+1]
+		//Define start of gradient matrix for next deterministic child dn[c+1]
 		gradient_start[c+1] = gradient_start[c] + nchild * nparam;
 	    }
     

@@ -25,6 +25,11 @@ namespace jags {
 	     * @param dependent_nodes Vector of nodes representing
 	     * dependent variables. The derivative of each terminal
 	     * node is calculated with respect to the sampled node.
+	     *
+	     * Any node may be supplied as a dependent node. But only
+	     * the sampled node and its deterministic descendents have
+	     * non trivial gradients. All other nodes have zero
+	     * gradient and are stripped out of the coefficient matrix.
 	     */
 	    SingletonForwardDiff(SingletonGraphView const *gv,
 				 std::vector<Node const *> const &dependent_nodes);
@@ -43,7 +48,8 @@ namespace jags {
 	    void calCoef(double *coef, unsigned int chain, bool transpose=false) const;
 	    /**
 	     * Number of rows of the coefficient matrix, equal to the
-	     * sum of the lengths of dependent nodes
+	     * sum of the lengths of dependent nodes, excluding those
+	     * that have trivial zero gradient.
 	     */
 	    unsigned long nrow() const;
 	    /**
