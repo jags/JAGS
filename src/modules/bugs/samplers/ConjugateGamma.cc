@@ -82,9 +82,9 @@ ConjugateGamma::ConjugateGamma(SingletonGraphView const *gv)
     vector<StochasticNode *> const &stoch_children = gv->stochasticChildren();
     unsigned long nchildren = stoch_children.size();
     vector<Node const *> dependent_nodes(nchildren);
-    
+
     for (unsigned long i = 0; i < nchildren; ++i) {
-	dependent_nodes.push_back(getScale(stoch_children[i], _child_dist[i]));
+	dependent_nodes[i] = getScale(stoch_children[i], _child_dist[i]);
     }
     _fd = new SingletonForwardDiff(gv, dependent_nodes);
     
