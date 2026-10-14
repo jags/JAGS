@@ -10,8 +10,12 @@ using std::map;
 using std::vector;
 using std::list;
 
+//debuggin
+#include <module/ModuleError.h>
+
 namespace jags {
 
+    /* Utility function for building adjacency matrix */
     static void
     push_child_indices(Node *node, map<Node const *, unsigned long> const &dmap,
 		       vector<vector<unsigned long>> &edges, unsigned long i) {
@@ -25,6 +29,8 @@ namespace jags {
     }
 
     unsigned long length(Node const *node) { return node->length(); }
+
+    template<typename T> unsigned long length(vector<T> const &v) { return v.size(); }
     
     template<typename T> unsigned long sumLengths(vector<T> const &v) {
 	unsigned long L = 0;
@@ -43,6 +49,12 @@ namespace jags {
 	    StochasticNode *snode = gv->node();
 	    vector<DeterministicNode *> const &dn = gv->deterministicChildren();
 
+	    //debuggin sanity check
+	    for (auto p = dependent_nodes.begin(); p != dependent_nodes.end(); ++p) {
+		if ((*p) == nullptr)
+		    throwLogicError("Oh no!");
+	    }
+	    
 	    /* We need a temporary map to replace pointers to the deterministic
 	       children with their indices in the vector dn. */
 	    map<Node const *, unsigned long> dmap;
@@ -50,11 +62,20 @@ namespace jags {
 		dmap.insert({dn[i], i});
 	    }
 
-	    /* Create edge matrix */
-	    _edges = vector<vector<unsigned long>>(dn.size());
-	    push_child_indices(snode, dmap, _edges, 0);
+	    /* Create adjacency matrix of edges between deterministic
+	       nodes, first as nested vectors ... */
+	    vector<vector<unsigned long>> edges(dn.size());
+	    push_child_indices(snode, dmap, edges, 0);
 	    for (unsigned int p = 0; p < dn.size(); ++p) {
-		push_child_indices(dn[p], dmap, _edges, p+1);
+		push_child_indices(dn[p], dmap, edges, p+1);
+	    }
+	    /* ... then convert to compressed column format */
+	    _edges_p.reserve(dn.size() + 1); // column indices
+	    _edges_i.reserve(sumLengths(edges)); // row numbers
+	    _edges_p.push_back(0);
+	    for (auto p = edges.begin(); p != edges.end(); ++p) {
+		_edges_p.push_back(_edges_p.back() + p->size());
+		_edges_i.insert(_edges_i.end(), p->begin(), p->end());
 	    }
 
 	    /* Convert dependent nodes to indices, dropping nodes with trivial zero gradient  */
@@ -93,15 +114,14 @@ namespace jags {
 		unsigned long nchild = dn[c]->length();
 		double *gc = gradient_start[c]; // nchild x nparam
 
-		for (auto r = _edges[c].begin(); r != _edges[c].end(); ++r) {
-
-		    if (*r == 0) {
+		for (auto r = _edges_p[c]; r < _edges_p[c+1]; ++r) {
+		    if (_edges_i[r] == 0) {
 			// Parent is sampled node
 			dn[c]->gradient(gc, snode, chain);
 		    }
 		    else {
 			// Parent is deterministic node
-			unsigned long p = *r - 1;
+			unsigned long p = _edges_i[r] - 1;
 			unsigned long nparent = dn[p]->length();
 			// Reset workspace
 			edge_workspace.resize(nchild * nparent); // nchild x nparent
