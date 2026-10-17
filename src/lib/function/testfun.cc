@@ -1,5 +1,4 @@
 #include <function/testfun.h>
-#include <util/logical.h>
 #include <util/dim.h>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -24,26 +23,6 @@ using std::floor;
 using std::isfinite;
 using std::isnan;
 
-class BoolIterator : public std::vector<bool>
-{
-public:
-    bool atEnd;
-    BoolIterator(unsigned long n) : vector<bool>(n, false), atEnd(false) {};
-
-    void next() {
-	bool bump = true;
-	for (unsigned long i = 0; i < size(); ++i) {
-	    if (bump) {
-		bool x = operator[](i); //current value
-		bump = x;
-		operator[](i) = !x;
-	    }
-	    else return;
-	}
-	if (bump) atEnd=true;
-    }
-    
-};
 
 bool isdiscrete(Function const *f, unsigned long npar,
 		bool (*predicate) (vector<bool> const &))
@@ -58,11 +37,6 @@ bool isdiscrete(Function const *f, unsigned long npar,
     }
     return true;
 }
-
-bool always(vector<bool> const &mask) { return true; }
-bool never(vector<bool> const &mask) { return false; }
-bool all(vector<bool> const &mask) { return allTrue(mask); }
-bool any(vector<bool> const &mask) { return anyTrue(mask); }
 
 bool neveradditive(Function const *f, unsigned long npar)
 {
