@@ -318,10 +318,17 @@ namespace jags {
 	    getSubsetRanges(subsets, indices, this->range());
 
 	    map<vector<unsigned long>, Node const *> mixmap;
+	    Node *subset0 = nullptr; // Checking for degenerate mixture
 	    for (unsigned int i = 0; i < subsets.size(); ++i) {
 		Node *subset_node =
 		    this->getSubset(subsets[i].second, model);
 		if (subset_node) {
+		    if (i == 0) {
+			subset0 = subset_node;
+		    }
+		    else if (subset_node != subset0) {
+			subset0 = nullptr;
+		    }
 		    mixmap[subsets[i].first] = subset_node;
 		}
 		else {
@@ -331,8 +338,13 @@ namespace jags {
 		    return nullptr;
 		}
 	    }
+	    if (subset0 != nullptr) {
+		// Degenerate mixture with all subsets equal to subset0.
+		// No need to create a MixtureNode
+		return subset0;
+	    }
 	    MixTab table(mixmap);
-	    _mix_tabs.insert(pair<vector<vector<unsigned long>>, MixTab>(full_indices, table));
+	    _mix_tabs.insert({full_indices, table});
 	    q = _mix_tabs.find(full_indices);
 	}
 	
