@@ -49,18 +49,12 @@ namespace jags {
 	
 	bool isWeighted(string const &stat)
 	{
-	    if (getDensityType(stat) == DTUNSET) {
-		return false;
-	    }
 	    //starts with "loo_"
 	    return stat.length() >= 4 && stat.compare(0, 4, "loo_") == 0;
 	}
 
 	bool isTotal(string const &stat)
 	{
-	    if (getDensityType(stat) == DTUNSET) {
-		return false;
-	    }
 	    //ends with "_total"
 	    return stat.length() >= 6 && stat.compare(stat.length() - 6, 6, "_total") == 0;
 	}
