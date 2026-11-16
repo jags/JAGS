@@ -23,9 +23,6 @@ namespace jags {
 	    else if (stat == "deviance" || stat == "loo_deviance" || stat == "deviance_total") {
 		return DEVIANCE;
 	    }
-	    else if (stat == "leverage" || stat == "loo_leverage" || stat == "leverage_total") {
-		return LEVERAGE;
-	    }
 	    return DTUNSET;
 	}
 

@@ -53,8 +53,6 @@ namespace jags {
 		case DEVIANCE:
 		    value[i] = -2.0 * ll(_nodes[i], ch);
 		    break;
-		case LEVERAGE:
-		    break; //-Wswitch
 		case DTUNSET:
 		    break; //-Wswitch
 		}

@@ -49,8 +49,6 @@ namespace jags {
 	    case DEVIANCE:
 		ans = -2.0 * loglik;
 		break;
-	    case LEVERAGE:
-		break;
 	    case DTUNSET:
 		break;
 	    }
