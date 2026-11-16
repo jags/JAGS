@@ -29,7 +29,7 @@ namespace jags {
 				 DensityType density_type)
 	    : MonitorStat(nodes.size()), _nodes(nodes), _density_type(density_type)
 	{
-	    if (density_type == DTUNSET) {
+	    if (density_type == DTUNSET || density_type == LEVERAGE) {
 		throw logic_error("Unimplemented DensityType in DensityStat");
 	    }
 	}
@@ -54,6 +54,8 @@ namespace jags {
 		case DEVIANCE:
 		    value[i] = -2.0 * ll(_nodes[i], ch);
 		    break;
+		case LEVERAGE:
+		    break; //-Wswitch
 		case DTUNSET:
 		    break; //-Wswitch
 		}

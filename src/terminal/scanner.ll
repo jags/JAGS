@@ -151,6 +151,12 @@ _observations_ {
   return NAME;
 }
 
+_observed_ { 
+  // Synonymous with _observations_
+  zzlval.stringptr = new std::string(zztext);
+  return NAME;
+}
+
 [a-zA-Z0-9\._\-\\\/]+ {
   // More general than NAME which is limited to syntactically valid BUGS names
   zzlval.stringptr = new std::string(zztext);
