@@ -744,7 +744,6 @@ void BugsFunTest::summary(vector<double> const &v)
     vector<double> vgrad = vgradient(_sum, 0UL, v);
     vector<double> vngrad = vnumgradient(_sum, 0UL, 1e-4, v);
     CPPUNIT_ASSERT(all_equal(vgrad, vngrad, 1e-3));
-
     vgrad = vgradient(_prod, 0UL, v);
     vngrad = vnumgradient(_prod, 0UL, 1e-4, v);
     CPPUNIT_ASSERT(all_equal(vgrad, vngrad, 1e-3));
@@ -873,10 +872,9 @@ void BugsFunTest::math()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_sqrt, 0.1),
 				 numgradient(_sqrt, 0.1, 1e-4), 1e-3);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_loggam, 0.5),
-				 numgradient(_loggam, 0.1, 1e-4), 1e-3);
-
+				 numgradient(_loggam, 0.5, 1e-4), 1e-3);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_logfact, log(5.0)),
-				 numgradient(_logfact, 0, 1e-4), 1e-3);
+				 numgradient(_logfact, log(5.0), 1e-4), 1e-3);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_sqrt, 4),
 				 numgradient(_sqrt, 4, 1e-4), 1e-3);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(gradient(_loggam, log(24.0)),

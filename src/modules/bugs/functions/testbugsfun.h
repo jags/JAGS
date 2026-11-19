@@ -24,8 +24,8 @@ class BugsFunTest : public CppUnit::TestFixture, public JAGSFixture
     CPPUNIT_TEST( trig );
     CPPUNIT_TEST( hyper );
     CPPUNIT_TEST( link );
-    //CPPUNIT_TEST( summary );
-    //CPPUNIT_TEST( math );
+    CPPUNIT_TEST( summary );
+    CPPUNIT_TEST( math );
     CPPUNIT_TEST( lossy );
     CPPUNIT_TEST( slap );
 
@@ -35,7 +35,7 @@ class BugsFunTest : public CppUnit::TestFixture, public JAGSFixture
     CPPUNIT_TEST( sort );
     CPPUNIT_TEST( matrix );
 
-    //CPPUNIT_TEST( inprod );
+    CPPUNIT_TEST( inprod );
     CPPUNIT_TEST( ifelse );
     CPPUNIT_TEST( interplin );
     CPPUNIT_TEST( interplinCube );
