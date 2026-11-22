@@ -2,11 +2,11 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.71])
 
-AC_INIT([JAGS],[5.0.2],[martyn_plummer@users.sourceforge.net],[JAGS])
+AC_INIT([JAGS],[5.0.3],[martyn_plummer@users.sourceforge.net],[JAGS])
 
 JAGS_MAJOR=5
 JAGS_MINOR=0
-JAGS_PATCH=2
+JAGS_PATCH=3
 
 AC_SUBST(JAGS_MAJOR)
 AC_DEFINE_UNQUOTED([JAGS_MAJOR], [$JAGS_MAJOR], [Major version of JAGS library])
@@ -80,6 +80,7 @@ AM_CONDITIONAL(WINDOWS, test x$win = xtrue)
 AC_LANG_PUSH([C++])
 AC_OPENMP
 CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+LDFLAGS="$LDFLAGS $OPENMP_CXXFLAGS"
 AC_LANG_POP([C++])
 AC_LANG_PUSH([C])
 AC_OPENMP
