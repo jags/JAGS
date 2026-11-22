@@ -1,4 +1,31 @@
+Canges in JAGS 5.0.3
+
+Bug fixes
+=========
+* JAGS now correctly links to libomp when compiling with clang. This
+  previously created an error when trying to link the rjags package.
+
+Changes in JAGS 5.0.2
+
+Bug fixes
+=========
+* Weighted and total versions of leverage diagnotics (loo_leverage, 
+  leverage_total) in the diag model were not correctly created.
+
+Changes in JAGS 5.0.1
+
+Bug Fixes
+=========
+* JAGS could fail with a logic_error when attempting to create a degenerate
+  mixture node with only one possible active parent. Instead the active
+  parent is reused.
+
+
 Changes in JAGS 5.0.0
+
+WARNING: The extensive changes in JAGS version 5.0.0 are not fully
+documented in the NEWS file. See the JAGS Installation Manual for advice on
+configuring and installing JAGS, and the User Manual for current features.
 
 Bug Fixes
 =========
@@ -8,8 +35,6 @@ Bug Fixes
   now gives an informative error rather than a LOGIC ERROR.
 * LogicalNodes with fixed values now correctly report whether or not they
   are discrete valued via the isDiscreteValued() member function.
-
-
 
 New features
 ============
@@ -23,6 +48,17 @@ New features
   facilitate use of the new monitor types.
 * A vector of node names (of matching type) can now be obtained either
   via rjags or via the terminal application.
+* JAGS now has native OpenMP support. This can be turned off with the option
+  --disable-openmp at configure time.
+* JAGS can be linked to Apple Grand Central Dispatch with option --enable-gcd.
+  This will also work on Linux where it uses libdispatch.
+
+Configuration changes
+=====================
+* The updated version of the AX_BLAS has a hierarchical preference for
+  blas implementations, starting with flexiblas.  To override the default
+  choice of BLAS and LAPACK use the --with-blas and --with-lapack configure
+  options. See the Installation Manual for details.
 
 Library changes
 ===============
