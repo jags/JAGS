@@ -12,8 +12,8 @@
 \begin{document}
 
 \title{JAGS Developers Manual}
-\author{Martyn Plummer}
-\date{6 July 2011}
+\author{Martyn Plummer \and Matt Denwood}
+\date{25 November 2026}
 \maketitle
 
 \tableofcontents
@@ -23,6 +23,193 @@
 This is currently a collection of notes on working with the JAGS
 source. It will eventually grow into an explanation of how to extend
 the capabilities of JAGS by writing new modules.
+
+\chapter{Compiling an R package containing a JAGS module}
+
+There are a number of JAGS modules that are implemented internally
+within an R package. This has many advantages, but does mean that
+the compiler flags for these R packages must match those used by
+the installed build of the rjags package. This is of particular concern
+when several major versions of JAGS are installed on the system.
+
+In the past, package maintainers had typically copied configure scripts
+and makevars files from rjags (or runjags) into their R packages. As
+of rjags 4-18 and rjags 5-5 (and later), this is no longer necessary
+or recommended:  packages should now use the pkg.compile.flags()
+functions that are exported by rjags in order to obtain compiler flags
+within their makevars and makevars.win files. This ensures binary
+compatibility between these R packages and rjags.
+
+A minimal example of an R package containing a JAGS module can
+be found at \url{https://github.com/mdenwood/JAGSmodule} - this is
+also built and checked for different platforms via r-universe hosting.
+This chapter briefly explains the key points to be aware of.
+
+\section{Package structure}
+
+A minimal package contains the following files:
+
+DESCRIPTION
+NAMESPACE
+R/zzz.R
+src/Makevars
+src/Makevars.win
+src/JAGSmodule.cc
+
+As well as one or more other C++ files under src that implement the
+distributions/functions used by the JAGS module.  You should also
+have something like:
+
+man/load.JAGSmodule.Rd
+R/load.JAGSmodule.R
+
+Where JAGSmodule is the name of your R package.
+
+\subsection{DESCRIPTION and NAMESPACE}
+
+The DESCRIPTION file should contain the following:
+
+\begin{verbatim}
+SystemRequirements: JAGS >= 5.0.0 (https://mcmc-jags.sourceforge.io/)
+LinkingTo: rjags (>= 5-6)
+Imports: rjags (>= 5-5)
+\end{verbatim}
+
+NOTE:  the current (2026-11-25) version of rjags on CRAN is 5-5,
+but a development version of rjags 5-6 is available via sourceforge
+(\url{https://sourceforge.net/p/mcmc-jags/rjags/}) or r-universe
+(\url{https://ku-awdc.r-universe.dev/rjags}). In the meantime, if
+submitting a package to CRAN then omit the LinkingTo: rjags
+statement until rjags 5-6 is released - this is not essential for
+functionality of the JAGS module, but does (a) allow us to easily
+see which R packages implement JAGS modules rather than
+simply importing rjags, and (b) allow for more informative error
+messages when trying to compile your package on a system
+that lacks an appropriate version of JAGS.
+
+The NAMESPACE should importFrom rjags the list.modules,
+load.pkg.module, and unload.module functions.  You should
+export load.JAGSmodule and unload.JAGSmodule (or similar)
+functions.
+
+\subsection{zzz.R}
+
+The R/zzz.R file should define a .onLoad function that calls the
+load.pkg.module function from rjags, This first ensures that
+the builds are compatible and then attempts to load the module,
+producing informative error messages if this fails. There are a
+number of small nuances to this process so we recommend 
+simply using the corresponding file in the JAGSmodule package
+(no changes should be required).
+
+\subsection{Makevars}
+
+The Makevars file should contain the following:
+
+\begin{verbatim}
+PKG_LIBS = `"$(R_HOME)/bin$(R_ARCH_BIN)/Rscript" -e 
+	"rjags::pkg.compile.flags('LIBS')"`
+PKG_CXXFLAGS = `"$(R_HOME)/bin$(R_ARCH_BIN)/Rscript" -e 
+	"rjags::pkg.compile.flags('CXXFLAGS')"`
+PKG_CPPFLAGS = `"$(R_HOME)/bin$(R_ARCH_BIN)/Rscript" -e 
+	"rjags::pkg.compile.flags('CPPFLAGS')"`
+\end{verbatim}
+
+And the Makevars.win file should contain the following:
+
+\begin{verbatim}
+JAGS_LIBS := $(shell "$(R_HOME)/bin$(R_ARCH_BIN)/Rscript" -e 
+	"rjags::pkg.compile.flags('LIBS')")
+JAGS_CXXFLAGS := $(shell "$(R_HOME)/bin$(R_ARCH_BIN)/Rscript" -e
+	"rjags::pkg.compile.flags('CXXFLAGS')")
+JAGS_CPPFLAGS := $(shell "$(R_HOME)/bin$(R_ARCH_BIN)/Rscript" -e
+	"rjags::pkg.compile.flags('CPPFLAGS')")
+PKG_LIBS = $(JAGS_LIBS)
+PKG_CXXFLAGS = $(JAGS_CXXFLAGS)
+PKG_CPPFLAGS = $(JAGS_CPPFLAGS)
+\end{verbatim}
+
+As of rjags 5-6 the LIBS flags will contain ljrmath automatically, but
+if you do not have LinkingTo:  rjags (>= 5-6) then you will need to modify
+the following lines in Makevars and Makevars.win:
+
+\begin{verbatim}
+# Makevars:
+PKG_LIBS = `"$(R_HOME)/bin$(R_ARCH_BIN)/Rscript" -e
+	"rjags::pkg.compile.flags('LIBS')"` -ljrmath
+
+# Makevars.win:
+PKG_LIBS = $(JAGS_LIBS) -ljrmath-0
+\end{verbatim}
+
+\subsection{C++ code}
+
+The JAGSmodule.cc (and all other .cc files relating to JAGS) should start
+with:
+
+\begin{verbatim}
+#include <rjags.h>
+\end{verbatim}
+
+If you do not have LinkingTo:  rjags (>= 5-6) then you will need the following:
+
+\begin{verbatim}
+#if defined(__has_include)
+  #if __has_include(<rjags.h>)
+    #include <rjags.h>
+  #elif !__has_include(<version.h>)
+    #error "The compiler flags for JAGS were not passed correctly - 
+    		check that rjags can be loaded"
+  #else
+    #include <version.h>
+  #endif
+#else
+  #include <version.h>
+#endif
+\end{verbatim}
+
+This ensures that an appropriate JAGS installation is present, and also
+defines JAGS\_MAJOR as a positive integer $\ge 4$, well as JAGS\_MINOR
+and JAGS\_PATCH similarly. This can be useful for conditional branching
+where API changes between major versions of JAGS necessitate changes
+to your code.
+
+\subsection{R functions}
+
+Although a minimal JAGS module does not in theory require exporting any
+R functions, it is good practice to document the distributions/functions
+added by the JAGS module. This can be combined with a function that
+allows a user to unload and re-load the JAGS module - see the 
+load.JAGSmodule.R function in the JAGSmodule package for inspiration.
+
+\section{Compliance with CRAN requirements}
+
+TODO:
+
+- init.c
+
+- tests
+
+\section{More advanced setups}
+
+TODO:
+
+- Integration with Rcpp
+
+- Exposing functions to R
+
+- Testing (be aware of numerical changes)
+
+
+\section{Changes to JAGS API}
+
+TODO:
+
+- Conditional branching in C++ code
+
+- CRAN releases and build systems (version bumping)
+
+
 
 \chapter{Working with the CVS repository}
 
